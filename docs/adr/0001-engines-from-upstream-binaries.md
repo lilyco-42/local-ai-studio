@@ -130,7 +130,7 @@ GitHub release 只给 `size`，**没有官方 sha256**，所以 pin 必须由 CI
 （`ggml-base.dll`、`libggml-base.so.0.27.0`）。CI 无头车道与外壳定位引擎都必须按深度 1–2 glob，
 不能假设 `解压根/可执行名`。
 
-## 分发源可达性（2026-10-19 从 CN 服务器 lain42.top 实测，HEAD 之外再做 2 MiB 区间 GET）
+## 分发源可达性（2026-10-19 从 CN 服务器 lain42.top 实测：HEAD 之外再做区间 GET，2 MiB 一组、4 MiB 重复三轮）
 
 第一次只发 HEAD 得到的结论有两处不能信：ModelScope 回 200 其实跳到了仓库页面，
 `dl.lilyco42.top` 两条都是 404 分不清是键名错还是桶坏。所以第二版要求
@@ -143,8 +143,20 @@ GitHub release 只给 `size`，**没有官方 sha256**，所以 pin 必须由 CI
 | `hf-mirror.com` | 可用：206，`Content-Range: bytes 0-2097151/415182688`，最终落到 `cas-bridge.xethub.hf.co`（美区 IP） | 单 2 MiB 样本，不能据此排吞吐 |
 | ModelScope `/resolve/master/` | 可用：206，同总长，CDN `cdn-lfs-cn-1` | |
 | ModelScope `/api/v1/.../repo?...` | 可用：206，同总长，同一 CDN 对象、不同边缘 IP | 两次采样 0.4 与 5.5 MiB/s 差 13 倍，**这只能说明单样本不足以排序，不能说明某个端点更快**（很可能是缓存冷热） |
-| GitHub release 产物（llama 引擎、oar-ocr 权重） | 可用：206，但 **0.1–0.2 MiB/s** | CUDA 包 146–566 MB 按这个速度要 20–90 分钟 → **国内必须有镜像，GitHub 直连只能当兜底** |
-| 自家 `dl.lilyco42.top` | **本轮没测到**：域名活着（回它自己的 404 页，27,150 字节），但站内只 grep 到 `https://dl.lilyco42.top/downloads` 这个前缀，没抓到能直接测的真实键 | 既不说它坏，也不说它好 |
+| GitHub release 产物 | 可用：206 + 真字节。但**同一个资产两次采样 0.10 / 0.28 MiB/s，另一个资产 1.01 MiB/s**（`x-cache: HIT, HIT`，后端是 Azure Blob） | 上一版本这行写成"0.1–0.2 MiB/s"，那是把方差当速率；三次采样说明它是**波动大**，不是恒定慢 |
+| 自家 `dl.lilyco42.top`（R2） | 可用：206 + 真字节，3 次采样 **1.01 / 0.97 / 0.82 MiB/s**（`server: cloudflare`）；桶里已经有 GGUF：`downloads/models/Qwen3-0.6B-Q4_K_M.gguf`（总长 396,705,472）、`router_v13-Q4_K_M.gguf`（484,219,648） | 比 GitHub 稳，同尺寸对照下快约 4–10 倍；但这不是受控基准，样本各只有 3 次 |
+
+**这条实测对产品有三个直接后果**（先说结论再说依据，避免把一次采样当定律）：
+
+1. 镜像**不用新建**：同一个桶里已经有 `downloads/models/*.gguf` 命名空间。但现有键名是
+   `downloads/models/<文件名>.gguf`，没有 org/repo/版本段，而且三个里有两个
+   （`router_v13-Q4_K_M.gguf`、`UGround-V1-2B.Q2_K.gguf`）根本不是上游仓库的原生文件名——
+   **光看键名回溯不出来源仓库**。新项目入库要用 `downloads/models/<org>/<repo>/<file>`，
+   否则目录里会出现"知道是哪个量化、不知道是谁训的"的条目，sha256 也救不回出处。
+2. R2 与 GitHub 都回 **206 + Content-Range**，所以**断点续传可以做**。在 0.8–1 MiB/s 的实际速率下，
+   一个 400 MB 权重要 7–8 分钟，不给续传就是让用户白等一次网络抖动。
+3. 桶里只暴露 `Content-Length`，**没有 sha256 元数据**（和 GitHub release 一样）。
+   所以 pin 只能在入库时由 CI 自己算，运行时再校一次；不能指望"源上写着哈希"。
 
 **能省掉一整类校验的设计事实**：ModelScope 的 CDN 对象路径是
 `lfs-objects/9e/e3/6184e616dfc76df4f5dd66f908dbde6979524ae36e6cefb67f532f798cb8`，
@@ -174,7 +186,13 @@ spending limit needs to be increased"*。同账号的 public 仓库当天早些�
 
 ## 待定（不阻塞本车道）
 
-外壳许可（AGPL-3.0-or-later 还是 MIT，所以仓库里现在**故意没有 LICENSE 文件**）、
-仓库名（`local-ai-studio` 仍是占位）、模型目录来源：按上面的实测，**自建清单为权威、按 sha256 内容寻址，每条挂多个候选源**
-（对话权重 ModelScope / hf-mirror 都拿到过真字节，HF 直连国内不可用；引擎与 OCR 权重 GitHub 可用但慢，必须进自家 R2 镜像）。
-HF 索引只当同步用的上游，不当用户侧下载地址。i18n 语言集（OCR 侧实测有简中/繁中/日/韩/阿拉伯/西里尔等独立 rec 权重，UI 侧另算）。
+- **外壳许可**：AGPL-3.0-or-later 还是 MIT。所以仓库里现在**故意没有 LICENSE 文件**，
+  定了再补，先不放一个会改变别人义务的默认值。
+- **仓库名**：`local-ai-studio` 仍是占位（改名一条 `gh repo rename` 就行，不影响已推的车道）。
+- **模型目录来源**：按上面的实测，取**自建清单为权威 + 按 sha256 内容寻址 + 每条挂多个候选源**。
+  对话权重 ModelScope 与 hf-mirror 都拿到过真字节（HF 直连国内不可用）；引擎与 OCR 权重
+  GitHub 可用但波动大（同一资产 0.10 / 0.28 MiB/s），自家 R2 三次采样稳定在 0.82–1.01 MiB/s，
+  所以引擎也应进 R2。HF 索引只当同步用的上游，不当用户侧下载地址。
+- **i18n 语言集**：OCR 侧实测有简中/繁中/日/韩/阿拉伯/西里尔/天城文/希腊/格鲁吉亚/拉丁等
+  独立 rec 权重（一个语言一个文件，7–16 MiB），所以"支持哪些语言"是**目录问题不是代码问题**；
+  UI 文案的语言集另算，两者不要混成一个决定。
