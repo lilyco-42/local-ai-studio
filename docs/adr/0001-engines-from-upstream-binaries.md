@@ -130,6 +130,29 @@ GitHub release 只给 `size`，**没有官方 sha256**，所以 pin 必须由 CI
 （`ggml-base.dll`、`libggml-base.so.0.27.0`）。CI 无头车道与外壳定位引擎都必须按深度 1–2 glob，
 不能假设 `解压根/可执行名`。
 
+## 分发源可达性（2026-10-19 从 CN 服务器 lain42.top 实测，HEAD 之外再做 2 MiB 区间 GET）
+
+第一次只发 HEAD 得到的结论有两处不能信：ModelScope 回 200 其实跳到了仓库页面，
+`dl.lilyco42.top` 两条都是 404 分不清是键名错还是桶坏。所以第二版要求
+**206 + Content-Range + 真收到 ≥1 MiB 字节**才算数（并加 `--max-filesize` 护栏，
+免得遇到不支持分段的源就在别人线上游戏服务器上拉完整 415 MB）。
+
+| 源 | 结果 | 备注 |
+|---|---|---|
+| `huggingface.co` 直连 | **不可用**：两次（20s HEAD / 45s GET）都 0 字节、rc=28 | 目标用户在国内时不能假定能连 HF |
+| `hf-mirror.com` | 可用：206，`Content-Range: bytes 0-2097151/415182688`，最终落到 `cas-bridge.xethub.hf.co`（美区 IP） | 单 2 MiB 样本，不能据此排吞吐 |
+| ModelScope `/resolve/master/` | 可用：206，同总长，CDN `cdn-lfs-cn-1` | |
+| ModelScope `/api/v1/.../repo?...` | 可用：206，同总长，同一 CDN 对象、不同边缘 IP | 两次采样 0.4 与 5.5 MiB/s 差 13 倍，**这只能说明单样本不足以排序，不能说明某个端点更快**（很可能是缓存冷热） |
+| GitHub release 产物（llama 引擎、oar-ocr 权重） | 可用：206，但 **0.1–0.2 MiB/s** | CUDA 包 146–566 MB 按这个速度要 20–90 分钟 → **国内必须有镜像，GitHub 直连只能当兜底** |
+| 自家 `dl.lilyco42.top` | **本轮没测到**：域名活着（回它自己的 404 页，27,150 字节），但站内只 grep 到 `https://dl.lilyco42.top/downloads` 这个前缀，没抓到能直接测的真实键 | 既不说它坏，也不说它好 |
+
+**能省掉一整类校验的设计事实**：ModelScope 的 CDN 对象路径是
+`lfs-objects/9e/e3/6184e616dfc76df4f5dd66f908dbde6979524ae36e6cefb67f532f798cb8`，
+按 `sha[0:2]/sha[2:4]/sha[4:]` 还原后 **正好等于** `engine-live.yml` 里钉的
+`9ee36184e616dfc76df4f5dd66f908dbde6979524ae36e6cefb67f532f798cb8`（64 位十六进制，整串重建比对，不是子串匹配）。
+HF 与 ModelScope 共用这套 LFS 布局，所以**同一个 sha256 pin 可以跨源复用**：
+目录按内容寻址，源只是候选。落地仍然要对下载结果算哈希——路径一致只证明"它声称给的是这份字节"。
+
 ## 后果
 
 - 安装包不含引擎与权重（CUDA 包 146–566MB），运行时下载 + sha256 pin；离线首装需要网络。
@@ -152,6 +175,6 @@ spending limit needs to be increased"*。同账号的 public 仓库当天早些�
 ## 待定（不阻塞本车道）
 
 外壳许可（AGPL-3.0-or-later 还是 MIT，所以仓库里现在**故意没有 LICENSE 文件**）、
-仓库名（`local-ai-studio` 仍是占位）、模型目录来源（HF 索引 vs 自建清单；OCR 权重已实测可走
-`oar-ocr` 的 release 产物 + 自算 sha256，对话权重走 HF/GGUF，两条都要进自家 R2 镜像）、
-i18n 语言集（OCR 侧实测有简中/繁中/日/韩/阿拉伯/西里尔等独立 rec 权重，UI 侧另算）。
+仓库名（`local-ai-studio` 仍是占位）、模型目录来源：按上面的实测，**自建清单为权威、按 sha256 内容寻址，每条挂多个候选源**
+（对话权重 ModelScope / hf-mirror 都拿到过真字节，HF 直连国内不可用；引擎与 OCR 权重 GitHub 可用但慢，必须进自家 R2 镜像）。
+HF 索引只当同步用的上游，不当用户侧下载地址。i18n 语言集（OCR 侧实测有简中/繁中/日/韩/阿拉伯/西里尔等独立 rec 权重，UI 侧另算）。
