@@ -7,6 +7,7 @@ on:
     paths:
       - "tools/engine_probe.py"
       - "tools/ocr_catalog_check.py"
+      - "tools/catalog_probe.py"
       - ".github/workflows/engine-live.yml"
 
 permissions:
@@ -102,6 +103,22 @@ jobs:
         with:
           name: ocr-catalog
           path: ocr-catalog.json
+
+  catalog-probe:
+    # 验的是"目录搜索的 API 形状和三条判据还成立"（泛词有结果 / 精确仓库能搜到 / 乱词必须 0 条），
+    # 跑在 GitHub runner 侧 → 它**不代表国内可达性**。国内能不能连 hf-mirror、R2 有多快，
+    # 由人工从 lain42.top 复测（docs/adr/0001 里那组数字就是这么来的），别拿这条车道当那件事的证据。
+    timeout-minutes: 8
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: 目录搜索探针
+        run: python3 tools/catalog_probe.py --json catalog-probe.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: catalog-probe
+          path: catalog-probe.json
 
   headless-inference:
     needs: discover

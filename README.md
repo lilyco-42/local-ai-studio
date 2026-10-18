@@ -10,7 +10,8 @@
    OCR 用 `oar-ocr`（Apache-2.0），它是四项能力里**唯一没有上游二进制**的，只能由 CI `cargo build`。
    权重运行时按需下载并做 sha256 校验，安装包不塞权重。
 
-依据与取舍见 [docs/adr/0001-engines-from-upstream-binaries.md](docs/adr/0001-engines-from-upstream-binaries.md)。
+依据与取舍见 [docs/adr/0001-engines-from-upstream-binaries.md](docs/adr/0001-engines-from-upstream-binaries.md)；
+功能分层、离线/联网边界与 MVP 切分见 [docs/requirements.md](docs/requirements.md)。
 
 ## 现在有什么
 
@@ -22,6 +23,8 @@
   把上面那个推断换成条目级证据；带一正一负对照，见 ADR。
 - `tools/yaml_gate.py`：解析两条 workflow，核对 needs 链、step 输出引用、heredoc 闭合，
   以及车道里写死的 target 名确实存在于 manifest（已用假 target 验证它会红）。
+- `tools/catalog_probe.py`：目录"能不能搜"的探针（文件能下 ≠ 能浏览目录，而浏览目录才是这类的招牌交互）。
+  三条判据一起成立才算过：泛词有结果、按精确仓库名能搜到它、乱词必须 0 条。
 - `.github/workflows/ci.yml`：静态门禁（含 yaml_gate）+ 单测（夹具是 2026-10-18 真实 API 捕获）+ 离线跑发现器。
 - `.github/workflows/engine-live.yml`：打真实 API 发现产物 → 下载 linux 引擎（不编译）→ 下载 pin 住的
   0.5B GGUF 并校 sha256 → 无头推理，要求真的抓到 `tokens per second > 0`；
