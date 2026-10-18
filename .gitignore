@@ -1,8 +1,10 @@
 __pycache__/
 *.pyc
 tools/_*.py
+.probe/
 m.json
 manifest.json
+ocr-catalog.json
 target/
 dist/
 node_modules/

@@ -6,6 +6,7 @@ on:
   push:
     paths:
       - "tools/engine_probe.py"
+      - "tools/ocr_catalog_check.py"
       - ".github/workflows/engine-live.yml"
 
 permissions:
@@ -86,6 +87,21 @@ jobs:
           done < inferred.tsv
           test "$n" -gt 0 || { echo "清单非空却一个都没证实"; exit 1; }
           echo "已证实 $n 个靠推断的 win 产物"
+
+  ocr-catalog:
+    # OCR 权重只能按 URL 钉（release 没有官方 sha256）。上游挪 tag 或删产物时，
+    # 这条要在 CI 先红，别等用户装到一半 404。
+    # 故意不 needs discover：discover 一挂，上游会把它标成 skipped，OCR 的结论就看不见了。
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: 文档链接的权重是否都还在 release 里
+        run: python3 tools/ocr_catalog_check.py --json ocr-catalog.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ocr-catalog
+          path: ocr-catalog.json
 
   headless-inference:
     needs: discover

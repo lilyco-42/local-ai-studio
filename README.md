@@ -6,8 +6,9 @@
 ## 两条硬约束
 
 1. **开发者机器不编译、不运行**：所有构建与验证只在 GitHub Actions。
-2. **引擎采用上游预编译产物**：llama.cpp（MIT）/ whisper.cpp（MIT）/ stable-diffusion.cpp（MIT）/
-   `paddle-ocr-rs`。运行时按需下载并做 sha256 校验，安装包不塞权重。
+2. **引擎不自研**：对话/字幕/生图直接下载上游预编译产物 —— llama.cpp、whisper.cpp、stable-diffusion.cpp（都 MIT）；
+   OCR 用 `oar-ocr`（Apache-2.0），它是四项能力里**唯一没有上游二进制**的，只能由 CI `cargo build`。
+   权重运行时按需下载并做 sha256 校验，安装包不塞权重。
 
 依据与取舍见 [docs/adr/0001-engines-from-upstream-binaries.md](docs/adr/0001-engines-from-upstream-binaries.md)。
 
