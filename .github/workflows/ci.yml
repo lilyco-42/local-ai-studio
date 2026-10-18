@@ -1,0 +1,36 @@
+name: ci
+on:
+  push:
+  pull_request:
+jobs:
+  unit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: 静态门禁
+        run: |
+          python -m pip install --quiet pyyaml
+          python -m compileall -q tools tests
+          python tools/yaml_gate.py
+          python - <<'PY'
+          import ast,sys
+          for f in ("tools/engine_probe.py","tests/test_engine_probe.py"):
+              ast.parse(open(f,encoding="utf-8").read())
+          print("AST ok")
+          PY
+      - name: 单测（夹具为 2026-10-18 真实 API 捕获）
+        run: python -m unittest discover -s tests -p "test_*.py" -v
+      - name: 离线跑一遍发现器
+        run: python tools/engine_probe.py --fixtures tests/fixtures --require-gpu --json /tmp/manifest.json
+      - name: 产物清单落盘
+        run: |
+          head -c 600 /tmp/manifest.json
+          python - <<'PY'
+          import json
+          m=json.load(open("/tmp/manifest.json"))
+          assert m["counts"]["llama"]>0 and m["counts"]["whisper"]>0 and m["counts"]["sd"]>0, m["counts"]
+          print("三家均可解析：",m["counts"])
+          PY

@@ -1,0 +1,136 @@
+name: 引擎连通性与无头推理实测
+# 这条车道回答一个二值问题：在"本机不编译不运行"的前提下，
+# 上游预编译产物 + sha256 pin 的模型，能不能在 CI 里真的跑出 token。
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "tools/engine_probe.py"
+      - ".github/workflows/engine-live.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  discover:
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    outputs:
+      llama_url: ${{ steps.pick.outputs.llama_url }}
+      llama_tag: ${{ steps.pick.outputs.llama_tag }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: 打真实 GitHub API 发现产物
+        run: |
+          python tools/engine_probe.py --live --require-gpu --json manifest.json
+      - name: 挑选 linux 引擎
+        id: pick
+        run: |
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          m = json.load(open("manifest.json"))["targets"]
+          v = m["llama-ubuntu-base-x64"]
+          print("llama_url=" + v["url"])
+          print("llama_tag=" + v["release"])
+          print("::notice::llama %s 产物 %s %.1fMB" % (v["release"], v["asset"], v["size"] / 1048576))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: engine-manifest
+          path: manifest.json
+
+  os-inference-proof:
+    # whisper 有几个产物连 OS 都不写（whisper-bin-x64.zip / whisper-blas-bin-x64.zip），
+    # 发现器只能推断成 win。这里把"推断"换成"证据"：真下载、真解压、看里面是不是 PE 文件。
+    # 必须遍历 manifest["inferred"]：上一版去解压 llama-win-cpu-x64，那名字里明写着 win，
+    # 证实了一个从来不需要证实的东西，等于没测。
+    needs: discover
+    timeout-minutes: 15
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: engine-manifest
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: 生成待证实清单
+        run: |
+          python - <<'PY' > inferred.tsv
+          import json
+          m = json.load(open("manifest.json"))
+          for k in m["inferred"]:
+              print("%s\t%s" % (k, m["targets"][k]["url"]))
+          PY
+          echo "待证实 $(wc -l < inferred.tsv) 个"
+      - name: 逐个下载解压，要求产物里有 .exe/.dll
+        run: |
+          set -euo pipefail
+          if [ ! -s inferred.tsv ]; then
+            echo "::notice::本轮上游文件名都写明了 OS，推断车道无事可做"
+            exit 0
+          fi
+          n=0
+          while IFS="$(printf '\t')" read -r target url; do
+            echo "=== $target"
+            curl -sSL --fail -o /tmp/probe.zip "$url"
+            unzip -l /tmp/probe.zip > /tmp/list.txt
+            head -20 /tmp/list.txt
+            grep -qE '\.(dll|exe)$' /tmp/list.txt \
+              || { echo "推断为 win 的 $target 里没有 PE 文件，OS 推断规则错了"; exit 1; }
+            n=$((n + 1))
+            echo "::notice::$target 内含 PE 文件，win 推断成立"
+          done < inferred.tsv
+          test "$n" -gt 0 || { echo "清单非空却一个都没证实"; exit 1; }
+          echo "已证实 $n 个靠推断的 win 产物"
+
+  headless-inference:
+    needs: discover
+    timeout-minutes: 25
+    runs-on: ubuntu-latest
+    env:
+      MODEL_REPO: Qwen/Qwen2.5-0.5B-Instruct-GGUF
+      MODEL_FILE: qwen2.5-0.5b-instruct-q2_k.gguf
+      MODEL_SHA256: 9ee36184e616dfc76df4f5dd66f908dbde6979524ae36e6cefb67f532f798cb8
+      MODEL_SIZE: "415182688"
+    steps:
+      - name: 下载引擎（不编译）
+        run: |
+          curl -sSL --fail -o engine.tar.gz "${{ needs.discover.outputs.llama_url }}"
+          mkdir -p engine && tar -xzf engine.tar.gz -C engine
+          echo "=== 解出来的布局（用来确认上游目录约定） ==="
+          find engine -maxdepth 3 | head -25
+      - name: 定位可执行文件并抓 --help 作证
+        run: |
+          BIN=$(find engine -type f \( -name 'llama-cli' -o -name 'llama-simple' -o -name 'llama-completions' \) | head -1)
+          test -n "$BIN" || { echo "上游没有预期的可执行文件，需要更新选择逻辑"; exit 1; }
+          echo "BIN=$BIN" >> "$GITHUB_ENV"
+          chmod +x "$BIN"
+          ldd "$BIN" | grep -i "not found" && exit 1 || echo "动态库齐全"
+          "$BIN" --help > help.txt 2>&1 || true
+          echo "=== help 里与对话模式相关的开关 ==="
+          grep -oE -- "--(no-cnv|no-conversations|cnv|chat)" help.txt | sort -u || true
+          head -12 help.txt
+      - name: 下载模型并校验 sha256（pin）
+        run: |
+          curl -sSL --fail -o model.gguf "https://huggingface.co/$MODEL_REPO/resolve/main/$MODEL_FILE"
+          test "$(stat -c %s model.gguf)" = "$MODEL_SIZE" || { echo "体积不符"; exit 1; }
+          echo "$MODEL_SHA256  model.gguf" | sha256sum -c -
+      - name: 无头推理，要求真的产出 token
+        run: |
+          FLAG=""
+          for cand in --no-cnv --no-conversations; do
+            if grep -qF -- "$cand" help.txt; then FLAG="$cand"; break; fi
+          done
+          echo "关闭对话模式的开关：[${FLAG:-上游已默认不进入对话模式}]"
+          timeout 900 "$BIN" -m model.gguf ${FLAG:+"$FLAG"} -t 1 -ngl 0 -n 24 \
+            -p "Reply with exactly one word: hello" > out.txt 2> err.txt
+          echo "=== stderr 尾部 ==="; tail -8 err.txt
+          echo "=== 输出 ==="; tail -5 out.txt
+          RATE=$(grep -hoE '[0-9]+\.[0-9]+ *tokens per second' err.txt out.txt | grep -oE '[0-9]+\.[0-9]+' | tail -1)
+          test -n "$RATE" || { echo "没抓到 tokens per second，推理没真跑起来"; tail -30 err.txt; exit 1; }
+          awk -v r="$RATE" 'BEGIN{exit !(r>0)}' || { echo "速率为 0"; exit 1; }
+          echo "::notice::无头推理成功 $RATE tok/s，引擎 ${{ needs.discover.outputs.llama_tag }}"

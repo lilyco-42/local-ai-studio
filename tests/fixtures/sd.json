@@ -1,0 +1,308 @@
+[
+ {
+  "tag_name": "master-975-95b3090",
+  "prerelease": false,
+  "assets": [
+   {
+    "name": "cudart-sd-bin-win-cu12-x64.zip",
+    "size": 563452046,
+    "browser_download_url": "https://github.com/leejet/stable-diffusion.cpp/releases/download/master-975-95b3090/cudart-sd-bin-win-cu12-x64.zip"
+   },
+   {
+    "name": "sd-master-95b3090-bin-Darwin-macOS-26.6.2-arm64.zip",
+    "size": 36488395,
+    "browser_download_url": "https://github.com/leejet/stable-diffusion.cpp/releases/download/master-975-95b3090/sd-master-95b3090-bin-Darwin-macOS-26.6.2-arm64.zip"
+   },
+   {
+    "name": "sd-master-95b3090-bin-Linux-Ubuntu-24.04-x86_64-rocm-10.1.0.zip",
+    "size": 295415674,
+    "browser_download_url": "https://github.com/leejet/stable-diffusion.cpp/releases/download/master-975-95b3090/sd-master-95b3090-bin-Linux-Ubuntu-24.04-x86_64-rocm-10.1.0.zip"
+   },
+   {
+    "name": "sd-master-95b3090-bin-Linux-Ubuntu-24.04-x86_64-vulkan.zip",
+    "size": 36612523,
+    "browser_download_url": "https://github.com/leejet/stable-diffusion.cpp/releases/download/master-975-95b3090/sd-master-95b3090-bin-Linux-Ubuntu-24.04-x86_64-vulkan.zip"
+   },
+   {
+    "name": "sd-master-95b3090-bin-Linux-Ubuntu-24.04-x86_64.zip",
+    "size": 26289165,
+    "browser_download_url": "https://github.com/leejet/stable-diffusion.cpp/releases/download/master-975-95b3090/sd-master-95b3090-bin-Linux-Ubuntu-24.04-x86_64.zip"
+   },
+   {
+    "name": "sd-master-95b3090-bin-win-cpu-x64.zip",
+    "size": 17706677,
+    "browser_download_url": "https://github.com/leejet/stable-diffusion.cpp/releases/download/master-975-95b3090/sd-master-95b3090-bin-win-cpu-x64.zip"
+   },
+   {
+    "name": "sd-master-95b3090-bin-win-cuda12-x64.zip",
+    "size": 343630973,
+    "browser_download_url": "https://github.com/leejet/stable-diffusion.cpp/releases/download/master-975-95b3090/sd-master-95b3090-bin-win-cuda12-x64.zip"
+   },
+   {
+    "name": "sd-master-95b3090-bin-win-rocm-10.1.0-x64.zip",
+    "size": 263997742,
+    "browser_download_url": "https://github.com/leejet/stable-diffusion.cpp/releases/download/master-975-95b3090/sd-master-95b3090-bin-win-rocm-10.1.0-x64.zip"
+   },
+   {
+    "name": "sd-master-95b3090-bin-win-vulkan-x64.zip",
+    "size": 29371165,
+    "browser_download_url": "https://github.com/leejet/stable-diffusion.cpp/releases/download/master-975-95b3090/sd-master-95b3090-bin-win-vulkan-x64.zip"
+   }
+  ]
+ },
+ {
+  "tag_name": "master-973-f0aac52",
+  "prerelease": false,
+  "assets": [
+   {
+    "name": "cudart-sd-bin-win-cu12-x64.zip",
+    "size": 563452046,
+    "browser_download_url": "https://github.com/leejet/stable-diffusion.cpp/releases/download/master-973-f0aac52/cudart-sd-bin-win-cu12-x64.zip"
+   },
+   {
+    "name": "sd-master-f0aac52-bin-Darwin-macOS-26.6.2-arm64.zip",
+    "size": 36476923,
+    "browser_download_url": "https://github.com/leejet/stable-diffusion.cpp/releases/download/master-973-f0aac52/sd-master-f0aac52-bin-Darwin-macOS-26.6.2-arm64.zip"
+   },
+   {
+    "name": "sd-master-f0aac52-bin-Linux-Ubuntu-24.04-x86_64-rocm-10.1.0.zip",
+    "size": 295412211,
+    "browser_download_url": "https://github.com/leejet/stable-diffusion.cpp/releases/download/master-973-f0aac52/sd-master-f0aac52-bin-Linux-Ubuntu-24.04-x86_64-rocm-10.1.0.zip"
+   },
+   {
+    "name": "sd-master-f0aac52-bin-Linux-Ubuntu-24.04-x86_64-vulkan.zip",
+    "size": 36611594,
+    "browser_download_url": "https://github.com/leejet/stable-diffusion.cpp/releases/download/master-973-f0aac52/sd-master-f0aac52-bin-Linux-Ubuntu-24.04-x86_64-vulkan.zip"
+   },
+   {
+    "name": "sd-master-f0aac52-bin-Linux-Ubuntu-24.04-x86_64.zip",
+    "size": 26288236,
+    "browser_download_url": "https://github.com/leejet/stable-diffusion.cpp/releases/download/master-973-f0aac52/sd-master-f0aac52-bin-Linux-Ubuntu-24.04-x86_64.zip"
+   },
+   {
+    "name": "sd-master-f0aac52-bin-win-cpu-x64.zip",
+    "size": 17698980,
+    "browser_download_url": "https://github.com/leejet/stable-diffusion.cpp/releases/download/master-973-f0aac52/sd-master-f0aac52-bin-win-cpu-x64.zip"
+   },
+   {
+    "name": "sd-master-f0aac52-bin-win-cuda12-x64.zip",
+    "size": 343638522,
+    "browser_download_url": "https://github.com/leejet/stable-diffusion.cpp/releases/download/master-973-f0aac52/sd-master-f0aac52-bin-win-cuda12-x64.zip"
+   },
+   {
+    "name": "sd-master-f0aac52-bin-win-rocm-10.1.0-x64.zip",
+    "size": 263998210,
+    "browser_download_url": "https://github.com/leejet/stable-diffusion.cpp/releases/download/master-973-f0aac52/sd-master-f0aac52-bin-win-rocm-10.1.0-x64.zip"
+   },
+   {
+    "name": "sd-master-f0aac52-bin-win-vulkan-x64.zip",
+    "size": 29363455,
+    "browser_download_url": "https://github.com/leejet/stable-diffusion.cpp/releases/download/master-973-f0aac52/sd-master-f0aac52-bin-win-vulkan-x64.zip"
+   }
+  ]
+ },
+ {
+  "tag_name": "master-970-2f016e8",
+  "prerelease": false,
+  "assets": [
+   {
+    "name": "cudart-sd-bin-win-cu12-x64.zip",
+    "size": 563452046,
+    "browser_download_url": "https://github.com/leejet/stable-diffusion.cpp/releases/download/master-970-2f016e8/cudart-sd-bin-win-cu12-x64.zip"
+   },
+   {
+    "name": "sd-master-2f016e8-bin-Darwin-macOS-26.6.2-arm64.zip",
+    "size": 35254394,
+    "browser_download_url": "https://github.com/leejet/stable-diffusion.cpp/releases/download/master-970-2f016e8/sd-master-2f016e8-bin-Darwin-macOS-26.6.2-arm64.zip"
+   },
+   {
+    "name": "sd-master-2f016e8-bin-Linux-Ubuntu-24.04-x86_64-rocm-10.1.0.zip",
+    "size": 285046529,
+    "browser_download_url": "https://github.com/leejet/stable-diffusion.cpp/releases/download/master-970-2f016e8/sd-master-2f016e8-bin-Linux-Ubuntu-24.04-x86_64-rocm-10.1.0.zip"
+   },
+   {
+    "name": "sd-master-2f016e8-bin-Linux-Ubuntu-24.04-x86_64-vulkan.zip",
+    "size": 37054860,
+    "browser_download_url": "https://github.com/leejet/stable-diffusion.cpp/releases/download/master-970-2f016e8/sd-master-2f016e8-bin-Linux-Ubuntu-24.04-x86_64-vulkan.zip"
+   },
+   {
+    "name": "sd-master-2f016e8-bin-Linux-Ubuntu-24.04-x86_64.zip",
+    "size": 26189733,
+    "browser_download_url": "https://github.com/leejet/stable-diffusion.cpp/releases/download/master-970-2f016e8/sd-master-2f016e8-bin-Linux-Ubuntu-24.04-x86_64.zip"
+   },
+   {
+    "name": "sd-master-2f016e8-bin-win-cpu-x64.zip",
+    "size": 17583859,
+    "browser_download_url": "https://github.com/leejet/stable-diffusion.cpp/releases/download/master-970-2f016e8/sd-master-2f016e8-bin-win-cpu-x64.zip"
+   },
+   {
+    "name": "sd-master-2f016e8-bin-win-cuda12-x64.zip",
+    "size": 338054307,
+    "browser_download_url": "https://github.com/leejet/stable-diffusion.cpp/releases/download/master-970-2f016e8/sd-master-2f016e8-bin-win-cuda12-x64.zip"
+   },
+   {
+    "name": "sd-master-2f016e8-bin-win-rocm-10.1.0-x64.zip",
+    "size": 259051110,
+    "browser_download_url": "https://github.com/leejet/stable-diffusion.cpp/releases/download/master-970-2f016e8/sd-master-2f016e8-bin-win-rocm-10.1.0-x64.zip"
+   },
+   {
+    "name": "sd-master-2f016e8-bin-win-vulkan-x64.zip",
+    "size": 30164424,
+    "browser_download_url": "https://github.com/leejet/stable-diffusion.cpp/releases/download/master-970-2f016e8/sd-master-2f016e8-bin-win-vulkan-x64.zip"
+   }
+  ]
+ },
+ {
+  "tag_name": "master-969-8c442fb",
+  "prerelease": false,
+  "assets": [
+   {
+    "name": "cudart-sd-bin-win-cu12-x64.zip",
+    "size": 563452046,
+    "browser_download_url": "https://github.com/leejet/stable-diffusion.cpp/releases/download/master-969-8c442fb/cudart-sd-bin-win-cu12-x64.zip"
+   },
+   {
+    "name": "sd-master-8c442fb-bin-Darwin-macOS-26.6.2-arm64.zip",
+    "size": 35252880,
+    "browser_download_url": "https://github.com/leejet/stable-diffusion.cpp/releases/download/master-969-8c442fb/sd-master-8c442fb-bin-Darwin-macOS-26.6.2-arm64.zip"
+   },
+   {
+    "name": "sd-master-8c442fb-bin-Linux-Ubuntu-24.04-x86_64-rocm-10.1.0.zip",
+    "size": 285047054,
+    "browser_download_url": "https://github.com/leejet/stable-diffusion.cpp/releases/download/master-969-8c442fb/sd-master-8c442fb-bin-Linux-Ubuntu-24.04-x86_64-rocm-10.1.0.zip"
+   },
+   {
+    "name": "sd-master-8c442fb-bin-Linux-Ubuntu-24.04-x86_64-vulkan.zip",
+    "size": 37055203,
+    "browser_download_url": "https://github.com/leejet/stable-diffusion.cpp/releases/download/master-969-8c442fb/sd-master-8c442fb-bin-Linux-Ubuntu-24.04-x86_64-vulkan.zip"
+   },
+   {
+    "name": "sd-master-8c442fb-bin-Linux-Ubuntu-24.04-x86_64.zip",
+    "size": 26190076,
+    "browser_download_url": "https://github.com/leejet/stable-diffusion.cpp/releases/download/master-969-8c442fb/sd-master-8c442fb-bin-Linux-Ubuntu-24.04-x86_64.zip"
+   },
+   {
+    "name": "sd-master-8c442fb-bin-win-cpu-x64.zip",
+    "size": 17585957,
+    "browser_download_url": "https://github.com/leejet/stable-diffusion.cpp/releases/download/master-969-8c442fb/sd-master-8c442fb-bin-win-cpu-x64.zip"
+   },
+   {
+    "name": "sd-master-8c442fb-bin-win-cuda12-x64.zip",
+    "size": 338022591,
+    "browser_download_url": "https://github.com/leejet/stable-diffusion.cpp/releases/download/master-969-8c442fb/sd-master-8c442fb-bin-win-cuda12-x64.zip"
+   },
+   {
+    "name": "sd-master-8c442fb-bin-win-rocm-10.1.0-x64.zip",
+    "size": 259051641,
+    "browser_download_url": "https://github.com/leejet/stable-diffusion.cpp/releases/download/master-969-8c442fb/sd-master-8c442fb-bin-win-rocm-10.1.0-x64.zip"
+   },
+   {
+    "name": "sd-master-8c442fb-bin-win-vulkan-x64.zip",
+    "size": 30166420,
+    "browser_download_url": "https://github.com/leejet/stable-diffusion.cpp/releases/download/master-969-8c442fb/sd-master-8c442fb-bin-win-vulkan-x64.zip"
+   }
+  ]
+ },
+ {
+  "tag_name": "master-968-8cd731e",
+  "prerelease": false,
+  "assets": [
+   {
+    "name": "cudart-sd-bin-win-cu12-x64.zip",
+    "size": 563452046,
+    "browser_download_url": "https://github.com/leejet/stable-diffusion.cpp/releases/download/master-968-8cd731e/cudart-sd-bin-win-cu12-x64.zip"
+   },
+   {
+    "name": "sd-master-8cd731e-bin-Darwin-macOS-26.6.2-arm64.zip",
+    "size": 35250705,
+    "browser_download_url": "https://github.com/leejet/stable-diffusion.cpp/releases/download/master-968-8cd731e/sd-master-8cd731e-bin-Darwin-macOS-26.6.2-arm64.zip"
+   },
+   {
+    "name": "sd-master-8cd731e-bin-Linux-Ubuntu-24.04-x86_64-rocm-10.1.0.zip",
+    "size": 285043485,
+    "browser_download_url": "https://github.com/leejet/stable-diffusion.cpp/releases/download/master-968-8cd731e/sd-master-8cd731e-bin-Linux-Ubuntu-24.04-x86_64-rocm-10.1.0.zip"
+   },
+   {
+    "name": "sd-master-8cd731e-bin-Linux-Ubuntu-24.04-x86_64-vulkan.zip",
+    "size": 37047375,
+    "browser_download_url": "https://github.com/leejet/stable-diffusion.cpp/releases/download/master-968-8cd731e/sd-master-8cd731e-bin-Linux-Ubuntu-24.04-x86_64-vulkan.zip"
+   },
+   {
+    "name": "sd-master-8cd731e-bin-Linux-Ubuntu-24.04-x86_64.zip",
+    "size": 26182248,
+    "browser_download_url": "https://github.com/leejet/stable-diffusion.cpp/releases/download/master-968-8cd731e/sd-master-8cd731e-bin-Linux-Ubuntu-24.04-x86_64.zip"
+   },
+   {
+    "name": "sd-master-8cd731e-bin-win-cpu-x64.zip",
+    "size": 17583160,
+    "browser_download_url": "https://github.com/leejet/stable-diffusion.cpp/releases/download/master-968-8cd731e/sd-master-8cd731e-bin-win-cpu-x64.zip"
+   },
+   {
+    "name": "sd-master-8cd731e-bin-win-cuda12-x64.zip",
+    "size": 338043602,
+    "browser_download_url": "https://github.com/leejet/stable-diffusion.cpp/releases/download/master-968-8cd731e/sd-master-8cd731e-bin-win-cuda12-x64.zip"
+   },
+   {
+    "name": "sd-master-8cd731e-bin-win-rocm-10.1.0-x64.zip",
+    "size": 259045043,
+    "browser_download_url": "https://github.com/leejet/stable-diffusion.cpp/releases/download/master-968-8cd731e/sd-master-8cd731e-bin-win-rocm-10.1.0-x64.zip"
+   },
+   {
+    "name": "sd-master-8cd731e-bin-win-vulkan-x64.zip",
+    "size": 30163610,
+    "browser_download_url": "https://github.com/leejet/stable-diffusion.cpp/releases/download/master-968-8cd731e/sd-master-8cd731e-bin-win-vulkan-x64.zip"
+   }
+  ]
+ },
+ {
+  "tag_name": "master-967-e47426c",
+  "prerelease": false,
+  "assets": [
+   {
+    "name": "cudart-sd-bin-win-cu12-x64.zip",
+    "size": 563452046,
+    "browser_download_url": "https://github.com/leejet/stable-diffusion.cpp/releases/download/master-967-e47426c/cudart-sd-bin-win-cu12-x64.zip"
+   },
+   {
+    "name": "sd-master-e47426c-bin-Darwin-macOS-26.6.2-arm64.zip",
+    "size": 35219700,
+    "browser_download_url": "https://github.com/leejet/stable-diffusion.cpp/releases/download/master-967-e47426c/sd-master-e47426c-bin-Darwin-macOS-26.6.2-arm64.zip"
+   },
+   {
+    "name": "sd-master-e47426c-bin-Linux-Ubuntu-24.04-x86_64-rocm-10.1.0.zip",
+    "size": 285022482,
+    "browser_download_url": "https://github.com/leejet/stable-diffusion.cpp/releases/download/master-967-e47426c/sd-master-e47426c-bin-Linux-Ubuntu-24.04-x86_64-rocm-10.1.0.zip"
+   },
+   {
+    "name": "sd-master-e47426c-bin-Linux-Ubuntu-24.04-x86_64-vulkan.zip",
+    "size": 37031113,
+    "browser_download_url": "https://github.com/leejet/stable-diffusion.cpp/releases/download/master-967-e47426c/sd-master-e47426c-bin-Linux-Ubuntu-24.04-x86_64-vulkan.zip"
+   },
+   {
+    "name": "sd-master-e47426c-bin-Linux-Ubuntu-24.04-x86_64.zip",
+    "size": 26165986,
+    "browser_download_url": "https://github.com/leejet/stable-diffusion.cpp/releases/download/master-967-e47426c/sd-master-e47426c-bin-Linux-Ubuntu-24.04-x86_64.zip"
+   },
+   {
+    "name": "sd-master-e47426c-bin-win-cpu-x64.zip",
+    "size": 17572108,
+    "browser_download_url": "https://github.com/leejet/stable-diffusion.cpp/releases/download/master-967-e47426c/sd-master-e47426c-bin-win-cpu-x64.zip"
+   },
+   {
+    "name": "sd-master-e47426c-bin-win-cuda12-x64.zip",
+    "size": 338012754,
+    "browser_download_url": "https://github.com/leejet/stable-diffusion.cpp/releases/download/master-967-e47426c/sd-master-e47426c-bin-win-cuda12-x64.zip"
+   },
+   {
+    "name": "sd-master-e47426c-bin-win-rocm-10.1.0-x64.zip",
+    "size": 259031806,
+    "browser_download_url": "https://github.com/leejet/stable-diffusion.cpp/releases/download/master-967-e47426c/sd-master-e47426c-bin-win-rocm-10.1.0-x64.zip"
+   },
+   {
+    "name": "sd-master-e47426c-bin-win-vulkan-x64.zip",
+    "size": 30152452,
+    "browser_download_url": "https://github.com/leejet/stable-diffusion.cpp/releases/download/master-967-e47426c/sd-master-e47426c-bin-win-vulkan-x64.zip"
+   }
+  ]
+ }
+]
