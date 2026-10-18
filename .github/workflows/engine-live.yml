@@ -121,7 +121,9 @@ jobs:
           find engine -maxdepth 3 | head -25
       - name: 定位可执行文件并抓 --help 作证
         run: |
-          BIN=$(find engine -type f \( -name 'llama-cli' -o -name 'llama-simple' -o -name 'llama-completions' \) | head -1)
+          # 候选名来自 zip 中央目录实测（tools/zip_peek.py 读 llama-win-cpu-x64.zip 的条目表）：
+          # 包里有 llama-cli / llama-completion / llama / llama-server，**没有** llama-simple 或 llama-completions。
+          BIN=$(find engine -type f \( -name 'llama-cli' -o -name 'llama-completion' -o -name 'llama' \) | head -1)
           test -n "$BIN" || { echo "上游没有预期的可执行文件，需要更新选择逻辑"; exit 1; }
           echo "BIN=$BIN" >> "$GITHUB_ENV"
           chmod +x "$BIN"

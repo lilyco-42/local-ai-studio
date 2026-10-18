@@ -130,6 +130,61 @@ GitHub release 只给 `size`，**没有官方 sha256**，所以 pin 必须由 CI
 （`ggml-base.dll`、`libggml-base.so.0.27.0`）。CI 无头车道与外壳定位引擎都必须按深度 1–2 glob，
 不能假设 `解压根/可执行名`。
 
+## 生图在"普通人电脑"上的现实（2026-10-19；依据是检索到的第三方数字，不是本机实测）
+
+先说这条能力的证据质量：`stable-diffusion.cpp` 自己的 README **没有写任何显存/内存下限，也没有一条基准数字**，
+只列了支持面（SD1/2、SDXL、SD3、Flux 1–3、MOSS/Qwen/Wan/LTX/Hunyuan；LoRA、ControlNet、TAESD、ESRGAN、
+VAE tiling；GGUF/Safetensors/CKPT；后端 CPU(AVX/AVX512)、CUDA、Vulkan、Metal、OpenCL、SYCL），
+可执行文件叫 `sd-cli`，并且明写 **"API and command-line option may change frequently"**
+→ 外壳必须按精确 release 钉它，不能跟着 master 漂。
+
+第三方数字（各自的日期与强度都标出来，别当定律）：
+
+| 来源 | 数字 | 强度 |
+|---|---|---|
+| HN 上 sd.cpp 作者早期报告（2023-08） | CPU 每 iteration 8.5–9 s | 代码早了三年，只能当量级 |
+| 2026 本地生图硬件指南 | SD1.5 @512×512 CPU **5–10 分钟/张**，GPU 3–5 秒；SDXL CPU 更差 | 泛用指南，未指明 sd.cpp |
+| 同指南 / thundercompute | SD1.5 ≥4 GB 显存、SDXL ≥8 GB | 常规经验值 |
+| FastSD CPU（另一条 CPU 路线） | i7-12700 出 512×512，但**要 ~30 GB 系统内存** | 不同实现，不可混用 |
+
+**但我们自己的产物表已经把最坏假设削掉一半**：`engine_probe` 实测 sd.cpp 每个 release 都发
+`sd-win-vulkan-x64`、`sd-ubuntu-vulkan-x64`（还有 rocm 两个），也就是**带集显/DX12 的普通笔记本可以走
+Vulkan，不必退回 CPU 的"几分钟一张"**。所以这条能力的设计不是"要不要砍掉生图"，而是：
+
+1. **按检测到的后端分层**：有 Vulkan/DirectML/CUDA → 正常默认（含 SDXL 级）；只有 CPU → 保留入口但
+   明确写"这张图预计 5–10 分钟"，默认降到量化后的 SD1.5 级模型。不要给用户一个"点了没反应"的按钮。
+2. **CI 证明不了这件事**：ubuntu-latest 是 2 核无 GPU，跑出来的 CPU 数字既不代表集显也不代表独显。
+   CI 只能证明"`sd-cli` 能起来、能出一张能校验的 PNG"（冒烟），真实性能必须靠设备矩阵，
+   和"GUI 能不能打开"是同一类无法在 CI 里证完的东西。
+3. 上面这些数字要在能跑 CI 之后由车道重新量一遍；现在它们只是**用来决定功能分层的依据**，不是承诺给用户的性能。
+
+## 包内到底有什么（2026-10-19，`zip_peek` 读三个包的中央目录）
+
+外壳怎么调引擎、装机要带哪些文件，这三条结论全部来自条目表，不是来自 README：
+
+| 包 | 条目 | 关键事实 |
+|---|---|---|
+| `llama-win-cpu-x64.zip` | 51 | `llama-cli.exe`、**`llama-server.exe`**、`llama.exe`、`llama-completion.exe`、`llama-bench.exe`、`llama-tts.exe`、`llama-quantize.exe`、`llama-mtmd-cli.exe`/`llava`/`qwen2vl`（多模态）、`ggml-rpc-server.exe`。**没有 `llama-simple`，也没有 `llama-completions`** |
+| `whisper-bin-x64.zip` | 41 | 全在 `Release/` 子目录；`whisper-cli.exe` **和** `main.exe` 同时存在，另有 **`whisper-server.exe`**、**`whisper-vad-speech-segments.exe`**、`whisper-quantize/bench/stream/talk-llama/lsp.exe`，以及 8 个 `test-*.exe`、`wchess.exe`、`parakeet-*.exe`、`SDL2.dll` |
+| `sd-...-Linux-Ubuntu-24.04-x86_64.zip` | 35 | 平铺根目录：`sd-cli`、**`sd-server`**（无扩展名），外加一整层运行时闭包 `libggml{,-base}.so`（含 `.so.0.27.0` 版本名）、14 个 `libggml-cpu-<微架构>.so`、`libstable-diffusion.so`、`libwebp/libwebpmux/libsharpyuv/libwebm.so`，两个 `.txt` 出处说明 |
+
+由此定下四条实现约束：
+
+1. **对话、字幕、生图三项上游都带 server 形态**（`llama-server` / `whisper-server` / `sd-server`）。
+   外壳应当**起一个常驻服务**，而不是一次任务起一次进程：400 MB 权重每次重新加载，
+   在 0.8–1 MiB/s 的下载与秒级加载面前是不可接受的。这也正好是 LM Studio 的形态（本地 OpenAI 兼容接口）。
+2. **`llama-bench` 已经在包里** → "给你这台机器实测多少 tok/s"这类 LM Studio 式能力，
+   不需要自己写基准，直接调上游产物即可。
+3. **字幕这条不需要自研分段**：`whisper-cli` 的 `-osrt, --output-srt` 在
+   `examples/cli/cli.cpp` 里能查到（`arg == "-osrt" || arg == "--output-srt"`），
+   而 VAD 断句工具 `whisper-vad-speech-segments.exe` 既在 `examples/vad-speech-segments/` 里，
+   也真的出现在 `whisper-bin-x64.zip` 的条目表里 → 出 SRT 的现成路径是"VAD 分段 + `-osrt`"，
+   外壳只做编排与进度显示。
+4. 打包**不能只拷可执行文件**：llama 是 `llama-cli.exe` + `llama-cli-impl.dll` 成对，whisper 的 `Release/` 里
+   混着 8 个测试程序和 `SDL2.dll`，sd 的 linux 包依赖一整套 `.so` 闭包（还带版本号软链名）。
+   所以按"整目录收集 + 显式排除 `test-*`"处理，运行时库目录要靠 `$ORIGIN`/`LD_LIBRARY_PATH`；
+   而 CI 无头车道里那句 `find -name llama-completions` 找的是**不存在的文件名**，已按实测条目表改掉。
+
 ## 分发源可达性（2026-10-19 从 CN 服务器 lain42.top 实测：HEAD 之外再做区间 GET，2 MiB 一组、4 MiB 重复三轮）
 
 第一次只发 HEAD 得到的结论有两处不能信：ModelScope 回 200 其实跳到了仓库页面，
