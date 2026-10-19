@@ -121,6 +121,36 @@ class TestOcrPinDrift(unittest.TestCase):
         self.assertIn("多出一条", log)
 
 
+class TestChatRatePattern(unittest.TestCase):
+    """对话车道的速率判据：上游 CLI 打的是 `[ Prompt: 41.2 t/s | … ]`，
+    库里那句 "tokens per second" 它根本不用（b11727 实测）。所以模式必须两种都吃，
+    而且不能把"抓不到速率"和"没产出 token"混成一句话。"""
+
+    @property
+    def pattern(self) -> str:
+        import re
+        import yaml
+        with open(lane_replay.WF, encoding="utf-8") as fh:
+            doc = yaml.safe_load(fh)
+        for st in doc["jobs"]["headless-inference"]["steps"]:
+            m = re.search(r"grep -hoE '([^']+)'", st.get("run") or "")
+            if m:
+                return m.group(1)
+        raise AssertionError("headless-inference 里找不到速率 grep 模式（被删了？）")
+
+    def test_matches_both_spellings(self) -> None:
+        import re
+        for line in [
+            "[ Prompt: 41.2 t/s | Generation: 8.9 t/s ]",
+            "llama_perf_context_print:  eval time = 100.00 ms / 24 runs (4.17 ms per token, 240.00 tokens per second)",
+        ]:
+            self.assertRegex(line, self.pattern)
+
+    def test_does_not_match_speedless_noise(self) -> None:
+        import re
+        self.assertFalse(re.search(self.pattern, "print_info: load time = 12.3 ms\n"))
+
+
 class TestHarnessItself(unittest.TestCase):
     def test_unexpected_exception_is_not_reported_as_a_legit_red(self) -> None:
         """判据段自己抛异常（比如忘了造某个文件）要报 99，不能和"判据认为不合格"混成一回事。"""

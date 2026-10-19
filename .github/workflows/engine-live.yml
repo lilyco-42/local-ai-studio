@@ -590,11 +590,25 @@ jobs:
             if grep -qF -- "$cand" help.txt; then FLAG="$cand"; break; fi
           done
           echo "关闭对话模式的开关：[${FLAG:-help 里没有，靠 /dev/null 兜底}]"
-          timeout 900 "$BIN" -m model.gguf ${FLAG:+"$FLAG"} -t 1 -ngl 0 -n 24 \
+          # 速率那一行不是白给的：b11727 的 llama-cli 只在 `--show-timings` 下打印
+          # `[ Prompt: %.1f t/s | Generation: %.1f t/s ]`（tools/cli/cli-context.cpp:655-660），
+          # 而库里那句 "tokens per second"（src/llama-context.cpp:4657）这个 CLI 根本不调。
+          TIMING=""
+          grep -qF -- "--show-timings" help.txt && TIMING=--show-timings
+          echo "要速率行的开关：[${TIMING:-help 里没有 --show-timings}]"
+          timeout 900 "$BIN" -m model.gguf ${FLAG:+"$FLAG"} ${TIMING:+"$TIMING"} -t 1 -ngl 0 -n 24 \
             -p "Reply with exactly one word: hello" > out.txt 2> err.txt < /dev/null
           echo "=== stderr 尾部 ==="; tail -8 err.txt
           echo "=== 输出 ==="; tail -5 out.txt
-          RATE=$(grep -hoE '[0-9]+\.[0-9]+ *tokens per second' err.txt out.txt | grep -oE '[0-9]+\.[0-9]+' | tail -1)
-          test -n "$RATE" || { echo "没抓到 tokens per second，推理没真跑起来"; tail -30 err.txt; exit 1; }
+          # 两种写法都认（`t/s` 与 `tokens per second`），因为上游在 CLI 与库之间不一致；
+          # 抓到 0 也别把结论说成"推理没跑起来"—— 那是两件事，下面用回复文本单独证明 token 真的产出了。
+          RATE=$(grep -hoE '[0-9]+(\.[0-9]+)? *(tokens per second|t/s)' err.txt out.txt \
+                 | grep -oE '[0-9]+(\.[0-9]+)?' | tail -1)
+          test -n "$RATE" || {
+            echo "没抓到速率行 —— 先分清是上游改了格式还是真没跑："; tail -30 err.txt
+            echo "help 里与 timing/perf 相关的开关："; grep -oE -- "--?[a-z-]*(timings|perf)" help.txt | sort -u || true
+            exit 1; }
+          # 独立证据：模型确实吐了字（大小写与标点都不假设，只要有非空白内容）
+          grep -qE '[^[:space:]]' out.txt || { echo "stdout 里没有任何文本，模型没产出 token"; exit 1; }
           awk -v r="$RATE" 'BEGIN{exit !(r>0)}' || { echo "速率为 0"; exit 1; }
           echo "::notice::无头推理成功 $RATE tok/s，引擎 ${{ needs.discover.outputs.llama_tag }}"
