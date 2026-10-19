@@ -126,8 +126,9 @@ OCR 93 条 URL 全带上游 digest、whisper 权重与样本已钉、SD1.5 Q4_0 
 ### 已经按这个结构生成过一次（`tools/catalog_snapshot.py`）
 
 ```
-python tools/catalog_snapshot.py --live --check     # 只验上游快照还是钉住的那份
-python tools/catalog_snapshot.py --live             # 重新生成 catalog/*.json
+python tools/catalog_snapshot.py --live --check     # 验上游快照还是钉住的那份 + 核对侧表
+python tools/catalog_snapshot.py --live             # 重新生成 catalog/*.json 与侧表
+python tools/catalog_snapshot.py --raw 整文件 --check  # 拿本地已下载的上游整文件复现校验
 ```
 
 2026-10-19 从钉住的 commit 真跑一遍的结果：
@@ -140,15 +141,26 @@ python tools/catalog_snapshot.py --live             # 重新生成 catalog/*.jso
 | `license` 归一为 `unknown` | **3,404 条**；含 `nc` 子串的 **376 条**（这条是子串启发式，只当统计不当闸门） |
 | `catalog/defaults.json` | **6 条**：`pins/models.json` 的 3 条权重 + `pins/ocr.json` 的 3 条 OCR 默认档；字段直接抄 pin 文件，不重打数字，另排除 1 条车道样本（`samples/jfk.wav` 不是给用户装的模型） |
 
-三个设计后果：
+**2026-10-20 复现验证**（这条补上了"派生物不进仓库"留下的那个洞）：重新从钉住的 commit 下载
+上游整文件（15,922,575 B，28 s，sha256 实算 `0d72c2ee…` 与 `UPSTREAM["sha256"]` 相等），
+用当前 `slim()` 重导出一遍，得到的 **5,808,032 B 与盘上那份逐字节相同**（`cmp` 无差异）。
+所以"可复现"不再是一句设计意图，而是一次量过的结果。
+因此新增 `catalog/describe.sha256`（**提交进仓库**，一行：`<64hex>␣␣<体积>␣␣路径`）：
+`describe.json` 不进仓库，那它在仓库里唯一的身份就是这颗哈希；`--live --check` 与 `--raw --check`
+都会重导出并比对，**任一边变了就红**（slim() 少抄一个字段、或上游漂了而哈希校验被绕过），
+已用改一个 hex 的副本证它会红（`Ran 16 tests`，含侧表 8 条）。缺侧表也算红，不许静默跳过。
+
+四个设计后果：
 - 内置目录快照的代价量级定了 —— **不到 500 KB 压缩**，比 ADR 原先担心的"要自带一个大目录"小得多，
   而且只带 16 个字段（上游 38 个字段里的 `head_dim`/`moe_intermediate_size` 等是它自己拟合用的，
   全搬进来等于把别人的 schema 变更变成我们的破坏性变更）。
-- `describe.json` **不进仓库**（已 gitignore）：它是按 commit+sha256 可复现的派生物，
-  要改就改 `UPSTREAM` 坐标，不把 5.5 MiB bulk 提交进历史。
+- `describe.json` **不进仓库**（已 gitignore），但 **`describe.sha256` 进**：它是按 commit+sha256
+  可复现的派生物，要改就改 `UPSTREAM` 坐标，不把 5.5 MiB bulk 提交进历史 ——
+  而"bulk 不进仓库"不等于"仓库对它没有任何记载"。
 - 16% 有可下载仓库这件事说明**描述层不能当下载层用**：剩下 84% 想让用户点一下就下，
   必须先经文件级解析（HF `tree` + ModelScope `repo/files`，两个端点都已实测过形状）。
-- 车道：`engine-live.yml` 的 `catalog-snapshot` 用 `--live --check` 盯上游漂移；
+- 车道：`engine-live.yml` 的 `catalog-snapshot` 用 `--live --check` 同时盯两件事 —— 上游漂移
+  （整文件哈希）与**目录形状漂移**（重导出 vs 侧表）；
   `ci.yml` 用真实切片夹具离线跑同一套规则。
 
 ## pin 强度不是一条线，是六级（`establish_pins.py --verify` 用来把低升到高）

@@ -11,6 +11,7 @@ on:
       - "tools/model_catalog_probe.py"
       - "tools/toolbelt_pins.py"
       - "tools/catalog_snapshot.py"
+      - "catalog/describe.sha256"
       - "pins/toolbelt.json"
       - ".github/workflows/engine-live.yml"
 
@@ -190,7 +191,11 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: 取上游快照，校验钉住的哈希
+      - name: 取上游快照 → 校验钉住的哈希 → 核对侧表（快照可复现）
+        # --live --check 现在做两件事：上游整文件的 sha256 要等于 UPSTREAM["sha256"]，
+        # 以及 slim() 重导出的那 5.5 MB 要等于 catalog/describe.sha256 记的哈希与体积。
+        # 后者是 2026-10-20 补的：describe.json 本身 .gitignore（可复现的派生物），
+        # 所以"出厂目录长什么样"在仓库里只剩这颗哈希 —— 没有它，slim() 少抄一个字段也没人知道。
         run: python3 tools/catalog_snapshot.py --live --check
 
   toolbelt-pins:

@@ -71,8 +71,8 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
 
 ## 验收标准（在当前唯一可用验证手段 = GitHub Actions 下）
 
-1. `ci.yml`：110 个单测绿（含 `test_yaml_gate.py` 给闸门自己的 11 条、`test_toolbelt_pins.py` 给工具带
-   钉表的 14 条、`test_catalog_snapshot.py` 给目录快照的 8 条、`test_establish_verify.py` 给字节复核的 8 条、
+1. `ci.yml`：118 个单测绿（含 `test_yaml_gate.py` 给闸门自己的 11 条、`test_toolbelt_pins.py` 给工具带
+   钉表的 14 条、`test_catalog_snapshot.py` 给目录快照与其侧表的 16 条、`test_establish_verify.py` 给字节复核的 8 条、
    `test_r2_manifest.py` 给镜像清单的 6 条、`test_lane_assertions.py` + `test_image_proof_block.py`
    给车道判据的 27 条、`test_shell_vars.py` 给 shell 变量判据的 10 条），
    `yaml_gate.py` 0 BAD、
@@ -85,7 +85,10 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
    `manifest["inferred"]` 每一个产物解压要求 PE；`ocr-catalog` 93 条模型 URL 0 缺失且每条都有上游 digest；
    `model-catalog` 盯权重目录与"上游给不给哈希"的漂移；
    `toolbelt-pins` 盯工具带 12 条 pin 的漂移，并**真下载** llmfit 验 `--json` 旗标与 JSON 结构还在；
-   `catalog-snapshot` 盯内置目录快照钉住的那份上游文件有没有漂（漂了要显式重钉）；
+   `catalog-snapshot` 盯内置目录快照钉住的那份上游文件有没有漂（漂了要显式重钉），**并用
+   `catalog/describe.sha256` 盯"重导出这张目录"的形状** —— 快照本身 .gitignore，所以这颗侧表哈希
+   是仓库里对它的唯一记载；2026-10-20 已经真复现过一次（重下上游 28 s、整文件哈希等于钉的、
+   重导出 5,808,032 B 与盘上那份逐字节相同），这条把那次一次性核对变成了每次都查；
    `headless-inference` 在 CPU runner 上对话真抓到 `tokens per second > 0`，**并且同一个包再起的
    常驻 `llama-server` 走 OpenAI 兼容 `/v1/chat/completions` 也真的产出非空文本**（ADR 的实现约束
    第 1 条"外壳起常驻服务而非一次一进程"原本一次都没被车道碰过）；

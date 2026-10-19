@@ -44,6 +44,9 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
 - `tools/catalog_snapshot.py` + `catalog/`：按 ADR 已定的两层结构生成内置目录快照。
   描述层从钉住的 commit 取（17,700 → 留 14,364 条 gguf，5.5 MiB，gzip-9 后 475 KB），
   默认档 `catalog/defaults.json` 的哈希与出处直接抄 `pins/models.json`，不重打数字。
+  `describe.json` 不进仓库，但 `catalog/describe.sha256` 进 —— 2026-10-20 重下上游整文件（28 s）
+  并重导出过一次，字节与盘上那份完全相同，所以这颗哈希是仓库对"出厂目录长什么样"的唯一记载，
+  `--live --check` 每次都比对，`slim()` 少抄一个字段就会红。
 - `.github/workflows/ci.yml`：静态门禁（含 yaml_gate）+ 单测（夹具是真实 API 捕获）+ 离线跑发现器
   与离线回放工具带钉表。
 - `.github/workflows/engine-live.yml`：打真实 API 发现产物 → 下载 linux 引擎（不编译）→ 下载 pin 住的

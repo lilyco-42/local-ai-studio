@@ -23,10 +23,14 @@ import gzip
 import hashlib
 import json
 import os
+import re
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, ".."))
+# describe.json 本身 .gitignore（5.5 MB 派生物，坐标可复现），但它的内容哈希要提交 ——
+# 否则"这张目录长什么样"只存在于某台机器的盘上，slim() 改了也没人能发现。
+SIDECAR = os.path.join(ROOT, "catalog", "describe.sha256")
 
 # 上游快照的坐标（2026-10-19 实测：按 commit 重抓与 HEAD 抓的逐字节相同）
 UPSTREAM = {
@@ -112,12 +116,33 @@ def picks_of(defaults: dict) -> dict:
     return {k: v for k, v in defaults.items() if not k.startswith("samples/")}
 
 
+def snapshot_bytes(snap) -> bytes:
+    """快照的唯一序列化路径。侧表钉的就是这串字节，所以"写盘"和"复现校验"必须走同一个函数 ——
+    分两处写迟早一份加个 key、一份没加，然后侧表永远对不上，或者更糟：永远对得上但测的是别的形状。"""
+    return json.dumps(snap, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
+
+
+def sidecar_line(data: bytes) -> str:
+    return f"{hashlib.sha256(data).hexdigest()}  {len(data):,}  catalog/describe.json\n"
+
+
+def parse_sidecar(text: str) -> tuple[str, int]:
+    """返回 (哈希, 字节数)。格式是 `<64hex>␣␣<带千分位的体积>␣␣<路径>`，只认一行。"""
+    lines = [l for l in text.splitlines() if l.strip()]
+    if len(lines) != 1:
+        raise ValueError(f"侧表应该只有一行，现在 {len(lines)} 行")
+    h, size, _path = lines[0].split()
+    if not re.fullmatch(r"[0-9a-f]{64}", h):
+        raise ValueError(f"侧表哈希不是 64 位十六进制：{h!r}")
+    return h, int(size.replace(",", ""))
+
+
 def emit(path: str, obj) -> int:
     os.makedirs(os.path.dirname(path), exist_ok=True)
-    text = json.dumps(obj, ensure_ascii=False, separators=(",", ":"))
-    with open(path, "w", encoding="utf-8", newline="\n") as fh:
-        fh.write(text)
-    return len(text.encode("utf-8"))
+    data = snapshot_bytes(obj)
+    with open(path, "wb") as fh:
+        fh.write(data)
+    return len(data)
 
 
 def load_bytes(args) -> tuple[bytes, str, str]:
@@ -130,6 +155,11 @@ def load_bytes(args) -> tuple[bytes, str, str]:
         with open(os.path.join(args.fixtures, "catalog_upstream.meta.json"), encoding="utf-8") as fh:
             meta = json.load(fh)
         return raw, f"夹具 {p}", meta["sha256"]
+    if args.raw:
+        # 离线复现用的入口：上游那张表 15.9 MB，CI 里直连很快，但在别的出口上未必要重下一遍。
+        # 仍然要求它等于钉住的那颗 —— 不然"用本地文件复现"就成了"随便拿个文件当快照"。
+        with open(args.raw, "rb") as fh:
+            return fh.read(), f"本地文件 {args.raw}", UPSTREAM["sha256"]
     import urllib.request
     req = urllib.request.Request(UPSTREAM["url"], headers={"User-Agent": "catalog-snapshot"})
     with urllib.request.urlopen(req, timeout=120) as r:
@@ -149,17 +179,42 @@ def load_pin_layers() -> dict:
     return out
 
 
+def check_sidecar(data: bytes) -> int:
+    """盘上的 catalog/describe.sha256 是唯一被提交的"这张目录应该长什么样"的记录。
+    它把两份东西绑在一起：钉住的上游整文件 + slim() 现在的形状。任一边改了（比如给条目多
+    抄一个字段），这里就红，而不是等某个下游拿着 5.5 MB 的 bulk 才发现对不上。"""
+    if not os.path.exists(SIDECAR):
+        print(f"BAD：缺侧表 {SIDECAR}（快照本身不进仓库，可复现性只靠这颗哈希）")
+        return 1
+    with open(SIDECAR, encoding="utf-8") as fh:
+        try:
+            want, want_size = parse_sidecar(fh.read())
+        except ValueError as e:
+            print(f"BAD：侧表读不动：{e}")
+            return 1
+    got, got_size = hashlib.sha256(data).hexdigest(), len(data)
+    if (got, got_size) == (want, want_size):
+        print(f"  ✅ 快照可复现：{got_size:,} B {got[:12]}… 与侧表一致")
+        return 0
+    print(f"BAD：重导出的快照与侧表不符 —— 侧表 {want_size:,} B {want[:12]}…，"
+          f"现在 {got_size:,} B {got[:12]}…")
+    print("     要么 slim()/UPSTREAM 真的变了（那就显式重钉并重生成侧表），"
+          "要么上游漂了而 --live 的哈希校验被绕过了。不许改成 warning 放行。")
+    return 1
+
+
 def main(argv) -> int:
     ap = argparse.ArgumentParser()
     g = ap.add_mutually_exclusive_group(required=True)
     g.add_argument("--live", action="store_true")
     g.add_argument("--fixtures", default="")
+    g.add_argument("--raw", default="", help="用本地已下载的上游整文件（仍按钉住哈希校验）")
     ap.add_argument("--check", action="store_true", help="只校验，不写 catalog/*.json")
     args = ap.parse_args(argv)
     if not args.live:
         # 夹具是上游文件的一个切片，拿它写盘会产出一份"source 声称是整文件那版"的假目录。
         # 离线只允许 --check（验规则还认得上游形状），生成必须走 --live。
-        if not args.check:
+        if not args.check and not args.raw:
             print("--fixtures 只能配 --check 用；生成快照要 --live")
             return 2
 
@@ -173,13 +228,22 @@ def main(argv) -> int:
         print("  ✗", b)
 
     if args.check:
-        return 1 if bad else 0
+        if bad:
+            return 1
+        # 侧表只有走整文件（--live / --raw）时才可比：夹具是切片，切片算出来的哈希天然不等于侧表。
+        if args.fixtures:
+            return 0
+        return check_sidecar(snapshot_bytes(snap))
+
     if bad:
         print("有问题 → 不写快照（半张目录比没有目录更危险）")
         return 1
 
     dp = os.path.join(ROOT, "catalog", "describe.json")
     n = emit(dp, snap)
+    with open(SIDECAR, "w", encoding="utf-8", newline="\n") as fh:
+        fh.write(sidecar_line(snapshot_bytes(snap)))
+    print(f"  写入 {SIDECAR}（describe.json 不进仓库，靠这颗哈希复现）")
     gz = len(gzip.compress(open(dp, "rb").read(), 9))
     print(f"  写入 {dp}：{n:,} B，gzip-9 后 {gz:,} B（{100*gz/n:.1f}%）")
     # 默认档不重打数字：直接从 pins/models.json 抄记录本体，出处跟着走。

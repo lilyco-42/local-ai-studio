@@ -11,4 +11,5 @@ node_modules/
 *.tmp
 # 描述层快照是按 commit+sha256 可复现的派生物（5.5 MiB），不进仓库；
 # 要改它就改 tools/catalog_snapshot.py 里的 UPSTREAM 坐标，别提交 bulk。
+# 但 catalog/describe.sha256 是要提交的：bulk 不在仓库里时，它是"出厂目录长什么样"的唯一记载。
 catalog/describe.json
