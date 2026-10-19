@@ -48,10 +48,12 @@ SD3.5-medium/large 与 `city96/…`）；对话在 `Qwen/Qwen2.5-0.5B-Instruct-G
 入库时必须自算。三处都不许拿 HF 的 ETag 当校验值。大小可以三方互相印证：
 元数据 415,182,688 == HEAD 415,182,688 == 我们的 pin。
 
-## 已经立住的三个 pin
+## 已经立住的四个 pin
 
 `tools/establish_pins.py` 专门处理"源不给哈希"这一侧，做法是**跨主机逐字节对照后再立 pin**，
-而不是"自己算完再自己断言相等"（那是自证）。2026-10-19 实测。
+而不是"自己算完再自己断言相等"（那是自证）。2026-10-19 实测，结果落盘为
+**`pins/models.json`**（含每条的 `primary` / `cross_checked_against` / `provenance`，
+车道里写死的哈希必须与它对得上，改 pin 要走工具而不是直接改 yaml）。
 
 **这一轮又翻掉本文早先一条结论**：ModelScope 不只 CDN 路径是内容寻址的，它
 `api/v1/models/<ns>/<repo>/repo/files` 的元数据里**每个文件都带 `Sha256` 字段** ——
@@ -59,15 +61,24 @@ SD3.5-medium/large 与 `city96/…`）；对话在 `Qwen/Qwen2.5-0.5B-Instruct-G
 
 | 文件 | sha256 | 大小 | 方法与凭据 |
 |---|---|---|---|
-| `stable-diffusion-v1-5-pruned-emaonly-Q4_0.gguf`（生图默认） | `b8944e9fe0b69b36ae1b5bb0185b3a7b8ef14347fe0fa9af6c64c4829022261f` | **1,566,768,416 B** | **零下载**：ModelScope 元数据 `Sha256` == 它 CDN 的 `lfs-objects/<2>/<2>/<60>` 还原值，总长又与 hf-mirror 的 `lfs.size` 一致 |
-| `ggml-tiny.bin`（字幕默认权重） | `be07e048e1e599ad46341c8d2a135645097a538221678b7acdd1b1919c6e1b21` | 77,691,713 B | 主源 hf-mirror 整包；HEAD 声明总长 == 实收；**huggingface.co 直连的头 4 MiB 与尾 4 MiB 与主源逐字节相同** |
+| `stable-diffusion-v1-5-pruned-emaonly-Q4_0.gguf`（生图默认） | `b8944e9fe0b69b36ae1b5bb0185b3a7b8ef14347fe0fa9af6c64c4829022261f` | **1,566,768,416 B** | **零下载**：ModelScope 元数据 `Sha256` == 它 CDN 的 `lfs-objects/<2>/<2>/<60>` 还原值，总长又与**另一家**的 `lfs.size` 一致 |
+| `qwen2.5-0.5b-instruct-q2_k.gguf`（对话车道默认） | `9ee36184e616dfc76df4f5dd66f908dbde6979524ae36e6cefb67f532f798cb8` | 415,182,688 B | 同上，**零下载**三条一致。这颗原先只是写进 yaml 的数字，今天才由工具复现出来 —— 复现前后才算钉过 |
+| `ggml-tiny.bin`（字幕默认权重） | `be07e048e1e599ad46341c8d2a135645097a538221678b7acdd1b1919c6e1b21` | 77,691,713 B | 主源 hf-mirror 整包；总长 == 实收；**huggingface.co 直连的头 4 MiB 与尾 4 MiB 与主源逐字节相同** |
 | `samples/jfk.wav`（车道样本，已知答案） | `59dfb9a4acb36fe2a2affc14bacbee2920ff435cb13cc314a08c13f66ba7860e` | 352,078 B | raw.githubusercontent 整包 + github.com 同段对照；**另与 git 自己的 blob sha1 `3184d372cd2f…` 相等**（git 是内容寻址，这算独立一道旁证） |
 
-生图那条的诚实边界：**没有整包下载校验过**（不为立 pin 去下 1.5 GB），靠的是同一提供方两条
+**两条自己造的假阴性（2026-10-19 复测时抓到，都已改）**：
+1. CDN 那条用 `curl -sIL`（HEAD）取 `url_effective` —— ModelScope 的 CDN 对 HEAD 不给这条重定向，
+   于是"内容寻址还原 = None"，把两条本来能立的 pin 判成"少一条独立机制"。改成 GET 跟跳转后两条都还原成功。
+2. 跨源总长那条用 `curl -sS` 没加 `-L`，而 **hf-mirror 对 `/api/...` 回 308 跳回 huggingface.co**
+   （它只镜像文件端点），收到 0 字节 → "HF 侧没拿到总长"。加 `-L` 并把真正回答的主机打出来。
+   所以本表那列措辞从"与 hf-mirror 一致"改成了"与另一家一致"，`pins/models.json` 里记的是
+   `huggingface.co`：**这一侧的对照其实是 HF 本体，不是国内镜像**，国内取不到它。
+
+生图与对话两条的诚实边界：**没有整包下载校验过**（不为立 pin 去下 1.5 GB / 415 MB），靠的是同一提供方两条
 独立机制一致 + 跨提供方总长一致；所以真正下载时仍必须按这颗 pin 复核，对不上就是源被换过。
 另外同一工具在 lain42.top 上跑时 whisper 那两条会红 —— 那台机器到 `huggingface.co` 与
 `raw.githubusercontent.com` 的出站被重置（curl rc=35），是**出口限制不是文件问题**；
-工具三条只立住一条就如实给退出码 1，不糊成"通过"。
+工具四条只要有一条立不住就如实给退出码 1，不糊成"通过"。
 
 诚实地说清 download 那两条的强度：只证明**传输与镜像未改写**，provenance 仍然只有 HF / GitHub 一家。
 原先设想的"两个独立发布方"对 `ggerganov/whisper.cpp` 实测不成立（ModelScope 404），
@@ -77,6 +88,40 @@ HF 上也没有 `ggml-org/whisper.cpp` 这个模型仓库（401，样本只在 G
 （30 个 release 的产物名去重 33 种，全是 xcframework/tar.gz/zip 二进制，`.bin` 命中 0）。
 所以字幕这一路是"引擎走 GitHub（有 digest）+ 权重走 HF（HF 自己不给哈希，要么查 ModelScope 镜像元数据、要么下载后自算）"，
 一个能力里混着两种凭据强度，代码里不能按同一套校验假设写。
+
+## 上游有一整张现成目录，但它给不了校验值（2026-10-19 实测）
+
+ADR 里"模型目录来源"原本挂着不定。今天把 llmfit 自带的 HF 目录整表量了一遍，
+它把这条决定需要的数字都补齐了：
+
+**抓的是** `llmfit-core/data/hf_models.json` @ commit `fbde9aaf8de3abbc7cc0eb3bb7ea4f705227bb7a`，
+**15,922,575 B**，sha256 `0d72c2eee81b0e3671c4a1ba374e987afb57d7eaa7075a9a4488c3ab0e3f4e83`
+（按 commit 重抓逐字节相同，所以这组数字可复现，不是"我看了一眼"）。
+
+| 量 | 值 | 对我们意味着什么 |
+|---|---|---|
+| 条目数 | **17,700**（format=gguf 14,364） | 对话这一项不用自己攒目录 |
+| `min_ram_gb` / `recommended_ram_gb` / `min_vram_gb` 非空 | **100%** | "这台机器能跑什么"的拟合输入是现成的 |
+| 字段数 | 38（含 capabilities / use_case / license / languages / architecture / 上下文长度 / MoE 参数） | 描述层够用 |
+| **值形如 64 位十六进制的字段** | **0 个**（整表遍历，不是子串匹配） | **它给不了校验值**，与"HF 元数据无内容哈希"那条实测一致 |
+| `gguf_sources` 里有什么 | 只有 `{repo, provider}` —— 没有文件名、没有大小、没有哈希 | 下载层必须我们自己落到"文件 + sha256" |
+| 带 `gguf_sources` 的条目 | **2,297 / 17,700（13%）**，文件条目合计 2,921 | 八成七的条目连可下载的仓库都没指出来 |
+| `quantization` 分布 | Q4_K_M **15,588（88%）** | 它是**模型级**索引，每条目一个默认量化，不是文件清单 |
+| `pipeline_tag` 分布 | text-generation 10,079 / image-text-to-text 3,370 / TTS 1,338 / **ASR 5** / OCR **0** / 生图 **0** | 四项能力里**只有对话**被它覆盖 |
+| `_revalidated` 为空 | **16,128 / 17,700（91%）** | 快照会漂，同步时不能当作"已复核" |
+| `license` 分布 | apache-2.0 7,616 / **无 3,784** / **cc-by-nc-4.0 1,327** | 快照 21% 无许可、7.5% 禁商用，UI 必须把这个字段显示出来 |
+| 压缩后体积 | gzip-9 **850,099 B（5.3%）** / lzma-9 607,988 B（3.8%） | "内置目录快照"完全可行 |
+
+顺带一条实现参照：llmfit 是把这 15 MiB **以 `include_str!` 未压缩嵌进二进制的**
+（`llmfit-core/src/models.rs:1719`），靠发布归档压缩 —— win msvc 包只有 6,222,681 B
+（见 `pins/toolbelt.json`），比 JSON 本身小，就是这个办法的证据。
+
+**由此定下的目录结构（写进 ADR）**：目录分两层，不许混。
+**描述层**用 llmfit 快照，按 commit + sha256 钉住、联网只刷新；
+**下载/校验层**自建 `repo + 文件名 + sha256 + 多候选源`，因为上游那层没有文件名也没有哈希 ——
+这正是 `pins/models.json` 的四条已经做的事。字幕/OCR/生图三条能力的目录**只能自建**
+（llmfit 对它们是 ASR 5 条 / OCR 0 / 生图 0），而这三条我们已经各自实测到文件级：
+OCR 93 条 URL 全带上游 digest、whisper 权重与样本已钉、SD1.5 Q4_0 已钉。
 
 ## 还没证的
 

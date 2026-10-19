@@ -25,6 +25,8 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   把上面那个推断换成条目级证据；带一正一负对照，见 ADR。
 - `tools/yaml_gate.py`：解析两条 workflow，核对 needs 链、step 输出引用、heredoc 闭合，
   以及车道里写死的 target 名确实存在于 manifest（已用假 target 验证它会红）。
+  还会把车道 env 里每条 `*_SHA256` 反查出处（`pins/*.json` 或上游 digest 夹具），
+  查不到、或体积抄错，都算 BAD（已用假哈希与错体积验证它会红）。
 - `tools/catalog_probe.py`：目录"能不能搜"的探针（文件能下 ≠ 能浏览目录，而浏览目录才是这类的招牌交互）。
   三条判据一起成立才算过：泛词有结果、按精确仓库名能搜到它、乱词必须 0 条。
 - `tools/establish_pins.py`：给权重立 pin，两条路子 —— `download`（整包算 sha256 + 第二主机头尾 4 MiB
@@ -48,7 +50,16 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
 
 ## 待定
 
-仓库名（`local-ai-studio` 是占位）、外壳许可（AGPL-3.0-or-later 还是 MIT，所以现在**故意没放 LICENSE**）、
-模型目录来源的细节。可见性已经定了 private，代价就是跑不了 CI —— 解法在上一条里，等你选。
+仓库名（`local-ai-studio` 是占位）与外壳许可（AGPL-3.0-or-later 还是 MIT，所以现在**故意没放 LICENSE**）。
+可见性已经定了 private，代价就是跑不了 CI —— 三条出路都归你选：
+① `gh repo edit lilyco-42/local-ai-studio --visibility public`；
+② Settings→Billing 加付款方式 / 提 Actions 支出上限；
+③ 在 lain42.top 上挂一个 self-hosted runner（仍然算"靠 GitHub Actions 出包"，
+但要在这台跑着线上对局的机器上做 `cargo build` 与 1.5 GB 下载，我不代你决定）。
+
+**已经定了的**：模型目录来源 —— 分两层，描述层用 llmfit 自带的 HF 快照（17,700 条，压缩后 850 KB），
+下载/校验层自建 `repo + 文件名 + sha256 + 多候选源`，因为那张表里一个内容哈希都没有。
+证据与复现见 [docs/model-catalog.md](docs/model-catalog.md)；四条已立住的权重 pin 在
+[pins/models.json](pins/models.json)，工具带 12 条在 [pins/toolbelt.json](pins/toolbelt.json)。
 i18n 已经按实测拆成"识别语言"与"界面语言"两条轴并给出默认包，见
 [docs/i18n.md](docs/i18n.md)。

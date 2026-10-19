@@ -71,9 +71,12 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
 
 ## 验收标准（在当前唯一可用验证手段 = GitHub Actions 下）
 
-1. `ci.yml`：46 个单测绿（含 `test_yaml_gate.py` 给闸门自己的 6 条、`test_toolbelt_pins.py` 给工具带
+1. `ci.yml`：49 个单测绿（含 `test_yaml_gate.py` 给闸门自己的 9 条、`test_toolbelt_pins.py` 给工具带
    钉表的 14 条，其中 7 条是负向对照）、`yaml_gate.py` 0 BAD、
    离线发现器解析出全部必需 target 且每个都带上游 sha256；单测在 `-W error::ResourceWarning` 下跑。
+   闸门还把**车道 env 里写死的每一条 `*_SHA256` 反查出处**（必须在 `pins/models.json` /
+   `pins/toolbelt.json` 或上游 release digest 夹具里），查不到就红、体积抄错也红 ——
+   这条是今天补的：那颗 415 MB 对话权重的哈希一直只写在 yaml 里，从没被任何工具复现过。
 2. `engine-live.yml`：`discover` 用真实 API 出 manifest（每个 target 都带上游 sha256）；`os-inference-proof` 对
    `manifest["inferred"]` 每一个产物解压要求 PE；`ocr-catalog` 93 条模型 URL 0 缺失且每条都有上游 digest；
    `model-catalog` 盯权重目录与"上游给不给哈希"的漂移；

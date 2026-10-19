@@ -93,6 +93,43 @@ class TestGate(unittest.TestCase):
         self.assertEqual(r.returncode, 0, r.stdout[-500:] + r.stderr[-300:])
         self.assertIn("编译了 1 段", r.stdout)
 
+    def test_lane_hashes_are_actually_sourced(self) -> None:
+        """正向对照之二：真实车道的写死哈希确实被寻到源，数量要打印出来才算覆盖。"""
+        out = run_gate(WORKFLOWS).stdout
+        n = int(out.split("哈希 ")[1].split(" 条")[0])
+        self.assertGreaterEqual(n, 5, f"只寻到 {n} 条，说明 env 里的哈希大面积没被覆盖")
+        self.assertIn("models.json:qwen2.5-0.5b-instruct-q2_k.gguf", out)
+
+    def test_lane_hash_without_provenance_is_caught(self) -> None:
+        """车道里一个来路不明的哈希必须红。今天就是靠这件事查出 415 MB 那颗对话权重
+        只写在 yaml 里、从没被任何工具复现过 —— 写下来不等于钉住。"""
+        wf = ("name: t\non:\n  push:\njobs:\n  j:\n    runs-on: ubuntu-latest\n"
+              "    env:\n      MODEL_SHA256: " + "0" * 64 + "\n      MODEL_SIZE: \"1\"\n"
+              "    steps:\n      - name: s\n        run: echo hi\n")
+        with tempfile.TemporaryDirectory() as d:
+            p = os.path.join(d, "ghosthash.yml")
+            with open(p, "w", encoding="utf-8") as fh:
+                fh.write(wf)
+            r = run_gate([p])
+        self.assertEqual(r.returncode, 1, f"来路不明的哈希没被拦：{r.stdout[-400:]}")
+        self.assertIn("没有任何出处", r.stdout)
+
+    def test_lane_size_mismatch_against_pin_is_caught(self) -> None:
+        """哈希对得上但体积抄错也要红 —— pin 正确、旁边的数字漂了是同一类事故。"""
+        import json
+        with open(os.path.join(ROOT, "pins", "models.json"), encoding="utf-8") as fh:
+            rec = json.load(fh)["ggml-tiny.bin"]
+        wf = ("name: t\non:\n  push:\njobs:\n  j:\n    runs-on: ubuntu-latest\n"
+              "    env:\n      MODEL_SHA256: " + rec["sha256"] + "\n      MODEL_SIZE: \"9\"\n"
+              "    steps:\n      - name: s\n        run: echo hi\n")
+        with tempfile.TemporaryDirectory() as d:
+            p = os.path.join(d, "wrongsize.yml")
+            with open(p, "w", encoding="utf-8") as fh:
+                fh.write(wf)
+            r = run_gate([p])
+        self.assertEqual(r.returncode, 1, f"体积不符必须红：{r.stdout[-400:]}")
+        self.assertIn("体积不符", r.stdout)
+
 
 if __name__ == "__main__":
     unittest.main()

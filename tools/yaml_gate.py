@@ -2,6 +2,7 @@
 以及车道里写死的 target 键名确实存在于 manifest。只读文本，不编译不运行任何引擎。
 用法：python tools/yaml_gate.py   （退出码非 0 = 有 BAD）"""
 import importlib.util
+import glob
 import json
 import os
 import re
@@ -24,6 +25,7 @@ rel = {e: json.load(open(os.path.join(HERE, "..", "tests", "fixtures", f"{e}.jso
 keys = set(probe.manifest_of(probe.plan(rel))["targets"])
 bad = []
 py_seen = 0
+lane_pins = []
 
 for f in FILES:
     raw = open(f, encoding="utf-8").read()
@@ -45,6 +47,10 @@ for f in FILES:
                 bad.append(f"{f}:{jn} 输出 {k} 引用了不存在的 step id {m.group(1)}")
         if "steps." in str(job.get("outputs") or "") and "id:" not in raw:
             bad.append(f"{f}:{jn} 用了 steps.* 但没有 step 声明 id")
+        jenv = job.get("env") or {}
+        for k, v in jenv.items():
+            if k.endswith("_SHA256"):
+                lane_pins.append((f, jn, k, str(v).strip(), jenv.get(k[: -len("_SHA256")] + "_SIZE")))
         for i, st in enumerate(job["steps"]):
             body = st.get("run", "")
             if not body:
@@ -71,8 +77,36 @@ for f in FILES:
             if src and ref not in (src[0].get("outputs") or {}):
                 bad.append(f"{f}:{jn} 引用了 needs.outputs.{ref}，上游没导出")
 
+# 车道里写死的哈希必须能在"工具立住的 pin"或"上游 release digest 夹具"里找到出处。
+# 这条是今天查出来的：那颗 415 MB 的对话权重哈希一直写在 yaml 里，但没有任何工具复现过它。
+pin_shas = {}
+for pf in sorted(glob.glob(os.path.join(ROOT, "pins", "*.json"))):
+    with open(pf, encoding="utf-8") as fh:
+        for name, v in json.load(fh).items():
+            if isinstance(v, dict) and v.get("sha256"):
+                pin_shas[v["sha256"]] = (os.path.basename(pf), name, v.get("size"))
+upstream_shas = set()
+for releases in rel.values():
+    for r in (releases if isinstance(releases, list) else []):
+        for a in (r.get("assets") or []):
+            dg = a.get("digest") or ""
+            if dg.startswith("sha256:"):
+                upstream_shas.add(dg.split(":", 1)[1])
+for f, jn, k, val, size in lane_pins:
+    src = pin_shas.get(val)
+    if not src and val not in upstream_shas:
+        bad.append(f"{f}:{jn} {k} 这个哈希没有任何出处（既不在 pins/*.json，也不在夹具的上游 digest 里）")
+        continue
+    if src and size is not None and src[2] is not None and str(src[2]) != str(size).strip('"'):
+        bad.append(f"{f}:{jn} {k} 的 {size} 与 pin {src[0]}:{src[1]} 记的 {src[2]} 体积不符")
+    elif src:
+        print(f"  pin 出处：{jn}.{k} → {src[0]}:{src[1]}")
+    else:
+        print(f"  pin 出处：{jn}.{k} → 上游 release digest（夹具里抓到的那颗）")
+
 print("---- 结论 ----")
-print(f"覆盖：编译了 {py_seen} 段 heredoc PY（0 段就意味着闸门什么都没查）")
+print(f"覆盖：编译了 {py_seen} 段 heredoc PY（0 段就意味着闸门什么都没查）；"
+      f"车道写死的哈希 {len(lane_pins)} 条已寻源")
 for b in bad:
     print("BAD:", b)
 print("BAD 数量 =", len(bad))

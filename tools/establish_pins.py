@@ -35,6 +35,10 @@ TARGETS = [
     # 1.5 GB 的东西不该为了立 pin 就下一遍，所以这条走零下载的路子
     ("生图 SD1.5 Q4_0", "modelscope", "second-state/stable-diffusion-v1-5-GGUF",
      "stable-diffusion-v1-5-pruned-emaonly-Q4_0.gguf", "master"),
+    # 对话车道用的那颗 0.5B 原先只是把哈希写进 yaml，来源没在这里复现过。
+    # 现在它走同一条零下载的路：元数据 Sha256 + CDN 内容寻址 + hf-mirror 总长三方一致才认。
+    ("对话 Qwen2.5-0.5B q2_k", "modelscope", "Qwen/Qwen2.5-0.5B-Instruct-GGUF",
+     "qwen2.5-0.5b-instruct-q2_k.gguf", "master"),
 ]
 
 
@@ -61,7 +65,10 @@ def via_modelscope(display, repo, path, rev):
     ms_sha, ms_size = ent.get("Sha256"), ent.get("Size")
     print(f"  元数据 Sha256 = {ms_sha}  Size = {ms_size:,}  IsLFS = {ent.get('IsLFS')}")
 
-    rc, eff, _ = sh(["curl", "-sIL", "--max-time", "60", "-A", "establish-pins/1.0", "-o", "/dev/null",
+    # 必须用 GET 跟跳转：ModelScope 的 CDN 对 HEAD 不返回这条重定向链，
+    # 用 -sIL 时 url_effective 停在 api 端点上 → 还原不出哈希 → 明明上游给了第二套机制却报"没有"。
+    # 2026-10-19 就是这么把两条零下载的 pin 误判成"少一条独立机制"的。
+    rc, eff, _ = sh(["curl", "-sSL", "--max-time", "60", "-A", "establish-pins/1.0", "-o", "/dev/null",
                      "-w", "%{url_effective}",
                      f"https://www.modelscope.cn/api/v1/models/{repo}/repo?Revision={rev}&FilePath={path}"])
     m = re.search(rb"lfs-objects/([0-9a-f]{2})/([0-9a-f]{2})/([0-9a-f]{56,64})", eff)
@@ -74,8 +81,16 @@ def via_modelscope(display, repo, path, rev):
         print("  ✗ 两条机制给的哈希不一致 → 绝不能挑一个好看的用")
         return None
 
-    rc2, hfs, _ = sh(["curl", "-sS", "--max-time", "60", "-A", "establish-pins/1.0",
-                      f"https://hf-mirror.com/api/models/{repo}/tree/main"])
+    # hf-mirror 只镜像文件端点，/api/... 回 308 跳回 huggingface.co 本体。
+    # 上一版没加 -L → 收到 0 字节 → 误报"HF 侧没拿到总长"，把两条本来能立的 pin 判成不成立。
+    # 加上 -L 之后必须把"真正回答的那台"打出来：对照的另一侧其实是 HF，不是国内镜像。
+    rc2, hfs, err2 = sh(["curl", "-sSL", "--max-time", "60", "-A", "establish-pins/1.0",
+                         "-w", "\n@@EFFECTIVE@@%{url_effective}",
+                         f"https://hf-mirror.com/api/models/{repo}/tree/main"])
+    hf_host = ""
+    if "\n@@EFFECTIVE@@" in hfs.decode("utf-8", "replace"):
+        hfs, _, tail = hfs.partition(b"\n@@EFFECTIVE@@")
+        hf_host = tail.decode("utf-8", "replace").split("//", 1)[-1].split("/", 1)[0]
     hf_size = None
     try:
         for x in json.loads(hfs.decode("utf-8", "replace")):
@@ -83,13 +98,16 @@ def via_modelscope(display, repo, path, rev):
                 hf_size = (x.get("lfs") or {}).get("size")
     except Exception:
         pass
-    print(f"  HF 侧 lfs.size = {hf_size:,}" if hf_size else "  HF 侧没拿到总长（不能只靠单源就立 pin）")
+    if hf_size:
+        print(f"  HF 侧 lfs.size = {hf_size:,}（真正回答的是 {hf_host or '未知主机'}）")
+    else:
+        print(f"  HF 侧没拿到总长（rc={rc2} host={hf_host or '未知'} err={err2[:80]}）→ 不能只靠单源立 pin")
     if hf_size != ms_size:
         print("  ✗ 两个提供方的总长不一致")
         return None
-    print("  ✔ 元数据哈希 == 内容寻址路径，且总长与 HF 一致 → 立 pin（零下载）")
+    print("  ✔ 元数据哈希 == 内容寻址路径，且总长与另一家一致 → 立 pin（零下载）")
     return {"sha256": ms_sha, "size": ms_size, "primary": "ModelScope repo/files 元数据",
-            "cross_checked_against": "同家 CDN lfs-objects 路径 + hf-mirror tree 总长",
+            "cross_checked_against": f"同家 CDN lfs-objects 路径 + {hf_host or 'HF'} tree 总长",
             "provenance": "两个提供方对总长一致；哈希出自 ModelScope 的两条独立机制，"
                           "整包字节未经下载校验 —— 首次真正下载时仍要按此 pin 复核"}
 

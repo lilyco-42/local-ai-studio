@@ -248,18 +248,36 @@ spending limit needs to be increased"*。同账号的 public 仓库当天早些�
 
 二选一，由用户定：把仓库改 public（车道立刻能跑，但仓库名与 README/ADR 公开），
 或在 Settings→Billing 加付款方式 / 提高 Actions 支出上限。
-在此之前，"47 个 target / 46 个单测 / 93 个模型 URL 全部命中 / 47 个 target 都有上游 sha256 /
+在此之前，"47 个 target / 49 个单测 / 93 个模型 URL 全部命中 / 47 个 target 都有上游 sha256 /
 工具带 12 条 pin 其中 8 条有两套机制对照"都只是本机 python 证据。
 （这些数字每次改动都会漂，复核命令是同一条：`python tools/yaml_gate.py &&
 python -W error::ResourceWarning -m unittest discover -s tests -p "test_*.py"`。）
+
+## 已定：模型目录分两层（2026-10-19 补齐证据，原先挂在待定里）
+
+**描述层**直接采用 llmfit 自带的 HF 目录快照（`llmfit-core/data/hf_models.json`，
+17,700 条 / 38 字段 / `min_ram_gb` 等拟合输入 100% 非空 / gzip-9 后 850 KB），
+按 commit + sha256 钉住，联网只刷新；**下载与校验层自建**
+`repo + 文件名 + sha256 + 多候选源`。理由是实测而不是偏好：
+
+- 那张表里**值形如 64 位十六进制的字段有 0 个**（整表遍历，不是子串匹配）→ 给不了校验值；
+- `gguf_sources` 只有 `{repo, provider}`，**没有文件名也没有大小**，且只有 2,297/17,700 条带 sources；
+- `quantization` 88% 是 Q4_K_M → 它是**模型级**索引，不是文件清单，落到"下哪个文件"还得我们自己解；
+- `pipeline_tag` 分布里 **ASR 只有 5 条、OCR 0、生图 0** → 四项能力只有对话能被它覆盖，
+  其余三条我们已经各自量到文件级（OCR 93 条带上游 digest、whisper 权重与样本已钉、SD1.5 已钉）；
+- `_revalidated` 为空占 91% → 同步来的快照不能当"上游已复核"，我们自己下过并校过哈希才算复核过；
+- `license` 有 3,784 条为空、1,327 条是 `cc-by-nc-4.0` → **许可字段必须透到 UI**，
+  不能替用户默认"随便用"。
+
+数字、复现命令与逐条解释见 [../model-catalog.md](../model-catalog.md)。
 
 ## 待定（不阻塞本车道）
 
 - **外壳许可**：AGPL-3.0-or-later 还是 MIT。所以仓库里现在**故意没有 LICENSE 文件**，
   定了再补，先不放一个会改变别人义务的默认值。
 - **仓库名**：`local-ai-studio` 仍是占位（改名一条 `gh repo rename` 就行，不影响已推的车道）。
-- **模型目录来源**：按上面的实测，取**自建清单为权威 + 按 sha256 内容寻址 + 每条挂多个候选源**。
-  对话权重 ModelScope 与 hf-mirror 都拿到过真字节（HF 直连国内不可用）；引擎与 OCR 权重
+- **分发源**（是上面"已定"那节的第三层，不是待定）：对话权重 ModelScope 与 hf-mirror 都拿到过真字节
+  （HF 直连国内不可用）；引擎与 OCR 权重
   GitHub 可用但波动大（同一资产 0.10 / 0.28 MiB/s），自家 R2 三次采样稳定在 0.82–1.01 MiB/s，
   所以引擎也应进 R2。HF 索引只当同步用的上游，不当用户侧下载地址。
   **工具带同理，且这次量到了更差的一端**：2026-10-19 用 `tools/gh_release_reach.sh` 从同一台 CN 服务器
