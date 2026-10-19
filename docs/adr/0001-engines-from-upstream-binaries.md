@@ -96,6 +96,23 @@ DirectML 对这款产品不是锦上添花：目标用户是"普通人已有的�
 3. `auto-download` 默认从 **ModelScope** 拉模型（对中国用户比 Hugging Face 友好），
    但我们的设计仍然是"自己 pin 后从自家镜像下"，所以只把它当兜底，不作为 pin 的来源。
 
+### EP 特性表与两条下载路（v0.10.0 的 Cargo.toml 实测，2026-10-19）
+
+`[features]` 里执行后端是一等公民，全部转发给 ort：`cuda / tensorrt / directml / coreml / webgpu / openvino`；
+依赖写死 `ort = { version = "=2.0.0-rc.13", default-features = false, features = ["std","ndarray","tracing","copy-dylibs"] }`。
+三条后果：
+
+1. **"没有 CUDA 的集显 Windows 本也有非 CPU 路径"这句现在有出处** —— `directml` 和 `webgpu` 都是可开特性。
+   但这只证明**特性存在**，不证明"开了就快"；速度必须上设备矩阵，CI 的 Linux runner 给不出这个结论。
+2. `default = ["download-binaries", "simd"]`，且 `download-binaries = ["ort/download-binaries","ort/tls-native"]`
+   → **构建过程会去下载 ONNX Runtime 二进制**。好消息是取哪一版由 `=2.0.0-rc.13` 这个精确版本决定，
+   所以我们钉 crate 版本 + `Cargo.lock` 就等于把 ORT 一起钉住了；坏消息是这条必须在 CI 里联网，
+   OCR 车道不能假设离线可建。
+3. `auto-download`（**不在** default 里）是运行时从 ModelScope 拉模型进 `$OAR_HOME`/`~/.oar`，
+   而且**自己校 SHA-256**。这与我们的目录规则同源（内容寻址 + 下载后复核），
+   所以 sideload 与自取两类可以并存；但对我们而言 pin 的权威仍然在 `pins/ocr.json` 这一侧，
+   `auto-download` 只当兜底路径，不当哈希来源。
+
 ### OCR 模型的可钉性（实测）
 
 `docs/models.md` 里链接的 **93 个模型 URL，逐个都能在 release 产物里找到，0 缺失**。
