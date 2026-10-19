@@ -123,6 +123,34 @@ ADR 里"模型目录来源"原本挂着不定。今天把 llmfit 自带的 HF �
 （llmfit 对它们是 ASR 5 条 / OCR 0 / 生图 0），而这三条我们已经各自实测到文件级：
 OCR 93 条 URL 全带上游 digest、whisper 权重与样本已钉、SD1.5 Q4_0 已钉。
 
+### 已经按这个结构生成过一次（`tools/catalog_snapshot.py`）
+
+```
+python tools/catalog_snapshot.py --live --check     # 只验上游快照还是钉住的那份
+python tools/catalog_snapshot.py --live             # 重新生成 catalog/*.json
+```
+
+2026-10-19 从钉住的 commit 真跑一遍的结果：
+
+| 输出 | 数字 |
+|---|---|
+| 上游 17,700 条 → 留下 | **14,364 条**（丢掉 3,336 条非 gguf，一条都没静默丢） |
+| `catalog/describe.json` 体积 | **5,808,032 B**，gzip-9 后 **474,976 B（8.2%）** |
+| 留下条目里有可下载仓库的 | **2,290 条（16%）** —— 其余只有描述，落到文件还得现查 |
+| `license` 归一为 `unknown` | **3,404 条**；含 `nc` 子串的 **376 条**（这条是子串启发式，只当统计不当闸门） |
+| `catalog/defaults.json` | **3 条**，字段直接抄 `pins/models.json`，另排除 1 条车道样本（`samples/jfk.wav` 不是给用户装的模型） |
+
+三个设计后果：
+- 内置目录快照的代价量级定了 —— **不到 500 KB 压缩**，比 ADR 原先担心的"要自带一个大目录"小得多，
+  而且只带 16 个字段（上游 38 个字段里的 `head_dim`/`moe_intermediate_size` 等是它自己拟合用的，
+  全搬进来等于把别人的 schema 变更变成我们的破坏性变更）。
+- `describe.json` **不进仓库**（已 gitignore）：它是按 commit+sha256 可复现的派生物，
+  要改就改 `UPSTREAM` 坐标，不把 5.5 MiB bulk 提交进历史。
+- 16% 有可下载仓库这件事说明**描述层不能当下载层用**：剩下 84% 想让用户点一下就下，
+  必须先经文件级解析（HF `tree` + ModelScope `repo/files`，两个端点都已实测过形状）。
+- 车道：`engine-live.yml` 的 `catalog-snapshot` 用 `--live --check` 盯上游漂移；
+  `ci.yml` 用真实切片夹具离线跑同一套规则。
+
 ## 还没证的
 
 - 上面所有"下载耗时"是从我们自己那台出口机的一次换算，不同城市/运营商必然不同，只能当量级。

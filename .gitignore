@@ -9,3 +9,6 @@ target/
 dist/
 node_modules/
 *.tmp
+# 描述层快照是按 commit+sha256 可复现的派生物（5.5 MiB），不进仓库；
+# 要改它就改 tools/catalog_snapshot.py 里的 UPSTREAM 坐标，别提交 bulk。
+catalog/describe.json

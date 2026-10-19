@@ -10,6 +10,7 @@ on:
       - "tools/catalog_probe.py"
       - "tools/model_catalog_probe.py"
       - "tools/toolbelt_pins.py"
+      - "tools/catalog_snapshot.py"
       - "pins/toolbelt.json"
       - ".github/workflows/engine-live.yml"
 
@@ -149,6 +150,21 @@ jobs:
         with:
           name: model-catalog
           path: model-catalog.json
+
+  catalog-snapshot:
+    # 描述层快照是"按 commit + sha256 钉住的上游文件"（llmfit 的 hf_models.json）。
+    # 这条盯的是上游有没有漂：漂了就必须显式重钉，因为那张表 91% 的 `_revalidated` 是空的，
+    # 它自己都不保证复核过 —— 我们更不能拿"它变了"当成"它对了"。
+    # 它不 needs discover：discover 一挂就会被标 skipped，结论看不见。
+    timeout-minutes: 8
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: 取上游快照，校验钉住的哈希
+        run: python3 tools/catalog_snapshot.py --live --check
 
   toolbelt-pins:
     # 工具带（llmfit / llama-swap / gguf-parser）按 ADR-0001 同一条规矩钉死：具体 release + sha256。

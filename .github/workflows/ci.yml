@@ -24,7 +24,8 @@ jobs:
           python - <<'PY'
           import ast,sys
           for f in ("tools/engine_probe.py","tests/test_engine_probe.py",
-                    "tools/toolbelt_pins.py","tests/test_toolbelt_pins.py"):
+                    "tools/toolbelt_pins.py","tests/test_toolbelt_pins.py",
+                    "tools/catalog_snapshot.py","tests/test_catalog_snapshot.py"):
               ast.parse(open(f,encoding="utf-8").read())
           print("AST ok")
           PY
@@ -35,6 +36,8 @@ jobs:
         run: python tools/engine_probe.py --fixtures tests/fixtures --require-gpu --json /tmp/manifest.json
       - name: 离线回放工具带钉表
         run: python tools/toolbelt_pins.py --fixtures tests/fixtures --check pins/toolbelt.json
+      - name: 离线校验目录快照的规则还认得上游形状
+        run: python tools/catalog_snapshot.py --fixtures tests/fixtures --check
       - name: 产物清单落盘
         run: |
           head -c 600 /tmp/manifest.json

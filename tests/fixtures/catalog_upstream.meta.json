@@ -1,0 +1,6 @@
+{
+ "sha256": "d915e1d4f24117be779adb6e4ca4727dbce633fc3a5621bd7bc48e0aa70ba0ac",
+ "size": 42348,
+ "how": "真实上游 llmfit-core/data/hf_models.json @ fbde9aaf8de3abbc7cc0eb3bb7ea4f705227bb7a 的前 60 条切片（不是照文档编的）",
+ "note": "钉死的整文件哈希在 tools/catalog_snapshot.py 的 UPSTREAM 里；这条 meta 只属于切片本身，用于让离线回放能跑同一条哈希比对，不能拿来当上游没变的证据。"
+}

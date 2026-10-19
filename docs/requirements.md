@@ -71,8 +71,9 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
 
 ## 验收标准（在当前唯一可用验证手段 = GitHub Actions 下）
 
-1. `ci.yml`：49 个单测绿（含 `test_yaml_gate.py` 给闸门自己的 9 条、`test_toolbelt_pins.py` 给工具带
-   钉表的 14 条，其中 7 条是负向对照）、`yaml_gate.py` 0 BAD、
+1. `ci.yml`：57 个单测绿（含 `test_yaml_gate.py` 给闸门自己的 9 条、`test_toolbelt_pins.py` 给工具带
+   钉表的 14 条、`test_catalog_snapshot.py` 给目录快照的 8 条，其中负向对照合计 10+ 条）、
+   `yaml_gate.py` 0 BAD、
    离线发现器解析出全部必需 target 且每个都带上游 sha256；单测在 `-W error::ResourceWarning` 下跑。
    闸门还把**车道 env 里写死的每一条 `*_SHA256` 反查出处**（必须在 `pins/models.json` /
    `pins/toolbelt.json` 或上游 release digest 夹具里），查不到就红、体积抄错也红 ——
@@ -81,6 +82,7 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
    `manifest["inferred"]` 每一个产物解压要求 PE；`ocr-catalog` 93 条模型 URL 0 缺失且每条都有上游 digest；
    `model-catalog` 盯权重目录与"上游给不给哈希"的漂移；
    `toolbelt-pins` 盯工具带 12 条 pin 的漂移，并**真下载** llmfit 验 `--json` 旗标与 JSON 结构还在；
+   `catalog-snapshot` 盯内置目录快照钉住的那份上游文件有没有漂（漂了要显式重钉）；
    `headless-inference` 在 CPU runner 上对话真抓到 `tokens per second > 0`；
    `subtitle-proof` 用钉好的引擎+权重+已知答案样本跑出一份**带时间戳且内容对得上**的 SRT。
 3. 目录可达性探针（`catalog_probe.py`）三条判据全过：泛词有结果、正向对照命中精确仓库、负向对照 0 条。
