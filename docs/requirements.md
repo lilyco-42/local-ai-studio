@@ -71,9 +71,9 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
 
 ## 验收标准（在当前唯一可用验证手段 = GitHub Actions 下）
 
-1. `ci.yml`：73 个单测绿（含 `test_yaml_gate.py` 给闸门自己的 11 条、`test_toolbelt_pins.py` 给工具带
+1. `ci.yml`：79 个单测绿（含 `test_yaml_gate.py` 给闸门自己的 11 条、`test_toolbelt_pins.py` 给工具带
    钉表的 14 条、`test_catalog_snapshot.py` 给目录快照的 8 条、`test_establish_verify.py` 给字节复核的 8 条、
-   `test_r2_manifest.py` 给镜像清单的 6 条），
+   `test_r2_manifest.py` 给镜像清单的 6 条、`test_image_proof_block.py` 给生图判据的 6 条），
    `yaml_gate.py` 0 BAD、
    离线发现器解析出全部必需 target 且每个都带上游 sha256；单测在 `-W error::ResourceWarning` 下跑。
    闸门还把**车道 env 里每一条 64 位十六进制的值**反查出处（必须在 `pins/*.json` 或
@@ -92,13 +92,16 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
    字幕（`subtitle-proof` 出带时间戳且内容对得上的 SRT）、文字识别（`ocr-proof`：CI 里 `cargo build`
    出 `oar`，用钉住的 tiny det/rec/dict 认出一张自画合成图里的已知词）、
    生图（`image-proof`：引擎用 discover 实时发现的产物 + 上游 digest 复核，权重钉死
-   `b8944e9f…`/1,566,768,416 B，3 步 256x256 出合法 PNG，并**要求 `-v` 日志里的
-   `Steps: 3` 与 `Size: 256x256` 证明参数真被吃进去**，不是随便跑出一张图）。
+   `b8944e9f…`/1,566,768,416 B，3 步 256x256 出合法 PNG，并**读 PNG 自己的 IHDR 与
+   `tEXt`/`parameters` 块**要求 `Steps: 3`、`Size: WxH` 与实际画布一致 —— 证明参数真被吃进去并写进产物，
+   不是随便跑出一张图。判据读产物而非日志，是 2026-10-19 读上游源码定下的：
+   `get_image_params()` 只 return，参数由 `stbi_write_png` 落成 tEXt，日志里根本没有那两行）。
+   这条判据本身还有 6 条离线回放单测（合成合法/缺元数据/步数错/尺寸不一致/画布不是 256/非 PNG）。
    生图这条刻意分工：引擎不钉（上游每天出 nightly，钉死等于天天红且测的是旧版），
    权重钉死（1.5 GB，一次下载要 45 min 级 timeout）。
    但覆盖度说的是**车道存在**，不是跑过 —— 跑过与否要看 Actions 的真实记录，目前为零。
 5. **车道里的 Python 片段要真编译**：`yaml_gate.py` 现在把两条 workflow 里的每段 `<<'PY'` 抽出来
-   `compile()`（本轮 10 段；`python tools/yaml_gate.py` 自己会打印这个数，别信文档里的静态值），
+   `compile()`（本轮 11 段；`python tools/yaml_gate.py` 自己会打印这个数，别信文档里的静态值），
    并验过它会红 —— 掺一段缩进错的 PY 进去，它按
    `文件:job#步骤 第N段` 报出语法错。这个能力是被我上一次写的车道逼出来的：
    一个多缩进两格的注释就是 IndentationError，而旧闸门只查 heredoc 是否闭合，放它过去了。

@@ -183,7 +183,7 @@ Vulkan，不必退回 CPU 的"几分钟一张"**。所以这条能力的设计�
 
 ## 包内到底有什么（2026-10-19，`zip_peek` 读三个包的中央目录）
 
-外壳怎么调引擎、装机要带哪些文件，这三条结论全部来自条目表，不是来自 README：
+外壳怎么调引擎、装机要带哪些文件，下面五条结论全部来自条目表与钉住 ref 的源码，不是来自 README：
 
 | 包 | 条目 | 关键事实 |
 |---|---|---|
@@ -197,7 +197,7 @@ Vulkan，不必退回 CPU 的"几分钟一张"**。所以这条能力的设计�
 三个包的实算哈希都与上游 `digest` 逐字节相等 → 又添三条"GitHub 的 digest 确实是内容哈希"的证据，
 而不只是那两个早期样本。）
 
-由此定下四条实现约束：
+由此定下五条实现约束：
 
 1. **对话、字幕、生图三项上游都带 server 形态**（`llama-server` / `whisper-server` / `sd-server`）。
    外壳应当**起一个常驻服务**，而不是一次任务起一次进程：400 MB 权重每次重新加载，
@@ -213,6 +213,19 @@ Vulkan，不必退回 CPU 的"几分钟一张"**。所以这条能力的设计�
    混着 8 个测试程序和 `SDL2.dll`，sd 的 linux 包依赖一整套 `.so` 闭包（还带版本号软链名）。
    所以按"整目录收集 + 显式排除 `test-*`"处理，运行时库目录要靠 `$ORIGIN`/`LD_LIBRARY_PATH`；
    而 CI 无头车道里那句 `find -name llama-completions` 找的是**不存在的文件名**，已按实测条目表改掉。
+5. **生图产物自带生成参数**，这是一件白送的能力：上游把 `get_image_params()` 的结果
+   经 `stbi_write_png(..., parameters)` 写成 PNG 的 `tEXt` 块（keyword=`parameters`，明文），
+   内含 `Steps:`、`CFG scale:`、`Seed:`、`Size: WxH`、`Model:`、`Version:` 等
+   （`common.cpp:3239/3269` 拼串，`thirdparty/stb_image_write.h:1210` 落成块；
+   默认开，只有 `--disable-image-metadata` 会关）。
+   所以"用户拿一张图回来想知道是怎么生成的"这种功能不必自己记会话，读图就行；
+   生图车道的判据也据此改成读 IHDR + `tEXt`（并要求两者尺寸一致），
+   而不是像我最初写的那样去 grep `-v` 日志 —— **日志里根本没有这两行**。
+
+旗标面已按**钉住的那个 ref** 重读一遍，不是按 HEAD 记的：whisper `b5454` 的 `examples/cli/cli.cpp`
+里 `-t/--threads`、`-of/--output-file`、`-osrt/--output-srt`、`-l/--language`、`-m`、`-f` 全在；
+sd `master-975-95b3090` 的 `--steps/--width/--height/--sampling-method/--diffusion-model/-v` 全在。
+（同一天 OCR 那条就是因为按 HEAD 读成员表、却钉了 tag，才发现 tag 里根本没有 CLI —— 见 `8b70b91`。）
 
 ## 分发源可达性（2026-10-19 从 CN 服务器 lain42.top 实测：HEAD 之外再做区间 GET，2 MiB 一组、4 MiB 重复三轮）
 
@@ -271,7 +284,7 @@ spending limit needs to be increased"*。同账号的 public 仓库当天早些�
 
 二选一，由用户定：把仓库改 public（车道立刻能跑，但仓库名与 README/ADR 公开），
 或在 Settings→Billing 加付款方式 / 提高 Actions 支出上限。
-在此之前，"47 个 target / 73 个单测 / 93 个模型 URL 全部命中 / 47 个 target 都有上游 sha256 /
+在此之前，"47 个 target / 79 个单测 / 93 个模型 URL 全部命中 / 47 个 target 都有上游 sha256 /
 工具带 12 条 pin 其中 8 条有两套机制对照"都只是本机 python 证据。
 （这些数字每次改动都会漂，复核命令是同一条：`python tools/yaml_gate.py &&
 python -W error::ResourceWarning -m unittest discover -s tests -p "test_*.py"`。）

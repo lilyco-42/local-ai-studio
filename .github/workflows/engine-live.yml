@@ -444,7 +444,11 @@ jobs:
     # 旗标全部在 examples/common/common.cpp 与 examples/cli/main.cpp 的选项表里查到过：
     #   -m/--model、--diffusion-model、--width/--height（默认 512）、--steps（默认 20）、
     #   --cfg-scale、--sampling-method、-o/--output。仍按对话那条路的做法：先看 -h 再决定用哪个。
-    # 强判据：-v 的日志里会印 "Steps: N" 与 "Size: WxH"（common.cpp 的 parameter_string 拼的），
+    # 强判据：产物 PNG 自己得带着参数。上游把参数写进 PNG 的 tEXt 块（keyword="parameters"），
+    # 不是打到日志里 —— 2026-10-19 读源码确认：common.cpp:3239/3269 拼 "Steps: N" 与 "Size: WxH"，
+    # 但 get_image_params() 只是 return，媒体写出走 media_io.cpp 的 stbi_write_png(..., parameters)，
+    # thirdparty/stb_image_write.h:1210 才把它落成 tEXt。所以这里读 IHDR + tEXt，
+    # 并要求元数据里的尺寸与 IHDR 实际画布一致 —— 比看日志强：它同时证明参数被吃进去并被写进产物。
     # 所以能证明"我们传的参数真被用上了"，而不是"随便跑出一张图"。
     needs: discover
     timeout-minutes: 45
@@ -493,21 +497,50 @@ jobs:
             || { echo "sd-cli 非零退出："; tail -30 gen.log; exit 1; }
           ls -l out.png || { echo "没产出 out.png"; tail -20 gen.log; exit 1; }
           python3 - <<'PY'
-          import re, sys
-          b = open("out.png", "rb").read()
+          import re, struct, sys
+          with open("out.png", "rb") as fh:
+              b = fh.read()
           print("PNG 头", b[:8].hex(), "字节数", len(b))
           if b[:8] != bytes([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]):
-              sys.exit("产物不是合法 PNG（只查文件签名，不比像素——像素会因指令集/浮点差异而不同）")
+              sys.exit("产物不是合法 PNG（只查文件签名与块结构，不比像素——像素会因指令集/浮点差异而不同）")
           if len(b) < 1024:
               sys.exit("PNG 小得不正常，多半是空图")
-          log = open("gen.log", encoding="utf-8", errors="replace").read()
-          m = re.search(r"Steps:\s*(\d+)", log)
-          s = re.search(r"Size:\s*(\d+)x(\d+)", log)
-          print("日志里的 Steps =", m.group(1) if m else None, " Size =", s.group(0) if s else None)
+          if b[12:16] != b"IHDR":
+              sys.exit("PNG 第一个块不是 IHDR")
+          w, h = struct.unpack(">II", b[16:24])
+          print("IHDR 声明画布 =", w, "x", h)
+          # 参数**不在日志里**：上游 examples/common/media_io.cpp 把 get_image_params() 的结果
+          # 交给 stbi_write_png(..., parameters)，而 thirdparty/stb_image_write.h 把它写成
+          # tEXt 块、关键字 "parameters"。所以这条判据读的是产物本身，不是 stdout。
+          pos, chunks, texts = 8, [], []
+          while pos + 8 <= len(b):
+              ln = struct.unpack(">I", b[pos:pos + 4])[0]
+              typ = b[pos + 4:pos + 8].decode("latin-1")
+              body = b[pos + 8:pos + 8 + ln]
+              chunks.append(typ)
+              if typ == "tEXt" and b"\x00" in body:
+                  kw, _, val = body.partition(b"\x00")
+                  texts.append((kw.decode("latin-1"), val.decode("utf-8", "replace")))
+              pos += 12 + ln
+          print("块序列 =", chunks)
+          params = dict(texts).get("parameters")
+          if not params:
+              print("关键字 =", [k for k, _ in texts] or "没有 tEXt")
+              with open("gen.log", encoding="utf-8", errors="replace") as fh:
+                  print("gen.log 尾部：", fh.read()[-400:])
+              sys.exit('产物里没有 tEXt/parameters —— 元数据没嵌进去（sd-cli 默认嵌，只被 '
+                       '--disable-image-metadata 关掉，车道没给那个旗标）')
+          m = re.search(r"Steps:\s*(\d+)", params)
+          s = re.search(r"Size:\s*(\d+)x(\d+)", params)
+          print("parameters 里的 Steps =", m.group(1) if m else None,
+                " Size =", s.group(0) if s else None)
           if not m or int(m.group(1)) != 3:
-              sys.exit("日志没体现 --steps 3：参数可能压根没吃进去")
-          if not s or (s.group(1), s.group(2)) != ("256", "256"):
-              sys.exit("日志没体现 256x256：--width/--height 没生效")
+              sys.exit("产物元数据没体现 --steps 3：参数可能压根没吃进去")
+          if not s or (int(s.group(1)), int(s.group(2))) != (w, h):
+              sys.exit(f"元数据写的尺寸与 IHDR 的 {w}x{h} 不一致：{(s.groups() if s else None)}")
+          if (w, h) != (256, 256):
+              sys.exit(f"画布是 {w}x{h}，不是请求的 256x256")
+          print("元数据片段 =", params[:220].replace("\n", " | "))
           PY
           echo "::notice::生图车道通过：引擎 ${{ needs.discover.outputs.sd_tag }} + 钉住的 Q4_0 权重，3 步 256x256 出合法 PNG"
 
