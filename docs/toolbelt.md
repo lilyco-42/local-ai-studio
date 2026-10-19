@@ -67,9 +67,12 @@ ADR-0001 只解决了"引擎从哪来"。但把普通人电脑用起来还差三
 - **CI 没有"小而快"的扩散模型可用**（本轮实测 hf-mirror 的 `tree` 大小）：
   `Green-Sky/SD-Turbo-GGUF` 最小档 `sd_turbo-f16-q8_0.gguf` 是 **1,930.0 MiB**，
   比 `second-state/stable-diffusion-v1-5-GGUF` 的 `Q4_0` **1,494.2 MiB** 还大。
-  也就是说想给生图做冒烟，1.5 GB 下载省不掉；而且这些权重在 HF 上（无 digest），
-  pin 只能靠首次运行时算并回填 —— 在那之前这条车道没有可信判据，**先不写**，
-  别拿"能跑起来"当"验过了"。
+  也就是说想给生图做冒烟，1.5 GB 下载省不掉。
+  （2026-10-19 更正：原先写"HF 无 digest → pin 只能首算回填，所以这条车道先不写"，
+  前半句仍成立，但 **ModelScope 的 `repo/files` 元数据每个文件带 `Sha256`**，
+  与它 CDN 内容寻址路径、HF 的 `lfs.size` 两条机制互相对得上 → 一个字节不下就能立钉
+  （`tools/establish_pins.py` 的 `modelscope` 路线）。生图车道已经写了：
+  权重钉 `b8944e9f…2261f` / **1,566,768,416 B**，见 `engine-live.yml` 的 `image-proof`。）
 - `sd-cli` 的参数以源码为准实测过：`-m/--model`、`-p`、`-o/--output`（main.cpp 的选项表里就是
   `{"-o", "--output"`)，长参数另有 `--diffusion-model`、`--vae`、`--clip_l`、`--t5xxl`、
   `--cfg-scale`、`--sampling-method`、`--steps`、`-M convert`、`--type`、`-v`
@@ -77,8 +80,32 @@ ADR-0001 只解决了"引擎从哪来"。但把普通人电脑用起来还差三
   它同时有 `-h` 打 usage，所以车道可以照对话那条路的办法：**先抓 help 再决定用哪些旗标**，
   不把我记住的名字当事实。
 
-## 下一步（需要 runner，仍在阻塞）
+## 已钉住：12 条，其中 8 条有两套机制对照（2026-10-19）
 
-把上面这套钉成一条车道：按 release 拉各工具的产物、用上游 `.sha256`/`checksums.txt` 校验、
-再跑一次 `llmfit recommend --json` 确认输出结构没漂。做法和 `engine_probe.py` + `yaml_gate.py` 一样，
-只是它得在 CI 里跑，而 private 仓库现在分不到 runner。
+`pins/toolbelt.json` 是权威落盘物，由 `tools/toolbelt_pins.py` 生成；立钉与复核是同一条命令的两个开关：
+
+```
+python tools/toolbelt_pins.py --live --json pins/toolbelt.json    # 立钉 / 换版本
+python tools/toolbelt_pins.py --live --check pins/toolbelt.json   # 漂移即红（CI 用这条）
+python tools/toolbelt_pins.py --fixtures tests/fixtures           # 离线回放，同一张表
+```
+
+钉住的 release 与哈希来源（下面是 `--live` 的实测输出，不是手填的）：
+
+| 工具 | 钉的 release | 平台数 | 哈希机制 |
+|---|---|---|---|
+| llmfit | v1.1.17 | 4（win msvc x64、mac x64 + arm64、linux gnu x64） | API digest + 每个包的 `.sha256`，**对得上** |
+| llama-swap | v265 | 4（win/linux/darwin amd64 + darwin arm64） | API digest + `checksums.txt`，**对得上** |
+| gguf-parser | v0.26.4 | 4（win/darwin amd64+arm64/linux amd64） | **只有 API digest**，上游没给第二套 |
+
+- sidecar 与 API digest 是两套独立机制，`sha256sum` 格式 `<64hex>␣␣<文件名>`；实测文件名与哈希都对得上。
+  任何一条对不上就进 `bad` 且 rc=1，**不许挑一个好看的用**（改一个字符即红，见 `test_tampered_sidecar_is_red`）。
+- 半张钉表不落盘：`bad` 非空时 `--json` 直接拒绝写文件。`tests/test_toolbelt_pins.py` 13 条里有
+  7 条是负向对照（缺 digest、缺产物、上游改名、sidecar 被改、checksums 缺失），
+  专门防"检查永远绿等于没检查"。
+- `gguf-parser` 那 4 条只有单一机制，强度低于另外 8 条 —— 这句写进 pin 表的 `sidecar: null`，
+  别在交付说明里把它们和"两边都对得上"混成一类。
+- 车道 `engine-live.yml` 的 `toolbelt-pins` 除了逐字段比对，还会**真下载**钉住的 llmfit 跑 `--help`
+  与 `recommend --json`：哈希只证明字节没变，不证明文档里记的旗标还在。
+  退出码不作判据（runner 上一个模型都没有），判据是 stdout 必须能解析成 JSON、help 里必须有 `--json`。
+- 仍未证的是执行：这条车道和其余九条一样，一次都没跑过（private 仓库分不到 runner）。

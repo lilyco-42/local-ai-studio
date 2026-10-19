@@ -1,0 +1,122 @@
+{
+ "gguf-parser/darwin-amd64": {
+  "asset": "gguf-parser-darwin-amd64",
+  "release": "v0.26.4",
+  "repo": "gpustack/gguf-parser-go",
+  "sha256": "ace89d7ef58cc9b86182b5282e088be9482a9e26e5dbba730beafeb570a2aa7a",
+  "sidecar": null,
+  "size": 9461104,
+  "tool": "gguf-parser",
+  "url": "https://github.com/gpustack/gguf-parser-go/releases/download/v0.26.4/gguf-parser-darwin-amd64"
+ },
+ "gguf-parser/darwin-arm64": {
+  "asset": "gguf-parser-darwin-arm64",
+  "release": "v0.26.4",
+  "repo": "gpustack/gguf-parser-go",
+  "sha256": "bb33961acc40466312940290553d9f84fdd1d19f532faedd60e02752e2a082b2",
+  "sidecar": null,
+  "size": 9130434,
+  "tool": "gguf-parser",
+  "url": "https://github.com/gpustack/gguf-parser-go/releases/download/v0.26.4/gguf-parser-darwin-arm64"
+ },
+ "gguf-parser/linux-amd64": {
+  "asset": "gguf-parser-linux-amd64",
+  "release": "v0.26.4",
+  "repo": "gpustack/gguf-parser-go",
+  "sha256": "b33c4488eb073d3a58329a1c4c7041af168241a1bb832eb962051da99689c1ec",
+  "sidecar": null,
+  "size": 9224344,
+  "tool": "gguf-parser",
+  "url": "https://github.com/gpustack/gguf-parser-go/releases/download/v0.26.4/gguf-parser-linux-amd64"
+ },
+ "gguf-parser/windows-amd64": {
+  "asset": "gguf-parser-windows-amd64.exe",
+  "release": "v0.26.4",
+  "repo": "gpustack/gguf-parser-go",
+  "sha256": "8da9ae6b8968d5d2dee4eaf48dbc24ed48bf3de02794c8dbe0b2a9443b12c92c",
+  "sidecar": null,
+  "size": 9592832,
+  "tool": "gguf-parser",
+  "url": "https://github.com/gpustack/gguf-parser-go/releases/download/v0.26.4/gguf-parser-windows-amd64.exe"
+ },
+ "llama-swap/darwin_amd64": {
+  "asset": "llama-swap_265_darwin_amd64.tar.gz",
+  "release": "v265",
+  "repo": "mostlygeek/llama-swap",
+  "sha256": "b7ab78ae48e6d0a9047a927cb0ee016a09a86afe087b1b87d70d21accc6e4ffd",
+  "sidecar": "一致",
+  "size": 23051954,
+  "tool": "llama-swap",
+  "url": "https://github.com/mostlygeek/llama-swap/releases/download/v265/llama-swap_265_darwin_amd64.tar.gz"
+ },
+ "llama-swap/darwin_arm64": {
+  "asset": "llama-swap_265_darwin_arm64.tar.gz",
+  "release": "v265",
+  "repo": "mostlygeek/llama-swap",
+  "sha256": "01d8d543198973dcfa52fd263e5696230ee1a77fb204f48c5d542761a67623b0",
+  "sidecar": "一致",
+  "size": 22043365,
+  "tool": "llama-swap",
+  "url": "https://github.com/mostlygeek/llama-swap/releases/download/v265/llama-swap_265_darwin_arm64.tar.gz"
+ },
+ "llama-swap/linux_amd64": {
+  "asset": "llama-swap_265_linux_amd64.tar.gz",
+  "release": "v265",
+  "repo": "mostlygeek/llama-swap",
+  "sha256": "cb1f9a94be05afa129d3c17868f1dd2ca710b919333c7b868239dc31575dcfa1",
+  "sidecar": "一致",
+  "size": 23187896,
+  "tool": "llama-swap",
+  "url": "https://github.com/mostlygeek/llama-swap/releases/download/v265/llama-swap_265_linux_amd64.tar.gz"
+ },
+ "llama-swap/windows_amd64": {
+  "asset": "llama-swap_265_windows_amd64.zip",
+  "release": "v265",
+  "repo": "mostlygeek/llama-swap",
+  "sha256": "80b61f4e980a11e659d5c8973f8b72f22cc5f68eaa33e28645ff67c16763bcc9",
+  "sidecar": "一致",
+  "size": 23062503,
+  "tool": "llama-swap",
+  "url": "https://github.com/mostlygeek/llama-swap/releases/download/v265/llama-swap_265_windows_amd64.zip"
+ },
+ "llmfit/aarch64-apple-darwin": {
+  "asset": "llmfit-v1.1.17-aarch64-apple-darwin.tar.gz",
+  "release": "v1.1.17",
+  "repo": "AlexsJones/llmfit",
+  "sha256": "294abbb9faa62315acbdb5ee55a2558f327c98df6644922d493d1dde1518a858",
+  "sidecar": "一致",
+  "size": 6579395,
+  "tool": "llmfit",
+  "url": "https://github.com/AlexsJones/llmfit/releases/download/v1.1.17/llmfit-v1.1.17-aarch64-apple-darwin.tar.gz"
+ },
+ "llmfit/x86_64-apple-darwin": {
+  "asset": "llmfit-v1.1.17-x86_64-apple-darwin.tar.gz",
+  "release": "v1.1.17",
+  "repo": "AlexsJones/llmfit",
+  "sha256": "a859d79292e961e9b9ed21b29bbeb787206c036668a7ec833f23c26e5ef7ca45",
+  "sidecar": "一致",
+  "size": 6685409,
+  "tool": "llmfit",
+  "url": "https://github.com/AlexsJones/llmfit/releases/download/v1.1.17/llmfit-v1.1.17-x86_64-apple-darwin.tar.gz"
+ },
+ "llmfit/x86_64-pc-windows-msvc": {
+  "asset": "llmfit-v1.1.17-x86_64-pc-windows-msvc.zip",
+  "release": "v1.1.17",
+  "repo": "AlexsJones/llmfit",
+  "sha256": "661b6ea57d835f681fbabcf3366649ff681d0081267fd3a05db254e67af6073f",
+  "sidecar": "一致",
+  "size": 6222681,
+  "tool": "llmfit",
+  "url": "https://github.com/AlexsJones/llmfit/releases/download/v1.1.17/llmfit-v1.1.17-x86_64-pc-windows-msvc.zip"
+ },
+ "llmfit/x86_64-unknown-linux-gnu": {
+  "asset": "llmfit-v1.1.17-x86_64-unknown-linux-gnu.tar.gz",
+  "release": "v1.1.17",
+  "repo": "AlexsJones/llmfit",
+  "sha256": "76915a48416aa1bfc6c2d481a951e0ae38b690a9d849eb8b9af136c281bcea95",
+  "sidecar": "一致",
+  "size": 7160946,
+  "tool": "llmfit",
+  "url": "https://github.com/AlexsJones/llmfit/releases/download/v1.1.17/llmfit-v1.1.17-x86_64-unknown-linux-gnu.tar.gz"
+ }
+}

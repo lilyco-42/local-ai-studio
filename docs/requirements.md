@@ -71,11 +71,13 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
 
 ## 验收标准（在当前唯一可用验证手段 = GitHub Actions 下）
 
-1. `ci.yml`：32 个单测绿（含 `test_yaml_gate.py` 给闸门自己的 6 条）、`yaml_gate.py` 0 BAD、
+1. `ci.yml`：45 个单测绿（含 `test_yaml_gate.py` 给闸门自己的 6 条、`test_toolbelt_pins.py` 给工具带
+   钉表的 13 条，其中 7 条是负向对照）、`yaml_gate.py` 0 BAD、
    离线发现器解析出全部必需 target 且每个都带上游 sha256；单测在 `-W error::ResourceWarning` 下跑。
 2. `engine-live.yml`：`discover` 用真实 API 出 manifest（每个 target 都带上游 sha256）；`os-inference-proof` 对
    `manifest["inferred"]` 每一个产物解压要求 PE；`ocr-catalog` 93 条模型 URL 0 缺失且每条都有上游 digest；
    `model-catalog` 盯权重目录与"上游给不给哈希"的漂移；
+   `toolbelt-pins` 盯工具带 12 条 pin 的漂移，并**真下载** llmfit 验 `--json` 旗标与 JSON 结构还在；
    `headless-inference` 在 CPU runner 上对话真抓到 `tokens per second > 0`；
    `subtitle-proof` 用钉好的引擎+权重+已知答案样本跑出一份**带时间戳且内容对得上**的 SRT。
 3. 目录可达性探针（`catalog_probe.py`）三条判据全过：泛词有结果、正向对照命中精确仓库、负向对照 0 条。
@@ -89,9 +91,13 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
    权重钉死（1.5 GB，一次下载要 45 min 级 timeout）。
    但覆盖度说的是**车道存在**，不是跑过 —— 跑过与否要看 Actions 的真实记录，目前为零。
 5. **车道里的 Python 片段要真编译**：`yaml_gate.py` 现在把两条 workflow 里的每段 `<<'PY'` 抽出来
-   `compile()`（本轮覆盖 7 段），并验过它会红 —— 掺一段缩进错的 PY 进去，它按
+   `compile()`（本轮 10 段；`python tools/yaml_gate.py` 自己会打印这个数，别信文档里的静态值），
+   并验过它会红 —— 掺一段缩进错的 PY 进去，它按
    `文件:job#步骤 第N段` 报出语法错。这个能力是被我上一次写的车道逼出来的：
    一个多缩进两格的注释就是 IndentationError，而旧闸门只查 heredoc 是否闭合，放它过去了。
+6. **工具带也要钉**：`pins/toolbelt.json` 12 条 pin（llmfit v1.1.17 / llama-swap v265 / gguf-parser v0.26.4），
+   8 条有 sidecar 与 API digest 两套机制互相对照、4 条只有 API digest（`sidecar: null` 如实记）。
+   详见 [docs/toolbelt.md](toolbelt.md) 的"已钉住"一节。
 
 **CI 证明不了的**：GUI 是否真打开、集显/独显上的真实性能与兼容性、DirectML/Vulkan EP 是否真的加速。
 这几项必须留到设备矩阵，交付说明里要写清，不拿 CI 绿当"能用"。

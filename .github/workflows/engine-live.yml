@@ -9,6 +9,8 @@ on:
       - "tools/ocr_catalog_check.py"
       - "tools/catalog_probe.py"
       - "tools/model_catalog_probe.py"
+      - "tools/toolbelt_pins.py"
+      - "pins/toolbelt.json"
       - ".github/workflows/engine-live.yml"
 
 permissions:
@@ -147,6 +149,64 @@ jobs:
         with:
           name: model-catalog
           path: model-catalog.json
+
+  toolbelt-pins:
+    # 工具带（llmfit / llama-swap / gguf-parser）按 ADR-0001 同一条规矩钉死：具体 release + sha256。
+    # 这条答的是"上游有没有漂"：产物改名、少发一个平台、digest 消失、sidecar 与 API digest 对不上，
+    # 全都要在 CI 先红 —— 别等外壳装到一半才发现 404 或校验不上。
+    # 它不 needs discover：discover 一挂就会被标 skipped，结论看不见。
+    # pins/toolbelt.json 由 `python tools/toolbelt_pins.py --live --json pins/toolbelt.json` 立，
+    # 重立之前必须知道：只有 API digest 一套机制的那 4 条（gguf-parser）强度低于另外 8 条。
+    timeout-minutes: 8
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: 实时取上游产物表，与钉表逐字段比对
+        run: python3 tools/toolbelt_pins.py --live --check pins/toolbelt.json
+      - name: 从钉表取 linux x64 的 llmfit
+        id: pick
+        run: |
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          p = json.load(open("pins/toolbelt.json"))["llmfit/x86_64-unknown-linux-gnu"]
+          print("url=" + p["url"])
+          print("sha256=" + p["sha256"])
+          print("size=" + str(p["size"]))
+          PY
+      - name: 按钉下载，再实测文档里那面 --json 旗标还在不在
+        # 钉住哈希只证明"取到的字节没变"，不证明"我们记的用法还成立"。
+        # 所以这里真跑一次：help 里必须还有 --json，且 recommend --json 的 stdout 必须能解析成 JSON。
+        # rc 不作要求 —— runner 上一个模型都没有，"查无结果"不是我们的车道该红的东西。
+        run: |
+          set -euo pipefail
+          curl -sSL --fail --max-time 300 -o llmfit.tar.gz "${{ steps.pick.outputs.url }}"
+          test "$(stat -c %s llmfit.tar.gz)" = "${{ steps.pick.outputs.size }}" \
+            || { echo "体积与钉表不符"; exit 1; }
+          echo "${{ steps.pick.outputs.sha256 }}  llmfit.tar.gz" | sha256sum -c -
+          tar xzf llmfit.tar.gz
+          BIN="$(find . -maxdepth 2 -type f -name llmfit | head -1)"
+          test -n "$BIN" || { echo "解压后 depth 1-2 没找到 llmfit，条目表："; tar tzf llmfit.tar.gz | head -30; exit 1; }
+          "$BIN" --help > help.txt 2>&1 || true
+          grep -q -- "--json" help.txt \
+            || { echo "钉住的这版 help 里没有 --json：docs/toolbelt.md 记的用法已过期"; head -40 help.txt; exit 1; }
+          set +e; "$BIN" recommend --json > rec.json 2> rec.err; rc=$?; set -e
+          echo "::notice::recommend --json 退出码 $rc（runner 上无模型，非 0 不作为判据）"
+          python3 - <<'PY'
+          import json
+          raw = open("rec.json", encoding="utf-8", errors="replace").read()
+          try:
+              d = json.loads(raw)
+          except Exception as e:
+              print("stdout 不是 JSON：", e)
+              print("stdout 前 300：", raw[:300])
+              print("stderr 前 500：", open("rec.err", encoding="utf-8", errors="replace").read()[:500])
+              raise SystemExit(1)
+          keys = list(d)[:8] if isinstance(d, dict) else ["<list>", len(d)]
+          print("recommend --json 顶层类型 =", type(d).__name__, "字节数 =", len(raw), "键 =", keys)
+          PY
 
   subtitle-proof:
     # 四项能力原先只有对话一条真跑过（还没跑成）。这条把字幕这一路补上：

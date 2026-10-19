@@ -27,7 +27,13 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   以及车道里写死的 target 名确实存在于 manifest（已用假 target 验证它会红）。
 - `tools/catalog_probe.py`：目录"能不能搜"的探针（文件能下 ≠ 能浏览目录，而浏览目录才是这类的招牌交互）。
   三条判据一起成立才算过：泛词有结果、按精确仓库名能搜到它、乱词必须 0 条。
-- `.github/workflows/ci.yml`：静态门禁（含 yaml_gate）+ 单测（夹具是 2026-10-18 真实 API 捕获）+ 离线跑发现器。
+- `tools/establish_pins.py`：给权重立 pin，两条路子 —— `download`（整包算 sha256 + 第二主机头尾 4 MiB
+  逐字节对照）与 `modelscope`（一个字节不下：元数据 `Sha256` == CDN 内容寻址路径 == 跨源总长）。
+- `tools/toolbelt_pins.py` + `pins/toolbelt.json`：把工具带（llmfit / llama-swap / gguf-parser）
+  按 ADR-0001 同一条规矩钉成"具体 release + sha256"。12 条 pin 里 8 条有 sidecar 与 API digest
+  两套机制互相对照，4 条只有 API digest（如实记 `sidecar: null`，不和前者混成一类）。
+- `.github/workflows/ci.yml`：静态门禁（含 yaml_gate）+ 单测（夹具是真实 API 捕获）+ 离线跑发现器
+  与离线回放工具带钉表。
 - `.github/workflows/engine-live.yml`：打真实 API 发现产物 → 下载 linux 引擎（不编译）→ 下载 pin 住的
   0.5B GGUF 并校 sha256 → 无头推理，要求真的抓到 `tokens per second > 0`；
   另有 os-inference-proof 逐条解压 `manifest["inferred"]` 里的产物，要求里面有 `.exe/.dll`。

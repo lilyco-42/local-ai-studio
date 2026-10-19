@@ -23,7 +23,8 @@ jobs:
           python tools/yaml_gate.py
           python - <<'PY'
           import ast,sys
-          for f in ("tools/engine_probe.py","tests/test_engine_probe.py"):
+          for f in ("tools/engine_probe.py","tests/test_engine_probe.py",
+                    "tools/toolbelt_pins.py","tests/test_toolbelt_pins.py"):
               ast.parse(open(f,encoding="utf-8").read())
           print("AST ok")
           PY
@@ -32,6 +33,8 @@ jobs:
         run: python -W error::ResourceWarning -m unittest discover -s tests -p "test_*.py" -v
       - name: 离线跑一遍发现器
         run: python tools/engine_probe.py --fixtures tests/fixtures --require-gpu --json /tmp/manifest.json
+      - name: 离线回放工具带钉表
+        run: python tools/toolbelt_pins.py --fixtures tests/fixtures --check pins/toolbelt.json
       - name: 产物清单落盘
         run: |
           head -c 600 /tmp/manifest.json
