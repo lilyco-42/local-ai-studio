@@ -1,0 +1,362 @@
+{
+ "from": "catalog/machine-budget.json",
+ "items": [
+  {
+   "bytes": 9001753376,
+   "candidate_sources": [
+    "modelscope",
+    "hf-mirror.com",
+    "huggingface.co"
+   ],
+   "checked": true,
+   "fastest": "https://www.modelscope.cn/models/ggml-org/Qwen3-14B-GGUF/resolve/master/Qwen3-14B-Q4_K_M.gguf",
+   "file": "Qwen3-14B-Q4_K_M.gguf",
+   "kind": "chat",
+   "matches_pin": true,
+   "metadata_sha256": "5ff1fe7a07aebc8d090682d01b17cf268a1b4680c6477050ce75a600aecb9efb",
+   "metadata_size": 9001753376,
+   "providers": [
+    "huggingface.co",
+    "www.modelscope.cn"
+   ],
+   "repo": "ggml-org/Qwen3-14B-GGUF",
+   "route": "hf_metadata",
+   "sha256": "5ff1fe7a07aebc8d090682d01b17cf268a1b4680c6477050ce75a600aecb9efb",
+   "status": "agree",
+   "tiers": [
+    "16GB"
+   ],
+   "usable_before_download": true
+  },
+  {
+   "bytes": 8175240416,
+   "candidate_sources": [
+    "modelscope",
+    "hf-mirror.com",
+    "huggingface.co"
+   ],
+   "checked": true,
+   "fastest": "https://www.modelscope.cn/models/second-state/FLUX.1-schnell-GGUF/resolve/master/flux1-schnell-Q5_0.gguf",
+   "file": "flux1-schnell-Q5_0.gguf",
+   "kind": "image",
+   "matches_pin": true,
+   "metadata_sha256": "7324362f5366f404fbf662357f321d6335a889e3f2030f1788270323eebd9116",
+   "metadata_size": 8175240416,
+   "providers": [
+    "huggingface.co",
+    "www.modelscope.cn"
+   ],
+   "repo": "second-state/FLUX.1-schnell-GGUF",
+   "route": "hf_metadata",
+   "sha256": "7324362f5366f404fbf662357f321d6335a889e3f2030f1788270323eebd9116",
+   "status": "agree",
+   "tiers": [
+    "16GB"
+   ],
+   "usable_before_download": true
+  },
+  {
+   "bytes": 1605835296,
+   "candidate_sources": [
+    "modelscope",
+    "hf-mirror.com",
+    "huggingface.co"
+   ],
+   "checked": true,
+   "fastest": "https://www.modelscope.cn/models/second-state/FLUX.1-schnell-GGUF/resolve/master/t5xxl-Q2_K.gguf",
+   "file": "t5xxl-Q2_K.gguf",
+   "kind": "image",
+   "matches_pin": true,
+   "metadata_sha256": "4368e93e01946e930490d4ce9e8e406b611fa8872cb0077b7ec57f394f1fcb16",
+   "metadata_size": 1605835296,
+   "providers": [
+    "huggingface.co",
+    "www.modelscope.cn"
+   ],
+   "repo": "second-state/FLUX.1-schnell-GGUF",
+   "route": "hf_metadata",
+   "sha256": "4368e93e01946e930490d4ce9e8e406b611fa8872cb0077b7ec57f394f1fcb16",
+   "status": "agree",
+   "tiers": [
+    "16GB"
+   ],
+   "usable_before_download": true
+  },
+  {
+   "bytes": 167656704,
+   "candidate_sources": [
+    "modelscope",
+    "hf-mirror.com",
+    "huggingface.co"
+   ],
+   "checked": true,
+   "fastest": "https://www.modelscope.cn/models/second-state/FLUX.1-schnell-GGUF/resolve/master/ae-f16.gguf",
+   "file": "ae-f16.gguf",
+   "kind": "image",
+   "matches_pin": true,
+   "metadata_sha256": "1bed7b05318709e46a8cb9accc211168fc7f0b61ab594661860bbfe4d785cc46",
+   "metadata_size": 167656704,
+   "providers": [
+    "huggingface.co",
+    "www.modelscope.cn"
+   ],
+   "repo": "second-state/FLUX.1-schnell-GGUF",
+   "route": "hf_metadata",
+   "sha256": "1bed7b05318709e46a8cb9accc211168fc7f0b61ab594661860bbfe4d785cc46",
+   "status": "agree",
+   "tiers": [
+    "16GB"
+   ],
+   "usable_before_download": true
+  },
+  {
+   "bytes": 130769600,
+   "candidate_sources": [
+    "modelscope",
+    "hf-mirror.com",
+    "huggingface.co"
+   ],
+   "checked": true,
+   "fastest": "https://www.modelscope.cn/models/second-state/FLUX.1-schnell-GGUF/resolve/master/clip_l-Q8_0.gguf",
+   "file": "clip_l-Q8_0.gguf",
+   "kind": "image",
+   "matches_pin": true,
+   "metadata_sha256": "59cbe002c3e75d2b89d38787e81d12fb4e512fd76176884c470737ad87a1d309",
+   "metadata_size": 130769600,
+   "providers": [
+    "huggingface.co",
+    "www.modelscope.cn"
+   ],
+   "repo": "second-state/FLUX.1-schnell-GGUF",
+   "route": "hf_metadata",
+   "sha256": "59cbe002c3e75d2b89d38787e81d12fb4e512fd76176884c470737ad87a1d309",
+   "status": "agree",
+   "tiers": [
+    "16GB"
+   ],
+   "usable_before_download": true
+  },
+  {
+   "bytes": 123297373,
+   "checked": false,
+   "file": "(合计)",
+   "kind": "ocr",
+   "note": "这是把默认档换成全语言时多出来的量，不是叠在默认档上；它不是一个文件，所以进不了首启队列（不等于没验过 —— 逐条在 pins/ocr-languages.json 与 ocr-languages 车道）",
+   "repo": null,
+   "route": "not_a_file",
+   "sha256": null,
+   "tiers": [
+    "16GB",
+    "4GB",
+    "8GB"
+   ]
+  },
+  {
+   "bytes": 4462639,
+   "checked": false,
+   "file": "pp-ocrv6_tiny_rec.onnx",
+   "kind": "ocr",
+   "note": "确认路线不在这条车道（GitHub release 的 asset digest；live 由 ocr-languages 的 --check-pins --live 查）",
+   "repo": null,
+   "route": "github_release_digest",
+   "sha256": "9ef676d6ed3c88256a2d92c640c44f25b0c40947e111b14b8be8f594091563e6",
+   "tiers": [
+    "16GB",
+    "4GB",
+    "8GB"
+   ]
+  },
+  {
+   "bytes": 1780590,
+   "checked": false,
+   "file": "pp-ocrv6_tiny_det.onnx",
+   "kind": "ocr",
+   "note": "确认路线不在这条车道（GitHub release 的 asset digest；live 由 ocr-languages 的 --check-pins --live 查）",
+   "repo": null,
+   "route": "github_release_digest",
+   "sha256": "193bab7a04fca699a6c82e6abb5b81bdb28177f0abd4062552b04908dafb19f8",
+   "tiers": [
+    "16GB",
+    "4GB",
+    "8GB"
+   ]
+  },
+  {
+   "bytes": 27156,
+   "checked": false,
+   "file": "ppocrv6_tiny_dict.txt",
+   "kind": "ocr",
+   "note": "确认路线不在这条车道（GitHub release 的 asset digest；live 由 ocr-languages 的 --check-pins --live 查）",
+   "repo": null,
+   "route": "github_release_digest",
+   "sha256": "c5cbe34ef40c29c4df07ed012bf96569cb69a2d2a01a07027e9f13cb832bd9cd",
+   "tiers": [
+    "16GB",
+    "4GB",
+    "8GB"
+   ]
+  },
+  {
+   "bytes": 3094623691,
+   "candidate_sources": [
+    "modelscope",
+    "hf-mirror.com",
+    "huggingface.co"
+   ],
+   "checked": true,
+   "fastest": "https://www.modelscope.cn/models/ggerganov/whisper.cpp/resolve/master/ggml-large-v1.bin",
+   "file": "ggml-large-v1.bin",
+   "kind": "subtitle",
+   "matches_pin": true,
+   "metadata_sha256": "7d99f41a10525d0206bddadd86760181fa920438b6b33237e3118ff6c83bb53d",
+   "metadata_size": 3094623691,
+   "providers": [
+    "huggingface.co"
+   ],
+   "repo": "ggerganov/whisper.cpp",
+   "route": "hf_metadata",
+   "sha256": "7d99f41a10525d0206bddadd86760181fa920438b6b33237e3118ff6c83bb53d",
+   "status": "single",
+   "tiers": [
+    "16GB",
+    "8GB"
+   ],
+   "usable_before_download": false
+  },
+  {
+   "bytes": 2497281312,
+   "candidate_sources": [
+    "modelscope",
+    "hf-mirror.com",
+    "huggingface.co"
+   ],
+   "checked": true,
+   "fastest": "https://www.modelscope.cn/models/unsloth/Qwen3-4B-GGUF/resolve/master/Qwen3-4B-Q4_K_M.gguf",
+   "file": "Qwen3-4B-Q4_K_M.gguf",
+   "kind": "chat",
+   "matches_pin": true,
+   "metadata_sha256": "f6f851777709861056efcdad3af01da38b31223a3ba26e61a4f8bf3a2195813a",
+   "metadata_size": 2497281312,
+   "providers": [
+    "huggingface.co",
+    "www.modelscope.cn"
+   ],
+   "repo": "unsloth/Qwen3-4B-GGUF",
+   "route": "hf_metadata",
+   "sha256": "f6f851777709861056efcdad3af01da38b31223a3ba26e61a4f8bf3a2195813a",
+   "status": "agree",
+   "tiers": [
+    "4GB"
+   ],
+   "usable_before_download": true
+  },
+  {
+   "bytes": 2132586944,
+   "candidate_sources": [
+    "modelscope",
+    "hf-mirror.com",
+    "huggingface.co"
+   ],
+   "checked": true,
+   "fastest": "https://www.modelscope.cn/models/second-state/stable-diffusion-v1-5-GGUF/resolve/master/stable-diffusion-v1-5-pruned-emaonly-f16.gguf",
+   "file": "stable-diffusion-v1-5-pruned-emaonly-f16.gguf",
+   "kind": "image",
+   "matches_pin": true,
+   "metadata_sha256": "da017009aa86a3f46468857d95833435fe55e4a2856afab76ba7722ef8ee4d8b",
+   "metadata_size": 2132586944,
+   "providers": [
+    "huggingface.co",
+    "www.modelscope.cn"
+   ],
+   "repo": "second-state/stable-diffusion-v1-5-GGUF",
+   "route": "hf_metadata",
+   "sha256": "da017009aa86a3f46468857d95833435fe55e4a2856afab76ba7722ef8ee4d8b",
+   "status": "agree",
+   "tiers": [
+    "4GB"
+   ],
+   "usable_before_download": true
+  },
+  {
+   "bytes": 1533763059,
+   "candidate_sources": [
+    "modelscope",
+    "hf-mirror.com",
+    "huggingface.co"
+   ],
+   "checked": true,
+   "fastest": "https://www.modelscope.cn/models/ggerganov/whisper.cpp/resolve/master/ggml-medium.bin",
+   "file": "ggml-medium.bin",
+   "kind": "subtitle",
+   "matches_pin": true,
+   "metadata_sha256": "6c14d5adee5f86394037b4e4e8b59f1673b6cee10e3cf0b11bbdbee79c156208",
+   "metadata_size": 1533763059,
+   "providers": [
+    "huggingface.co"
+   ],
+   "repo": "ggerganov/whisper.cpp",
+   "route": "hf_metadata",
+   "sha256": "6c14d5adee5f86394037b4e4e8b59f1673b6cee10e3cf0b11bbdbee79c156208",
+   "status": "single",
+   "tiers": [
+    "4GB"
+   ],
+   "usable_before_download": false
+  },
+  {
+   "bytes": 5027784512,
+   "candidate_sources": [
+    "modelscope",
+    "hf-mirror.com",
+    "huggingface.co"
+   ],
+   "checked": true,
+   "fastest": "https://www.modelscope.cn/models/unsloth/Qwen3-8B-GGUF/resolve/master/Qwen3-8B-Q4_K_M.gguf",
+   "file": "Qwen3-8B-Q4_K_M.gguf",
+   "kind": "chat",
+   "matches_pin": true,
+   "metadata_sha256": "120307ba529eb2439d6c430d94104dabd578497bc7bfe7e322b5d9933b449bd4",
+   "metadata_size": 5027784512,
+   "providers": [
+    "huggingface.co",
+    "www.modelscope.cn"
+   ],
+   "repo": "unsloth/Qwen3-8B-GGUF",
+   "route": "hf_metadata",
+   "sha256": "120307ba529eb2439d6c430d94104dabd578497bc7bfe7e322b5d9933b449bd4",
+   "status": "agree",
+   "tiers": [
+    "8GB"
+   ],
+   "usable_before_download": true
+  },
+  {
+   "bytes": 4265059488,
+   "candidate_sources": [
+    "modelscope",
+    "hf-mirror.com",
+    "huggingface.co"
+   ],
+   "checked": true,
+   "fastest": "https://www.modelscope.cn/models/second-state/stable-diffusion-v1-5-GGUF/resolve/master/stable-diffusion-v1-5-pruned-emaonly-f32.gguf",
+   "file": "stable-diffusion-v1-5-pruned-emaonly-f32.gguf",
+   "kind": "image",
+   "matches_pin": true,
+   "metadata_sha256": "52c7ca39d8d48d6f44fa4ff2c44569f3c924d92311108cb38492958350d48ff8",
+   "metadata_size": 4265059488,
+   "providers": [
+    "huggingface.co",
+    "www.modelscope.cn"
+   ],
+   "repo": "second-state/stable-diffusion-v1-5-GGUF",
+   "route": "hf_metadata",
+   "sha256": "52c7ca39d8d48d6f44fa4ff2c44569f3c924d92311108cb38492958350d48ff8",
+   "status": "agree",
+   "tiers": [
+    "8GB"
+   ],
+   "usable_before_download": true
+  }
+ ],
+ "problems": []
+}

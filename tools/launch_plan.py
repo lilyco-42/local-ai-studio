@@ -41,6 +41,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, ".."))
 sys.path.insert(0, HERE)
 import citation_check  # 复用"按 pin 住的 ref 取上游原文"那套（含缓存）  # noqa: E402
+import file_index as fi    # 首启队列由它算：argv 点的每一颗都必须能在队列里找到  # noqa: E402
 
 OUT = os.path.join(ROOT, "pins", "launch-plan.json")
 LLAMA = ("ggml-org/llama.cpp", "b11727")
@@ -48,14 +49,39 @@ WHISPER = ("ggml-org/whisper.cpp", "b5454")
 SD = ("leejet/stable-diffusion.cpp", "95b3090664d019fcf8fa032a44d1d4793ba244b8")
 OCR = ("GreatV/oar-ocr", "84817f58")
 BIND = "127.0.0.1"           # 唯一允许引擎绑的地址（第 10 条：UI 永不直连）
+OS_LABELS = ("win-x64", "linux-x64", "macos-arm64")
+
+# 外壳真正 exec 的那个文件名，只在这张表里写一次：`launch_plan` 的 argv 与
+# `pack_engine` 收集后的检查都从这里取。此前它们是两份，而 pack_engine 写的是
+# "llama-cli 或 llama-server 之一"——一份只带 CLI 的负载能过它的判据，
+# 外壳却按 `llama-server` 起进程：装了、检查说没事、但不能用。
+SERVER_BASE = {"llama": "llama-server", "whisper": "whisper-server",
+               "sd": "sd-server", "oar-ocr": "oar"}
+NO_SERVER = {"whisper"}          # 上游 Apple 侧只有 xcframework（#29），没有可执行文件
+
+
+def binary_names(engine: str) -> list[str]:
+    """这台引擎在各个 OS 上的可执行文件名（win 带 .exe；已知没有的给 None 并跳过）。"""
+    out = []
+    for os_label in OS_LABELS:
+        b = binary_for(engine, os_label)
+        if b:
+            out.append(b)
+    return out
+
+
+def binary_for(engine: str, os_label: str) -> str | None:
+    base = SERVER_BASE[engine]
+    if os_label == "macos-arm64" and engine in NO_SERVER:
+        return None
+    return base + (".exe" if os_label == "win-x64" else "")
 
 # 每项能力的规格。`verify` 里的每条 needle 都必须在钉住的 ref 的那份文件里出现，
 # `absent` 里的则必须**不**出现（"whisper 没有鉴权"也得是可证的，不能是一句印象）。
 SPEC = {
     "对话": {
         "mode": "server", "engine": "llama", "repo": LLAMA,
-        "binary": {"win-x64": "llama-server.exe", "linux-x64": "llama-server",
-                   "macos-arm64": "llama-server"},
+        "binary": {o: binary_for("llama", o) for o in OS_LABELS},
         "bind": ["--host", BIND, "--port", "{port}"],
         "model": ["-m", "{model}"],
         "auth": {"engine_supports_api_key": True,
@@ -72,8 +98,7 @@ SPEC = {
     },
     "字幕": {
         "mode": "server", "engine": "whisper", "repo": WHISPER,
-        "binary": {"win-x64": "whisper-server.exe", "linux-x64": "whisper-server",
-                   "macos-arm64": None},        # 上游 Apple 侧只有 xcframework，没有可执行文件
+        "binary": {o: binary_for("whisper", o) for o in OS_LABELS},
         "bind": ["--host", BIND, "--port", "{port}"],
         "model": ["-m", "{model}"],
         "auth": {"engine_supports_api_key": False, "argv": [],
@@ -91,8 +116,7 @@ SPEC = {
     },
     "生图": {
         "mode": "server", "engine": "sd", "repo": SD,
-        "binary": {"win-x64": "sd-server.exe", "linux-x64": "sd-server",
-                   "macos-arm64": "sd-server"},
+        "binary": {o: binary_for("sd", o) for o in OS_LABELS},
         "bind": ["--listen-ip", BIND, "--listen-port", "{port}"],
         "model": ["-m", "{model}"],
         # 配套件角色 → 上游旗标（`examples/common/common.cpp` 里逐个查到）。这里必须是**唯一的**
@@ -115,7 +139,7 @@ SPEC = {
     },
     "文字识别": {
         "mode": "subprocess", "engine": "oar-ocr", "repo": OCR,
-        "binary": {"win-x64": "oar.exe", "linux-x64": "oar", "macos-arm64": "oar"},
+        "binary": {o: binary_for("oar-ocr", o) for o in OS_LABELS},
         "bind": [], "subcommand": "ocr",
         "model": ["--det", "{det}", "--rec", "{rec}", "--dict", "{dict}"],
         # 上游把这三颗写成 requires_all，并把默认档 --size 与它们 conflicts_with_all：
@@ -196,6 +220,15 @@ def verify_spec(cap: str, spec: dict, cache: str, fill: bool, stats: dict | None
     return bad
 
 
+KIND = {"对话": "chat", "字幕": "subtitle", "生图": "image", "文字识别": "ocr"}
+
+
+def weights_of(cap: str, tier: str, budget: dict) -> list[dict]:
+    """这一档这一能力在预算里算进钱的那几颗权重 —— 按 kind 取，不在这写文件名。"""
+    return [i for i in budget["per_tier"][tier]["items"]
+            if i.get("kind") == KIND[cap] and i.get("queueable", True)]
+
+
 def model_argv(cap: str, tier: str, image: dict, budget: dict) -> tuple[list[str], list[str]]:
     """把"要用哪些文件"从档位表与预算里读出来，而不是在这里手写一份。
 
@@ -206,6 +239,15 @@ def model_argv(cap: str, tier: str, image: dict, budget: dict) -> tuple[list[str
     这样"这一行起的是哪一颗"是可核对的，而不是一个谁都能填的 `{model}`。
     """
     spec = SPEC[cap]
+    if cap in ("对话", "字幕"):
+        items = weights_of(cap, tier, budget)
+        if len(items) != 1:
+            return list(spec["model"]), [
+                f"{tier}/{cap}: 预算里应正好有一颗 kind={KIND[cap]} 的权重，实到 {len(items)} 颗 "
+                "—— argv 点不出文件名，不许退回 {model} 装作已经点名"]
+        if not items[0].get("sha256"):
+            return list(spec["model"]), [f"{tier}/{cap}: {items[0]['file']} 没有钉住的 sha256"]
+        return [spec["model"][0], "{" + items[0]["file"] + "}"], []
     if cap != "生图":
         return list(spec["model"]), []
     flags = spec["model_flags"]
@@ -250,16 +292,34 @@ def cites_of(spec: dict) -> list[str]:
 
 
 def build(os_labels: list[str], tiers: list[str], cache: str = "", fill: bool = False,
-          check_provenance: bool = True, stats: dict | None = None) -> tuple[dict, list[str]]:
-    with open(os.path.join(ROOT, "catalog", "image-tiers.json"), encoding="utf-8") as fh:
-        image = json.load(fh)
-    with open(os.path.join(ROOT, "catalog", "machine-budget.json"), encoding="utf-8") as fh:
-        budget = json.load(fh)
+          check_provenance: bool = True, stats: dict | None = None,
+          tables: dict | None = None) -> tuple[dict, list[str]]:
+    tables = tables or {}        # 测试可以整表换掉输入（负向对照要能造"两张表不一致"）
+    if "image" not in tables:
+        with open(os.path.join(ROOT, "catalog", "image-tiers.json"), encoding="utf-8") as fh:
+            tables["image"] = json.load(fh)
+    if "budget" not in tables:
+        with open(os.path.join(ROOT, "catalog", "machine-budget.json"), encoding="utf-8") as fh:
+            tables["budget"] = json.load(fh)
+    image, budget = tables["image"], tables["budget"]
     # 出处 id 必须真的在出处表里：本轮就写过两个表里根本没有的 id，
     # 而那时"引用了出处"这件事看起来和"核对过出处"一模一样。
     with open(os.path.join(ROOT, "pins", "citations.json"), encoding="utf-8") as fh:
         cited = {r["id"] for r in json.load(fh)}
+    # argv 里写成 `{某个文件名}` 的那几颗，必须就是首启队列会下的那几颗：
+    # 这是"下的和用的是同一批文件"这句话**跨三个产物**的最后一环
+    # （machine-budget 算钱 → file_index 出队列 → 这里起进程）。
+    queue = {it["file"]: it for it in fi.queue_items(budget)}
+    # 队列报告（`file_index.py --queue --json` 的产物，车道里传成 artifact first-run-queue）
+    # 是**另一个生产者**：它带"这颗有没有被两家哈希 live 确认"。只从预算推的话
+    # argv 与队列同源，那条核对就是自证空转 —— 所以有报告就按报告核，没有就如实标 budget-only。
+    report = tables.get("queue_report")
+    pool = ({r["file"]: r for r in report.get("items", [])} if report is not None else queue)
+    where = "首启队列的报告" if report is not None else "首启队列"
     plan, problems = {}, []
+    if report is not None and report.get("problems"):
+        problems.append(f"队列报告自己就有 {len(report['problems'])} 条问题 —— 先修它，"
+                        "再来问「起的是不是下的那一颗」")
     for cap, spec in SPEC.items():
         for cid in cites_of(spec):
             if cid not in cited:
@@ -302,6 +362,35 @@ def build(os_labels: list[str], tiers: list[str], cache: str = "", fill: bool = 
                     problems.append(f"{cap}: 命令行里带了 {f} —— 上游把它与钉住权重的三颗设成互斥，"
                                     "带了就直接被 clap 拒")
             entry["argv_template"] = one
+        named = sorted({tok[1:-1] for row in (entry.get("by_tier") or {}).values()
+                        for tok in row if tok.startswith("{") and "." in tok}
+                       | {tok[1:-1] for tok in (entry.get("argv_template") or [])
+                          if tok.startswith("{") and "." in tok})
+        for name in named:
+            it = pool.get(name)
+            if it is None:
+                problems.append(f"{cap}: 命令行点了 {{{name}}}，可{where}里没有这一颗 "
+                                "—— 起的不是下的那一颗（三张表脱节了）")
+            elif not it.get("sha256"):
+                problems.append(f"{cap}: {{{name}}} 在{where}里但没有钉住的 sha256 "
+                                "—— 下完没东西可校验，不许起进程")
+            elif report is not None and not it.get("matches_pin"):
+                how = (f"没在这条车道做 live 比对（路线 {it.get('route')}）"
+                       if not it.get("checked") else
+                       f"两家哈希没对上（status={it.get('status')}）")
+                problems.append(f"{cap}: 命令行点了 {{{name}}}，可报告对它是 {how} "
+                                "—— 报告没确认的颗不许起进程")
+        entry["named_files"] = named
+        entry["queue_link"] = ("first-run-queue 报告（含 live 确认状态）" if report is not None
+                               else "budget-only：没有 --queue-report，同源核对不算已验")
+        if spec["mode"] == "subprocess":
+            # OCR 不猜"哪个文件是 det / rec / dict"（那是上游 registry 的语义，
+            # 文件名后缀担保不了）：这里只核"这一档队列里确实是三颗"。
+            ocr_items = weights_of("文字识别", "4GB", budget)
+            entry["queue_ocr_files"] = sorted(i["file"] for i in ocr_items)
+            if len(ocr_items) != 3:
+                problems.append(f"文字识别: 默认档应是 det/rec/dict 三颗，队列里是 {len(ocr_items)} 颗 "
+                                "—— argv 的三个旗标没有对应的料")
         plan[cap] = entry
     doc = {"schema": 1, "bind_address": BIND,
            "rule": {"listener": "每一项能力都只绑 127.0.0.1；外壳是唯一监听口，UI 只连外壳",
@@ -328,7 +417,7 @@ def check(committed: dict, fresh: dict) -> list[str]:
             continue
         for key in ("mode", "bind", "engine_auth", "readiness", "request", "by_tier",
                     "argv_template", "subcommand", "omit", "companion_flags", "cites",
-                    "flags_verified", "flags_absent"):
+                    "named_files", "queue_link", "flags_verified", "flags_absent"):
             if key in spec and old.get(key) != spec[key]:
                 bad.append(f"{cap}.{key}: {str(old.get(key))[:60]!r} → {str(spec[key])[:60]!r}")
         if old.get("binaries") != spec["binaries"]:
@@ -418,6 +507,26 @@ def selftest() -> int:
                                         "file": "v.gguf"}]}}})
     if not any("命令行会缺参数或多参数" in x for x in p6):
         bad.append(f"两张表的 needs 数量不一致时没报：{p6}")
+    # argv 点名那一环（对话与字幕）：三种"点不出名"的形状都得报
+    def chat_budget(*items):
+        return {"per_tier": {"8GB": {"items": [dict(i, kind="chat") for i in items]}}}
+    _a_c1, pc1 = model_argv("对话", "8GB", {}, chat_budget({"file": "a.gguf", "sha256": "f" * 64},
+                                                          {"file": "b.gguf", "sha256": "e" * 64}))
+    if not any("实到 2 颗" in x for x in pc1):
+        bad.append(f"这一档有两颗对话权重时没报：{pc1}")
+    _a_c2, pc2 = model_argv("对话", "8GB", {}, chat_budget())
+    if not any("实到 0 颗" in x for x in pc2):
+        bad.append(f"这一档没有对话权重时没报：{pc2}")
+    _a_c3, pc3 = model_argv("对话", "8GB", {}, chat_budget({"file": "a.gguf"}))
+    if not any("没有钉住的 sha256" in x for x in pc3):
+        bad.append(f"权重没钉哈希时没报：{pc3}")
+    argv_c4, pc4 = model_argv("对话", "8GB", {}, chat_budget({"file": "ok.gguf", "sha256": "d" * 64}))
+    if argv_c4 != ["-m", "{ok.gguf}"] or pc4:
+        bad.append(f"点名正常时 argv 不对（正向对照）：{argv_c4} / {pc4}")
+    if binary_for("llama", "win-x64") != "llama-server.exe"             or binary_for("llama", "macos-arm64") != "llama-server":
+        bad.append("win 该带 .exe、mac 不该带 —— 文件名字形变了要当场红")
+    if binary_for("whisper", "macos-arm64") is not None:
+        bad.append("whisper 在 Apple 侧被造出了一个可执行文件（上游只发 xcframework）")
     argv4, p4 = model_argv("生图", "8GB", {}, {
         "per_tier": {"8GB": {"image_companions": {"needs": ["clip_q"]},
                              "items": [{"role": "unet", "file": "x.gguf"},
@@ -444,6 +553,8 @@ def main(argv: list[str]) -> int:
     ap.add_argument("--tiers", default="4GB,8GB,16GB")
     ap.add_argument("--cache", default="")
     ap.add_argument("--fill", action="store_true", help="配合 --cache：缺的原文抓下来存盘")
+    ap.add_argument("--queue-report", default="",
+                    help="file_index.py --queue --json 的产物：有了它才算与已发布队列对过表")
     ap.add_argument("--out", default=OUT)
     a = ap.parse_args(argv)
     if a.selftest:
@@ -452,10 +563,14 @@ def main(argv: list[str]) -> int:
         # 这行不是装饰：车道靠"输出里没有这句"确认自己真的查了上游，
         # 免得哪天有人图快加了 --skip-provenance 而结论还是绿的。
         print("NOTE: --skip-provenance —— 本轮没有向钉住的 ref 核对任何旗标")
+    tables: dict = {}
+    if a.queue_report:
+        with open(a.queue_report, encoding="utf-8") as fh:
+            tables["queue_report"] = json.load(fh)
     stats: dict = {}
     fresh, problems = build([s.strip() for s in a.os.split(",") if s.strip()],
                             [s.strip() for s in a.tiers.split(",") if s.strip()],
-                            a.cache, a.fill, not a.skip_provenance, stats)
+                            a.cache, a.fill, not a.skip_provenance, stats, tables)
     print(f"核对 {stats.get('needles', 0)} 条 needle / {stats.get('absent_claims', 0)} 条缺席声明，"
           f"取自 {stats.get('files', 0)} 份上游原文（缓存 {stats.get('cached', 0)} / 现抓 "
           f"{stats.get('fetched', 0)}）")

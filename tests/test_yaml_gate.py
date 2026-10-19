@@ -143,6 +143,54 @@ class TestGate(unittest.TestCase):
         self.assertEqual(r.returncode, 1, f"被当成数字的哈希没被拦：{r.stdout[-400:]}")
         self.assertIn("别让它被当成数字", r.stdout)
 
+    def test_needs_ref_to_an_unexported_output_is_caught(self) -> None:
+        """引用上游没导出的 outputs：拿到的是空字符串而不是报错，所以只能靠闸门。"""
+        wf = ("name: t\non:\n  push:\njobs:\n"
+              "  up:\n    runs-on: ubuntu-latest\n    steps:\n      - run: echo hi\n"
+              "  down:\n    needs: up\n    runs-on: ubuntu-latest\n    steps:\n"
+              "      - run: echo ${{ needs.up.outputs.llama_url }}\n")
+        with tempfile.TemporaryDirectory() as d:
+            p = os.path.join(d, "needs.yml")
+            with open(p, "w", encoding="utf-8") as fh:
+                fh.write(wf)
+            r = run_gate([p])
+        self.assertEqual(r.returncode, 1, f"引用了没导出的输出却没红：{r.stdout[-400:]}")
+        self.assertIn("up 没导出它", r.stdout)
+
+    def test_needs_ref_without_the_needs_is_caught(self) -> None:
+        """用了 needs.a.outputs.x 却没 needs a：Actions 里那是空字符串，不是错误。"""
+        wf = ("name: t\non:\n  push:\njobs:\n"
+              "  up:\n    runs-on: ubuntu-latest\n    outputs:\n      url: hello\n    steps:\n"
+              "      - run: echo hi\n"
+              "  down:\n    runs-on: ubuntu-latest\n    steps:\n"
+              "      - run: echo ${{ needs.up.outputs.url }}\n")
+        with tempfile.TemporaryDirectory() as d:
+            p = os.path.join(d, "noneeds.yml")
+            with open(p, "w", encoding="utf-8") as fh:
+                fh.write(wf)
+            r = run_gate([p])
+        self.assertEqual(r.returncode, 1, f"没 needs 却引用了它的输出：{r.stdout[-400:]}")
+        self.assertIn("却没 needs up", r.stdout)
+
+    def test_needs_refs_are_blamed_on_the_job_that_wrote_them(self) -> None:
+        """回归：上一版扫的是整份文件，任何带 needs 的 job 都要为别人的引用背锅 ——
+        给 launch-plan 加了一句 needs: file-index（它不导出东西），它凭空背上六条错。"""
+        wf = ("name: t\non:\n  push:\njobs:\n"
+              "  up:\n    runs-on: ubuntu-latest\n    outputs:\n      url: hello\n    steps:\n"
+              "      - run: echo hi\n"
+              "  silent:\n    runs-on: ubuntu-latest\n    steps:\n      - run: echo hi\n"
+              "  user:\n    needs: up\n    runs-on: ubuntu-latest\n    steps:\n"
+              "      - run: echo ${{ needs.up.outputs.url }}\n"
+              "  bystander:\n    needs: silent\n    runs-on: ubuntu-latest\n    steps:\n"
+              "      - run: echo hi\n")
+        with tempfile.TemporaryDirectory() as d:
+            p = os.path.join(d, "blame.yml")
+            with open(p, "w", encoding="utf-8") as fh:
+                fh.write(wf)
+            r = run_gate([p])
+        self.assertEqual(r.returncode, 0, f"别人写的引用算到了 bystander 头上：{r.stdout[-500:]}")
+        self.assertIn("BAD 数量 = 0", r.stdout)
+
     def test_lane_size_mismatch_against_pin_is_caught(self) -> None:
         """哈希对得上但体积抄错也要红 —— pin 正确、旁边的数字漂了是同一类事故。"""
         import json

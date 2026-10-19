@@ -17,7 +17,7 @@
     "16GB/linux-x64": [
      "{bin}",
      "-m",
-     "{model}",
+     "{ggml-large-v1.bin}",
      "--host",
      "127.0.0.1",
      "--port",
@@ -26,7 +26,7 @@
     "16GB/win-x64": [
      "{bin}",
      "-m",
-     "{model}",
+     "{ggml-large-v1.bin}",
      "--host",
      "127.0.0.1",
      "--port",
@@ -35,7 +35,7 @@
     "4GB/linux-x64": [
      "{bin}",
      "-m",
-     "{model}",
+     "{ggml-medium.bin}",
      "--host",
      "127.0.0.1",
      "--port",
@@ -44,7 +44,7 @@
     "4GB/win-x64": [
      "{bin}",
      "-m",
-     "{model}",
+     "{ggml-medium.bin}",
      "--host",
      "127.0.0.1",
      "--port",
@@ -53,7 +53,7 @@
     "8GB/linux-x64": [
      "{bin}",
      "-m",
-     "{model}",
+     "{ggml-large-v1.bin}",
      "--host",
      "127.0.0.1",
      "--port",
@@ -62,7 +62,7 @@
     "8GB/win-x64": [
      "{bin}",
      "-m",
-     "{model}",
+     "{ggml-large-v1.bin}",
      "--host",
      "127.0.0.1",
      "--port",
@@ -106,7 +106,12 @@
    ],
    "macos_note": "上游 Apple 侧只有 xcframework（无 whisper-cli 可执行文件）：要么 CI 自己编，要么这台机器不做字幕（#29）",
    "mode": "server",
+   "named_files": [
+    "ggml-large-v1.bin",
+    "ggml-medium.bin"
+   ],
    "omit": [],
+   "queue_link": "budget-only：没有 --queue-report，同源核对不算已验",
    "readiness": {
     "cite": [
      "ws-health-loading",
@@ -145,7 +150,7 @@
     "16GB/linux-x64": [
      "{bin}",
      "-m",
-     "{model}",
+     "{Qwen3-14B-Q4_K_M.gguf}",
      "--host",
      "127.0.0.1",
      "--port",
@@ -156,7 +161,7 @@
     "16GB/macos-arm64": [
      "{bin}",
      "-m",
-     "{model}",
+     "{Qwen3-14B-Q4_K_M.gguf}",
      "--host",
      "127.0.0.1",
      "--port",
@@ -167,7 +172,7 @@
     "16GB/win-x64": [
      "{bin}",
      "-m",
-     "{model}",
+     "{Qwen3-14B-Q4_K_M.gguf}",
      "--host",
      "127.0.0.1",
      "--port",
@@ -178,7 +183,7 @@
     "4GB/linux-x64": [
      "{bin}",
      "-m",
-     "{model}",
+     "{Qwen3-4B-Q4_K_M.gguf}",
      "--host",
      "127.0.0.1",
      "--port",
@@ -189,7 +194,7 @@
     "4GB/macos-arm64": [
      "{bin}",
      "-m",
-     "{model}",
+     "{Qwen3-4B-Q4_K_M.gguf}",
      "--host",
      "127.0.0.1",
      "--port",
@@ -200,7 +205,7 @@
     "4GB/win-x64": [
      "{bin}",
      "-m",
-     "{model}",
+     "{Qwen3-4B-Q4_K_M.gguf}",
      "--host",
      "127.0.0.1",
      "--port",
@@ -211,7 +216,7 @@
     "8GB/linux-x64": [
      "{bin}",
      "-m",
-     "{model}",
+     "{Qwen3-8B-Q4_K_M.gguf}",
      "--host",
      "127.0.0.1",
      "--port",
@@ -222,7 +227,7 @@
     "8GB/macos-arm64": [
      "{bin}",
      "-m",
-     "{model}",
+     "{Qwen3-8B-Q4_K_M.gguf}",
      "--host",
      "127.0.0.1",
      "--port",
@@ -233,7 +238,7 @@
     "8GB/win-x64": [
      "{bin}",
      "-m",
-     "{model}",
+     "{Qwen3-8B-Q4_K_M.gguf}",
      "--host",
      "127.0.0.1",
      "--port",
@@ -276,7 +281,13 @@
     }
    ],
    "mode": "server",
+   "named_files": [
+    "Qwen3-14B-Q4_K_M.gguf",
+    "Qwen3-4B-Q4_K_M.gguf",
+    "Qwen3-8B-Q4_K_M.gguf"
+   ],
    "omit": [],
+   "queue_link": "budget-only：没有 --queue-report，同源核对不算已验",
    "readiness": {
     "cite": "llama-health-is-public",
     "expect_status": 200,
@@ -383,8 +394,15 @@
     }
    ],
    "mode": "subprocess",
+   "named_files": [],
    "omit": [
     "--size"
+   ],
+   "queue_link": "budget-only：没有 --queue-report，同源核对不算已验",
+   "queue_ocr_files": [
+    "pp-ocrv6_tiny_det.onnx",
+    "pp-ocrv6_tiny_rec.onnx",
+    "ppocrv6_tiny_dict.txt"
    ],
    "readiness": null,
    "repo": "GreatV/oar-ocr@84817f58",
@@ -580,7 +598,16 @@
     }
    ],
    "mode": "server",
+   "named_files": [
+    "ae-f16.gguf",
+    "clip_l-Q8_0.gguf",
+    "flux1-schnell-Q5_0.gguf",
+    "stable-diffusion-v1-5-pruned-emaonly-f16.gguf",
+    "stable-diffusion-v1-5-pruned-emaonly-f32.gguf",
+    "t5xxl-Q2_K.gguf"
+   ],
    "omit": [],
+   "queue_link": "budget-only：没有 --queue-report，同源核对不算已验",
    "readiness": {
     "cite": "sd-listen-after-load",
     "expect_status": 200,

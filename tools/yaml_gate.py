@@ -86,12 +86,21 @@ for f in FILES:
             for t in re.findall(r'"((?:llama|whisper|sd)-[a-z]+-[a-z0-9]+(?:-[a-z0-9]+){1,2})"', body):
                 if t not in keys and not t.endswith("-cudart"):
                     bad.append(f"{f}:{jn}#{i} 引用了 manifest 里没有的 target：{t}")
-        # needs 里引用的 outputs 名也要在对方 job 的 outputs 里
-        for ref in re.findall(r"needs\.[A-Za-z0-9_-]+\.outputs\.([A-Za-z0-9_]+)", raw):
-            src = [d["jobs"][j] for j in d["jobs"] if isinstance(job.get("needs"), (str, list))
-                   and (job["needs"] == j or j in (job["needs"] or []))]
-            if src and ref not in (src[0].get("outputs") or {}):
-                bad.append(f"{f}:{jn} 引用了 needs.outputs.{ref}，上游没导出")
+        # needs 里引用的 outputs 名也要在对方 job 的 outputs 里。
+        # 扫的是**这个 job 自己的文本**：上一版扫整份文件，于是任何带 needs 的 job
+        # 都要为别人的引用背锅 —— 加了一个 `needs: file-index`（它不导出任何东西）
+        # 就让 launch-plan 凭空背上六条"上游没导出"。
+        jobtext = "\n".join([str(job.get("env") or "")] + [str(st) for st in job["steps"]])
+        mine = need if isinstance(need, list) else [need]
+        for m in re.finditer(r"needs\.([A-Za-z0-9_-]+)\.outputs\.([A-Za-z0-9_]+)", jobtext):
+            up, ref = m.group(1), m.group(2)
+            if up not in d["jobs"]:
+                bad.append(f"{f}:{jn} 引用了 needs.{up}.outputs.{ref}，可这个 job 不存在")
+            elif up not in mine:
+                bad.append(f"{f}:{jn} 引用了 needs.{up}.outputs.{ref}，却没 needs {up}"
+                            "（拿不到值时是空字符串，不是报错）")
+            elif ref not in (d["jobs"][up].get("outputs") or {}):
+                bad.append(f"{f}:{jn} 引用了 needs.{up}.outputs.{ref}，{up} 没导出它")
 
 # 车道里写死的哈希必须能在"工具立住的 pin"或"上游 release digest 夹具"里找到出处。
 # 这条是今天查出来的：那颗 415 MB 的对话权重哈希一直写在 yaml 里，但没有任何工具复现过它。

@@ -29,10 +29,18 @@ import sys
 import tarfile
 import zipfile
 
-ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
+HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, HERE)          # 被 import 时 sys.path[0] 不是 tools/
+import launch_plan as lp           # noqa: E402  server 的名字只有一张权威表，见下
+
+ROOT = os.path.abspath(os.path.join(HERE, ".."))
 
 MAIN_BINARY = {"llama": ("llama-server", "llama-cli"), "whisper": ("whisper-cli", "whisper-server"),
                "sd": ("sd-cli", "sd-server")}
+# MAIN_BINARY 只说"这包里有个主二进制"，**不能**当"外壳起得来"用：
+# 外壳按 launch_plan 的表 exec `llama-server` / `whisper-server` / `sd-server`，
+# 一份只带 CLI 的负载会过前者却起不来。所以 server 的名字从那张表取，不在这儿再写一遍。
+SERVER_BINARY = {e: set(lp.binary_names(e)) for e in ("llama", "whisper", "sd")}
 EXCLUDE = re.compile(r"(^|/)test-[^/]*$")
 
 
@@ -119,6 +127,11 @@ def check(engine: str, rows: list[dict]) -> list[str]:
     mains = [b for b in MAIN_BINARY.get(engine, ()) if any(n == b or n.startswith(b + ".") for n in names)]
     if not mains:
         bad.append(f"{engine}: 收集后没有主二进制（期望 {MAIN_BINARY.get(engine)} 之一）—— 装了也不能用")
+    servers = {b for b in SERVER_BINARY.get(engine, set())
+               if b in names or (b + ".dylib") in names}
+    if SERVER_BINARY.get(engine) and not servers:
+        bad.append(f"{engine}: 负载里没有外壳要点名执行的那个 server（期望 "
+                   f"{sorted(SERVER_BINARY[engine])} 之一）—— 只有 CLI 不算，装了也起不来")
     if any(EXCLUDE.search(n) for n in names):
         bad.append(f"{engine}: 清单里还有 test-* 被排除的东西，说明排除与收集两处规则不一致")
     # 不逐包要求"必须有东西被排除"：llama/sd 的包里本来就没有 test-*，
@@ -203,6 +216,7 @@ def selfcheck() -> int:
         tg = os.path.join(d, "y.tar.gz")
         with tarfile.open(tg, "w:gz") as t:
             for name, payload in (("whisper-bin-ubuntu-x64/Release/whisper-cli", b"cli"),
+                                  ("whisper-bin-ubuntu-x64/Release/whisper-server", b"srv"),
                                   ("whisper-bin-ubuntu-x64/Release/test-vad", b"junk"),
                                   ("whisper-bin-ubuntu-x64/Release/libwhisper.so", b"so")):
                 info = tarfile.TarInfo(name)
@@ -211,14 +225,23 @@ def selfcheck() -> int:
         tkeep, tdrop = collect(tg)
         tnames = [dst for _s, dst in tkeep]
         cases.append(("tar.gz 同样能拉平并排除",
-                      tnames == ["whisper-cli", "libwhisper.so"] and tdrop ==
+                      tnames == ["whisper-cli", "whisper-server", "libwhisper.so"] and tdrop ==
                       ["whisper-bin-ubuntu-x64/Release/test-vad"], (tnames, tdrop)))
         tout = os.path.join(d, "tout")
         extract_into(tg, tkeep, tout)
         trows = manifest_of(tout)
         cases.append(("tar.gz 解出来的文件可执行位与清单",
-                      len(trows) == 2 and check("whisper", trows) == [],
+                      len(trows) == 3 and check("whisper", trows) == [],
                       check("whisper", trows)))
+        # 新判据的正反两面：只有 CLI 的负载过去是**绿的**，而外壳起不来。
+        only_cli = [dict(file="whisper-cli", sha256="a" * 64, bytes=3),
+                    dict(file="libwhisper.so", sha256="b" * 64, bytes=2)]
+        oc = check("whisper", only_cli)
+        cases.append(("只有 CLI 的负载必须红（server 名字与 launch_plan 同一张表）",
+                      any("只有 CLI 不算" in x for x in oc), oc))
+        with_server = only_cli + [dict(file="whisper-server", sha256="c" * 64, bytes=4)]
+        cases.append(("补上 server 就该绿（正向对照）",
+                      check("whisper", with_server) == [], check("whisper", with_server)))
         cases.append(("主二进制缺席必须红",
                       any("主二进制" in b for b in check("whisper",
                                                           [dict(file="libwhisper.so", sha256="f" * 64,

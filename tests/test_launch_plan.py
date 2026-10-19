@@ -10,6 +10,8 @@ from __future__ import annotations
 
 import ast
 import contextlib
+import copy
+import hashlib
 import io
 import json
 import os
@@ -51,6 +53,23 @@ def cite_ids():
 
 def budget_stub(**per_tier):
     return {"per_tier": per_tier}
+
+
+QFIX = os.path.join(ROOT, "tests", "fixtures", "first-run-queue.json")
+
+
+def queue_report(mutate=None) -> dict:
+    """另一个生产者的**真实捕获**（`file_index.py --queue … --json`），每次给一份新拷贝。"""
+    with open(QFIX, encoding="utf-8") as fh:
+        rep = copy.deepcopy(json.load(fh))
+    if mutate:
+        mutate(rep)
+    return rep
+
+
+def report_build(mod, rep: dict):
+    return mod.build(OS3, TIERS, "", False, check_provenance=False,
+                     tables={"queue_report": rep})
 
 
 FLUX16 = budget_stub(**{"16GB": {
@@ -372,6 +391,159 @@ class TestSecurityShape(unittest.TestCase):
         self.assertTrue(any("带了就直接被 clap 拒" in p for p in problems), problems)
 
 
+class TestArgvNamesWhatItDownloads(unittest.TestCase):
+    """argv 点名的每一颗权重，都要能在首启队列里找到，且 server 名字与出包判据同一张表。
+
+    这一环是"下的和用的是同一批文件"这句话跨产物的最后一格：
+    machine-budget 算钱 → file_index 出队列 → 这里起进程。
+    """
+
+    def chat_budget(self, *items):
+        return {"per_tier": {"8GB": {"items": [dict(i, kind="chat") for i in items]}}}
+
+    def test_chat_argv_names_the_tier_weight(self) -> None:
+        argv, problems = lp.model_argv("对话", "8GB", {}, self.chat_budget(
+            {"file": "Qwen3-8B-Q4_K_M.gguf", "sha256": "d" * 64}))
+        self.assertEqual(argv, ["-m", "{Qwen3-8B-Q4_K_M.gguf}"])
+        self.assertEqual(problems, [])
+
+    def test_two_candidates_is_a_problem_not_a_pick(self) -> None:
+        """这一档有两颗就说两颗，不自作主张挑一颗 —— 挑了就看不出表已经不一致。"""
+        _argv, problems = lp.model_argv("对话", "8GB", {}, self.chat_budget(
+            {"file": "a.gguf", "sha256": "d" * 64}, {"file": "b.gguf", "sha256": "e" * 64}))
+        self.assertTrue(any("实到 2 颗" in p for p in problems), problems)
+        _a2, p2 = lp.model_argv("对话", "8GB", {}, self.chat_budget())
+        self.assertTrue(any("实到 0 颗" in p for p in p2), p2)
+
+    def test_unpinned_weight_is_refused(self) -> None:
+        _argv, problems = lp.model_argv("对话", "8GB", {}, self.chat_budget({"file": "a.gguf"}))
+        self.assertTrue(any("没有钉住的 sha256" in p for p in problems), problems)
+
+    def test_named_files_all_come_from_the_first_run_queue(self) -> None:
+        import file_index as fi
+        budget = load("catalog/machine-budget.json")
+        queue = {i["file"]: i for i in fi.queue_items(budget)}
+        named = sorted({n for e in artifact()["capabilities"].values()
+                        for n in e.get("named_files") or []})
+        self.assertEqual(len(named), 11, named)
+        for name in named:
+            self.assertIn(name, queue, f"{name} 被 argv 点名，但首启队列里没有它")
+            self.assertTrue(queue[name].get("sha256"), name)
+
+    def test_a_named_file_the_report_drops_is_refused(self) -> None:
+        """跨生产者核对：报告里少了 argv 点名的那一颗，必须当场说"起的不是下的那一颗"。
+
+        负向对照不能再靠改预算来造 —— 预算是 argv 名字的**同一个来源**，改它两边一起动，
+        那条核对就成了自证空转。所以这份夹具是 file_index 自己写出的 JSON。
+        """
+        rep = queue_report()
+        dropped = next(i for i in rep["items"] if i["file"] in
+                       artifact()["capabilities"]["对话"]["named_files"])
+        rep["items"].remove(dropped)
+        _doc, problems = report_build(lp, rep)
+        self.assertTrue(any("起的不是下的那一颗" in p and dropped["file"] in p
+                            for p in problems), problems)
+
+    def test_full_report_is_a_clean_cross_check(self) -> None:
+        """正向对照：报告逐颗确认时不许有任何问题 —— 否则上面那条红是"永远红"。"""
+        _doc, problems = report_build(lp, queue_report())
+        self.assertEqual(problems, [])
+
+    def test_a_mismatch_is_reported_as_a_mismatch(self) -> None:
+        rep = queue_report(lambda r: [it.update(matches_pin=False, checked=True, status="disagree")
+                                      for it in r["items"]
+                                      if it["file"] == artifact()["capabilities"]["字幕"]
+                                      ["named_files"][0]])
+        _doc, problems = report_build(lp, rep)
+        self.assertTrue(any("两家哈希没对上" in p and "disagree" in p for p in problems), problems)
+
+    def test_a_route_that_did_not_live_check_is_not_called_a_mismatch(self) -> None:
+        """"没查"与"查了没对上"是两句话：混在一起就是把没核过的当成核过 —— 反过来也一样。"""
+        f = artifact()["capabilities"]["对话"]["named_files"][0]
+        rep = queue_report(lambda r: [it.update(matches_pin=False, checked=False)
+                                      for it in r["items"] if it["file"] == f])
+        _doc, problems = report_build(lp, rep)
+        hits = [p for p in problems if f in p]
+        self.assertTrue(any("没在这条车道做 live 比对" in p for p in hits), hits)
+        self.assertFalse(any("两家哈希没对上" in p for p in hits), hits)
+
+    def test_a_report_that_itself_has_problems_is_refused(self) -> None:
+        """生产者的结论也是输入：它自己报了问题，就不许拿它的行来谈起进程。"""
+        rep = queue_report(lambda r: r.update(problems=["有一颗两家哈希不一致"]))
+        _doc, problems = report_build(lp, rep)
+        self.assertTrue(any("报告自己就有 1 条问题" in p for p in problems), problems)
+
+    def test_without_a_report_the_link_says_budget_only(self) -> None:
+        """没有报告时不假装核对过：产物里那句必须写着 budget-only。"""
+        doc = artifact()
+        for cap, spec in doc["capabilities"].items():
+            self.assertIn("budget-only", spec["queue_link"], cap)
+        fresh, _p = report_build(lp, queue_report())
+        for cap, spec in fresh["capabilities"].items():
+            self.assertIn("live 确认状态", spec["queue_link"], cap)
+
+    def test_the_report_fixture_is_the_capture_recorded_in_meta(self) -> None:
+        """夹具不是随手编的形状：它必须还是那次捕获的字节。"""
+        with open(QFIX, "rb") as fh:
+            raw = fh.read()
+        with open(QFIX.replace(".json", ".meta.json"), encoding="utf-8") as fh:
+            meta = json.load(fh)
+        self.assertEqual(hashlib.sha256(raw).hexdigest(), meta["sha256"])
+        self.assertEqual(len(raw), meta["size"])
+        rep = json.loads(raw)
+        self.assertEqual(len(rep["items"]), 15)
+        self.assertEqual(sum(1 for i in rep["items"] if i.get("matches_pin")), 11)
+
+    def test_ocr_keeps_generic_flags_but_checks_the_trio(self) -> None:
+        doc = artifact()
+        self.assertEqual(doc["capabilities"]["文字识别"]["queue_ocr_files"],
+                         ["pp-ocrv6_tiny_det.onnx", "pp-ocrv6_tiny_rec.onnx",
+                          "ppocrv6_tiny_dict.txt"])
+        self.assertNotIn("--size", doc["capabilities"]["文字识别"]["argv_template"])
+
+    def test_server_names_are_one_table_two_consumers(self) -> None:
+        """出包判据(pack_engine)与启动计划不许各写一份 server 名字。"""
+        import pack_engine as pe
+        for engine in ("llama", "whisper", "sd"):
+            self.assertEqual(pe.SERVER_BINARY[engine], set(lp.binary_names(engine)), engine)
+
+    def test_cli_only_payload_is_rejected_by_the_packing_lane(self) -> None:
+        """这就是那张表合起来挡掉的事：负载里只有 CLI，检查说没事，外壳却起不来。"""
+        import pack_engine as pe
+        only_cli = [dict(file="whisper-cli", sha256="a" * 64, bytes=3)]
+        bad = pe.check("whisper", only_cli)
+        self.assertTrue(any("只有 CLI 不算" in x for x in bad), bad)
+        with_server = only_cli + [dict(file="whisper-server", sha256="c" * 64, bytes=4)]
+        self.assertEqual(pe.check("whisper", with_server), [])
+
+    def test_binary_names_follow_the_os_rule(self) -> None:
+        self.assertEqual(lp.binary_for("llama", "win-x64"), "llama-server.exe")
+        self.assertEqual(lp.binary_for("llama", "linux-x64"), "llama-server")
+        self.assertIsNone(lp.binary_for("whisper", "macos-arm64"))
+        self.assertEqual(lp.SPEC["对话"]["binary"],
+                         {o: lp.binary_for("llama", o) for o in lp.OS_LABELS})
+
+    def test_the_artifact_names_come_from_the_one_table(self) -> None:
+        """产物里每颗二进制名字都必须等于那张表算出来的值，命令行里则只放 {bin}。
+
+        这张表在导入时就评估完了，所以"运行时改表看 argv 变不变"是错的探针 ——
+        改表要能红，得走源码变异（见 TestSourceMutants 里 sd-cli 那条）。
+        """
+        doc = artifact()
+        for cap, spec in lp.SPEC.items():
+            for os_label in lp.OS_LABELS:
+                self.assertEqual(doc["capabilities"][cap]["binaries"][os_label],
+                                 lp.binary_for(spec["engine"], os_label), f"{cap}/{os_label}")
+        for cap in ("对话", "字幕", "生图"):
+            rows = doc["capabilities"][cap]["by_tier"]
+            self.assertTrue(rows, cap)
+            for key, row in rows.items():
+                self.assertEqual(row[0], "{bin}", key)
+                for os_label, name in doc["capabilities"][cap]["binaries"].items():
+                    if name:
+                        self.assertNotIn(name, row, f"{key} 里手写了 {name}")
+
+
 class TestCli(unittest.TestCase):
     def test_selftest_exits_zero(self) -> None:
         r = subprocess.run([sys.executable, CLI, "--selftest"], capture_output=True, text=True)
@@ -441,10 +613,12 @@ class TestArtifactShape(unittest.TestCase):
 class TestSourceMutants(unittest.TestCase):
     """把工具源码逐条改坏，证明上面那些判据不是装饰。
 
-    每个变异体必须让三条探针里**至少一条**不再"判据在位"：
+    每个变异体必须让五条探针里**至少一条**不再"判据在位"：
       a 离线对照（selftest）仍然全绿；
       b 重算并与已提交那张比漂移，仍然没有问题；
-      c 出处 id 闸门仍然抓得住一个引用了不存在的 id 的规格。
+      c 出处 id 闸门仍然抓得住一个引用了不存在的 id 的规格；
+      d 声明"上游没有"的那面旗标真混进原文时仍然点名它；
+      e 跨生产者核对（首启队列报告）的四种说法仍然各说各的。
     探针只读，不落盘 —— 变异扫描里"顺手覆盖产品表"是这一轮已经犯过两次的错。
     """
 
@@ -468,6 +642,12 @@ class TestSourceMutants(unittest.TestCase):
         ("缺席声明不再扫（whisper 加了鉴权也不知道）", 'for needle in spec.get("absent") or []:',
          'for needle in []:'),
         ("llama 的 --api-key 从规格里掉出去", '"argv": ["--api-key", "{token}"],', '"argv": [],'),
+        ("报告被忽略，仍旧只按预算自证",
+         'pool = ({r["file"]: r for r in report.get("items", [])} if report is not None else queue)',
+         'pool = queue'),
+        ("报告自己报问题时被当成没问题", 'if report is not None and report.get("problems"):',
+         'if False and report.get("problems"):'),
+        ("生图的二进制名字不经过那张表", 'binary_for("sd", o)', '"sd-cli"'),
     ]
 
     def load(self, src: str):
@@ -509,6 +689,7 @@ class TestSourceMutants(unittest.TestCase):
         finally:
             cc_mod.read_cache, cc_mod.fetch = saved_read, saved_fetch
         out["d 缺席声明照扫"] = any("--api-key" in x for x in bad)
+        saved_cite = mod.SPEC["对话"]["request"]["cite"]
         try:
             mod.SPEC["对话"]["request"]["cite"] = "这条出处根本不存在"
             _doc, problems = mod.build(OS3, TIERS, "", False, check_provenance=False)
@@ -516,13 +697,42 @@ class TestSourceMutants(unittest.TestCase):
         except Exception as exc:                       # noqa: BLE001
             out["c 出处 id 闸门"] = False
             out["_c 异常"] = str(exc)[:60]
+        finally:                                       # 不还回去，e 拿到的就是被 c 改脏的规格
+            mod.SPEC["对话"]["request"]["cite"] = saved_cite
+        try:
+            base, p0 = report_build(mod, queue_report())
+            named = {n for e in base["capabilities"].values() for n in e.get("named_files") or []}
+
+            def one(**kv):
+                rep = queue_report()
+                for it in rep["items"]:
+                    if it["file"] in named:
+                        it.update(**kv)
+                        break
+                return rep
+
+            rep_drop = queue_report()
+            rep_drop["items"] = [i for i in rep_drop["items"] if i["file"] not in named][:5]
+            _b1, p1 = report_build(mod, rep_drop)
+            _b2, p2 = report_build(mod, one(matches_pin=False, checked=True, status="disagree"))
+            _b3, p3 = report_build(mod, one(matches_pin=False, checked=False))
+            _b4, p4 = report_build(mod, queue_report(lambda r: r.update(problems=["有一颗没对上"])))
+            out["e 跨生产者核对"] = (
+                len(named) == 11 and p0 == []
+                and any("起的不是下的那一颗" in x for x in p1)
+                and any("两家哈希没对上" in x for x in p2)
+                and any("没在这条车道做 live 比对" in x for x in p3)
+                and any("报告自己就有" in x for x in p4))
+        except Exception as exc:                       # noqa: BLE001
+            out["e 跨生产者核对"] = False
+            out["_e 异常"] = str(exc)[:60]
         return out
 
     def test_baseline_probes_all_hold(self) -> None:
-        """正向对照：不改坏的源码，三条探针必须全部说"判据在位"。"""
+        """正向对照：不改坏的源码，五条探针必须全部说"判据在位"。"""
         self.assertEqual({k: v for k, v in self.probes(lp).items() if not k.startswith("_")},
                          {"a 离线对照": True, "b 重算与漂移": True, "c 出处 id 闸门": True,
-                          "d 缺席声明照扫": True})
+                          "d 缺席声明照扫": True, "e 跨生产者核对": True})
 
     def test_every_mutant_is_caught(self) -> None:
         missed = []
@@ -536,7 +746,7 @@ class TestSourceMutants(unittest.TestCase):
 
     def test_mutant_probe_counts(self) -> None:
         """变异体数量也是账：删掉一条锚点而不说原因，就该在这里红。"""
-        self.assertEqual(len(self.MUTANTS), 10)
+        self.assertEqual(len(self.MUTANTS), 13)
 
 
 if __name__ == "__main__":

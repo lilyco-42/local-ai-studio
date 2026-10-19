@@ -76,9 +76,9 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
 
 ## 验收标准（在当前唯一可用验证手段 = GitHub Actions 下）
 
-1. `ci.yml`：637 个单测绿（重数：`python -W error::ResourceWarning -m unittest discover -s tests
+1. `ci.yml`：656 个单测绿（重数：`python -W error::ResourceWarning -m unittest discover -s tests
    -p "test_*.py"`；按文件数就 `python -m unittest tests.<模块名>`。2026-10-20 实测逐文件：
-   `test_yaml_gate.py` 闸门自己 11、`test_toolbelt_pins.py` 工具带钉表 14、
+   `test_yaml_gate.py` 闸门自己 14、`test_toolbelt_pins.py` 工具带钉表 14、
    `test_catalog_snapshot.py` 目录快照与侧表 16、`test_citation_check.py` 出处闸门 22、
    `test_ocr_build_surface.py` OCR 依赖面 15、`test_file_index.py` 下载层五种状态与首启队列 33、
    `test_payload_plan.py` 装机负载（含 tar 成员表与缺口点名）19、`test_pack_engine.py` 出包逻辑 10、
@@ -87,7 +87,7 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
    车道判据 38 + 6 = 44、`test_recommend_image.py` 生图档位表 31、`test_machine_budget.py` 装机预算 20、
    `test_lane_replay_report.py` 给分段、预跑与 job 数计数 4、`test_engine_probe.py` 产物名解析与 skipped 点名 30、
    `test_recommend_subtitle.py` 字幕四表对账 44、`test_recommend_models.py` 对话档位表 46、
-   `test_launch_plan.py` 启动计划（含 10 条源码变异体全部被抓）46、
+   `test_launch_plan.py` 启动计划（含 13 条源码变异体全部被抓）62、
    `test_install_deps.py` 装依赖清单（含 8 条源码变异体与真捕获夹具的字节校验）36、
    `test_action_pins.py` action 钉法（含 7 条源码变异体与形状对表复核）36），
    `yaml_gate.py` 0 BAD、
@@ -132,10 +132,16 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
    OCR 没有服务形态可测（见"技术前提"第 4 条的例外说明）。
    但覆盖度说的是**车道存在**，不是跑过 —— 跑过与否要看 Actions 的真实记录，目前为零。
 5. **车道里的 Python 片段要真编译**：`yaml_gate.py` 现在把三条 workflow 里的每段 `<<'PY'` 抽出来
-   `compile()`（本轮 14 段；`python tools/yaml_gate.py` 自己会打印这个数，别信文档里的静态值），
+   `compile()`（本轮 17 段；`python tools/yaml_gate.py` 自己会打印这个数，别信文档里的静态值），
    并验过它会红 —— 掺一段缩进错的 PY 进去，它按
    `文件:job#步骤 第N段` 报出语法错。这个能力是被我上一次写的车道逼出来的：
    一个多缩进两格的注释就是 IndentationError，而旧闸门只查 heredoc 是否闭合，放它过去了。
+   闸门**自己**也有一条同类回归：它原本用整份文件的文本来核对 `needs.X.outputs.Y`，
+   于是任何带 `needs:` 的 job 都要为别人写的引用背锅 —— 我给 `launch-plan` 加了一句
+   `needs: file-index`（那个 job 不导出任何东西），它凭空背上 6 条"上游没导出"。
+   现在按 job 自己的文本扫，并且三种情况分开报：引用的 job 不存在、用了 `needs.*.outputs.*`
+   却没 `needs` 它（Actions 里那是空字符串，不报错）、上游确实没导出该输出。
+   `tests/test_yaml_gate.py` 为这三种各钉一条，外加一条"别人写的引用不许算到旁观 job 头上"的正向对照。
 6. **工具带也要钉**：`pins/toolbelt.json` 12 条 pin（llmfit v1.1.17 / llama-swap v265 / gguf-parser v0.26.4），
    8 条有 sidecar 与 API digest 两套机制互相对照、4 条只有 API digest（`sidecar: null` 如实记）。
    详见 [docs/toolbelt.md](toolbelt.md) 的"已钉住"一节。
@@ -448,13 +454,31 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     真算进预算的那几颗配套件读出来，主体文件名则与 `catalog/image-tiers.json` 的默认行**交叉核对** ——
     两张表对不上就报"下的与用的不是同一批文件"，绝不挑一张用。模板里写的是**文件名**
     （`{flux1-schnell-Q5_0.gguf}`）而不是一个谁都能填的 `{model}`，这样"起的正是下的那一颗"才可核对。
+    对话与字幕同理：`-m {Qwen3-14B-Q4_K_M.gguf}`、`-m {ggml-large-v1.bin}` —— 这一档在预算里
+    **必须正好有一颗**该能力的权重，两颗就报"实到 2 颗"、没有就报"实到 0 颗"，绝不替用户挑一颗
+    （挑了，"表已经不一致"这件事就再也看不见）。四项能力一共点名 11 颗。
+
+    点名之后还要与**另一个生产者**对表。`pins/launch-plan.json` 里那 11 颗是从 `machine-budget`
+    算出来的，而首启队列由 `tools/file_index.py --queue` 现算、逐项做两家元数据 live 比对，
+    产物叫 `first-run-queue`。`launch_plan.py --queue-report` 吃的就是这份报告：报告里没有这一颗、
+    `status` 不是 agree、或这一行走的是"这条车道没做 live 比对"的路线（OCR 默认档那三颗来自 GitHub
+    release，它们的复核在 `ocr-languages` 车道）—— 三种都拒绝起进程，而且**"没查"与"查了没对上"
+    分开说**，不混成一句。没有报告时不假装核过：产物里逐项写着
+    `queue_link = budget-only：没有 --queue-report，同源核对不算已验`（argv 与预算队列本就是同一个
+    来源，拿它自证是空转）。这份报告的**真实捕获**钉在 `tests/fixtures/first-run-queue.json`
+    （15 行、11 行 `matches_pin=true`，字节哈希记在同目录 `.meta.json`），所以这条跨产物的核对
+    在还没有 runner 的今天也能离线重算。
+    起进程要点名的 server 名字现在也只有**一张表**：`launch_plan.SERVER_BASE` ⇄ `pack_engine.SERVER_BINARY`，
+    出包那条因此会拒收"负载里只有 `whisper-cli`"的产物（只有 CLI 不算装了 server，装了也起不来）。
 
     判据的承重证明留在仓库里（不是又一次性扫描）：`tests/test_launch_plan.py` 的
-    `TestSourceMutants` 把工具源码改坏 **10 个变异体**，每个都必须让四条探针（离线对照 /
-    重算漂移 / 出处 id 闸门 / 缺席声明照扫）至少一条不再"在位"，并同时跑一条正向对照
-    （不改坏时四条全绿）。它当场抓出两个真 bug：`build()` 把 SPEC 里的 dict **直接塞进产物**
-    （改产物就是改规格，现已 `deepcopy`），以及 `verify_spec` 里 `seen_absent` 初始化成了 list
-    （第一跑就 `TypeError`）。输出还会自报家门：
+    `TestSourceMutants` 把工具源码改坏 **13 个变异体**，每个都必须让五条探针（离线对照 /
+    重算漂移 / 出处 id 闸门 / 缺席声明照扫 / 跨生产者核对）至少一条不再"在位"，并同时跑一条正向对照
+    （不改坏时五条全绿）。它当场抓出三个真 bug：`build()` 把 SPEC 里的 dict **直接塞进产物**
+    （改产物就是改规格，现已 `deepcopy`）、`verify_spec` 里 `seen_absent` 初始化成了 list
+    （第一跑就 `TypeError`），以及探针之间**互相脏了数据** —— 出处 id 那条探针把 `SPEC` 里的 cite
+    改掉后不还回去，紧接着的跨生产者探针拿到就是被污染的规格，报出来的"红"跟变异体毫无关系。
+    现在每条改共享状态的探针都自带 `finally` 还原。输出还会自报家门：
     `核对 28 条 needle / 8 条缺席声明，取自 8 份上游原文（缓存 N / 现抓 M）`，
     加 `--skip-provenance` 时打 NOTE 并报 0 —— 「没查」不能长得像「查过了」。
     这一轮也踩了一次**引用不存在的出处**：SPEC 里原先写 `headless-server-chat-completions`
@@ -463,7 +487,10 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     单测 `TestCiteIdsExist` 同时守正向（每条 id 都在表里）与负向（塞一个假 id 必须报）。
     重数：`python3 tools/launch_plan.py --selftest`、`python -m unittest tests.test_launch_plan -v`、
     `python3 tools/launch_plan.py --check --skip-provenance`（离线那层）、
-    `python3 tools/launch_plan.py --check --fill --cache .cache/refs`（联网按 pin 查）。
+    `python3 tools/launch_plan.py --check --fill --cache .cache/refs`（联网按 pin 查）、
+    `python3 tools/launch_plan.py --check --fill --cache .cache/refs`（联网按 pin 查）、
+    `python3 tools/launch_plan.py --cache .cache/refs --queue-report tests/fixtures/first-run-queue.json --out .cache/launch-plan-with-report.json`
+    （跨生产者那层：写的是 scratch 那份，有 BAD 就不落盘，所以 rc 就是那句话本身）。
     **仍然没有的部分**：这些是按上游源码与文档拼出来的模板，本机一台都没起过 ——
     argv 真能被引擎接受，属于 #25 实现之后在 CI 里跑的那一轮
     （而这条仓库现在还没有 runner，见 #19）。
@@ -496,7 +523,9 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
 
 24. **出包那只手自己也要钉住**（`tools/action_pins.py` → `pins/actions.json`）：
     硬约束是"只能靠 GitHub Actions 出包"，那么 workflow 里每个 `uses:` 就是那条路径本身。
-    这一轮之前它们全是**浮动大版本 tag**（4 个 action、44 处），今天全部改成 40 位 commit SHA，
+    这一轮之前它们全是**浮动大版本 tag**（4 个 action、当时 44 处；现在这张表记 45 处，因为 `launch-plan`
+    又加了一处 `download-artifact` 去吃队列报告 —— 重数：`python3 tools/action_pins.py --check`），
+    今天全部改成 40 位 commit SHA，
     尾注保留它来自哪个 tag；判据三件：形状必须是 SHA、尾注 tag 重新解析后**漂了就红但不自动跟**
     （重钉必须是显式动作）、`action.yml` 的 `runs.using` 与 `inputs` 键集合必须与表一致。
     形状这件事差点被自己骗过去：第一版用自写缩进正则，把 `actions/checkout` 的 21 个输入读成

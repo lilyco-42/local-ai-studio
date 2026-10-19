@@ -27,6 +27,9 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   把上面那个推断换成条目级证据；带一正一负对照，见 ADR。
 - `tools/yaml_gate.py`：解析三条 workflow，核对 needs 链、step 输出引用、heredoc 闭合与**每段 PY 真编译**，
   以及车道里写死的 target 名确实存在于 manifest（已用假 target 验证它会红）。
+  `needs.X.outputs.Y` 也按 **job 自己的文本**查三件事：X 这个 job 存在、本 job 真 `needs` 它、
+  X 真导出 Y —— 引用没导出的输出在 Actions 里拿到的是空字符串而不是报错，而"扫整份文件"那一版
+  会让任何带 `needs:` 的 job 为别人的引用背锅（见 `docs/requirements.md` 验收第 5 条）。
   车道分段与预跑的**计数**由 `tests/test_lane_replay_report.py` 钉住：三条 workflow 共 17 段 `<<'PY'`、
   其中 12 段含判据（认 `check(`/`SystemExit`/`assert`/`sys.exit(`）、本地预跑引用 8 个
   (job, 步骤名) 组合 —— 重数：`python -W error::ResourceWarning -m unittest tests.test_lane_replay_report -v`。
@@ -180,14 +183,21 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   `conflicts_with_all`（带了就被 clap 拒）。**所以那两项的隔离只能靠绑 127.0.0.1，不能指望引擎自带门禁。**
   生图那行的编码器从 `machine-budget` 真算进预算的配套件里读，并与 `image-tiers` 的默认行交叉核对 ——
   两张表对不上就报"下的与用的不是同一批文件"；模板里写的是文件名（`{flux1-schnell-Q5_0.gguf}`），
-  所以"起的正是下的那一颗"可核对。车道 `launch-plan` 前三步离线（判据自测 / 46 条单测 / 与已提交那张
-  比漂移），第四步才联网按 pin 现查 28 条 needle 与 8 条缺席声明；输出会自报"缓存 N / 现抓 M"，
-  `--skip-provenance` 时报 0 ——「没查」不能长得像「查过了」。
-  变异扫描留在仓库里：`tests/test_launch_plan.py::TestSourceMutants` 改坏源码 10 处，
-  四处探针（离线对照 / 重算漂移 / 出处 id 闸门 / 缺席声明照扫）每条至少被抓一次，并带一条正向对照。
+  对话与字幕也各自点名这一档那唯一一颗权重（`-m {Qwen3-14B-Q4_K_M.gguf}`），一共 11 颗。
+  **点名之后还要与另一个生产者对表**：`file-index` 那份首启队列报告（`--queue-report`）里少一颗、
+  `status` 不是 agree、或走的是这条车道没做 live 比对的 `github_release_digest` 路线，都不许起进程 ——
+  "没查"与"查了没对上"是两句话，报告里分开说。没有报告时产物如实标 `budget-only`（argv 与预算队列
+  同源，自证不算已验）。二进制名字与出包判据共用一张表（`pack_engine.SERVER_BINARY` == `launch_plan.binary_names`：
+  负载里只有 `whisper-cli` 也算没装，外壳起不来）。车道 `launch-plan` 前三步离线（判据自测 / 62 条单测 /
+  与已提交那张比漂移），第四步联网按 pin 现查 28 条 needle 与 8 条缺席声明，第五、六步取 `file-index`
+  的产物并按它对表；
+  输出会自报"缓存 N / 现抓 M"，`--skip-provenance` 时报 0 ——「没查」不能长得像「查过了」。
+  变异扫描留在仓库里：`tests/test_launch_plan.py::TestSourceMutants` 改坏源码 13 处，
+  五条探针（离线对照 / 重算漂移 / 出处 id 闸门 / 缺席声明照扫 / 跨生产者核对）每条至少被抓一次，
+  并带一条正向对照。
 - `tools/action_pins.py` + `pins/actions.json`：**出包那只手自己也要钉住**。这一轮之前三个
   workflow 里 4 个 `uses:` 全是浮动大版本 tag（`checkout@v4`、`setup-python@v5`、
-  `upload-artifact@v4`、`download-artifact@v4`，共 **44 处**）—— 仓库对引擎/权重/工具带都定了
+  `upload-artifact@v4`、`download-artifact@v4`，共 **45 处**）—— 仓库对引擎/权重/工具带都定了
   "release + sha256"，唯独真正跑包的东西跟着别人随时会移动的 tag 走。现在全部改成 40 位 commit
   SHA 并把尾注留着记它来自哪个 tag：`checkout 11d5960a…`(v4.4.0)、`setup-python a26af69b…`(v5.6.0)、
   `upload-artifact ea165f8d…`(v4.6.2)、`download-artifact d3f86a10…`(v4.3.0)，都是 MIT、`node20`。

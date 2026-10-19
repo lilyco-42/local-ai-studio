@@ -34,6 +34,8 @@ on:
       # 这一条都得重跑（它给的是"外壳该敲哪一行"，不是给人看的说明）。
       - "tools/launch_plan.py"
       - "pins/launch-plan.json"
+      # 队列报告那份夹具是跨生产者核对的输入：重抓一次捕获也要能触发这条道
+      - "tests/fixtures/first-run-queue*"
       - "tools/install_deps.py"
       - "pins/install-deps.json"
       - "tools/action_pins.py"
@@ -673,8 +675,13 @@ jobs:
     # （args.rs:59 requires_all）、--size 与它们互斥（args.rs:84 conflicts_with_all）。
     # 生图那一行的编码器不是手打的：从 machine-budget 真算进预算的那几颗配套件读出来，
     # 并与 image-tiers 的默认行交叉核对 —— 两张表对不上就红，绝不挑一张用。
-    # 前三步离线（判据自身 + 单测 + 与已提交那张比漂移），第四步才真联网按 pin 查旗标。
+    # argv 里写成 {某个文件名} 的那 11 颗，还要与**另一个生产者**对表：file-index 那份
+    # 首启队列报告（live 比对过两家元数据哈希的）。报告没确认的颗 —— 少一颗、status 不
+    # agree、或走的是这条车道没查的 github_release_digest 路线 —— 都不许起进程。
+    # 前三步离线（判据自身 + 单测 + 与已提交那张比漂移），第四步才真联网按 pin 查旗标，
+    # 第五步吃 file-index 的产物（所以 needs 它；被挂住就是看不见结论）。
     timeout-minutes: 8
+    needs: file-index
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4.4.0
@@ -689,6 +696,18 @@ jobs:
         run: python3 tools/launch_plan.py --check --skip-provenance
       - name: 按钉住的 ref 逐条核对 needle 与缺席声明（上游改了命令行就红）
         run: python3 tools/launch_plan.py --check --fill --cache .cache/refs
+      - name: 取首启队列那份报告（file-index 现算的，不是仓库里的夹具）
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093  # v4.3.0
+        with:
+          name: first-run-queue
+          path: .cache/queue
+      - name: 跨生产者核对：argv 点名的每一颗都得是报告确认下得下来的那一颗
+        # 写的是 scratch 那份：已提交那张标的是 budget-only，吃报告的这次不算漂移。
+        # 有 BAD 就不落盘 —— 这一步的红/绿就是那句"起的正是下的那一颗"。
+        # 旗标仍按钉住的 ref 核对（走上面那步留下的缓存，所以是 现抓 0）。
+        run: python3 tools/launch_plan.py --cache .cache/refs
+             --queue-report .cache/queue/queue-report.json
+             --out .cache/launch-plan-with-report.json
       - name: 核对用过的那几份上游原文留档
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4.6.2
         with:
