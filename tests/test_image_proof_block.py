@@ -7,36 +7,22 @@
 合成的 PNG 是按上游写出格式拼的（签名 + IHDR + tEXt(parameters) + 补长的 IDAT + IEND），
 判据本身不验 CRC，所以这里也不填真 CRC —— 它验的是块结构与字段一致性。
 """
-import contextlib
-import io
-import os
-import re
+
 import struct
-import tempfile
 import unittest
 
-import yaml
+import lane_replay
 
-HERE = os.path.dirname(os.path.abspath(__file__))
-WF = os.path.join(HERE, "..", ".github", "workflows", "engine-live.yml")
-
+JOB, IDX = "image-proof", 2
 
 def lane_block() -> str:
     """取出 image-proof 里那段真正做产物判据的 heredoc PY（与 yaml_gate 同一个抽法）。"""
-    with open(WF, encoding="utf-8") as fh:
-        doc = yaml.safe_load(fh)
-    body = ""
-    for st in doc["jobs"]["image-proof"]["steps"]:
-        if "out.png" in (st.get("run") or ""):
-            body = st["run"]
-    blocks = re.findall(r"<<'PY'[^\n]*\n(.*?)\nPY", body, re.S)
-    assert blocks, "image-proof 里找不到 heredoc PY，判据被删了？"
-    return blocks[0]
-
+    assert "参数生效" in lane_replay.step_name(JOB, IDX) or "生成一张小图" in lane_replay.step_name(JOB, IDX), \
+        f"{JOB}#{IDX} 步骤名变了，判据指向可能错位：{lane_replay.step_name(JOB, IDX)}"
+    return lane_replay.block(JOB, IDX)
 
 def chunk(typ: bytes, data: bytes) -> bytes:
     return struct.pack(">I", len(data)) + typ + data + b"\x00\x00\x00\x00"
-
 
 def make_png(w: int, h: int, params: str | None = None) -> bytes:
     ihdr = struct.pack(">IIBBBBB", w, h, 8, 2, 0, 0, 0)
@@ -46,31 +32,12 @@ def make_png(w: int, h: int, params: str | None = None) -> bytes:
     out += chunk(b"IDAT", b"\x00" * 1400)      # 判据要求 >1024 B，这里只凑体积不画像素
     return out + chunk(b"IEND", b"")
 
-
 def run_block(png: bytes) -> tuple[int, str]:
-    """在工作目录里放下 out.png 与 gen.log，执行判据；返回 (退出码, 输出)。"""
-    with tempfile.TemporaryDirectory() as d:
-        with open(os.path.join(d, "out.png"), "wb") as fh:
-            fh.write(png)
-        with open(os.path.join(d, "gen.log"), "w", encoding="utf-8") as fh:
-            fh.write("some log without any Steps line\n")
-        cwd = os.getcwd()
-        os.chdir(d)
-        buf = io.StringIO()
-        code = 0
-        try:
-            with contextlib.redirect_stdout(buf):
-                exec(compile(lane_block(), "image-proof 判据", "exec"), {})
-        except SystemExit as e:
-            code = e.code if isinstance(e.code, int) else 1
-            buf.write(str(e.code) + "\n" if not isinstance(e.code, int) else "")
-        finally:
-            os.chdir(cwd)
-        return code, buf.getvalue()
-
+    """把合成产物交给车道自己那段判据。"""
+    return lane_replay.run(lane_block(),
+                           {"out.png": png, "gen.log": "some log without any Steps line\n"})
 
 GOOD = "prompt | Steps: 3, CFG scale: 5.000000, Seed: 42, Size: 256x256, Model: sd.gguf"
-
 
 class TestImageProofBlock(unittest.TestCase):
     def test_good_artifact_passes(self) -> None:
@@ -103,7 +70,6 @@ class TestImageProofBlock(unittest.TestCase):
         code, out = run_block(b"GIF89a" + b"\x00" * 1500)
         self.assertEqual(code, 1)
         self.assertIn("合法 PNG", out)
-
 
 if __name__ == "__main__":
     unittest.main()
