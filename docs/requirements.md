@@ -116,6 +116,20 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
    强度级一起带出去，UI 才有东西可显示。第 6 级目前**没有任何一条到达** ——
    whisper/SD 权重实测只有一家发布，这点在交付说明里要照实写。
 
+## 车道判据的出处（全部按**钉住的那个 ref** 核过，不是按 HEAD 记的）
+
+| 车道 | 判据依赖的东西 | 出处 |
+|---|---|---|
+| `headless-inference` | stderr 里出现 `%8.2f tokens per second` | llama.cpp `b11727` 的 `src/llama-context.cpp:4657/4659`（`llama_perf_context_print`，走 `LLAMA_LOG_INFO`）；`-t/-n/-ngl` 在同 ref 的 `common/arg.cpp` |
+| `subtitle-proof` | `-osrt/--output-srt`、`-of/--output-file`、`-l`、`-m`、`-f`、`-t` | whisper.cpp `b5454` 的 `examples/cli/cli.cpp:183/190/197/201/202/159`；不给 `-of` 时输出名从输入名推（同文件 `1136`） |
+| `image-proof` | 参数写在**产物的 tEXt** 里而不是日志里 | sd.cpp `master-975-95b3090`：`examples/common/common.cpp:3239/3269` 拼 `Steps:`/`Size:` → `examples/common/media_io.cpp` 交给 `stbi_write_png(..., parameters)` → `thirdparty/stb_image_write.h:1210` 落成 `tEXt`、关键字 `parameters` |
+| `ocr-proof` | 包名 `oar-ocr-cli`、二进制名 `oar`、`--det/--rec/--dict` 必须一起给 | commit `84817f58…`（**不是** tag `v0.10.0` —— 那个 tag 里没有 CLI）：根 `Cargo.toml` members、`oar-ocr-cli/Cargo.toml` 的 `[[bin]] name = "oar"`、`src/args.rs` 的 `requires_all`/`conflicts_with_all` |
+| 引擎与权重输入 | 上游 `digest` 就是内容哈希 | 五个包整包下回实算相等（llama b11727、whisper b5454、sd 95b3090、qwen 415 MB、SD1.5 1.5 GB），见 `pins/models.json` 的 `bytes_verified` |
+
+写这张表的理由：CI 现在一次都跑不了，而"日志里会出现某串"这类假设一旦错，
+车道第一次跑就会红在无关的地方 —— `image-proof` 原本就是这么错的（它去 grep 日志，
+而参数其实只进 PNG）。所以**每条硬编码判据都要有 ref 级出处**，上游改动时按这张表逐条重量。
+
 ## 第一次真跑要盯什么（车道至今 0 次执行，这些是静态审计之后剩下的未知）
 
 1. **timeout 够不够**：`image-proof` 是 45 min（1.5 GB 权重 + 3 步推理），`ocr-proof` 是 34 min
