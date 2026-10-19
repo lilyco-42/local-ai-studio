@@ -53,8 +53,11 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
 ## 这套 CI 能证明什么、不能证明什么
 
 能证明：上游产物可发现、可下载、校验对得上、在无 GPU 的 runner 上真能产出 token。
-**注意：这些车道至今一次都没跑过** —— 仓库是 private，这个账号给 private 仓库分不到 runner
-（job 两秒失败、`steps: []`，原因只在 check-run annotation 里）。所以下面"能证明"目前是设计意图，不是结果。
+**注意：这些车道至今一次都没跑过** —— 仓库是 private，这个账号给 private 仓库分不到 runner。
+观察到的形状有两种，都不执行任何一步：早先是 job 两秒失败、`steps: []`（原因只在 check-run
+annotation 里）；2026-10-19 这两次 push 则是**一直停在 queued**（`gh run view <id> --json jobs`
+给 `runner_name: null`、`steps: 0`，annotations 接口 404），21 分钟没动过。所以别把"queued"
+读成"在排队、等等就有"。所以下面"能证明"目前是设计意图，不是结果。
 **也不能证明：图形界面真的打得开。** 桌面外壳交付时必须另找设备验证，不拿 CI 绿当"能用"。
 
 
