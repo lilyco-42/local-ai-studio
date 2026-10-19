@@ -76,13 +76,15 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
 
 ## 验收标准（在当前唯一可用验证手段 = GitHub Actions 下）
 
-1. `ci.yml`：201 个单测绿（含 `test_yaml_gate.py` 给闸门自己的 11 条、`test_toolbelt_pins.py` 给工具带
-   钉表的 14 条、`test_catalog_snapshot.py` 给目录快照与其侧表的 16 条、`test_citation_check.py` 给出处闸门的 14 条、
-   `test_ocr_build_surface.py` 给 OCR 依赖面分类器与比对的 15 条、`test_file_index.py` 给下载层五种状态的 20 条、
-   `test_payload_plan.py` 给装机负载清单的 11 条、`test_pack_engine.py` 给出包逻辑的 10 条、
-   `test_establish_verify.py` 给字节复核与哈希对照的 16 条、`test_shell_vars.py` 给 shell 变量判据的 10 条、
-   `test_r2_manifest.py` 给镜像清单的 6 条、`test_lane_assertions.py` + `test_image_proof_block.py`
-   给车道判据的 32 条），
+1. `ci.yml`：486 个单测绿（重数：`python -W error::ResourceWarning -m unittest discover -s tests
+   -p "test_*.py"`；按文件数就 `python -m unittest tests.<模块名>`。2026-10-20 实测逐文件：
+   `test_yaml_gate.py` 闸门自己 11、`test_toolbelt_pins.py` 工具带钉表 14、
+   `test_catalog_snapshot.py` 目录快照与侧表 16、`test_citation_check.py` 出处闸门 20、
+   `test_ocr_build_surface.py` OCR 依赖面 15、`test_file_index.py` 下载层五种状态 20、
+   `test_payload_plan.py` 装机负载 11、`test_pack_engine.py` 出包逻辑 10、
+   `test_establish_verify.py` 字节复核 16、`test_shell_vars.py` shell 变量判据 14、
+   `test_r2_manifest.py` 镜像清单 6、`test_lane_assertions.py` + `test_image_proof_block.py`
+   车道判据 38 + 6 = 44、`test_recommend_image.py` 生图档位表 31、`test_machine_budget.py` 装机预算 18），
    `yaml_gate.py` 0 BAD、
    离线发现器解析出全部必需 target 且每个都带上游 sha256；单测在 `-W error::ResourceWarning` 下跑。
    闸门还把**车道 env 里每一条 64 位十六进制的值**反查出处（必须在 `pins/*.json` 或
@@ -124,7 +126,7 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
    产物里却是 `Steps: 3`/256x256，才能证明参数是从请求体吃进去的）。
    OCR 没有服务形态可测（见"技术前提"第 4 条的例外说明）。
    但覆盖度说的是**车道存在**，不是跑过 —— 跑过与否要看 Actions 的真实记录，目前为零。
-5. **车道里的 Python 片段要真编译**：`yaml_gate.py` 现在把两条 workflow 里的每段 `<<'PY'` 抽出来
+5. **车道里的 Python 片段要真编译**：`yaml_gate.py` 现在把三条 workflow 里的每段 `<<'PY'` 抽出来
    `compile()`（本轮 14 段；`python tools/yaml_gate.py` 自己会打印这个数，别信文档里的静态值），
    并验过它会红 —— 掺一段缩进错的 PY 进去，它按
    `文件:job#步骤 第N段` 报出语法错。这个能力是被我上一次写的车道逼出来的：
@@ -400,13 +402,27 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
 车道第一次跑就会红在无关的地方 —— `image-proof` 原本就是这么错的（它去 grep 日志，
 而参数其实只进 PNG）。所以**每条硬编码判据都要有 ref 级出处**，上游改动时按这张表逐条重量。
 
-判据本身也不能只靠"看上去对"：`engine-live.yml` 里 14 段 `<<'PY'`（三条 workflow 合起来 17 段，
-段数由 `yaml_gate.py` 打印）中有 6 段是**断言段**，
-其中 5 段已在本地预跑过（`tests/lane_replay.py` 把那段原样抽出来、放合成输入、exec 一遍，
-`SystemExit` 当结论；共 27 条用例，每段都配一条"必须过"的正向对照，另有一条
- mutation 检查证明它不是永远绿：同一份 OCR 输出把期望词换掉，rc 从 0 翻成 1）。
-剩下 4 段是取数/打印，不含判据；而 `ocr-proof#0` 那段工具链版本闸依赖真 `rustc`，
-预跑工具刻意不 mock 外部命令，所以它只能等 CI —— 这一条要如实留着，别当作已验。
+判据本身也不能只靠"看上去对"，而且**这几个计数不许只活在散文里**：
+`tests/test_lane_replay_report.py` 把它们钉成断言，重数只要一条命令
+（`python -W error::ResourceWarning -m unittest tests.test_lane_replay_report -v`）。
+2026-10-20 实测：三条 workflow 合起来 **17 段** `<<'PY'`（`engine-live.yml` 14、`ci.yml` 2、
+`package.yml` 1；`yaml_gate.py` 会打同一份编译计数，段数打 0 就意味着闸门什么都没查），
+其中 **12 段含判据**（认 `check(` / `SystemExit` / `assert` / `sys.exit(` —— 最后这个是这轮补的：
+`ocr-proof` 那段工具链版本闸就是靠 `sys.exit("工具链低于…")` 红的，只找前三个会漏），
+5 段是取数与打印。被本地预跑引用到的是 **8 个 (job, 步骤名) 组合**：
+`headless-inference 起常驻 llama-server`、`ocr-proof 认得出那个词`、`ocr-proof 编译 CLI`、
+`ocr-catalog digest`、`toolbelt-pins --json`、`subtitle-proof 常驻 whisper-server`、
+`image-proof 常驻 sd-server`、`image-proof 生成一张小图`；这两份测试文件合起来 **44 条用例**
+（`python -m unittest tests.test_lane_assertions tests.test_image_proof_block`）。
+预跑的做法是 `tests/lane_replay.py` 把那段原样抽出来、在临时目录里放合成输入再 exec，
+`SystemExit` 当结论；每段都配一条"必须过"的正向对照，另有一条 mutation 检查证明它不是永远绿
+（同一份 OCR 输出把期望词换掉，rc 从 0 翻成 1）。其中 `subtitle-proof` / `image-proof`
+那两步的判据本体已经抽进 `tools/srt_proof.py` 与 `tools/png_proof.py`，
+走的是 `lane_replay.body`（钉整段 shell 文本的形状）而不是 `lane_replay.block`。
+**刻意不在这里验的也留在账上**：`ocr-proof` 开头那段工具链版本闸要真 `rustc`，
+预跑工具不 mock 外部命令，所以它只能等 CI；`ci.yml` / `package.yml` / `ocr-languages` /
+`citation-drift` 那几段断言段的判据其实住在 `tools/` 里，由各自的离线单测负责，
+车道里剩下的只是"怎么调它" —— 这两种"没在本地跑"要分开说，别混成一句"都验过了"。
 预跑也顺手抓到一个"看起来在测、其实什么都没测"的形状：`test_lane_assertions.py` 与
 `test_image_proof_block.py` 原来靠 `discover -s tests` 才 import 得到 `lane_replay`，
 单跑一个模块时报的是 ImportError（`Ran 1 test … errors=1`），很容易被读成"这个模块只有 1 条用例"。
