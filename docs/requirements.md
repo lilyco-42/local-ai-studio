@@ -120,7 +120,7 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
 
 | 车道 | 判据依赖的东西 | 出处 |
 |---|---|---|
-| `headless-inference` | stderr 里出现 `%8.2f tokens per second` | llama.cpp `b11727` 的 `src/llama-context.cpp:4657/4659`（`llama_perf_context_print`，走 `LLAMA_LOG_INFO`）；`-t/-n/-ngl` 在同 ref 的 `common/arg.cpp` |
+| `headless-inference` | stderr 里出现 `%8.2f tokens per second`；关对话模式的真实拼法 | llama.cpp `b11727` 的 `src/llama-context.cpp:4657/4659`（`llama_perf_context_print`，走 `LLAMA_LOG_INFO`）；旗标是 `-no-cnv` / `--no-conversation`（**单数**，`common/arg.cpp:1907`），车道早期试的是 `--no-cnv`/`--no-conversations`，两个都不存在 → 永远走兜底；现在候选表补全，并且无论有没有命中都 `< /dev/null`，交互模式也只会 EOF 不会挂到 timeout。`-t/-n/-ngl` 在同 ref 的 `common/arg.cpp`（**不在** `common/common.cpp`） |
 | `subtitle-proof` | `-osrt/--output-srt`、`-of/--output-file`、`-l`、`-m`、`-f`、`-t` | whisper.cpp `b5454` 的 `examples/cli/cli.cpp:183/190/197/201/202/159`；不给 `-of` 时输出名从输入名推（同文件 `1136`） |
 | `image-proof` | 参数写在**产物的 tEXt** 里而不是日志里 | sd.cpp `master-975-95b3090`：`examples/common/common.cpp:3239/3269` 拼 `Steps:`/`Size:` → `examples/common/media_io.cpp` 交给 `stbi_write_png(..., parameters)` → `thirdparty/stb_image_write.h:1210` 落成 `tEXt`、关键字 `parameters` |
 | `ocr-proof` | 包名 `oar-ocr-cli`、二进制名 `oar`、`--det/--rec/--dict` 必须一起给 | commit `84817f58…`（**不是** tag `v0.10.0` —— 那个 tag 里没有 CLI）：根 `Cargo.toml` members、`oar-ocr-cli/Cargo.toml` 的 `[[bin]] name = "oar"`、`src/args.rs` 的 `requires_all`/`conflicts_with_all` |

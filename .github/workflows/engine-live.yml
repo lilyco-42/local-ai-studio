@@ -232,7 +232,7 @@ jobs:
           tar xzf llmfit.tar.gz
           BIN="$(find . -maxdepth 2 -type f -name llmfit | head -1)"
           test -n "$BIN" || { echo "解压后 depth 1-2 没找到 llmfit，条目表："; tar tzf llmfit.tar.gz | head -30; exit 1; }
-          "$BIN" --help > help.txt 2>&1 || true
+          "$BIN" --help > help.txt 2>&1 < /dev/null || true
           grep -q -- "--json" help.txt \
             || { echo "钉住的这版 help 里没有 --json：docs/toolbelt.md 记的用法已过期"; head -40 help.txt; exit 1; }
           set +e; "$BIN" recommend --json > rec.json 2> rec.err; rc=$?; set -e
@@ -380,7 +380,7 @@ jobs:
           cargo build --release -p oar-ocr-cli
           BIN=target/release/oar
           test -x "$BIN" || { echo "编出来的不是 target/release/oar，看下面："; ls -l target/release | head -20; exit 1; }
-          "$BIN" --help > "$RUNNER_TEMP/help.txt" 2>&1 || true
+          "$BIN" --help > "$RUNNER_TEMP/help.txt" 2>&1 < /dev/null || true
           head -25 "$RUNNER_TEMP/help.txt"
       - name: 取三个模型文件并按上游 digest 校验
         # 模型/字典来自 release **v0.7.0**，与上面源码的 commit 不同源是有意为之：
@@ -473,7 +473,7 @@ jobs:
           export LD_LIBRARY_PATH="$(dirname "$BIN"):$LD_LIBRARY_PATH"
           echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH" >> "$GITHUB_ENV"
           ldd "$BIN" | grep -i "not found" && { echo "动态库缺失"; exit 1; } || echo "动态库齐全"
-          "$BIN" -h > "$RUNNER_TEMP/help.txt" 2>&1 || true
+          "$BIN" -h > "$RUNNER_TEMP/help.txt" 2>&1 < /dev/null || true
           grep -oE -- "--(diffusion-model|width|height|steps|output)\b" "$RUNNER_TEMP/help.txt" | sort -u
       - name: 取权重并按钉住的 sha256 复核
         run: |
@@ -569,9 +569,9 @@ jobs:
           echo "BIN=$BIN" >> "$GITHUB_ENV"
           chmod +x "$BIN"
           ldd "$BIN" | grep -i "not found" && exit 1 || echo "动态库齐全"
-          "$BIN" --help > help.txt 2>&1 || true
+          "$BIN" --help > help.txt 2>&1 < /dev/null || true
           echo "=== help 里与对话模式相关的开关 ==="
-          grep -oE -- "--(no-cnv|no-conversations|cnv|chat)" help.txt | sort -u || true
+          grep -oE -- "--?(no-cnv|no-conversation(s)?|cnv|chat)" help.txt | sort -u || true
           head -12 help.txt
       - name: 下载模型并校验 sha256（pin）
         run: |
@@ -581,12 +581,17 @@ jobs:
       - name: 无头推理，要求真的产出 token
         run: |
           FLAG=""
-          for cand in --no-cnv --no-conversations; do
+          # 候选名单按 b11727 的 common/arg.cpp:1907 补全 —— 那一版写的是 `-no-cnv` 与
+          # `--no-conversation`（单数），上一版只试 `--no-cnv`/`--no-conversations`，
+          # 两个都不存在，于是这条永远走"当作默认不进对话"的兜底分支。
+          # 兜底本身也不要再依赖"上游大概默认关了对话"这种猜测：下面用 `< /dev/null`
+          # 把 stdin 关掉，即使它真进了交互模式也会立刻 EOF 而不是挂到 timeout。
+          for cand in -no-cnv --no-cnv --no-conversation --no-conversations; do
             if grep -qF -- "$cand" help.txt; then FLAG="$cand"; break; fi
           done
-          echo "关闭对话模式的开关：[${FLAG:-上游已默认不进入对话模式}]"
+          echo "关闭对话模式的开关：[${FLAG:-help 里没有，靠 /dev/null 兜底}]"
           timeout 900 "$BIN" -m model.gguf ${FLAG:+"$FLAG"} -t 1 -ngl 0 -n 24 \
-            -p "Reply with exactly one word: hello" > out.txt 2> err.txt
+            -p "Reply with exactly one word: hello" > out.txt 2> err.txt < /dev/null
           echo "=== stderr 尾部 ==="; tail -8 err.txt
           echo "=== 输出 ==="; tail -5 out.txt
           RATE=$(grep -hoE '[0-9]+\.[0-9]+ *tokens per second' err.txt out.txt | grep -oE '[0-9]+\.[0-9]+' | tail -1)
