@@ -148,5 +148,88 @@ class TestVerify(unittest.TestCase):
                         seen[0])
 
 
+class TestCrossMeta(unittest.TestCase):
+    """--cross-hf：HF 的 `tree.lfs.oid` 是第二家分发方给的哈希。
+    这里 stub 掉 `get`（真跑要联网），证明判定本身会红，尤其证明"对不上时不许写盘"。"""
+
+    REC = {KEY: {"sha256": "a" * 64, "size": 415182688,
+                 "primary": "ModelScope repo/files 元数据",
+                 "url": f"https://hf-mirror.com/Qwen/X-GGUF/resolve/main/{KEY}"}}
+
+    def stub(self, oids, rc=0):
+        def fake_get(url, rng=None):
+            host = url.split("/")[2]
+            oid = oids.get(host)
+            body = json.dumps([{"path": KEY, "lfs": {"oid": oid, "size": 415182688}}]).encode()
+            return rc, (body if rc == 0 else b""), "" if rc == 0 else "curl 22"
+        return fake_get
+
+    def run_on(self, tmp, oids, rc=0):
+        real = tb.get
+        tb.get = self.stub(oids, rc)
+        path = os.path.join(tmp, "pins.json")
+        with open(path, "w", encoding="utf-8") as fh:
+            json.dump(copy.deepcopy(self.REC), fh)
+        try:
+            return tb.cross_meta(path), json.load(open(path, encoding="utf-8"))
+        finally:
+            tb.get = real
+
+    def test_both_hosts_agree(self) -> None:
+        with tempfile.TemporaryDirectory() as d:
+            rc, pins = self.run_on(d, {"huggingface.co": "a" * 64, "hf-mirror.com": "a" * 64})
+            self.assertEqual(rc, 0)
+            self.assertEqual(pins[KEY]["meta_hashes"]["level"],
+                             "两家分发方元数据各给哈希且相等（仍不是真字节）")
+            self.assertEqual(sorted(pins[KEY]["meta_hashes"]["hosts"]),
+                             ["hf-mirror.com", "huggingface.co"])
+
+    def test_disagreeing_host_is_red_and_nothing_is_written(self) -> None:
+        with tempfile.TemporaryDirectory() as d:
+            rc, pins = self.run_on(d, {"huggingface.co": "a" * 64, "hf-mirror.com": "b" * 64})
+            self.assertEqual(rc, 1)
+            self.assertNotIn("meta_hashes", pins[KEY], "对不上却写盘 = 把一次失败的对照记成成功")
+
+    def test_unreachable_host_is_red_not_skipped(self) -> None:
+        """取不到不能当成"没这条"，否则网络一抖车道就绿。"""
+        with tempfile.TemporaryDirectory() as d:
+            rc, pins = self.run_on(d, {"huggingface.co": "a" * 64}, rc=22)
+            self.assertEqual(rc, 1)
+            self.assertNotIn("meta_hashes", pins[KEY])
+
+    def test_size_mismatch_is_red(self) -> None:
+        real = tb.get
+        def fake_get(url, rng=None):
+            return 0, json.dumps([{"path": KEY, "lfs": {"oid": "a" * 64, "size": 1}}]).encode(), ""
+        tb.get = fake_get
+        try:
+            with tempfile.TemporaryDirectory() as d:
+                path = os.path.join(d, "pins.json")
+                with open(path, "w", encoding="utf-8") as fh:
+                    json.dump(copy.deepcopy(self.REC), fh)
+                self.assertEqual(tb.cross_meta(path), 1)
+        finally:
+            tb.get = real
+
+    def test_repo_extraction_ignores_github_urls(self) -> None:
+        self.assertEqual(tb.hf_repos_for({"url": f"https://hf-mirror.com/A/B/resolve/main/{KEY}"}),
+                         {"A/B"})
+        self.assertEqual(tb.hf_repos_for({"alt_sources": [f"https://huggingface.co/C/D/resolve/main/{KEY}",
+                                                          "https://github.com/x/y/raw/z"]}), {"C/D"})
+        self.assertEqual(tb.hf_repos_for({"primary": "https://www.modelscope.cn/models/E/F"}), set())
+
+    def test_committed_pins_all_have_the_second_hash(self) -> None:
+        """仓库里那三条 HF 权重必须都带 meta_hashes —— 这条是"别忘了跑 --cross-hf"的守卫。"""
+        with open(os.path.join(HERE, "..", "pins", "models.json"), encoding="utf-8") as fh:
+            pins = json.load(fh)
+        hf = [k for k, v in pins.items() if tb.hf_repos_for(v)]
+        self.assertEqual(len(hf), 3, hf)
+        for k in hf:
+            self.assertEqual(pins[k]["meta_hashes"]["oid"], pins[k]["sha256"], k)
+            self.assertIn("仍不是真字节", pins[k]["meta_hashes"]["level"],
+                          "级别名不许把它冒充成真字节")
+
+
+
 if __name__ == "__main__":
     unittest.main()

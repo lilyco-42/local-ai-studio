@@ -64,7 +64,13 @@ def head(url: str):
 
 
 def files_of(repo: str):
-    """tree 与 siblings 两个端点都试并合并：只试一个的话，空结果会被误读成「这仓库没权重」。"""
+    """tree 与 siblings 两个端点都试并合并：只试一个的话，空结果会被误读成「这仓库没权重」。
+
+    2026-10-20 更正一处**读者缺陷**（不是上游缺陷）：这一版原来只认 `lfs.oidsha` / `lfs.sha`，
+    而 HF 的字段叫 **`lfs.oid`** —— 拿不存在的键名去读，结论就成了"HF 不给内容哈希"，
+    并顺着这句话写进了 model-catalog / ADR / requirements 五处。实测（三个仓库、两个主机）：
+    `tree` 的 `lfs.oid` 就是标准 sha256，与我们独立钉的三颗 pin 逐字符相等。
+    """
     out = {}
     d, note = get(f"{MIRROR}/api/models/{repo}/tree/main?recursive=true")
     if isinstance(d, list):
@@ -72,17 +78,24 @@ def files_of(repo: str):
             if e.get("type") == "file":
                 lfs = e.get("lfs") or {}
                 out[e.get("path")] = {"size": lfs.get("size") or e.get("size") or 0,
-                                      "hash": lfs.get("oidsha") or lfs.get("sha"),
+                                      "hash": lfs.get("oid") or e.get("oid")
+                                              or lfs.get("oidsha") or lfs.get("sha"),
+                                      "oid_type": lfs.get("oidType") or "",
+                                      "xet": bool(e.get("xetHash")),
                                       "src": "tree"}
     d2, note2 = get(f"{MIRROR}/api/models/{repo}")
     if isinstance(d2, dict):
         for s in d2.get("siblings") or []:
             name = s.get("rfilename")
+            sib_lfs = s.get("lfs") or {}
             if name and name not in out:
-                out[name] = {"size": (s.get("lfs") or {}).get("size") or 0,
-                             "hash": (s.get("lfs") or {}).get("oidsha"), "src": "siblings"}
+                out[name] = {"size": sib_lfs.get("size") or 0,
+                             "hash": sib_lfs.get("oid") or sib_lfs.get("oidsha"), "src": "siblings"}
             elif name:
                 out[name]["src"] += "+siblings"
+                if not out[name].get("hash") and sib_lfs.get("oid"):
+                    out[name]["hash"] = sib_lfs["oid"]
+                    out[name]["src"] += "(oid)"
     return out, f"tree={note} info={note2}"
 
 
@@ -116,6 +129,7 @@ def main():
     print("=== 控制样本：三种「哈希来源」哪个等于我们独立钉的 sha256 ===")
     fl, _ = files_of(CONTROL_REPO)
     ent = fl.get(CONTROL_FILE)
+    hf_hash = None
     if not ent:
         bad.append(f"控制文件 {CONTROL_FILE} 不在树里")
     else:
@@ -134,10 +148,25 @@ def main():
             print("    ✗ ETag 是 64 位十六进制，但**不等于**内容 sha256（它是 Xet/cas-bridge 的对象指纹）")
             print("      这是会咬人的陷阱：看着像 sha256 的字段拿去做校验，每个 pin 都会静默错位")
         if not ent["hash"]:
-            print("    · HF 元数据（tree/siblings）不给内容哈希 → pin 只能在入库时自己算")
+            # 这条必须是红的。上一版的结论"HF 不给哈希"就是这么活下来的：控制文件明明在树里，
+            # 哈希字段却读成 None —— 因为读的是不存在的键名（`lfs.oidsha`/`lfs.sha`，实际是 `lfs.oid`）。
+            # "读不到"在没有对照的场合永远不该被当成"上游没有"。
+            bad.append(f"控制文件 {CONTROL_FILE} 在树里却读不到哈希 —— 先查键名（HF 用 `lfs.oid`）"
+                       f"再谈「上游不给哈希」；这条若成立，说明是读者瞎了，不是仓库空了")
+            hf_hash = False
+        elif ent["hash"] == PIN_SHA:
+            print(f"    ✔ 元数据给的哈希**就是**内容 sha256（{ent['hash'][:16]}…，"
+                  f"oidType={ent.get('oid_type') or '未给，按 LFS 默认 sha256'}）")
+            print("      这条等式本身就是算法证明：pin 是从别处（整包字节 / ModelScope 路径）独立立起来的")
+            hf_hash = True
+        else:
+            bad.append(f"元数据哈希与 pin 不等：{ent['hash'][:16]}… ≠ {PIN_SHA[:16]}… "
+                       f"—— 要么仓库被换过，要么这个字段不再是内容哈希")
+            hf_hash = None
     print(f"    Accept-Ranges：{ranges}（决定能不能断点续传）")
 
-    out = {"catalog": catalog, "hf_gives_content_hash": False,
+    out = {"catalog": catalog, "hf_gives_content_hash": hf_hash,
+           "hf_hash_field": "lfs.oid" if hf_hash else None,
            "etag_equals_sha256": etag == PIN_SHA if ent else None,
            "models_range_header": ranges}
     json.dump(out, open("model-catalog.json", "w", encoding="utf-8"), ensure_ascii=False, indent=1, sort_keys=True)

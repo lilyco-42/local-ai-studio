@@ -2,8 +2,10 @@
 
 三家源的实测差别（决定走哪条路）：
   · GitHub release：产物 API 里带 `digest = sha256:…`，下载验证过就是内容哈希 → 直接可钉；
-  · HF / hf-mirror：tree 与 siblings 只给文件名+大小；resolve 的 `ETag` 是 64 位十六进制
-    但**不是**内容哈希（Xet/cas-bridge 指纹，长得极像 sha256，是最危险的假朋友）；
+  · HF / hf-mirror：**`tree` 的 `lfs.oid` 就是内容 sha256**（2026-10-20 更正。上一版这里写"只给文件名+大小"
+    是探针读错键名造成的假结论 —— 读的是 `lfs.oidsha`/`lfs.sha`，HF 用的是 `lfs.oid`，
+    三颗独立 pin 与 oid 逐字符相等才算把它钉死）。但 resolve 的 `ETag` 是 64 位十六进制
+    却**不是**内容哈希（Xet/cas-bridge 指纹，长得极像 sha256，是最危险的假朋友）；
   · ModelScope：`repo/files` 元数据每个文件带 `Sha256`，且 CDN 重定向路径本身就是
     `lfs-objects/<sha[0:2]>/<sha[2:4]>/<sha[4:]>` —— 两条独立机制给的哈希一致，
     总长又能与 HF 的 `lfs.size` 对上。**所以 HF 上的权重不必只能自算**，
@@ -301,14 +303,95 @@ def sources_of(key, prior, rec):
     return prior.get("url") or "（旧记录只存了提供方名：" + str(rec.get("provider")) + "）"
 
 
+def hf_tree_entry(host: str, repo: str, name: str, rev: str = "main"):
+    """读 HF 系 tree 元数据里这个文件的 (lfs.oid, size)，返回 (oid, size, 错误说明)。
+
+    键名就是这条判据的全部风险：HF 给的是 `lfs.oid`，不是 `oidsha`/`sha`。
+    上一轮探针读错键，于是"HF 不给哈希"这句假结论进了五处文档。
+    """
+    try:
+        rc, body, err = get(f"https://{host}/api/models/{repo}/tree/{rev}")
+        if rc != 0:
+            return None, None, f"curl 退出码 {rc}：{str(err)[:80]}"
+        tree = json.loads(body)
+    except Exception as e:      # noqa: BLE001  取不到要变成一行结论，不能抛死整轮
+        return None, None, f"{type(e).__name__}: {e}"
+    if not isinstance(tree, list):
+        return None, None, f"返回不是列表（{str(tree)[:70]}）"
+    hit = [e for e in tree if e.get("path") == name]
+    if not hit:
+        return None, None, f"{host} 的树里没有 {name}（条目 {len(tree)} 个）"
+    lfs = hit[0].get("lfs") or {}
+    return lfs.get("oid") or hit[0].get("oid"), lfs.get("size") or hit[0].get("size"), None
+
+
+def hf_repos_for(rec: dict) -> set[str]:
+    """从 pin 记录里任何一条 hf-mirror / huggingface 的 URL 反推同名 HF 仓库。"""
+    out = set()
+    for u in [rec.get("url"), rec.get("primary"), *(rec.get("alt_sources") or [])]:
+        m = re.match(r"https?://(?:hf-mirror\.com|huggingface\.co)/([^/]+/[^/]+)/resolve/", str(u or ""))
+        if m:
+            out.add(m.group(1))
+    return out
+
+
+def cross_meta(pins_path: str) -> int:
+    """第二家给哈希：把 HF 系 `tree.lfs.oid` 与已钉的 sha256 对表。
+
+    为什么值得单独一条：ModelScope 那侧的 pin 本质是"一家元数据说哈希是 A"，
+    而 HF 的 `lfs.oid` 是**另一家分发方**独立给的同一个值 —— 两家都给哈希，
+    不需要下几百 MB 就把"单一声明"升级成"两家一致声明"。这**不是**真字节，
+    所以级别名要如实写，也不许冒充 `bytes_verified`。
+    """
+    with open(pins_path, encoding="utf-8") as fh:
+        pins = json.load(fh)
+    rc = 0
+    for name, rec in sorted(pins.items()):
+        repos = hf_repos_for(rec)
+        if not repos:
+            print(f"  · {name}: 记录里没有 HF 侧 URL → 换不了第二家（这不等于「它没哈希」）")
+            continue
+        repo = sorted(repos)[0]
+        hashes = {}
+        for host in ("huggingface.co", "hf-mirror.com"):
+            oid, size, err = hf_tree_entry(host, repo, name)
+            if err:
+                print(f"  ✗ {name}: {host} —— {err}")
+                rc = 1
+                continue
+            hashes[host] = {"oid": oid, "size": size}
+            if oid != rec["sha256"]:
+                print(f"  ✗ {name}: {host} 给的 oid={str(oid)[:16]}… ≠ 钉的 {rec['sha256'][:16]}…")
+                rc = 1
+            if size not in (None, rec["size"]):
+                print(f"  ✗ {name}: {host} 给的 size={size} ≠ 钉的 {rec['size']}")
+                rc = 1
+        if len(hashes) == 2 and all(h["oid"] == rec["sha256"] for h in hashes.values()):
+            rec["meta_hashes"] = {"repo": repo, "hosts": sorted(hashes), "oid": rec["sha256"],
+                                  "level": "两家分发方元数据各给哈希且相等（仍不是真字节）"}
+            print(f"  ✔ {name}: HF 两主机的 oid 都等于钉的哈希（仓库 {repo}）")
+        else:
+            rc = 1
+    if rc:
+        print("有不等项或取不到 → 不写盘（哈希对不上时改文件是最坏的动作）")
+        return 1
+    with open(pins_path, "w", encoding="utf-8", newline="\n") as fh:
+        json.dump(pins, fh, ensure_ascii=False, indent=1, sort_keys=True)
+    print(f"哈希对照记录已写回 {pins_path}")
+    return 0
+
+
 def main(argv):
     ap = argparse.ArgumentParser()
     ap.add_argument("--json", default="")
     ap.add_argument("--verify", default="", help="用另一家的真字节复核已有 pin 文件")
     ap.add_argument("--only", default="", help="配合 --verify，只复核名字里含这段的那条")
+    ap.add_argument("--cross-hf", default="", help="把 HF 系 tree.lfs.oid 与已有 pin 对表（第二家哈希）")
     args = ap.parse_args(argv)
     if args.verify:
         return verify(args.verify, args.only)
+    if args.cross_hf:
+        return cross_meta(args.cross_hf)
     pins = {}
     for display, route, repo, path, rev in TARGETS:
         p = via_modelscope(display, repo, path, rev) if route == "modelscope" \

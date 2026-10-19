@@ -116,8 +116,10 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
 6. **工具带也要钉**：`pins/toolbelt.json` 12 条 pin（llmfit v1.1.17 / llama-swap v265 / gguf-parser v0.26.4），
    8 条有 sidecar 与 API digest 两套机制互相对照、4 条只有 API digest（`sidecar: null` 如实记）。
    详见 [docs/toolbelt.md](toolbelt.md) 的"已钉住"一节。
-7. **pin 要标强度级，不许压成一句"已校验"**：六级阶梯（配置里写着 → 只有体积 → 上游 digest →
-   元数据两条机制 + 跨源体积 → 一家给哈希另一家给整包字节 → 两个独立发布方各下整包）
+7. **pin 要标强度级，不许压成一句"已校验"**：六级阶梯 + 一条 2026-10-20 新增的 4.5 级
+   （配置里写着 → 只有体积 → 上游 digest → 元数据两条机制 + 跨源体积 →
+   **两家分发方各给哈希（ModelScope `Sha256` × HF `tree.lfs.oid`，零下载，`--cross-hf`）** →
+   一家给哈希另一家给整包字节 → 两个独立发布方各下整包）
    与每级能说明什么，见 [model-catalog.md](model-catalog.md)。
    验收动作是 `python tools/establish_pins.py --verify pins/models.json` 与
    `--verify pins/ocr.json`：字节与钉的哈希对不上就红；`catalog/defaults.json` 会把这条 pin 的

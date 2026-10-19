@@ -13,3 +13,4 @@ node_modules/
 # 要改它就改 tools/catalog_snapshot.py 里的 UPSTREAM 坐标，别提交 bulk。
 # 但 catalog/describe.sha256 是要提交的：bulk 不在仓库里时，它是"出厂目录长什么样"的唯一记载。
 catalog/describe.json
+model-catalog.json

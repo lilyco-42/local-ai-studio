@@ -178,6 +178,12 @@ jobs:
       - uses: actions/checkout@v4
       - name: 权重目录与哈希可得性探针
         run: python3 tools/model_catalog_probe.py
+      - name: 第二家哈希：把 HF 的 tree.lfs.oid 与已钉的 pin 对表
+        # 2026-10-20 更正带来的新判据：`lfs.oid` 是另一家分发方独立给的内容 sha256，
+        # 所以"两家都说同一个哈希"零下载就能成立。它**不是**真字节，级别名里写清了"仍不是真字节"，
+        # 也不许写进 bytes_verified。上一版探针读错键名（读 oidsha/sha）得出"HF 不给哈希"，
+        # 于是这句假结论进了五处文档 —— 这条同时也是那个盲点的守卫。
+        run: python3 tools/establish_pins.py --cross-hf pins/models.json
       - uses: actions/upload-artifact@v4
         with:
           name: model-catalog

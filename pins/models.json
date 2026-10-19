@@ -2,6 +2,15 @@
  "ggml-tiny.bin": {
   "cross_checked_against": "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-tiny.bin",
   "git_blob_sha1": null,
+  "meta_hashes": {
+   "hosts": [
+    "hf-mirror.com",
+    "huggingface.co"
+   ],
+   "level": "两家分发方元数据各给哈希且相等（仍不是真字节）",
+   "oid": "be07e048e1e599ad46341c8d2a135645097a538221678b7acdd1b1919c6e1b21",
+   "repo": "ggerganov/whisper.cpp"
+  },
   "primary": "https://hf-mirror.com/ggerganov/whisper.cpp/resolve/main/ggml-tiny.bin",
   "provenance": "只有单一发布方（HF 或 GitHub）；本对照证明的是传输与镜像未改写，不是来源独立",
   "sha256": "be07e048e1e599ad46341c8d2a135645097a538221678b7acdd1b1919c6e1b21",
@@ -18,6 +27,15 @@
    "url": "（旧记录只存了提供方名：hf-mirror.com）"
   },
   "cross_checked_against": "同家 CDN lfs-objects 路径 + huggingface.co tree 总长",
+  "meta_hashes": {
+   "hosts": [
+    "hf-mirror.com",
+    "huggingface.co"
+   ],
+   "level": "两家分发方元数据各给哈希且相等（仍不是真字节）",
+   "oid": "9ee36184e616dfc76df4f5dd66f908dbde6979524ae36e6cefb67f532f798cb8",
+   "repo": "Qwen/Qwen2.5-0.5B-Instruct-GGUF"
+  },
   "primary": "ModelScope repo/files 元数据",
   "provenance": "两个提供方对总长一致；哈希出自 ModelScope 的两条独立机制，整包字节未经下载校验 —— 首次真正下载时仍要按此 pin 复核",
   "sha256": "9ee36184e616dfc76df4f5dd66f908dbde6979524ae36e6cefb67f532f798cb8",
@@ -43,6 +61,15 @@
    "url": "（旧记录只存了提供方名：hf-mirror.com）"
   },
   "cross_checked_against": "同家 CDN lfs-objects 路径 + huggingface.co tree 总长",
+  "meta_hashes": {
+   "hosts": [
+    "hf-mirror.com",
+    "huggingface.co"
+   ],
+   "level": "两家分发方元数据各给哈希且相等（仍不是真字节）",
+   "oid": "b8944e9fe0b69b36ae1b5bb0185b3a7b8ef14347fe0fa9af6c64c4829022261f",
+   "repo": "second-state/stable-diffusion-v1-5-GGUF"
+  },
   "primary": "ModelScope repo/files 元数据",
   "provenance": "两个提供方对总长一致；哈希出自 ModelScope 的两条独立机制，整包字节未经下载校验 —— 首次真正下载时仍要按此 pin 复核",
   "sha256": "b8944e9fe0b69b36ae1b5bb0185b3a7b8ef14347fe0fa9af6c64c4829022261f",

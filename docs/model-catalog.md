@@ -36,21 +36,28 @@ SD3.5-medium/large 与 `city96/…`）；对话在 `Qwen/Qwen2.5-0.5B-Instruct-G
 
 | 源 | 给不给权重 sha256 | 证据 |
 |---|---|---|
-| HF（含 hf-mirror） | **不给**。`tree` 与 `siblings` 两个端点都只有文件名与大小，三个仓库一致 | 探针输出 `元数据是否带内容哈希：{'无'}` ×3 |
-| HF resolve 响应的 `ETag` | **看着像但不是**。`e3545da2…f9deed9` 是 64 位十六进制，却不等于内容 sha256（它是 Xet/cas-bridge 的对象指纹） | 与已知 pin 直接比对不等 |
+| HF（含 hf-mirror） | **给**（2026-10-20 更正）：`GET /api/models/{repo}/tree/{rev}` 的每个文件带 `lfs.oid`，那就是内容 sha256；实测三颗独立 pin 逐字符相等，两个主机一致 | 探针输出 `元数据是否带内容哈希：{'有'}`；控制样本 `9ee36184e616dfc7…` == pin。上一版写"不给"是**读者的盲点**：代码读的是 `lfs.oidsha`/`lfs.sha`，而 HF 的键叫 `lfs.oid`，读不存在的键就成了"上游没有" |
+| HF resolve 响应的 `ETag` | **看着像但不是**。`e3545da2…f9deed9` 是 64 位十六进制，却不等于内容 sha256（它是 Xet/cas-bridge 的对象指纹） | 与已知 pin 直接比对不等 —— 这条**没有被更正**：要用的是 `lfs.oid`，不是 ETag |
 | ModelScope | **给两条**：`repo/files` 元数据每个文件带 `Sha256`；CDN 路径又是 `lfs-objects/<sha[0:2]>/<sha[2:4]>/<sha[4:]>` 的内容寻址还原 | 本轮实测两者对 SD1.5 Q4_0 完全一致，且总长 == hf-mirror 的 `lfs.size` |
 | GitHub release 产物 | **给**：每个产物的 API 里有 `digest = sha256:<64hex>`，实测就是内容哈希 | 下载 `whisper-bin-x64.zip`(8,928,640 B) 与 `sd-…-win-cpu-x64.zip`(17,706,677 B) 本地算 sha256，与 digest 逐字节相等；三家引擎 216/216、36/36、54/54 全带，OCR 权重 119 个产物 0 缺 |
 | 自家 R2 | 不给，只有 `Content-Length` | 同上一轮 |
 
 所以规则按源分三条，不是一句"全部自算"：**GitHub release 产物**（引擎、OCR 权重、工具）直接用上游
-`digest`；**HF 上的权重**去 ModelScope 查同名仓库的 `Sha256` 元数据 + CDN 内容寻址路径 + 跨源总长，
-三条一致就能零下载立 pin（该仓库没镜像时退回"下载后自己算"）；**自家 R2 只有 `Content-Length`**，
-入库时必须自算。三处都不许拿 HF 的 ETag 当校验值。大小可以三方互相印证：
+`digest`；**HF 上的权重**读 `tree` 的 `lfs.oid`，并去 ModelScope 查同名仓库的 `Sha256` 元数据 +
+CDN 内容寻址路径 + 跨源总长 —— **两家各自独立给哈希且相等**时零下载就能立 pin（比单家强得多，
+但仍只是"两家都说一样的哈希"，第 5 级要有一家给整包真字节）；**自家 R2 只有 `Content-Length`**，
+入库时必须自算。三处都不许拿 HF 的 ETag 当校验值（它不是内容哈希，这条没被更正）。
+大小可以三方互相印证：
 元数据 415,182,688 == HEAD 415,182,688 == 我们的 pin。
+
+> 2026-10-20 的更正为什么重要：这张表原本记着"HF 不给哈希"，于是下载层的设计就按"只能靠
+> ModelScope 镜像 + 自算"来写；实际上 `lfs.oid` 一直是真 sha256，而且 `hf-mirror.com` 也照给
+> （国内出口实测可达）。差别不是措辞：**目录里 84% 没有预置文件的条目，从此可以按
+> "两家元数据哈希一致 → 下载后再比对"来校验**，不必先找到一个镜像仓库才能验证。
 
 ## 已经立住的四个 pin
 
-`tools/establish_pins.py` 专门处理"源不给哈希"这一侧，做法是**跨主机逐字节对照后再立 pin**，
+`tools/establish_pins.py` 处理的是"只有体积、哈希要自己凑"这一侧，做法是**跨主机逐字节对照后再立 pin**，
 而不是"自己算完再自己断言相等"（那是自证）。2026-10-19 实测，结果落盘为
 **`pins/models.json`**（含每条的 `primary` / `cross_checked_against` / `provenance`，
 车道里写死的哈希必须与它对得上，改 pin 要走工具而不是直接改 yaml）。
@@ -86,7 +93,7 @@ HF 上也没有 `ggml-org/whisper.cpp` 这个模型仓库（401，样本只在 G
 
 另一个实测结论会影响目录设计：**whisper.cpp 的 GitHub release 里没有任何模型**
 （30 个 release 的产物名去重 33 种，全是 xcframework/tar.gz/zip 二进制，`.bin` 命中 0）。
-所以字幕这一路是"引擎走 GitHub（有 digest）+ 权重走 HF（HF 自己不给哈希，要么查 ModelScope 镜像元数据、要么下载后自算）"，
+所以字幕这一路是"引擎走 GitHub（有 digest）+ 权重走 HF（HF 的 `tree.lfs.oid` 就是 sha256，2026-10-20 更正；另可再拿 ModelScope 的 `Sha256` 当第二家对照）"，
 一个能力里混着两种凭据强度，代码里不能按同一套校验假设写。
 
 ## 上游有一整张现成目录，但它给不了校验值（2026-10-19 实测）
@@ -170,14 +177,16 @@ python tools/catalog_snapshot.py --raw 整文件 --check  # 拿本地已下载�
 | 级 | 凭据 | 能说明什么 | 说不清什么 |
 |---|---|---|---|
 | 1 | 哈希只写在 workflow env 里 | 什么也不能说明 | 没人复现过它 —— 本轮之前那颗 415 MB 对话权重就在这一级 |
-| 2 | 上游只给体积（HF `tree`、自家 R2） | 文件还在、长度没变 | 内容对不对 |
+| 2 | 只给体积（自家 R2；HF 的 `tree` 已从这一级挪走，见下方 4.5） | 文件还在、长度没变 | 内容对不对 |
 | 3 | 上游给 `digest = sha256:`（GitHub release 全部产物） | 内容与发布方算过的一致 | 发布方只有一家；来源独立性没有 |
 | 4 | 元数据 `Sha256` + CDN 内容寻址路径 + 跨源总长（ModelScope 零下载） | 同一提供方**两条独立机制**一致，另一家体积也一致 | 整包字节一次都没下过 |
+| 4.5 | `--cross-hf`：ModelScope 的 `Sha256` 与 **HF `tree.lfs.oid`** 两处独立元数据都等于已钉的哈希 | 两家分发方零下载各给同一个内容哈希 —— 单家说谎已经不够了 | 仍没人下过整包；而且两家都是**分发方**，不是原作者 |
 | 5 | `--verify`：从**另一家**下整包算 sha256，与已钉的哈希逐字节相等 | 跨提供方 + 真字节，两边都不许说谎 | 仍是两个镜像，不是两个原作者 |
 | 6 | 两个独立发布方各下整包且哈希一致 | 真正的来源独立 | 现实中几乎不存在：whisper/SD 权重实测只有一家发布 |
 
 ```
 python tools/establish_pins.py --verify pins/models.json                 # 全部元数据来的 pin 都升一级
+python tools/establish_pins.py --cross-hf pins/models.json                 # 第二家给哈希：只比元数据，不下载
 python tools/establish_pins.py --verify pins/models.json --only qwen2.5   # 只升某一条（1.5 GB 那条要单独挑）
 ```
 
@@ -193,8 +202,8 @@ python tools/establish_pins.py --verify pins/models.json --only qwen2.5   # 只�
 
 | pin | 级 | 实测凭据 |
 |---|---|---|
-| `qwen2.5-0.5b-instruct-q2_k.gguf`（对话） | **5** | ModelScope 元数据给哈希，**hf-mirror 下满 415,182,688 B 真字节**，实算 `9ee36184e616…` 与钉值相等 |
-| `stable-diffusion-v1-5-pruned-emaonly-Q4_0.gguf`（生图） | **5** | 同上，整包 1,566,768,416 B 流式算完，`b8944e9fe0b6…` 相等 |
+| `qwen2.5-0.5b-instruct-q2_k.gguf`（对话） | **5 + 4.5** | ModelScope 元数据给哈希，**hf-mirror 下满 415,182,688 B 真字节**，实算 `9ee36184e616…` 与钉值相等；2026-10-20 另加 `--cross-hf`：HF 两主机 `lfs.oid` 也等于它 |
+| `stable-diffusion-v1-5-pruned-emaonly-Q4_0.gguf`（生图） | **5 + 4.5** | 同上，整包 1,566,768,416 B 流式算完，`b8944e9fe0b6…` 相等；`--cross-hf` 下 HF 两主机 `lfs.oid` 同值 |
 | OCR `pp-ocrv6_tiny_det/rec` 与 `ppocrv6_tiny_dict` | **3 + 同家真字节** | 上游 release digest 给哈希，同一条 URL 整包下回并算一致（1,780,590 / 4,462,639 / 27,156）；**提供方只有一个** |
 | `ggml-tiny.bin` | 3 + 同族两主机头尾 | 整包自算 + huggingface.co 头尾 4 MiB 与 hf-mirror 逐字节一致；ModelScope 无该仓库 → **升不到第 5 级** |
 | `samples/jfk.wav` | 3 + git 旁证 | 整包自算 + 同族对照 + 与 git blob sha1 相等（内容寻址的第三方旁证） |

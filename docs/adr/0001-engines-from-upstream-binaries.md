@@ -300,8 +300,7 @@ sd `master-975-95b3090` 的 `--steps/--width/--height/--sampling-method/--diffus
    否则目录里会出现"知道是哪个量化、不知道是谁训的"的条目，sha256 也救不回出处。
 2. R2 与 GitHub 都回 **206 + Content-Range**，所以**断点续传可以做**。在 0.8–1 MiB/s 的实际速率下，
    一个 400 MB 权重要 7–8 分钟，不给续传就是让用户白等一次网络抖动。
-3. R2 只暴露 `Content-Length`，**没有 sha256 元数据**；HF 的 tree/siblings 也只给文件名+大小，
-   而 resolve 响应那个 64 位十六进制的 `ETag` **不是**内容哈希（详见 model-catalog.md 的对照表）。
+3. R2 只暴露 `Content-Length`，**没有 sha256 元数据**；HF 的 `tree` **给**（`lfs.oid` 就是内容 sha256，2026-10-20 更正 —— 上一版写"只给文件名+大小"，原因是探针读了不存在的 `lfs.oidsha`/`lfs.sha`），但 resolve 响应那个 64 位十六进制的 `ETag` **不是**内容哈希（详见 model-catalog.md 的对照表）。
    但 **HF 的权重未必要自算**：同一仓库若在 ModelScope 有镜像，它 `repo/files` 元数据直接给每个文件的
    `Sha256`，且 CDN 路径本身就是内容寻址的 `lfs-objects/<sha[0:2]>/<sha[2:4]>/<sha[4:]>`，
    两条机制一致 + 总长与 HF 相符，就能零下载立 pin（SD1.5 Q4_0 1,566,768,416 B 就是这么立住的）；
