@@ -68,12 +68,23 @@ def rate_mib_s(needle: str) -> tuple[float, str]:
     return 0.0, "没有该出口的实测速率 → 不给等待时间，不编一个数字"
 
 
+def need_key(row: dict) -> str:
+    """这颗权重对应上游例子里的哪个旗标：VAE 一个，文本编码器按 clip_l / clip_g / t5xxl 分开。
+
+    用 role 当键会少算 —— flux 那一行点名的 clip_l 与 t5xxl 的 role 都是 text_encoder。
+    """
+    return "VAE" if row["role"] == "vae" else (row.get("role_token") or row["role"])
+
+
 def weight_items(arts: dict, tier: str) -> tuple[list[dict], list[str], dict | None]:
     """这一档的默认权重行：三张档位表各取第一行，生图再带上同仓库的配套件。
 
-    第三个返回值是生图那一行的配套件情况（`{"repo","roles","alternates"}`）；没有生图行时为 None。
-    它单独返回是因为"这一档的仓库里根本不含配套件"必须能进产物 —— 上游 docs/sd.md 的 flux /
-    sd3.5 例子都要另给 `--vae --clip_l --t5xxl`，所以那种情况下这张表是**下限**，不能当装齐。
+    第三个返回值是生图那一行的配套件与完备性情况（`{"repo","roles","needs_counted","alternates",
+    "state","needs","missing","source","citation"}`）；没有生图行时为 None。
+    它单独返回是因为"这一族按上游例子还需要什么、这一档到底装没装齐"必须能进产物：
+    上游 `docs/sd.md` 的 txt2img 例子逐行写着要什么（flux 要 `--vae --clip_l --t5xxl`，
+    SD1.5 只给 `-m`），**需要而仓库里没有**的那些档就是下限，判不了家族的写 unknown_arch，
+    也不许当装齐。
     """
     items, problems = [], []
     companions = None
@@ -112,25 +123,39 @@ def weight_items(arts: dict, tier: str) -> tuple[list[dict], list[str], dict | N
                 problems.append(f"{img['repo']}/{c['file']}: 配套件在 weights 里查不到字节 —— "
                                 "不能按'通常多大'补一个数")
                 continue
-            found.append((c["role"], row))
-        # 档位表把同仓库所有非主体文件都列成配套件，里面是**同一角色的不同量化**（clip_l 有
-        # f16/q8_0/q5_0…）。全加进预算等于让普通人下十几 GiB 他根本用不到的备选，
-        # 所以每个角色只算最小的那颗当"装齐"的下限，其余记成 alt 数量。
-        best: dict[str, dict] = {}
-        for role, row in found:
-            cur = best.get(role)
+            found.append(row)
+
+        # 分组键是"上游那一行里那个旗标对应的东西"，**不是 role**：flux 那一行要 clip_l、t5xxl
+        # 和 vae 三份，前两颗的 role 都是 text_encoder —— 按 role 分组会把 t5xxl 丢掉，
+        # 而档位表这时候还写着 state=complete（这一版就错过一次，所以写下来）。
+        # 同一个键下面的十几个量化才是备选，取最小的那颗。
+        groups: dict[str, dict] = {}
+        for row in found:
+            key = need_key(row)
+            cur = groups.get(key)
             if cur is None or int(row["size"]) < int(cur["size"]):
-                best[role] = row
-        for role in sorted(best):
-            row = best[role]
+                groups[key] = row
+        for key in sorted(groups):
+            row = groups[key]
             items.append({"kind": "image", "name": img["repo"], "file": row["file"],
                           "bytes": int(row["size"]), "hash_status": row["status"],
                           "trusted_before_download": row["usable_before_download"],
-                          "role": role, "companion_of": img["file"],
-                          "role_alternates": sum(1 for r, _ in found if r == role) - 1,
+                          "role": row["role"], "need_key": key, "companion_of": img["file"],
+                          "group_alternates": sum(1 for r in found if need_key(r) == key) - 1,
                           "from": "catalog/image-tiers.json"})
-        companions = {"repo": img["repo"], "roles": sorted(best),
-                      "alternates": sum(1 for _ in found) - len(best)}
+        counted = set(groups)
+        comp = img.get("completeness") or {}
+        for need in comp.get("needs") or []:
+            if need not in counted and need not in (comp.get("missing") or []):
+                problems.append(f"{img['repo']}/{img['file']}: 档位表说这一族需要 {need}，"
+                                "但同仓库的配套件里没有它，而它自己写着不缺 —— "
+                                "加法会少算（两张表不一致）")
+        companions = {"repo": img["repo"], "roles": sorted({r["role"] for r in groups.values()}),
+                      "needs_counted": sorted(counted), "alternates": len(found) - len(groups)}
+        # 预算只转述档位表已经判过的 state/needs/missing（依据是 docs/sd.md 的 txt2img 例子那四行），
+        # 并据此决定这一档能不能当"装齐"：需要但仓库没有 = 下限；上游例子只给 -m = 不是下限。
+        for k in ("state", "needs", "missing", "source", "citation"):
+            companions[k] = comp.get(k)
     return items, problems, companions
 
 
@@ -206,10 +231,9 @@ def build(arts: dict) -> tuple[dict, list[str]]:
                                       if i["trusted_before_download"] is False}),
             "companion_bytes": sum(i["bytes"] for i in items if i.get("companion_of")),
             "image_companions": comps,
-            # 上游 docs/sd.md 的 flux / sd3.5 例子要另给 --vae --clip_l --t5xxl，所以默认行
-            # 所在仓库不含配套件时，这一档的"生图"部分只能算下限。这是事实，不是 bug：
-            # 它必须由产物带出去，UI 才不能说"装完这几颗就能出图"。
-            "image_repo_carries_companions": bool(comps and comps["roles"]),
+            # **需要但同仓库没有**（incomplete）或**上游例子里没这一族、判不了**（unknown_arch）
+            # 时，这一档的生图量只能当**下限**；上游例子只给 -m 的（self_contained）不是下限。
+            "image_lower_bound": bool(comps) and comps.get("state") in ("incomplete", "unknown_arch"),
             "by_os": by_os,
         }
     totals = {t: {o: per[t]["by_os"][o]["download_gib"] for o in per[t]["by_os"]} for t in tiers}
@@ -219,8 +243,10 @@ def build(arts: dict) -> tuple[dict, list[str]]:
                             "各档默认权重(三张档位表该档第一行) + OCR(默认档三条已钉字节)",
                      "image_companions": "生图的配套件（clip/t5/vae）按 weights 里的真实字节加，"
                                           "查不到就报问题、不估算；同一角色的多个量化是**备选**不是都要下，"
-                                          "只把最小那颗计入，其余记 alternates；默认行所在仓库没有配套件时，"
-                                          "该档的生图部分只是下限（上游 flux/sd3.5 例子要另给三份文件）",
+                                          "只把最小那颗计入，其余记 alternates；"
+                                          "档位表判为 incomplete（需要但同仓库没有）或 unknown_arch（判不了）"
+                                          "的那些档，生图部分只是下限，判定依据是上游 docs/sd.md 的 "
+                                          "txt2img 例子那四行（每行都有 file:line 出处）",
                      "ram": "不加内存：四项能力共用一个常驻引擎、一次跑一项，"
                             "内存那一轴由各档位表自己的判据负责",
                      "time": "等待时间用 lain42.top 这台 CN 出口一次量的吞吐换算，只当量级",
@@ -253,10 +279,9 @@ def check(committed: dict, fresh: dict) -> list[str]:
                        f"{f['image_companions']}（档位表重算过，'装齐'的含义要跟着重看）")
         if c.get("companion_bytes") != f["companion_bytes"]:
             bad.append(f"{t}: 配套件字节变了 {c.get('companion_bytes')} → {f['companion_bytes']}")
-        if c.get("image_repo_carries_companions") != f["image_repo_carries_companions"]:
-            bad.append(f"{t}: '默认行仓库带不带配套件'变了 "
-                       f"{c.get('image_repo_carries_companions')} → "
-                       f"{f['image_repo_carries_companions']}（这一档是不是下限，UI 措辞要改）")
+        if c.get("image_lower_bound") != f["image_lower_bound"]:
+            bad.append(f"{t}: '这一档是不是下限'变了 {c.get('image_lower_bound')} → "
+                       f"{f['image_lower_bound']}（配套件判定漂了，UI 那句'装完就能出图'要重看）")
         for o, ov in f["by_os"].items():
             cv = c.get("by_os", {}).get(o)
             if not cv:
@@ -298,38 +323,76 @@ def selftest() -> int:
         "catalog/image-tiers.json": {"tiers_rows": {
             "4GB": [{"repo": "x/y", "file": "unet.gguf", "size": 3000, "status": "single",
                      "usable_before_download": False,
+                     "completeness": {"state": "incomplete", "arch": "flux",
+                                      "needs": ["clip_l", "t5xxl", "VAE"], "missing": ["VAE"],
+                                      "source": "docs/sd.md:16", "citation": "sd-flux-needs-companions"},
                      "companions": [{"file": "t5.gguf", "role": "text_encoder"},
                                     {"file": "clip.gguf", "role": "text_encoder"},
+                                    {"file": "clip_hi.gguf", "role": "text_encoder"},
                                     {"file": "gone.gguf", "role": "vae"}]}]},
             "weights": [{"repo": "x/y", "file": "unet.gguf", "size": 3000, "status": "single",
-                         "usable_before_download": False},
+                         "role": "unet", "role_token": "", "usable_before_download": False},
                         {"repo": "x/y", "file": "t5.gguf", "size": 7000, "status": "agree",
+                         "role": "text_encoder", "role_token": "t5xxl",
                          "usable_before_download": True},
                         {"repo": "x/y", "file": "clip.gguf", "size": 500, "status": "agree",
+                         "role": "text_encoder", "role_token": "clip_l",
+                         "usable_before_download": True},
+                        {"repo": "x/y", "file": "clip_hi.gguf", "size": 9000, "status": "agree",
+                         "role": "text_encoder", "role_token": "clip_l",
                          "usable_before_download": True}]},
     }
     out, problems = build(arts)
     o = out["per_tier"]["4GB"]["by_os"]["win-x64"]
-    want = 1000 + 2000 + 3000 + 500 + 100 + 200 + int(round(17.1 * MIB))
+    want = 1000 + 2000 + 3000 + 500 + 7000 + 100 + 200 + int(round(17.1 * MIB))
     if o["download_bytes"] != want:
         bad.append(f"求和不对：{o['download_bytes']} ≠ {want}")
-    if out["per_tier"]["4GB"]["companion_bytes"] != 500:
-        bad.append(f"配套件没按'每角色最小那颗'算：{out['per_tier']['4GB']['companion_bytes']} ≠ 500 "
-                   "（只报 unet 是少算，把同角色的每个量化都加进来是多算）")
+    if out["per_tier"]["4GB"]["companion_bytes"] != 7500:
+        bad.append(f"配套件没按'每个需要的旗标取最小那颗'算：{out['per_tier']['4GB']['companion_bytes']} ≠ 7500 "
+                   "（clip_l 与 t5xxl 都是 flux 那一行点名的，按 role 分组会丢掉 t5xxl）")
+    files = [i["file"] for i in out["per_tier"]["4GB"]["items"]]
+    if "t5.gguf" not in files:
+        bad.append(f"t5xxl 被丢掉或当成备选没进加法：{files}")
+    if "clip_hi.gguf" in files:
+        bad.append("同一颗 clip_l 的另一个量化被当成第二份必下的文件加进预算了")
     ic = out["per_tier"]["4GB"]["image_companions"]
     if not ic or ic["roles"] != ["text_encoder"] or ic["alternates"] != 1:
         bad.append(f"配套件的角色/备选数没记进产物：{ic}")
-    if "t5.gguf" in [i["file"] for i in out["per_tier"]["4GB"]["items"]]:
-        bad.append("同角色的另一颗量化被当成第二份必下的文件加进预算了")
-    if not out["per_tier"]["4GB"]["image_repo_carries_companions"]:
-        bad.append("仓库里明明有配套件，产物却说没有")
-    no_comp = json.loads(json.dumps(arts))
-    no_comp["catalog/image-tiers.json"]["tiers_rows"]["4GB"][0]["companions"] = []
-    nc = build(no_comp)[0]["per_tier"]["4GB"]
-    if nc["image_repo_carries_companions"] or nc["companion_bytes"]:
-        bad.append("默认行仓库没有配套件时，产物没把这档标成下限")
-    if nc["image_companions"] != {"repo": "x/y", "roles": [], "alternates": 0}:
-        bad.append(f"没有配套件时 image_companions 该是空角色表：{nc['image_companions']}")
+    if ic["needs_counted"] != ["clip_l", "t5xxl"]:
+        bad.append(f"加法到底装了哪些旗标没记下来：{ic}")
+    if ic["state"] != "incomplete" or not out["per_tier"]["4GB"]["image_lower_bound"]:
+        bad.append(f"需要但仓库缺配套件的那一档没被标成下限：{ic['state']} / "
+                   f"{out['per_tier']['4GB']['image_lower_bound']}")
+    if ic.get("citation") != "sd-flux-needs-companions":
+        bad.append(f"'这一档是下限'没把上游出处带进产物：{ic}")
+    # 两张表不一致（档位表说齐了、文件表里却没有那颗旗标对应的文件）必须报问题：
+    # 这就是上一版按 role 分组时发生的事 —— 少算的时候没人喊。
+    dis = json.loads(json.dumps(arts))
+    dis["catalog/image-tiers.json"]["tiers_rows"]["4GB"][0]["companions"] = [
+        {"file": "clip.gguf", "role": "text_encoder"}]
+    dis["catalog/image-tiers.json"]["tiers_rows"]["4GB"][0]["completeness"] = {
+        "state": "complete", "needs": ["clip_l", "t5xxl", "VAE"], "missing": [],
+        "source": "docs/sd.md:16", "citation": "sd-flux-needs-companions"}
+    dp = build(dis)[1]
+    if not any("需要 t5xxl" in p for p in dp):
+        bad.append(f"档位表说齐、加法却少了一颗旗标时没报问题：{dp}")
+    # 反向对照：上游例子只给 -m 的那一档（SD1.5）**不是**下限 —— 防的是"仓库里没配套件就等于
+    # 装不齐"这种粗判，它会把能直接出图的档也标成可疑。
+    sc = json.loads(json.dumps(arts))
+    sc["catalog/image-tiers.json"]["tiers_rows"]["4GB"][0]["companions"] = []
+    sc["catalog/image-tiers.json"]["tiers_rows"]["4GB"][0]["completeness"] = {
+        "state": "self_contained", "arch": "sd1.5", "needs": [], "missing": [],
+        "source": "docs/sd.md:13", "citation": "sd-example-sd15-only-model"}
+    s = build(sc)[0]["per_tier"]["4GB"]
+    if s["image_lower_bound"] or s["companion_bytes"]:
+        bad.append("上游说只给 -m 就够的那一档被错标成下限（或还留着配套件字节）")
+    if s["image_companions"]["roles"] or s["image_companions"]["state"] != "self_contained":
+        bad.append(f"self_contained 那档的配套件表不对：{s['image_companions']}")
+    # 认不出家族也不能算"装齐"：查不到 ≠ 不需要
+    ua = json.loads(json.dumps(arts))
+    ua["catalog/image-tiers.json"]["tiers_rows"]["4GB"][0]["completeness"] = {"state": "unknown_arch"}
+    if not build(ua)[0]["per_tier"]["4GB"]["image_lower_bound"]:
+        bad.append("unknown_arch 被当成不需要配套件了")
     if not any("gone.gguf" in p for p in problems):
         bad.append(f"配套件查不到字节却没报问题：{problems}")
     if o["missing_capabilities"] != ["字幕"]:
@@ -422,10 +485,12 @@ def main(argv: list[str]) -> int:
                                 for f in fresh['per_tier'][t]['untrusted_rows']}))
     for t in fresh["tiers"]:
         blk = fresh["per_tier"][t]
-        if not blk["image_repo_carries_companions"]:
-            print(f"  {t} 档：生图默认行 {blk['image_companions']['repo'] if blk['image_companions'] else '(无)'} "
-                  "的仓库里没有任何配套件 —— 这一档的生图量是**下限**（上游 docs/sd.md 的 flux / "
-                  "sd3.5 例子要另给 --vae --clip_l --t5xxl）")
+        if blk["image_lower_bound"]:
+            ic = blk["image_companions"] or {}
+            print(f"  {t} 档：生图默认行 {(ic.get('repo') or '(无)')} 还缺 "
+                  f"{ic.get('missing') or '判不了这一族需要些什么'}"
+                  f"（{ic.get('state')}，依据 {ic.get('source') or '—'}）"
+                  " —— 这一档的生图量是**下限**，UI 不能说装完就能出图")
     for x in problems:
         print("BAD:", x)
     print("BAD 数量 =", len(problems))

@@ -250,6 +250,35 @@ class TestPoolDiscovery(unittest.TestCase):
         self.assertTrue(all("主体权重" in p for p in problems), problems)
         self.assertEqual(out["tiers_rows"]["4GB"][0]["file"], "a.gguf")
 
+    def flux_files(self, unet_size: int, sha: str) -> dict:
+        """一颗"齐"的 flux 仓库：unet + clip_l + t5xxl + ae，四样都带（上游 :16 点名要后三样）。"""
+        names = {"flux1-big.gguf": unet_size, "clip_l-a.gguf": 200_000_000,
+                 "t5xxl-a.gguf": 900_000_000, "ae-a.gguf": 200_000_000}
+        return {"hf": {k: {"sha256": sha, "size": v} for k, v in names.items()},
+                "ms": {k: {"sha256": sha, "size": v} for k, v in names.items()}}
+
+    def test_mature_is_excluded_even_when_that_row_would_win_every_other_gate(self) -> None:
+        """成人标记这条判据曾被"完备性优先"遮住：真实捕获里那两颗成人仓库排不到前面。
+
+        所以这里造一颗**又大又齐**的成人 unet（7 GB，16GB 档里比另一家大），
+        它必须仍然被上游自己的 `not-for-all-audiences` 挡在档位之外。
+        """
+        base = {"id": "leejet/Adult", "downloads": 50, "tags": ["gguf", ri.MATURE_TAG]}
+        other = {"id": "someone/Okay", "downloads": 40, "tags": ["gguf"]}
+        files = {"leejet/Adult": self.flux_files(7_000_000_000, "a" * 64),
+                 "someone/Okay": self.flux_files(5_000_000_000, "b" * 64)}
+        for tags, expect_in in ((True, False), (False, True)):
+            adult = dict(base, tags=["gguf", ri.MATURE_TAG] if tags else ["gguf"])
+            fetch_meta, files_for = self.make({"q1": [adult, other]}, files=files)
+            out = ri.build(ri.search_repos(fetch_meta, queries=("q1",))[0], files_for)[0]
+            repos_16 = [r["repo"] for r in out["tiers_rows"]["16GB"]]
+            if expect_in:
+                self.assertEqual(repos_16[0], "leejet/Adult",
+                                 "正向对照：去掉成人标记，这颗又大又齐的就该是第一行")
+            else:
+                self.assertNotIn("leejet/Adult", repos_16,
+                                 "带成人标记的行进了档位（它同时又是最大最齐的那颗）")
+
 
 class TestCheck(unittest.TestCase):
     def fresh(self):
@@ -290,6 +319,21 @@ class TestCheck(unittest.TestCase):
         for name, fn in cases:
             self.assertTrue(any(name in x or "新出现" in x or "解不出来" in x
                                 for x in ri.check(self.fresh(), self.mutated(fn))), name)
+
+    def test_completeness_and_default_state_drift_are_caught(self) -> None:
+        # 完备性判定是"装完能不能出图"这件事的唯一记录，两张表一漂就得红
+        label = next(t for t, s in self.fresh()["default_row_states"].items()
+                     if s == "complete")
+        bad = ri.check(self.fresh(), self.mutated(
+            lambda d: d["tiers_rows"][label][0].__setitem__(
+                "completeness", {"state": "incomplete", "needs": ["VAE"], "missing": ["VAE"]})))
+        self.assertTrue(any("completeness 变了" in x for x in bad), bad)
+        bad2 = ri.check(self.fresh(), self.mutated(
+            lambda d: d["default_row_states"].__setitem__(label, "incomplete")))
+        self.assertTrue(any("判定变了" in x for x in bad2), bad2)
+        self.assertTrue(any("completeness 变了" in x for x in ri.check(
+            self.fresh(), self.mutated(lambda d: d["tiers_rows"][label][0].pop("completeness")))),
+                        "整张表少了 completeness 字段也不红")
 
     def test_rule_ref_queries_and_unresolved_sets_are_compared(self) -> None:
         self.assertTrue(any("rule" in x for x in

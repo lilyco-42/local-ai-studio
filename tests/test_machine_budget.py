@@ -90,7 +90,9 @@ class TestAgainstSourceArtifacts(unittest.TestCase):
                 if i["kind"] == "chat":
                     src_row = next(r for r in self.chat["tiers_rows"][tier] if r["file"] == i["file"])
                 elif i["kind"] == "image":
-                    src_row = next(r for r in self.img["tiers_rows"][tier] if r["file"] == i["file"])
+                    # 配套件不在 tiers_rows 里（那里只有主体行），必须回 weights 按（仓库, 文件）查
+                    src_row = next(r for r in self.img["weights"]
+                                   if (r["repo"], r["file"]) == (i["name"], i["file"]))
                 elif i["kind"] == "subtitle":
                     src_row = {"usable_before_download": False}   # 整轴只有一家给哈希
                 else:
@@ -120,30 +122,32 @@ class TestArithmetic(unittest.TestCase):
                              self.d["totals_gib"][tier], "汇总数字必须由每档算出")
 
     def test_companions_are_counted_and_separately_visible(self) -> None:
-        total = 0
         for tier, block in self.d["per_tier"].items():
             comp = sum(i["bytes"] for i in block["items"] if i.get("companion_of"))
             self.assertEqual(block["companion_bytes"], comp)
-            total += comp
-            roles = [i["role"] for i in block["items"] if i.get("companion_of")]
-            self.assertEqual(len(roles), len(set(roles)),
-                             "同一角色的多个量化被当成多份必下的文件了")
+            counted = [i["need_key"] for i in block["items"] if i.get("companion_of")]
+            self.assertEqual(len(counted), len(set(counted)),
+                             "同一个旗标的两个量化都被当成必下的文件加进预算了")
+            self.assertEqual(sorted(counted), block["image_companions"]["needs_counted"])
+            ic = block["image_companions"]
+            # 上游例子点名的每一样：要么进了加法，要么明写着缺（不能不吭声地少算）
+            for need in ic.get("needs") or []:
+                self.assertTrue(need in counted or need in (ic.get("missing") or []),
+                                (tier, need, counted, ic.get("missing")))
+            tiers_src = src("catalog/image-tiers.json")
+            repo_rows = [w for w in tiers_src["weights"] if w["repo"] == ic["repo"]]
             for i in block["items"]:
-                if i.get("companion_of"):
-                    self.assertNotEqual(i["file"], i["companion_of"])
-                    self.assertIn(i["role"], ("vae", "text_encoder", "lora"))
-                    # 计进来的必须正好是同角色候选里最小的一颗
-                    row = next(x for x in self.img["tiers_rows"][tier]
-                               if x["file"] == i["companion_of"])
-                    cands = [w["size"] for c in row.get("companions") or []
-                             if c["role"] == i["role"]
-                             for w in self.img["weights"] if w["file"] == c["file"]]
-                    self.assertEqual(i["bytes"], min(cands), (tier, i["file"]))
-                    self.assertEqual(i["role_alternates"], len(cands) - 1)
+                if not i.get("companion_of"):
+                    continue
+                self.assertNotEqual(i["file"], i["companion_of"])
+                self.assertIn(i["role"], ("vae", "text_encoder", "lora"))
+                cands = [w["size"] for w in repo_rows if mb.need_key(w) == i["need_key"]]
+                self.assertEqual(i["bytes"], min(cands), (tier, i["file"]))
+                self.assertEqual(i["group_alternates"], len(cands) - 1)
         with_comp = [i for t in self.d["per_tier"].values() for i in t["items"]
                      if i.get("companion_of")]
-        self.assertTrue(with_comp or total == 0,
-                        "默认档恰好都没配套件时，这条要由带配套件的合成用例负责（见 selftest）")
+        self.assertTrue(with_comp,
+                        "默认档至少要有一行真的带配套件，否则上面的加法判据全是空的（合成那半在 selftest）")
 
     def test_time_is_derived_from_the_measured_rate_module(self) -> None:
         self.assertEqual(self.d["rates_mib_s"]["modelscope"],
@@ -212,8 +216,7 @@ class TestRecompute(unittest.TestCase):
             ("companion_bytes", lambda d: d["per_tier"]["4GB"].__setitem__("companion_bytes", 1)),
             ("image_companions", lambda d: d["per_tier"]["4GB"].__setitem__(
                 "image_companions", {"repo": "x/y", "roles": ["vae"], "alternates": 3})),
-            ("carries", lambda d: d["per_tier"]["4GB"].__setitem__(
-                "image_repo_carries_companions", True)),
+            ("carries", lambda d: d["per_tier"]["4GB"].__setitem__("image_lower_bound", True)),
         ]:
             mutated = json.loads(json.dumps(fresh))
             mutate(mutated)

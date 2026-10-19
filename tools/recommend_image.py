@@ -108,6 +108,49 @@ def role_of(file: str) -> tuple[str, str]:
     return "unet", ""
 
 
+# —— "装完这一颗能不能出图" ——
+# 只从上游 `docs/sd.md` 的 txt2img 例子读：那几行逐条写着每个家族在主体之外还要哪些文件
+# （行号都进了 pins/citations.json，由车道 citation-drift 按 pin ref 逐行查）。
+# 认不出家族的行是 `unknown_arch`，**不当成"不需要外挂权重"** —— 查不到要用"不知道"表达，
+# 把"我没查到"写成"没有"这类错本轮在 HF 的 lfs 键名上已经犯过一次。
+SD_DOC = "docs/sd.md"
+ARCH_RULES = (
+    # (家族, 匹配"仓库名/文件名"的正则, 主体之外还需要的东西, 上游那一行, 那行的主体文件, 出处 id)
+    ("flux", re.compile(r"flux", re.I), ("clip_l", "t5xxl", "VAE"), 16,
+     "flux1-dev-q3_k.gguf", "sd-flux-needs-companions"),
+    ("sd3.5", re.compile(r"sd3[.\s_-]*5|diffusion-3[.\s_-]*5", re.I),
+     ("clip_l", "clip_g", "t5xxl"), 17, "sd3.5_large.safetensors", "sd-sd35-needs-encoders"),
+    ("sdxl", re.compile(r"sd[-_ ]?xl|xl[-_ ]?base", re.I), ("VAE",), 14,
+     "sd_xl_base_1.0.safetensors", "sd-example-sdxl-needs-vae"),
+    ("sd1.5", re.compile(r"v1[-_.]?5|sd[-_]v1[-_]4", re.I), (), 13,
+     "v1-5-pruned-emaonly.safetensors", "sd-example-sd15-only-model"),
+)
+
+
+def arch_of(repo: str, file: str):
+    for rule in ARCH_RULES:
+        if rule[1].search(f"{repo}/{file}"):
+            return rule
+    return None
+
+
+def completeness(repo: str, file: str, present: set[str]) -> dict:
+    """这颗主体权重装完之后，同一个仓库里有没有上游那条例子点名的其余文件。"""
+    rule = arch_of(repo, file)
+    if rule is None:
+        return {"arch": None, "needs": None, "missing": None, "state": "unknown_arch",
+                "source": None, "citation": None,
+                "note": f"{SD_DOC} 的例子里没有这一族，所以不判它需不需要外挂权重（不是'不需要'）"}
+    arch, _rx, needs, line, example, cid = rule
+    missing = [n for n in needs if n not in present]
+    state = "self_contained" if not needs else ("complete" if not missing else "incomplete")
+    return {"arch": arch, "needs": list(needs), "missing": missing, "state": state,
+            "source": f"{ENGINE_REPO}@{REF[:8]} {SD_DOC}:{line}（那行的主体是 {example}）",
+            "citation": cid,
+            "note": ("上游那一行只给 -m：主体之外不需要别的文件" if not needs else
+                     "需要的是那一行点名的文件；同仓库里备齐才算这一档能直接出图")}
+
+
 def search_repos(fetch_meta, queries: tuple[str, ...] = QUERIES,
                  limit: int = LIMIT) -> tuple[list[dict], list[str]]:
     """候选池来自上游搜索本身（按下载量排），不是我背一份仓库名单。"""
@@ -181,19 +224,40 @@ def build(repos: list[dict], files_for, per_tier: int = PER_TIER) -> tuple[dict,
                 "urls": [c["url"] for c in file_index.candidates(r["repo"], f)][:3],
             })
     tiers: dict[str, list[dict]] = {}
+    # 每个仓库实际带了哪些"主体之外的东西"：VAE 单独归一成 VAE（上游例子里它叫 --vae / ae.sft），
+    # 文本编码器按角色算（clip_l / clip_g / t5xxl 在一个档位里是"要有",不是"要几个量化"）。
+    present: dict[str, set[str]] = {}
+    for x in rows:
+        bag = present.setdefault(x["repo"], set())
+        if x["role"] == "vae":
+            bag.add("VAE")
+        elif x["role"] != "unet":
+            bag.add(x["role_token"])
+    default_states: dict[str, str] = {}
     for label, _cap in rm.TIERS:
-        pool = [x for x in rows if x["fits"][label] and x["role"] == "unet" and not x["mature"]]
-        pool.sort(key=lambda x: (-x["size"], x["repo"], x["file"]))
+        pool = []
+        for x in rows:
+            if x["fits"][label] and x["role"] == "unet" and not x["mature"]:
+                comp = completeness(x["repo"], x["file"], present.get(x["repo"], set()))
+                pool.append((0 if comp["state"] in ("complete", "self_contained") else 1,
+                             -x["size"], x["repo"], x["file"], x, comp))
+        # 先按"装完能不能直接出图"排，再按大小、仓库名 —— 一个跑不动的大文件不该赢过
+        # 同档里备齐编码器的另一家（16GB 档实测就是这么从只有 unet 的 unsloth FLUX
+        # 换成带 clip_l/t5xxl/ae 的仓库的）。
+        pool.sort(key=lambda t: t[:4])
+        default_states[label] = pool[0][5]["state"] if pool else "empty"
         tiers[label] = [dict(
-            {"repo": x["repo"], "file": x["file"], "size": x["size"], "sha256": x["sha256"],
-             "status": x["status"], "usable_before_download": x["usable_before_download"],
-             "license": x["license"], "by_author": x["by_author"],
-             "downloads": x["downloads"]},
+            {"repo": t[4]["repo"], "file": t[4]["file"], "size": t[4]["size"],
+             "sha256": t[4]["sha256"], "status": t[4]["status"],
+             "usable_before_download": t[4]["usable_before_download"],
+             "license": t[4]["license"], "by_author": t[4]["by_author"],
+             "downloads": t[4]["downloads"]},
             # 生图往往不是一个文件：FLUX 那类要 unet + clip_l + t5 + vae 才出得来图。
             # 只报主体文件名，用户下完发现跑不动 —— 配套件必须跟着行走。
             companions=[{"file": y["file"], "role": y["role"]} for y in rows
-                        if y["repo"] == x["repo"] and y["role"] != "unet"])
-            for x in pool[:per_tier]]
+                        if y["repo"] == t[4]["repo"] and y["role"] != "unet"],
+            completeness=t[5])
+            for t in pool[:per_tier]]
         if len(pool) < 2:
             problems.append(f"档位 {label} 只有 {len(pool)} 行**主体权重**合档（<2）—— "
                             "候选池或大小/角色判据漂了")
@@ -217,11 +281,19 @@ def build(repos: list[dict], files_for, per_tier: int = PER_TIER) -> tuple[dict,
                                      "引擎在运行时量内存并走分段执行（见 mem_facts）",
                      "hash": "两家给同一个 sha256 才 usable；一家给就是 single，必须下完自算",
                      "mature": f"上游打了 {MATURE_TAG} 标签的行不进档位（仍留在 weights 里），"
-                               "按上游标记排除、不按仓库名猜"},
+                               "按上游标记排除、不按仓库名猜",
+                     "completeness": f"每行带 completeness：家族需要什么只从上游 {SD_DOC} 的 "
+                                     "txt2img 例子读（:13 SD1.5 只给 -m / :14 SDXL 要 --vae / "
+                                     ":16 flux 要 --vae --clip_l --t5xxl / :17 sd3.5_large 要三串"
+                                     "编码器），四行各有一条 file:line 出处由 citation-drift 查。"
+                                     "同仓库里有那些角色的文件才算 complete；缺的叫 incomplete 并"
+                                     "**排在同档后面**；认不出家族是 unknown_arch，**不当成'不需要'**"},
             "mem_facts": {k: f"{ENGINE_REPO}@{REF[:8]} {MEM_DOC}:{v}" for k, v in MEM_FACTS.items()},
             "engine_tag_claims": sum(1 for x in rows if x["engine_tags"]),
             "queries": list(QUERIES), "candidates": len(repos),
             "roles": roles, "unresolved_repos": sorted(unresolved),
+            "default_row_states": default_states,
+            "incomplete_default_rows": [k for k, v in default_states.items() if v == "incomplete"],
             "mature_rows": sum(1 for x in rows if x["mature"]),
             "license_unknown_rows": sum(1 for x in rows if "许可不明" in x["license_flag"]),
             "row_count": len(rows), "usable_before_download": agree,
@@ -259,6 +331,16 @@ def check(committed: dict, fresh: dict) -> list[str]:
         got = [x["file"] for x in fresh["tiers_rows"][label]]
         if want != got:
             bad.append(f"档位 {label} 的行变了 {want} → {got}")
+            continue
+        if (committed.get("default_row_states", {}).get(label)
+                != fresh["default_row_states"][label]):
+            bad.append(f"档位 {label} 默认行的'装完能不能出图'判定变了 "
+                       f"{committed.get('default_row_states', {}).get(label)!r} → "
+                       f"{fresh['default_row_states'][label]!r}（家族规则或仓库内容漂了）")
+        for a, b in zip(committed["tiers_rows"][label], fresh["tiers_rows"][label]):
+            if a.get("completeness") != b.get("completeness"):
+                bad.append(f"档位 {label}/{a['file']}: completeness 变了 "
+                           f"{str(a.get('completeness'))[:60]!r} → {str(b.get('completeness'))[:60]!r}")
     return bad
 
 

@@ -12,8 +12,8 @@
   "16GB": {
    "by_os": {
     "linux-x64": {
-     "download_bytes": 20679604915,
-     "download_gib": 19.26,
+     "download_bytes": 22360077651,
+     "download_gib": 20.82,
      "engine_download_mib": 52.1,
      "engine_landed_mib": null,
      "engine_rows": [
@@ -42,17 +42,17 @@
        "status": "ok"
       }
      ],
-     "minutes_at_measured_rate": 78.3,
+     "minutes_at_measured_rate": 84.6,
      "missing_capabilities": [],
      "unknown_landed_sizes": [
       "字幕",
       "对话"
      ],
-     "worst_case_hours_at_slowest_measured": 21.91
+     "worst_case_hours_at_slowest_measured": 23.69
     },
     "macos-arm64": {
-     "download_bytes": 20673732889,
-     "download_gib": 19.25,
+     "download_bytes": 22354205625,
+     "download_gib": 20.82,
      "engine_download_mib": 46.5,
      "engine_landed_mib": null,
      "engine_rows": [
@@ -81,18 +81,18 @@
        "status": "ok"
       }
      ],
-     "minutes_at_measured_rate": 78.2,
+     "minutes_at_measured_rate": 84.6,
      "missing_capabilities": [
       "字幕"
      ],
      "unknown_landed_sizes": [
       "对话"
      ],
-     "worst_case_hours_at_slowest_measured": 21.91
+     "worst_case_hours_at_slowest_measured": 23.69
     },
     "win-x64": {
-     "download_bytes": 20671321164,
-     "download_gib": 19.25,
+     "download_bytes": 22351793900,
+     "download_gib": 20.82,
      "engine_download_mib": 44.2,
      "engine_landed_mib": 115.6,
      "engine_rows": [
@@ -121,19 +121,36 @@
        "status": "ok"
       }
      ],
-     "minutes_at_measured_rate": 78.2,
+     "minutes_at_measured_rate": 84.6,
      "missing_capabilities": [],
      "unknown_landed_sizes": [],
-     "worst_case_hours_at_slowest_measured": 21.9
+     "worst_case_hours_at_slowest_measured": 23.68
     }
    },
-   "companion_bytes": 0,
+   "companion_bytes": 1904261600,
    "image_companions": {
-    "alternates": 0,
-    "repo": "unsloth/FLUX.1-schnell-GGUF",
-    "roles": []
+    "alternates": 8,
+    "citation": "sd-flux-needs-companions",
+    "missing": [],
+    "needs": [
+     "clip_l",
+     "t5xxl",
+     "VAE"
+    ],
+    "needs_counted": [
+     "VAE",
+     "clip_l",
+     "t5xxl"
+    ],
+    "repo": "second-state/FLUX.1-schnell-GGUF",
+    "roles": [
+     "text_encoder",
+     "vae"
+    ],
+    "source": "leejet/stable-diffusion.cpp@95b30906 docs/sd.md:16（那行的主体是 flux1-dev-q3_k.gguf）",
+    "state": "complete"
    },
-   "image_repo_carries_companions": false,
+   "image_lower_bound": false,
    "items": [
     {
      "bytes": 9001753376,
@@ -145,13 +162,52 @@
      "trusted_before_download": true
     },
     {
-     "bytes": 8399029280,
-     "file": "flux1-schnell-Q5_K_M.gguf",
+     "bytes": 8175240416,
+     "file": "flux1-schnell-Q5_0.gguf",
      "from": "catalog/image-tiers.json",
      "hash_status": "agree",
      "kind": "image",
-     "name": "unsloth/FLUX.1-schnell-GGUF",
+     "name": "second-state/FLUX.1-schnell-GGUF",
      "role": "unet",
+     "trusted_before_download": true
+    },
+    {
+     "bytes": 1605835296,
+     "companion_of": "flux1-schnell-Q5_0.gguf",
+     "file": "t5xxl-Q2_K.gguf",
+     "from": "catalog/image-tiers.json",
+     "group_alternates": 7,
+     "hash_status": "agree",
+     "kind": "image",
+     "name": "second-state/FLUX.1-schnell-GGUF",
+     "need_key": "t5xxl",
+     "role": "text_encoder",
+     "trusted_before_download": true
+    },
+    {
+     "bytes": 167656704,
+     "companion_of": "flux1-schnell-Q5_0.gguf",
+     "file": "ae-f16.gguf",
+     "from": "catalog/image-tiers.json",
+     "group_alternates": 0,
+     "hash_status": "agree",
+     "kind": "image",
+     "name": "second-state/FLUX.1-schnell-GGUF",
+     "need_key": "VAE",
+     "role": "vae",
+     "trusted_before_download": true
+    },
+    {
+     "bytes": 130769600,
+     "companion_of": "flux1-schnell-Q5_0.gguf",
+     "file": "clip_l-Q8_0.gguf",
+     "from": "catalog/image-tiers.json",
+     "group_alternates": 1,
+     "hash_status": "agree",
+     "kind": "image",
+     "name": "second-state/FLUX.1-schnell-GGUF",
+     "need_key": "clip_l",
+     "role": "text_encoder",
      "trusted_before_download": true
     },
     {
@@ -205,7 +261,7 @@
    "untrusted_rows": [
     "ggml-large-v1.bin"
    ],
-   "weights_bytes": 20624974105
+   "weights_bytes": 22305446841
   },
   "4GB": {
    "by_os": {
@@ -328,10 +384,16 @@
    "companion_bytes": 0,
    "image_companions": {
     "alternates": 0,
+    "citation": "sd-example-sd15-only-model",
+    "missing": [],
+    "needs": [],
+    "needs_counted": [],
     "repo": "second-state/stable-diffusion-v1-5-GGUF",
-    "roles": []
+    "roles": [],
+    "source": "leejet/stable-diffusion.cpp@95b30906 docs/sd.md:13（那行的主体是 v1-5-pruned-emaonly.safetensors）",
+    "state": "self_contained"
    },
-   "image_repo_carries_companions": false,
+   "image_lower_bound": false,
    "items": [
     {
      "bytes": 2497281312,
@@ -526,10 +588,16 @@
    "companion_bytes": 0,
    "image_companions": {
     "alternates": 0,
+    "citation": "sd-example-sd15-only-model",
+    "missing": [],
+    "needs": [],
+    "needs_counted": [],
     "repo": "second-state/stable-diffusion-v1-5-GGUF",
-    "roles": []
+    "roles": [],
+    "source": "leejet/stable-diffusion.cpp@95b30906 docs/sd.md:13（那行的主体是 v1-5-pruned-emaonly.safetensors）",
+    "state": "self_contained"
    },
-   "image_repo_carries_companions": false,
+   "image_lower_bound": false,
    "items": [
     {
      "bytes": 5027784512,
@@ -610,7 +678,7 @@
   "modelscope": 4.2
  },
  "rule": {
-  "image_companions": "生图的配套件（clip/t5/vae）按 weights 里的真实字节加，查不到就报问题、不估算；同一角色的多个量化是**备选**不是都要下，只把最小那颗计入，其余记 alternates；默认行所在仓库没有配套件时，该档的生图部分只是下限（上游 flux/sd3.5 例子要另给三份文件）",
+  "image_companions": "生图的配套件（clip/t5/vae）按 weights 里的真实字节加，查不到就报问题、不估算；同一角色的多个量化是**备选**不是都要下，只把最小那颗计入，其余记 alternates；档位表判为 incomplete（需要但同仓库没有）或 unknown_arch（判不了）的那些档，生图部分只是下限，判定依据是上游 docs/sd.md 的 txt2img 例子那四行（每行都有 file:line 出处）",
   "ocr": "默认档三条与全 14 语言合计是两个数，不能相加",
   "ram": "不加内存：四项能力共用一个常驻引擎、一次跑一项，内存那一轴由各档位表自己的判据负责",
   "sum": "只加已钉产物里的字节：引擎净负载(payload-plan totals_mib) + 各档默认权重(三张档位表该档第一行) + OCR(默认档三条已钉字节)",
@@ -624,9 +692,9 @@
  ],
  "totals_gib": {
   "16GB": {
-   "linux-x64": 19.26,
-   "macos-arm64": 19.25,
-   "win-x64": 19.25
+   "linux-x64": 20.82,
+   "macos-arm64": 20.82,
+   "win-x64": 20.82
   },
   "4GB": {
    "linux-x64": 5.91,

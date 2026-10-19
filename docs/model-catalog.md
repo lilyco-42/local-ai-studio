@@ -367,14 +367,14 @@ python3 tools/recommend_models.py --live --check                          # 真�
 三张表各自回答"这颗选哪个"，但用户问的是另一句：**「装齐四样要占多少盘、要等多久」**。
 这个数字此前没有任何地方算过。`machine_budget.py` 只加已钉产物里的字节，一个都不估算：
 引擎净负载（`pins/payload-plan.json` 的 `totals_mib`，Range 读 zip 中央目录量的）
- + 三张档位表该档第一行（就是默认档） + OCR 默认档三条已钉字节；
++ 三张档位表该档第一行（就是默认档）+ OCR 默认档三条已钉字节；
 `pins/ocr-languages.json` 的全 14 语言合计是**替代**默认档的另一个数，不许叠上去再加。
 
 | 档位 | win-x64 下载量 | 按最快已量出口（ModelScope 4.2 MiB/s） | 按最慢已量出口（hf-mirror 0.25 MiB/s） |
 |---|---|---|---|
 | 4GB | 5.90 GiB | 24.0 分钟 | 6.72 小时 |
 | 8GB | 11.70 GiB | 47.5 分钟 | 13.31 小时 |
-| 16GB | 19.25 GiB | 78.2 分钟 | 21.90 小时 |
+| 16GB | 20.82 GiB（含生图配套件 1.77） | 84.6 分钟 | 23.68 小时 |
 
 **两个数都要给。** 吞吐是 2026-10 从 lain42.top 这台 CN 出口一次量的（`r2_manifest.RATES_MIB_S`，
 产物里 `measured_at_exit` 就写这台机器），不同城市/运营商必然不同 ——
@@ -387,17 +387,25 @@ python3 tools/recommend_models.py --live --check                          # 真�
 `unknown_landed_sizes`（**落地大小未知**：llama/whisper 的 Linux/macOS 是 tar.gz，读不了中央目录）
 是两个字段 —— 把后者当缺失能力报出去，等于谎称那项功能在 Apple silicon 上没得用。
 
-加总这一步当场逮出两条关于生图的事实，两条都以数据进产物：
+**这张表算出来之后，反过来把生图那条链改了三处**（方向全是"少算"，这正是单独加总一遍的价值）：
 
-1. **三档的生图默认行所在仓库都不含配套件**：4/8GB 是 `second-state/stable-diffusion-v1-5-GGUF`，
-   16GB 是 `unsloth/FLUX.1-schnell-GGUF`，两张表里都只有 unet 类文件。而上游 `docs/sd.md:16` 的
-   flux 例子要 `--diffusion-model … --vae --clip_l --t5xxl`、`:17` 的 sd3.5_large 要
-   `--clip_l --clip_g --t5xxl`（两条都进了 `pins/citations.json`，由 `citation-drift` 逐行查）。
-   所以 `image_repo_carries_companions = false` 的那些档，生图那一栏只能当**下限**，
-   UI 不许说"装完这几颗就能出图"。
-2. **档位表的 `companions` 是同角色的全部量化**：`sd3.5_medium` 那行数出 17 颗编码器
-   （clip_g / clip_l / t5xxl 各五个量化）。全加进预算等于多算十几 GiB 用户根本用不到的备选，
-   所以每个角色只把**最小那颗**计入，其余记 `image_companions.alternates`。
+1. 原先三档选中的生图默认行，**仓库里都没有配套件**，而上游 `docs/sd.md:16/17` 的 flux 与
+   sd3.5_large 例子要另给 `--vae --clip_l --t5xxl` / `--clip_l --clip_g --t5xxl`。
+   于是 `recommend_image.py` 给每一行加了 `completeness`，家族需要什么**只从上游那五行 txt2img
+   例子读**（`:13` SD1.5 只给 `-m` / `:14` SDXL 要 `--vae` / `:15` sd3_medium 文件名自带
+   clips+t5xxl / `:16` flux 要三样 / `:17` sd3.5_large 要三串编码器，五条都进了 `pins/citations.json`），
+   并让档位**先按"装完这一颗能不能直接出图"排**。16GB 档因此从 `unsloth/FLUX.1-schnell-GGUF`
+   （只有 unet）换成 `second-state/FLUX.1-schnell-GGUF`（带 clip_l / t5xxl / ae），
+   预算从 19.25 GiB 涨到 **20.82 GiB，其中配套件 1.77 GiB**。
+   "这一档能不能当装齐"由 `image_lower_bound` 说：只有它为假时 UI 才许说"装完就能出图"。
+2. **"仓库里没有配套件"本身不是判据**：上游例子只给 `-m` 的 SD1.5 是 `self_contained`，不是下限；
+   认不出家族的写 `unknown_arch`，**不许当成"不需要"** —— "查不到"和"没有"是两件事，
+   这一条与 `missing_capabilities` / `unknown_landed_sizes` 的拆分是同一个教训的两次应用。
+3. 配套件的分组键是**上游那个旗标对应的东西**（`clip_l` / `clip_g` / `t5xxl` / `VAE`），不是 `role`。
+   `clip_l` 与 `t5xxl` 的 `role` 都是 `text_encoder`，按 `role` 分组会把 t5xxl 整个丢掉，
+   而档位表这时仍写着 `state=complete`（这一轮就错过一次）。现在两张表不一致会直接报问题
+   （"档位表说这一族需要 X，但加法里没有它"），同一个键下面的十几个量化才是备选 ——
+   取最小那颗，其余记 `group_alternates`，所以 16GB 的配套件是 1.77 GiB 而不是 17 颗编码器的总量。
 
 车道 `machine-budget` 三步**全离线**（输入就是上面那五张已提交的表加吞吐表；
 联网重算属于三条档位车道，那边一漂这边就跟着红）：`--selftest` → 18 条单测 → `--check`。

@@ -1,11 +1,17 @@
 {
  "candidates": 43,
+ "default_row_states": {
+  "16GB": "complete",
+  "4GB": "self_contained",
+  "8GB": "self_contained"
+ },
  "engine_tag_claims": 26,
  "from": [
   "HF 搜索（按家族查询、按 downloads 排）",
   "两家的文件表：tree.lfs.oid × ModelScope 元数据 Sha256",
   "leejet/stable-diffusion.cpp 的 docs/performance.md（内存是运行时量的，不是查表）"
  ],
+ "incomplete_default_rows": [],
  "license_flags": [
   "None",
   "creativeml-openrail-m",
@@ -34,6 +40,7 @@
  },
  "row_count": 338,
  "rule": {
+  "completeness": "每行带 completeness：家族需要什么只从上游 docs/sd.md 的 txt2img 例子读（:13 SD1.5 只给 -m / :14 SDXL 要 --vae / :16 flux 要 --vae --clip_l --t5xxl / :17 sd3.5_large 要三串编码器），四行各有一条 file:line 出处由 citation-drift 查。同仓库里有那些角色的文件才算 complete；缺的叫 incomplete 并**排在同档后面**；认不出家族是 unknown_arch，**不当成'不需要'**",
   "file": "仓库里每个 .gguf 都算一行；不按量化名偏好（各家命名不同）；**档位只认 role=unet 的主体权重** —— 生图一个模型往往是好几份文件 (unet + clip + t5 + vae)，只按大小排会把文本编码器排到档位第一行",
   "fit": "文件大小 < 档位 × 1 GiB × 0.5（与字幕那张表同一个常数）；这是算术下限，不是内存承诺",
   "hash": "两家给同一个 sha256 才 usable；一家给就是 single，必须下完自算",
@@ -52,49 +59,265 @@
   "16GB": [
    {
     "by_author": false,
-    "companions": [],
-    "downloads": 35469,
-    "file": "flux1-schnell-Q5_K_M.gguf",
+    "companions": [
+     {
+      "file": "ae-f16.gguf",
+      "role": "vae"
+     },
+     {
+      "file": "clip_l-Q8_0.gguf",
+      "role": "text_encoder"
+     },
+     {
+      "file": "clip_l-f16.gguf",
+      "role": "text_encoder"
+     },
+     {
+      "file": "t5xxl-Q2_K.gguf",
+      "role": "text_encoder"
+     },
+     {
+      "file": "t5xxl-Q3_K.gguf",
+      "role": "text_encoder"
+     },
+     {
+      "file": "t5xxl-Q4_0.gguf",
+      "role": "text_encoder"
+     },
+     {
+      "file": "t5xxl-Q4_K.gguf",
+      "role": "text_encoder"
+     },
+     {
+      "file": "t5xxl-Q5_0.gguf",
+      "role": "text_encoder"
+     },
+     {
+      "file": "t5xxl-Q5_1.gguf",
+      "role": "text_encoder"
+     },
+     {
+      "file": "t5xxl-Q8_0.gguf",
+      "role": "text_encoder"
+     },
+     {
+      "file": "t5xxl-f16.gguf",
+      "role": "text_encoder"
+     }
+    ],
+    "completeness": {
+     "arch": "flux",
+     "citation": "sd-flux-needs-companions",
+     "missing": [],
+     "needs": [
+      "clip_l",
+      "t5xxl",
+      "VAE"
+     ],
+     "note": "需要的是那一行点名的文件；同仓库里备齐才算这一档能直接出图",
+     "source": "leejet/stable-diffusion.cpp@95b30906 docs/sd.md:16（那行的主体是 flux1-dev-q3_k.gguf）",
+     "state": "complete"
+    },
+    "downloads": 5894,
+    "file": "flux1-schnell-Q5_0.gguf",
     "license": "apache-2.0",
-    "repo": "unsloth/FLUX.1-schnell-GGUF",
-    "sha256": "702b1e0130a1b1c7669f7f4fed01afdaaa896ee20608b8f09a6e619d66df561d",
-    "size": 8399029280,
+    "repo": "second-state/FLUX.1-schnell-GGUF",
+    "sha256": "7324362f5366f404fbf662357f321d6335a889e3f2030f1788270323eebd9116",
+    "size": 8175240416,
     "status": "agree",
     "usable_before_download": true
    },
    {
     "by_author": false,
-    "companions": [],
-    "downloads": 198,
-    "file": "flux1-schnell-Q5_K_S.gguf",
+    "companions": [
+     {
+      "file": "ae-f16.gguf",
+      "role": "vae"
+     },
+     {
+      "file": "clip_l-Q8_0.gguf",
+      "role": "text_encoder"
+     },
+     {
+      "file": "clip_l-f16.gguf",
+      "role": "text_encoder"
+     },
+     {
+      "file": "t5xxl-Q2_K.gguf",
+      "role": "text_encoder"
+     },
+     {
+      "file": "t5xxl-Q3_K.gguf",
+      "role": "text_encoder"
+     },
+     {
+      "file": "t5xxl-Q4_0.gguf",
+      "role": "text_encoder"
+     },
+     {
+      "file": "t5xxl-Q4_K.gguf",
+      "role": "text_encoder"
+     },
+     {
+      "file": "t5xxl-Q5_0.gguf",
+      "role": "text_encoder"
+     },
+     {
+      "file": "t5xxl-Q5_1.gguf",
+      "role": "text_encoder"
+     },
+     {
+      "file": "t5xxl-Q8_0.gguf",
+      "role": "text_encoder"
+     },
+     {
+      "file": "t5xxl-f16.gguf",
+      "role": "text_encoder"
+     }
+    ],
+    "completeness": {
+     "arch": "flux",
+     "citation": "sd-flux-needs-companions",
+     "missing": [],
+     "needs": [
+      "clip_l",
+      "t5xxl",
+      "VAE"
+     ],
+     "note": "需要的是那一行点名的文件；同仓库里备齐才算这一档能直接出图",
+     "source": "leejet/stable-diffusion.cpp@95b30906 docs/sd.md:16（那行的主体是 flux1-dev-q3_k.gguf）",
+     "state": "complete"
+    },
+    "downloads": 5894,
+    "file": "flux1-schnell-Q4_1.gguf",
     "license": "apache-2.0",
-    "repo": "Niansuh/FLUX.1-schnell-gguf",
-    "sha256": "19f63562d9a20d2123288dddd9abb3d5560554e5694ded951aaf6bfafe46b5df",
-    "size": 8263222304,
+    "repo": "second-state/FLUX.1-schnell-GGUF",
+    "sha256": "bb01a73c659012275d336fabde09fd7213c98a295851e4560d76a376e0e755b2",
+    "size": 7432042976,
+    "status": "agree",
+    "usable_before_download": true
+   },
+   {
+    "by_author": false,
+    "companions": [
+     {
+      "file": "ae-f16.gguf",
+      "role": "vae"
+     },
+     {
+      "file": "clip_l-f16.gguf",
+      "role": "text_encoder"
+     },
+     {
+      "file": "clip_l-q8_0.gguf",
+      "role": "text_encoder"
+     },
+     {
+      "file": "t5xxl_q2_k.gguf",
+      "role": "text_encoder"
+     },
+     {
+      "file": "t5xxl_q3_k.gguf",
+      "role": "text_encoder"
+     },
+     {
+      "file": "t5xxl_q4_k.gguf",
+      "role": "text_encoder"
+     },
+     {
+      "file": "t5xxl_q8_0.gguf",
+      "role": "text_encoder"
+     }
+    ],
+    "completeness": {
+     "arch": "flux",
+     "citation": "sd-flux-needs-companions",
+     "missing": [],
+     "needs": [
+      "clip_l",
+      "t5xxl",
+      "VAE"
+     ],
+     "note": "需要的是那一行点名的文件；同仓库里备齐才算这一档能直接出图",
+     "source": "leejet/stable-diffusion.cpp@95b30906 docs/sd.md:16（那行的主体是 flux1-dev-q3_k.gguf）",
+     "state": "complete"
+    },
+    "downloads": 3332,
+    "file": "flux1-schnell-q4_k.gguf",
+    "license": "apache-2.0",
+    "repo": "Green-Sky/flux.1-schnell-GGUF",
+    "sha256": "0c7148f5b7e47edaea99a6cec058a8e2bc8ded52e3bba55519c81aa1a38df5d3",
+    "size": 6884606880,
     "status": "single",
     "usable_before_download": false
    },
    {
     "by_author": false,
-    "companions": [],
-    "downloads": 126176,
-    "file": "flux1-schnell-Q5_K_S.gguf",
+    "companions": [
+     {
+      "file": "ae-f16.gguf",
+      "role": "vae"
+     },
+     {
+      "file": "clip_l-Q8_0.gguf",
+      "role": "text_encoder"
+     },
+     {
+      "file": "clip_l-f16.gguf",
+      "role": "text_encoder"
+     },
+     {
+      "file": "t5xxl-Q2_K.gguf",
+      "role": "text_encoder"
+     },
+     {
+      "file": "t5xxl-Q3_K.gguf",
+      "role": "text_encoder"
+     },
+     {
+      "file": "t5xxl-Q4_0.gguf",
+      "role": "text_encoder"
+     },
+     {
+      "file": "t5xxl-Q4_K.gguf",
+      "role": "text_encoder"
+     },
+     {
+      "file": "t5xxl-Q5_0.gguf",
+      "role": "text_encoder"
+     },
+     {
+      "file": "t5xxl-Q5_1.gguf",
+      "role": "text_encoder"
+     },
+     {
+      "file": "t5xxl-Q8_0.gguf",
+      "role": "text_encoder"
+     },
+     {
+      "file": "t5xxl-f16.gguf",
+      "role": "text_encoder"
+     }
+    ],
+    "completeness": {
+     "arch": "flux",
+     "citation": "sd-flux-needs-companions",
+     "missing": [],
+     "needs": [
+      "clip_l",
+      "t5xxl",
+      "VAE"
+     ],
+     "note": "需要的是那一行点名的文件；同仓库里备齐才算这一档能直接出图",
+     "source": "leejet/stable-diffusion.cpp@95b30906 docs/sd.md:16（那行的主体是 flux1-dev-q3_k.gguf）",
+     "state": "complete"
+    },
+    "downloads": 5894,
+    "file": "flux1-schnell-Q4_0.gguf",
     "license": "apache-2.0",
-    "repo": "city96/FLUX.1-schnell-gguf",
-    "sha256": "19f63562d9a20d2123288dddd9abb3d5560554e5694ded951aaf6bfafe46b5df",
-    "size": 8263222304,
-    "status": "agree",
-    "usable_before_download": true
-   },
-   {
-    "by_author": false,
-    "companions": [],
-    "downloads": 6204,
-    "file": "flux1-schnell-Q5_K_S.gguf",
-    "license": "apache-2.0",
-    "repo": "lllyasviel/FLUX.1-schnell-gguf",
-    "sha256": "19f63562d9a20d2123288dddd9abb3d5560554e5694ded951aaf6bfafe46b5df",
-    "size": 8263222304,
+    "repo": "second-state/FLUX.1-schnell-GGUF",
+    "sha256": "b338a7ab5c81600a54be46c4cf950edb3761a52ae163e419beafd250976fb566",
+    "size": 6688845536,
     "status": "agree",
     "usable_before_download": true
    }
@@ -103,6 +326,15 @@
    {
     "by_author": false,
     "companions": [],
+    "completeness": {
+     "arch": "sd1.5",
+     "citation": "sd-example-sd15-only-model",
+     "missing": [],
+     "needs": [],
+     "note": "上游那一行只给 -m：主体之外不需要别的文件",
+     "source": "leejet/stable-diffusion.cpp@95b30906 docs/sd.md:13（那行的主体是 v1-5-pruned-emaonly.safetensors）",
+     "state": "self_contained"
+    },
     "downloads": 52762,
     "file": "stable-diffusion-v1-5-pruned-emaonly-f16.gguf",
     "license": "creativeml-openrail-m",
@@ -115,6 +347,15 @@
    {
     "by_author": false,
     "companions": [],
+    "completeness": {
+     "arch": "sd1.5",
+     "citation": "sd-example-sd15-only-model",
+     "missing": [],
+     "needs": [],
+     "note": "上游那一行只给 -m：主体之外不需要别的文件",
+     "source": "leejet/stable-diffusion.cpp@95b30906 docs/sd.md:13（那行的主体是 v1-5-pruned-emaonly.safetensors）",
+     "state": "self_contained"
+    },
     "downloads": 6398,
     "file": "stable-diffusion-v1-5-FP16.gguf",
     "license": "creativeml-openrail-m",
@@ -196,6 +437,19 @@
       "role": "text_encoder"
      }
     ],
+    "completeness": {
+     "arch": "sd3.5",
+     "citation": "sd-sd35-needs-encoders",
+     "missing": [],
+     "needs": [
+      "clip_l",
+      "clip_g",
+      "t5xxl"
+     ],
+     "note": "需要的是那一行点名的文件；同仓库里备齐才算这一档能直接出图",
+     "source": "leejet/stable-diffusion.cpp@95b30906 docs/sd.md:17（那行的主体是 sd3.5_large.safetensors）",
+     "state": "complete"
+    },
     "downloads": 21496,
     "file": "sd3.5_medium-Q4_0.gguf",
     "license": "other",
@@ -208,12 +462,21 @@
    {
     "by_author": false,
     "companions": [],
-    "downloads": 845,
-    "file": "sd3.5-2b-lite-q5_k_m.gguf",
-    "license": "other",
-    "repo": "calcuis/sd3.5-lite-gguf",
-    "sha256": "aed31c080ada49acbe0f0464a529d99f24e540fa239897a9cbf7404b869d42f5",
-    "size": 2067526080,
+    "completeness": {
+     "arch": "sd1.5",
+     "citation": "sd-example-sd15-only-model",
+     "missing": [],
+     "needs": [],
+     "note": "上游那一行只给 -m：主体之外不需要别的文件",
+     "source": "leejet/stable-diffusion.cpp@95b30906 docs/sd.md:13（那行的主体是 v1-5-pruned-emaonly.safetensors）",
+     "state": "self_contained"
+    },
+    "downloads": 6398,
+    "file": "stable-diffusion-v1-5-Q8_0.gguf",
+    "license": "creativeml-openrail-m",
+    "repo": "gpustack/stable-diffusion-v1-5-GGUF",
+    "sha256": "a51037fac577d133fe3b83a4a0c2a7605615786f07bdec397378143fe0361f32",
+    "size": 1881241504,
     "status": "agree",
     "usable_before_download": true
    }
@@ -222,24 +485,21 @@
    {
     "by_author": false,
     "companions": [],
+    "completeness": {
+     "arch": "sd1.5",
+     "citation": "sd-example-sd15-only-model",
+     "missing": [],
+     "needs": [],
+     "note": "上游那一行只给 -m：主体之外不需要别的文件",
+     "source": "leejet/stable-diffusion.cpp@95b30906 docs/sd.md:13（那行的主体是 v1-5-pruned-emaonly.safetensors）",
+     "state": "self_contained"
+    },
     "downloads": 52762,
     "file": "stable-diffusion-v1-5-pruned-emaonly-f32.gguf",
     "license": "creativeml-openrail-m",
     "repo": "second-state/stable-diffusion-v1-5-GGUF",
     "sha256": "52c7ca39d8d48d6f44fa4ff2c44569f3c924d92311108cb38492958350d48ff8",
     "size": 4265059488,
-    "status": "agree",
-    "usable_before_download": true
-   },
-   {
-    "by_author": false,
-    "companions": [],
-    "downloads": 2561,
-    "file": "sd_xl_base_1.0_0_Q8_0.gguf",
-    "license": "openrail++",
-    "repo": "kostakoff/stable-diffusion-xl-base-1.0-GGUF",
-    "sha256": "c25a143954d00f6eed6235cbe0f26d2a4e68c9f3452bef33bc6ffa3b3073856b",
-    "size": 4180186816,
     "status": "agree",
     "usable_before_download": true
    },
@@ -275,6 +535,19 @@
       "role": "text_encoder"
      }
     ],
+    "completeness": {
+     "arch": "flux",
+     "citation": "sd-flux-needs-companions",
+     "missing": [],
+     "needs": [
+      "clip_l",
+      "t5xxl",
+      "VAE"
+     ],
+     "note": "需要的是那一行点名的文件；同仓库里备齐才算这一档能直接出图",
+     "source": "leejet/stable-diffusion.cpp@95b30906 docs/sd.md:16（那行的主体是 flux1-dev-q3_k.gguf）",
+     "state": "complete"
+    },
     "downloads": 3332,
     "file": "flux1-schnell-q2_k.gguf",
     "license": "apache-2.0",
@@ -285,16 +558,119 @@
     "usable_before_download": false
    },
    {
-    "by_author": true,
+    "by_author": false,
     "companions": [],
-    "downloads": 18906,
-    "file": "flux1-schnell-q2_k.gguf",
-    "license": "apache-2.0",
-    "repo": "leejet/FLUX.1-schnell-gguf",
-    "sha256": "e23c3c58b5475937419dd34ec0ccac301d8348ceadd7838eb367e6ce9329c836",
-    "size": 4110959520,
+    "completeness": {
+     "arch": "sd1.5",
+     "citation": "sd-example-sd15-only-model",
+     "missing": [],
+     "needs": [],
+     "note": "上游那一行只给 -m：主体之外不需要别的文件",
+     "source": "leejet/stable-diffusion.cpp@95b30906 docs/sd.md:13（那行的主体是 v1-5-pruned-emaonly.safetensors）",
+     "state": "self_contained"
+    },
+    "downloads": 2587,
+    "file": "v1-5-pruned_Q8_0.gguf",
+    "license": "creativeml-openrail-m",
+    "repo": "kostakoff/stable-diffusion-v1-5-GGUF",
+    "sha256": "148a269718917aec66470ed1c83f360908db2447a4421282db1530ad4acb703a",
+    "size": 3227903840,
     "status": "agree",
     "usable_before_download": true
+   },
+   {
+    "by_author": false,
+    "companions": [
+     {
+      "file": "clip_g-Q4_0.gguf",
+      "role": "text_encoder"
+     },
+     {
+      "file": "clip_g-Q4_1.gguf",
+      "role": "text_encoder"
+     },
+     {
+      "file": "clip_g-Q5_0.gguf",
+      "role": "text_encoder"
+     },
+     {
+      "file": "clip_g-Q5_1.gguf",
+      "role": "text_encoder"
+     },
+     {
+      "file": "clip_g-Q8_0.gguf",
+      "role": "text_encoder"
+     },
+     {
+      "file": "clip_g-f16.gguf",
+      "role": "text_encoder"
+     },
+     {
+      "file": "clip_l-Q4_0.gguf",
+      "role": "text_encoder"
+     },
+     {
+      "file": "clip_l-Q4_1.gguf",
+      "role": "text_encoder"
+     },
+     {
+      "file": "clip_l-Q5_0.gguf",
+      "role": "text_encoder"
+     },
+     {
+      "file": "clip_l-Q5_1.gguf",
+      "role": "text_encoder"
+     },
+     {
+      "file": "clip_l-Q8_0.gguf",
+      "role": "text_encoder"
+     },
+     {
+      "file": "clip_l-f16.gguf",
+      "role": "text_encoder"
+     },
+     {
+      "file": "t5xxl-Q4_0.gguf",
+      "role": "text_encoder"
+     },
+     {
+      "file": "t5xxl-Q4_1.gguf",
+      "role": "text_encoder"
+     },
+     {
+      "file": "t5xxl-Q5_0.gguf",
+      "role": "text_encoder"
+     },
+     {
+      "file": "t5xxl-Q5_1.gguf",
+      "role": "text_encoder"
+     },
+     {
+      "file": "t5xxl-Q8_0.gguf",
+      "role": "text_encoder"
+     }
+    ],
+    "completeness": {
+     "arch": "sd3.5",
+     "citation": "sd-sd35-needs-encoders",
+     "missing": [],
+     "needs": [
+      "clip_l",
+      "clip_g",
+      "t5xxl"
+     ],
+     "note": "需要的是那一行点名的文件；同仓库里备齐才算这一档能直接出图",
+     "source": "leejet/stable-diffusion.cpp@95b30906 docs/sd.md:17（那行的主体是 sd3.5_large.safetensors）",
+     "state": "complete"
+    },
+    "downloads": 21496,
+    "file": "sd3.5_medium-Q8_0.gguf",
+    "license": "other",
+    "repo": "second-state/stable-diffusion-3.5-medium-GGUF",
+    "sha256": "d59aa31f4ec70fa0189f8baaeacbb91048a80bf289b5cd958795f62988e4aa48",
+    "size": 3191079008,
+    "status": "single",
+    "usable_before_download": false
    }
   ]
  },

@@ -111,7 +111,11 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   车道能发现多了一个家族），仓库顺序是 `leejet`（引擎作者自己也发 gguf）> 其余按下载量。
   三条实测出来的判据形状：**档位只认 `role=unet` 的主体权重**（`Green-Sky/flux.1-schnell-GGUF` 的清单里
   `t5xxl_q3_k` / `clip_l-q8_0` / `ae-f16` 都比主体小，只按大小排会把文本编码器推荐成"出图的那个模型"），
-  配套件跟着每一行走（`companions`）；**成人内容按上游自己的 `not-for-all-audiences` 标签挡**，
+  配套件跟着每一行走（`companions`），而**默认行先按"装完这一颗能不能直接出图"排**
+  （每行带 `completeness`：需要什么只从上游 `docs/sd.md` 的 txt2img 例子那五行读 —— `:13` SD1.5 只给
+  `-m`、`:14` SDXL 要 `--vae`、`:15` sd3_medium 那颗自带 clips/t5xxl、`:16` flux 要 `--vae --clip_l --t5xxl`、
+  `:17` sd3.5_large 要三串编码器；五条都进了出处表）。同仓库缺哪一样就叫 `incomplete` 并排后面，
+  认不出家族是 `unknown_arch`，**不当成"不需要"**；**成人内容按上游自己的 `not-for-all-audiences` 标签挡**，
   不按仓库名猜（这次捕获里有 2 个仓库带这个标签，仍留在 `weights` 里但不进档位）；
   **许可缺失也算要显示**（43 个仓库里 7 个没 license 标签，`str(None)` 是 "None"，纯正则会把"没有许可"
   当成"许可没问题"）；`creativeml-openrail-m` / `openrail++` 也进标记（SD1.5 就是这条）。
@@ -121,27 +125,34 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   与字幕整轴只有 single 形成对照）；`second-state` 那颗 Q4_0 与 `pins/models.json` 已钉的 pin 逐字节相同。
   还有一条反例钉在测试里：`leejet` 的 `q4_0` 与 `q4_k` **大小一模一样而哈希不同** —— 按大小认文件是假的。
 - `tools/machine_budget.py` + `catalog/machine-budget.json`：**把已钉的五张表加成一个数** ——
-  普通人问的不是"这颗选哪个"，而是「装齐四样要占多少盘、要等多久」，而这个数此前没有任何地方算过
-  （`payload-plan` 只算引擎净负载，三张档位表只给单颗大小）。只加已钉产物里有的字节，一个都不估算：
-  引擎净负载 + 三张档位表**该档第一行** + OCR 默认档三条（全 14 语言合计是另一个数，不是相加）。
+  普通人问的不是"这颗选哪个"，而是「装齐四样要占多少盘、要等多久」，而这个数此前没有任何地方
+  算过（`payload-plan` 只算引擎净负载，三张档位表只给单颗大小）。只加已钉产物里有的字节：
+  引擎净负载 + 三张档位表**该档第一行**（默认档）+ OCR 默认档三条；全 14 种语言合计是**替代**
+  默认档的另一个数，不许叠上去再加。
   实测（win-x64，按 lain42.top 那台 CN 出口量到的 ModelScope 4.2 MiB/s）：
-  4GB **5.90 GiB / 约 24 分钟**、8GB **11.70 / 约 47.5 分钟**、16GB **19.25 / 约 78.2 分钟**；
-  同一批字节按最慢的那个已量出口（hf-mirror 0.25 MiB/s）是 **6.7 / 13.3 / 21.9 小时** ——
+  4GB **5.90 GiB / 约 24.0 分钟**、8GB **11.70 / 约 47.5**、16GB **20.82 / 约 84.6**；
+  同一批字节按最慢的那个已量出口（hf-mirror 0.25 MiB/s）是 **6.72 / 13.31 / 23.68 小时**。
   两个数都得给用户，否则"约 24 分钟"就是拿最好的网速承诺最坏的体验。
-  产物自己带口径：`ram_statement` 写死"这是磁盘与下载量、不是峰值内存"（四项能力共用一个常驻引擎、
-  一次只跑一项，把权重相加当内存是错的），内存那一轴由各档位表自己的判据负责。
-  两类"算不出来"分开记，不混成一个：**没有产物**（macOS 的字幕）与**落地大小未知**（tar.gz 读不了
-  中央目录）—— 后者当缺失能力报出去就等于谎称那项功能在 Apple silicon 上没得用。
-  这一步当场逮出两条关于生图的事实：① 三档的**生图默认行所在仓库都不含配套件**（4/8GB 的
-  `second-state/stable-diffusion-v1-5-GGUF`、16GB 的 `unsloth/FLUX.1-schnell-GGUF` 都只有 unet 类文件），
-  而上游 `docs/sd.md:16/17` 的 flux 与 sd3.5 例子要另给 `--vae --clip_l --t5xxl` 三份文件
-  （两条都进了出处表）→ 所以这张表的生图栏是**下限**，UI 不能说"装完这几颗就能出图"；
-  ② 档位表的 `companions` 列的是**同角色的全部量化**（`sd3.5_medium` 那行 17 颗编码器），
-  全加进预算等于多算十几 GiB 用户根本用不到的备选 → 每角色只计最小那颗，其余记 `alternates`。
-  车道 `machine-budget` 三步全离线（它的输入就是那五张已提交的表加吞吐表）：
-  `--selftest` → 18 条单测 → `--check`；20 个变异全被抓，其中三条是这轮补的：分钟数少除一个 60、
-  吞吐查表方向写反（短针 `hf-mirror` 对不上长键 `hf-mirror.com` 会静默把慢吞吐读成 0）、
-  OCR 的"下之前就能当真"写死成 `True`。
+  产物自己带口径：`ram_statement` 写死"这是磁盘与下载量、不是峰值内存"（四项能力共用一个常驻
+  引擎、一次只跑一项），内存那一轴由各档位表自己的判据负责；两类"算不出来"也分开记：
+  **没有产物**（macOS 的字幕，whisper 上游不发 macOS 包）与**落地大小未知**（llama/whisper 的
+  Linux/macOS 是 tar.gz，读不了中央目录）—— 混成一个就等于谎称那项功能在 Apple silicon 上没得用。
+  这张表一算出来就把生图那条链改了三处，方向全是"少算"：
+  ① 三档原本选中的默认行**仓库里都没有配套件**，而上游 `docs/sd.md:16` 的 flux 例子要
+  `--vae --clip_l --t5xxl`、`:17` 的 sd3.5_large 要 `--clip_l --clip_g --t5xxl`
+  （连同 `:13/:14/:15` 一共五条例子行都进了出处表）→ 档位表选默认行改成**先按"装完能不能直接
+  出图"排**，16GB 档因此从 `unsloth/FLUX.1-schnell-GGUF`（只有 unet）换成
+  `second-state/FLUX.1-schnell-GGUF`（带 clip_l / t5xxl / ae），16GB 的数字从 19.25 涨到
+  **20.82 GiB（其中配套件 1.77 GiB）**；
+  ② 上游例子只给 `-m` 的家族（SD1.5，`:13`）判成 `self_contained`，**不是**下限 ——
+  "仓库里没有配套件"本身不是判据，得先问"这一族要不要"；认不出家族的写 `unknown_arch`，
+  不许当成"不需要"；需要但仓库没有的才标 `image_lower_bound`，UI 那时才不许说"装完就能出图"；
+  ③ 配套件的分组键必须是**上游那个旗标对应的东西**（`clip_l` / `clip_g` / `t5xxl` / `VAE`），
+  不是 `role`：`clip_l` 与 `t5xxl` 的 role 都是 `text_encoder`，按 role 分组会把 t5xxl 整个丢掉
+  而档位表这时候还写着 `complete`（这一版就错过一次）→ 现在两张表不一致会直接报问题。
+  同一个键下面的十几个量化才是备选，取最小那颗，其余记 `group_alternates`。
+  车道 `machine-budget` 三步全离线（它的输入就是那五张已提交的表加吞吐表）：`--selftest` →
+  18 条单测 → `--check`。
 - `tools/payload_plan.py` + `pins/payload-plan.json`：装机负载计划（出包前必须先有的数字）。
   按"没 CUDA 的 x64 / Apple silicon"选默认产物，Range 读 zip 中央目录拿逐文件大小：
   引擎净负载 win 44.2 / linux 52.1 / macOS 46.5 MiB（不含权重），`whisper-bin-x64.zip` 41 条里

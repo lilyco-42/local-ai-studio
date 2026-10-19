@@ -602,6 +602,10 @@ jobs:
     # 我们能核对的只有文件级大小与两家哈希。这三条出处由 citation-drift 逐行查。
     # 档位只认主体权重（unet）：FLUX 那类仓库里 t5xxl / clip / vae 都比主体小，
     # 只按大小排会把文本编码器推荐成"出图的那个模型"。
+    # 默认行还先按"装完这一颗能不能直接出图"排：每行带 completeness，需要什么**只从**上游
+    # docs/sd.md 的 txt2img 例子那五行读（:13 SD1.5 只给 -m / :14 SDXL 要 --vae / :15 sd3_medium
+    # 自带 clips+t5xxl / :16 flux 要三样 / :17 sd3.5_large 要三串编码器，五条都在出处表里）。
+    # 缺的叫 incomplete 并排后面，认不出家族叫 unknown_arch —— 都不许当成"不需要"。
     timeout-minutes: 15
     runs-on: ubuntu-latest
     steps:
@@ -624,6 +628,9 @@ jobs:
     # 重出，这里必然红。它不联网：联网重算属于上面三条档位车道，那边一漂这边就跟着漂。
     # 口径由产物自己带着（ram_statement / rule）：**加的是磁盘与下载量，不是内存**，
     # 生图配套件（t5/clip/vae）必须一起算 —— 只报 unet 等于把真实下载量少算几倍。
+    # 反向也一样：同一角色的十几个量化是**备选**，全加等于多算十几 GiB，所以按上游旗标分组
+    # （clip_l / clip_g / t5xxl / VAE 各取最小那颗，其余记 group_alternates）；
+    # 而"需要但同仓库没有"的那些档由 image_lower_bound 标成**下限**，UI 那时不许说装完就能出图。
     timeout-minutes: 8
     runs-on: ubuntu-latest
     steps:
