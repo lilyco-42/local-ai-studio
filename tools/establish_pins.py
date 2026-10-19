@@ -1,22 +1,20 @@
-"""给没有上游哈希的源（HF / 样本）立 pin，并打印这个 pin 的凭据强度到哪一步。
+"""立权重 pin，并打印每条 pin 的凭据强度到哪一步。
 
-背景：GitHub release 每个产物都带 `digest = sha256:…`（已实测），但 HF 的 tree/siblings 只给
-文件名+大小，而 resolve 响应那个 64 位十六进制的 ETag **不是**内容哈希；自家 R2 也只有 Content-Length。
-所以从 HF 取的权重必须由我们自己立 pin。
+三家源的实测差别（决定走哪条路）：
+  · GitHub release：产物 API 里带 `digest = sha256:…`，下载验证过就是内容哈希 → 直接可钉；
+  · HF / hf-mirror：tree 与 siblings 只给文件名+大小；resolve 的 `ETag` 是 64 位十六进制
+    但**不是**内容哈希（Xet/cas-bridge 指纹，长得极像 sha256，是最危险的假朋友）；
+  · ModelScope：`repo/files` 元数据每个文件带 `Sha256`，且 CDN 重定向路径本身就是
+    `lfs-objects/<sha[0:2]>/<sha[2:4]>/<sha[4:]>` —— 两条独立机制给的哈希一致，
+    总长又能与 HF 的 `lfs.size` 对上。**所以 HF 上的权重不必只能自算**，
+    一个字节都不用下载就能拿到上游哈希（本轮实测，用于 >1 GB 的扩散权重）。
 
-"先试两个独立发布方"不成立，都是实测：ModelScope 上没有 ggerganov/whisper.cpp（404），
-HF 上也没有 ggml-org/whisper.cpp 这个模型仓库（401）。因此这里用的是能拿到的最强对照：
+于是有两条路子，都保留：
+  A `modelscope`：零下载，靠上游元数据 + 内容寻址路径 + 跨源总长对照；
+  B `download`：整包算 sha256 + 第二主机头尾 4 MiB 逐字节对照（whisper 权重/样本用这条）。
 
-  1) 从 hf-mirror 整包下载算 sha256 —— 这就是将来实际会走的下载路径；
-  2) 与 HEAD 声明的总长核对（优先 Content-Range，其次 Content-Length；
-     上一版只 regex content-range，把"我取法不对"读成了"文件长度不符"）；
-  3) 从第二个主机（HF 直连 / GitHub raw 之外的镜像路径）取头 4 MiB 与尾 4 MiB 比哈希
-     —— 能证"这条镜像没有改写这份文件"，**但不能证来源独立**；
-  4) 小文件再补一道 git blob sha1（git 本身就是内容寻址），与 GitHub contents API 的 sha 对得上。
-
-结论强度必须跟着 pin 一起写进目录：provenance 只有一家的东西，不能假装是多方共识。
-
-用法：python3 tools/establish_pins.py [--json pins.json]
+B 路的强度必须如实写：它只证明传输与镜像未改写，**不证明来源独立**
+（想找两个独立发布方时实测过：ModelScope 没有 ggerganov/whisper.cpp，HF 也没有 ggml-org 模型仓库）。
 """
 from __future__ import annotations
 
@@ -30,11 +28,70 @@ import sys
 CHUNK = 4 << 20
 NUL = bytes([0])
 
-# (显示名, 仓库, 仓库内路径, 分支/rev)
+# (显示名, 路子, 仓库, 仓库内路径, 分支/rev)
 TARGETS = [
-    ("whisper ggml-tiny", "ggerganov/whisper.cpp", "ggml-tiny.bin", "main"),
-    ("whisper 样本 jfk.wav", "ggml-org/whisper.cpp", "samples/jfk.wav", "master"),
+    ("whisper ggml-tiny", "download", "ggerganov/whisper.cpp", "ggml-tiny.bin", "main"),
+    ("whisper 样本 jfk.wav", "download", "ggml-org/whisper.cpp", "samples/jfk.wav", "master"),
+    # 1.5 GB 的东西不该为了立 pin 就下一遍，所以这条走零下载的路子
+    ("生图 SD1.5 Q4_0", "modelscope", "second-state/stable-diffusion-v1-5-GGUF",
+     "stable-diffusion-v1-5-pruned-emaonly-Q4_0.gguf", "master"),
 ]
+
+
+def via_modelscope(display, repo, path, rev):
+    """零下载立 pin：ModelScope 元数据的 Sha256 + 它 CDN 路径里的内容寻址哈希 + 跨源总长对照。
+    两条机制若不一致就是有问题，绝不能挑一个好看的用。"""
+    print("=" * 72)
+    print(f"{display}  <- ModelScope {repo}/{path}@{rev}（不下载整包）")
+    rc, out, err = sh(["curl", "-sS", "--max-time", "60", "-A", "establish-pins/1.0",
+                       f"https://www.modelscope.cn/api/v1/models/{repo}/repo/files?Revision={rev}&Root=."])
+    if rc or not out.strip():
+        print("  文件元数据取不到", (err or "")[:110])
+        return None
+    try:
+        data = json.loads(out.decode("utf-8", "replace"))
+    except Exception:
+        print("  元数据不是 JSON：", out[:100])
+        return None
+    files = {f.get("Path"): f for f in (data.get("Data") or {}).get("Files", [])}
+    ent = files.get(path)
+    if not ent:
+        print(f"  ModelScope 这个仓库里没有 {path}（同目录有 {list(files)[:4]}）→ 这条源不适用")
+        return None
+    ms_sha, ms_size = ent.get("Sha256"), ent.get("Size")
+    print(f"  元数据 Sha256 = {ms_sha}  Size = {ms_size:,}  IsLFS = {ent.get('IsLFS')}")
+
+    rc, eff, _ = sh(["curl", "-sIL", "--max-time", "60", "-A", "establish-pins/1.0", "-o", "/dev/null",
+                     "-w", "%{url_effective}",
+                     f"https://www.modelscope.cn/api/v1/models/{repo}/repo?Revision={rev}&FilePath={path}"])
+    m = re.search(rb"lfs-objects/([0-9a-f]{2})/([0-9a-f]{2})/([0-9a-f]{56,64})", eff)
+    path_sha = "".join(x.decode() for x in m.groups()) if m else None
+    print(f"  CDN 路径还原 = {path_sha}")
+    if not path_sha:
+        print("  重定向里没有 lfs-objects 路径 → 少一条独立机制，不立 pin")
+        return None
+    if path_sha != ms_sha:
+        print("  ✗ 两条机制给的哈希不一致 → 绝不能挑一个好看的用")
+        return None
+
+    rc2, hfs, _ = sh(["curl", "-sS", "--max-time", "60", "-A", "establish-pins/1.0",
+                      f"https://hf-mirror.com/api/models/{repo}/tree/main"])
+    hf_size = None
+    try:
+        for x in json.loads(hfs.decode("utf-8", "replace")):
+            if x.get("path") == path:
+                hf_size = (x.get("lfs") or {}).get("size")
+    except Exception:
+        pass
+    print(f"  HF 侧 lfs.size = {hf_size:,}" if hf_size else "  HF 侧没拿到总长（不能只靠单源就立 pin）")
+    if hf_size != ms_size:
+        print("  ✗ 两个提供方的总长不一致")
+        return None
+    print("  ✔ 元数据哈希 == 内容寻址路径，且总长与 HF 一致 → 立 pin（零下载）")
+    return {"sha256": ms_sha, "size": ms_size, "primary": "ModelScope repo/files 元数据",
+            "cross_checked_against": "同家 CDN lfs-objects 路径 + hf-mirror tree 总长",
+            "provenance": "两个提供方对总长一致；哈希出自 ModelScope 的两条独立机制，"
+                          "整包字节未经下载校验 —— 首次真正下载时仍要按此 pin 复核"}
 
 
 def sh(args):
@@ -114,8 +171,9 @@ def main(argv):
     ap.add_argument("--json", default="")
     args = ap.parse_args(argv)
     pins = {}
-    for display, repo, path, rev in TARGETS:
-        p = handle(display, repo, path, rev)
+    for display, route, repo, path, rev in TARGETS:
+        p = via_modelscope(display, repo, path, rev) if route == "modelscope" \
+            else handle(display, repo, path, rev)
         if p:
             pins[path] = p
     print("=" * 72)

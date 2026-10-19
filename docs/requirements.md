@@ -82,9 +82,11 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
 4. **车道覆盖度**：四项能力现在有**三条**执行车道 —— 对话（`headless-inference` 抓 tokens/s）、
    字幕（`subtitle-proof` 出带时间戳的 SRT）、文字识别（`ocr-proof`：CI 里 `cargo build` 出 `oar`，
    用钉住的 tiny det/rec/dict 三件套认出一张自画合成图里的已知词）。
-   只缺**生图**一条：实测最小可用扩散权重也要 1,494.2 MiB（SD-Turbo 反而 1,930.0 MiB 更大），
-   且这类权重在 HF 上没有 digest，pin 只能首测算并回填 —— 在那之前不写这条，
-   免得用一条没有可信判据的车道冒充"四项都验过"。
+   只缺**生图**一条。它的前两个障碍现在只剩一个：
+   pin 已经零下载立住了（ModelScope 元数据 `Sha256` == 其 CDN 内容寻址路径，总长 == HF `lfs.size`，
+   `b8944e9f…`、1,566,768,416 B），剩下的纯粹是**成本** —— 最小可用扩散权重 1,494.2 MiB
+   （SD-Turbo 反而 1,930.0 MiB 更大），CI 要 30 min 级 timeout 才装得下一次下载。
+   在它跑通之前不把"四项都验过"当成事实。
 5. **车道里的 Python 片段要真编译**：`yaml_gate.py` 现在把两条 workflow 里的每段 `<<'PY'` 抽出来
    `compile()`（本轮覆盖 7 段），并验过它会红 —— 掺一段缩进错的 PY 进去，它按
    `文件:job#步骤 第N段` 报出语法错。这个能力是被我上一次写的车道逼出来的：

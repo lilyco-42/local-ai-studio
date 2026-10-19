@@ -38,32 +38,44 @@ SD3.5-medium/large 与 `city96/…`）；对话在 `Qwen/Qwen2.5-0.5B-Instruct-G
 |---|---|---|
 | HF（含 hf-mirror） | **不给**。`tree` 与 `siblings` 两个端点都只有文件名与大小，三个仓库一致 | 探针输出 `元数据是否带内容哈希：{'无'}` ×3 |
 | HF resolve 响应的 `ETag` | **看着像但不是**。`e3545da2…f9deed9` 是 64 位十六进制，却不等于内容 sha256（它是 Xet/cas-bridge 的对象指纹） | 与已知 pin 直接比对不等 |
-| ModelScope | **给**：LFS 对象路径按 `sha[0:2]/sha[2:4]/sha[4:]` 重建后**正好等于**同一个 pin | 上一轮整串重建验过（不是子串匹配） |
+| ModelScope | **给两条**：`repo/files` 元数据每个文件带 `Sha256`；CDN 路径又是 `lfs-objects/<sha[0:2]>/<sha[2:4]>/<sha[4:]>` 的内容寻址还原 | 本轮实测两者对 SD1.5 Q4_0 完全一致，且总长 == hf-mirror 的 `lfs.size` |
 | GitHub release 产物 | **给**：每个产物的 API 里有 `digest = sha256:<64hex>`，实测就是内容哈希 | 下载 `whisper-bin-x64.zip`(8,928,640 B) 与 `sd-…-win-cpu-x64.zip`(17,706,677 B) 本地算 sha256，与 digest 逐字节相等；三家引擎 216/216、36/36、54/54 全带，OCR 权重 119 个产物 0 缺 |
 | 自家 R2 | 不给，只有 `Content-Length` | 同上一轮 |
 
-所以规则按源分两条，不是笼统一条：**引擎二进制与 OCR 权重（都在 GitHub release 上）直接用上游 `digest` 当 pin**，
-CI 负责核对而不是首次计算；**HF 权重与自家 R2 镜像仍必须入库时自算 sha256**（HF 元数据不给，且 ETag 是假哈希）。
-ModelScope 的对象路径可当独立旁证，HF ETag **禁止**被当校验值使用。三处大小互相印证可以放心用：
+所以规则按源分三条，不是一句"全部自算"：**GitHub release 产物**（引擎、OCR 权重、工具）直接用上游
+`digest`；**HF 上的权重**去 ModelScope 查同名仓库的 `Sha256` 元数据 + CDN 内容寻址路径 + 跨源总长，
+三条一致就能零下载立 pin（该仓库没镜像时退回"下载后自己算"）；**自家 R2 只有 `Content-Length`**，
+入库时必须自算。三处都不许拿 HF 的 ETag 当校验值。大小可以三方互相印证：
 元数据 415,182,688 == HEAD 415,182,688 == 我们的 pin。
 
-## 已经立住的两个 pin（无上游哈希的那一侧，先做一个样例）
+## 已经立住的三个 pin
 
 `tools/establish_pins.py` 专门处理"源不给哈希"这一侧，做法是**跨主机逐字节对照后再立 pin**，
-而不是"自己算完再自己断言相等"（那是自证）。2026-10-19 实测：
+而不是"自己算完再自己断言相等"（那是自证）。2026-10-19 实测。
 
-| 文件 | sha256 | 大小 | 凭据 |
+**这一轮又翻掉本文早先一条结论**：ModelScope 不只 CDN 路径是内容寻址的，它
+`api/v1/models/<ns>/<repo>/repo/files` 的元数据里**每个文件都带 `Sha256` 字段** ——
+所以"HF 上的权重只能自己算"是错的（前提是同仓库在 ModelScope 上有镜像）。
+
+| 文件 | sha256 | 大小 | 方法与凭据 |
 |---|---|---|---|
+| `stable-diffusion-v1-5-pruned-emaonly-Q4_0.gguf`（生图默认） | `b8944e9fe0b69b36ae1b5bb0185b3a7b8ef14347fe0fa9af6c64c4829022261f` | **1,566,768,416 B** | **零下载**：ModelScope 元数据 `Sha256` == 它 CDN 的 `lfs-objects/<2>/<2>/<60>` 还原值，总长又与 hf-mirror 的 `lfs.size` 一致 |
 | `ggml-tiny.bin`（字幕默认权重） | `be07e048e1e599ad46341c8d2a135645097a538221678b7acdd1b1919c6e1b21` | 77,691,713 B | 主源 hf-mirror 整包；HEAD 声明总长 == 实收；**huggingface.co 直连的头 4 MiB 与尾 4 MiB 与主源逐字节相同** |
 | `samples/jfk.wav`（车道样本，已知答案） | `59dfb9a4acb36fe2a2affc14bacbee2920ff435cb13cc314a08c13f66ba7860e` | 352,078 B | raw.githubusercontent 整包 + github.com 同段对照；**另与 git 自己的 blob sha1 `3184d372cd2f…` 相等**（git 是内容寻址，这算独立一道旁证） |
 
-诚实地说清强度：这两条只证明**传输与镜像未改写**，provenance 仍然只有 HF / GitHub 一家。
-原先设想的"两个独立发布方"实测不成立——ModelScope 上没有 `ggerganov/whisper.cpp`（404），
+生图那条的诚实边界：**没有整包下载校验过**（不为立 pin 去下 1.5 GB），靠的是同一提供方两条
+独立机制一致 + 跨提供方总长一致；所以真正下载时仍必须按这颗 pin 复核，对不上就是源被换过。
+另外同一工具在 lain42.top 上跑时 whisper 那两条会红 —— 那台机器到 `huggingface.co` 与
+`raw.githubusercontent.com` 的出站被重置（curl rc=35），是**出口限制不是文件问题**；
+工具三条只立住一条就如实给退出码 1，不糊成"通过"。
+
+诚实地说清 download 那两条的强度：只证明**传输与镜像未改写**，provenance 仍然只有 HF / GitHub 一家。
+原先设想的"两个独立发布方"对 `ggerganov/whisper.cpp` 实测不成立（ModelScope 404），
 HF 上也没有 `ggml-org/whisper.cpp` 这个模型仓库（401，样本只在 GitHub 代码仓库里）。
 
 另一个实测结论会影响目录设计：**whisper.cpp 的 GitHub release 里没有任何模型**
 （30 个 release 的产物名去重 33 种，全是 xcframework/tar.gz/zip 二进制，`.bin` 命中 0）。
-所以字幕这一路只有"引擎走 GitHub（有 digest）+ 权重走 HF（无 digest，须自算）"这一种组合，
+所以字幕这一路是"引擎走 GitHub（有 digest）+ 权重走 HF（HF 自己不给哈希，要么查 ModelScope 镜像元数据、要么下载后自算）"，
 一个能力里混着两种凭据强度，代码里不能按同一套校验假设写。
 
 ## 还没证的

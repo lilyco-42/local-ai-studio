@@ -218,8 +218,11 @@ Vulkan，不必退回 CPU 的"几分钟一张"**。所以这条能力的设计�
    一个 400 MB 权重要 7–8 分钟，不给续传就是让用户白等一次网络抖动。
 3. R2 只暴露 `Content-Length`，**没有 sha256 元数据**；HF 的 tree/siblings 也只给文件名+大小，
    而 resolve 响应那个 64 位十六进制的 `ETag` **不是**内容哈希（详见 model-catalog.md 的对照表）。
-   所以走这两条源的 pin 必须在入库时自己算，运行时再校一次；
-   而 GitHub release 这一侧不同，它的 `digest` 实测就是内容 sha256，可以直接用作上游 pin 来源。
+   但 **HF 的权重未必要自算**：同一仓库若在 ModelScope 有镜像，它 `repo/files` 元数据直接给每个文件的
+   `Sha256`，且 CDN 路径本身就是内容寻址的 `lfs-objects/<sha[0:2]>/<sha[2:4]>/<sha[4:]>`，
+   两条机制一致 + 总长与 HF 相符，就能零下载立 pin（SD1.5 Q4_0 1,566,768,416 B 就是这么立住的）；
+   查不到镜像的仓库才退回"下载后自己算"。自家 R2 只能自算。
+   GitHub release 这一侧则最简单：`digest` 实测就是内容 sha256，可直接当上游 pin 来源。
 
 **能省掉一整类校验的设计事实**：ModelScope 的 CDN 对象路径是
 `lfs-objects/9e/e3/6184e616dfc76df4f5dd66f908dbde6979524ae36e6cefb67f532f798cb8`，
