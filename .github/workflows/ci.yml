@@ -24,6 +24,8 @@ jobs:
           python tools/bash_gate.py
           python tools/citation_check.py --selftest
           python tools/action_pins.py --selftest
+          python tools/lane_argv.py --selftest
+          python tools/lane_argv.py
           python - <<'PY'
           import ast,sys
           for f in ("tools/engine_probe.py","tests/test_engine_probe.py",

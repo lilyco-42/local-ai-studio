@@ -196,6 +196,13 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   变异扫描留在仓库里：`tests/test_launch_plan.py::TestSourceMutants` 改坏源码 14 处，
   六条探针（离线对照 / 重算漂移 / 出处 id 闸门 / 缺席声明照扫 / 跨生产者核对 / 核对没有输入就红）
   每条至少被抓一次，并带一条正向对照。
+- `tools/lane_argv.py`：**表说的那一行 = 车道真敲的那一行**。上面那张表是按上游源码核对的，可四条
+  执行车道的命令是手写的，两边从没对过；这个工具用 pyyaml 取 `engine-live.yml` 每个步骤的 `run`，
+  认出每项能力真起进程的那几步，再按表查四件事：二进制名对不对（`chmod/ldd` 那种"提到过"不算执行）、
+  `--host`/`--listen-ip` 有没有逐字给 `127.0.0.1`（`$ADDR` 与"靠上游默认"都不算）、表里说上游查不到的
+  旗标有没有混进来、`omit`/子命令对不对。只吃 shell 那一层（注释与 heredoc 正文先滤掉）。
+  实测 4 项能力各一段、问题 0 条；9 种 workflow 文本变异全被报，正向对照是"0 问题必须建立在
+  4 段都认出来之上"（重数：`python3 tools/lane_argv.py`，已挂在 `ci.yml` 静态门禁）。
 - `tools/action_pins.py` + `pins/actions.json`：**出包那只手自己也要钉住**。这一轮之前三个
   workflow 里 4 个 `uses:` 全是浮动大版本 tag（`checkout@v4`、`setup-python@v5`、
   `upload-artifact@v4`、`download-artifact@v4`，共 **45 处**）—— 仓库对引擎/权重/工具带都定了

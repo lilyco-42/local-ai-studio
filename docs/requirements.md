@@ -76,9 +76,10 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
 
 ## 验收标准（在当前唯一可用验证手段 = GitHub Actions 下）
 
-1. `ci.yml`：659 个单测绿（重数：`python -W error::ResourceWarning -m unittest discover -s tests
+1. `ci.yml`：669 个单测绿（重数：`python -W error::ResourceWarning -m unittest discover -s tests
    -p "test_*.py"`；按文件数就 `python -m unittest tests.<模块名>`。2026-10-20 实测逐文件：
-   `test_yaml_gate.py` 闸门自己 14、`test_toolbelt_pins.py` 工具带钉表 14、
+   `test_yaml_gate.py` 闸门自己 14、`test_lane_argv.py` 车道 ↔ 启动表一致（含 9 个 workflow 文本变异）10、
+   `test_toolbelt_pins.py` 工具带钉表 14、
    `test_catalog_snapshot.py` 目录快照与侧表 16、`test_citation_check.py` 出处闸门 22、
    `test_ocr_build_surface.py` OCR 依赖面 15、`test_file_index.py` 下载层五种状态与首启队列 33、
    `test_payload_plan.py` 装机负载（含 tar 成员表与缺口点名）19、`test_pack_engine.py` 出包逻辑 10、
@@ -544,6 +545,25 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     它的 release 名（`action-v1.0.0`）与 tag 名（`v1.0.0`）不同，两个名字都进表、机器复核。
     重数：`python3 tools/action_pins.py --selftest`、`--offline`（只查形状、**拒绝落盘**）、
     `GITHUB_TOKEN=$(gh auth token) python3 tools/action_pins.py --check`。
+
+25. **表说的那一行，与车道真敲的那一行，必须是同一行**：`tools/lane_argv.py`（挂在 `ci.yml` 静态门禁）。
+    第 22 条那张表是**按上游源码**核对出来的，可四条执行车道里的命令一直是手写的，两边从没对过 ——
+    "表对了"与"跑的那行对了"是两句不同的话。现在读 `engine-live.yml`（用 pyyaml 取每个步骤的 `run`，
+    不自写正则切块：上一版按 `- name:` 切，最后一步会一路吞进下一个 job，把别人的旗标算到这一段头上），
+    认出每项能力真起进程的那几步，再用表里的四条规矩量：
+    ① 定位到的二进制必须就是表里那颗（`whisper-cli` 与 `whisper-server` 是两个文件，而且
+    `chmod/ldd` 那种"提到过"不算执行 —— 只看一行的开头）；
+    ② `--host` / `--listen-ip` 必须出现，且值**逐字**是 `127.0.0.1` —— `$ADDR`、`0.0.0.0`、
+    "没写所以靠上游默认"三种都算不合格（验收第 10 条讲的是我们传了什么，不是引擎默认什么）；
+    ③ 表里声明"上游查不到"的旗标不许出现在车道里；④ `omit`（OCR 的 `--size`）与子命令 `oar ocr` 同样各查一遍。
+    判据只吃 shell 那一层：`#` 注释与 heredoc 正文都先滤掉（本仓库真出过一次"判据钉着注释"的事故），
+    并且注释里带 `--api-key`、heredoc 里打印 `--api-key` 都不许让它红 —— 这两条各有一组对照。
+    实测（2026-10-20）：四项能力各认出一段常驻 server 的步骤，**问题 0 条**；把 workflow 文本改坏
+    9 种（绑 0.0.0.0 / 绑变量 / 不传绑地址 / 给 whisper 或 sd 加 `--api-key` / 把 llama 的常驻那步改成
+    找 CLI / 去掉 `oar` 子命令 / 带 `--size` / 只 find 不 exec / 改掉二进制名）9 种全被报出来，
+    正向对照"真实 workflow 必须 0 问题且认出 4 段"防止"0 问题"其实是"什么都没认出来"。
+    重数：`python3 tools/lane_argv.py --selftest`、`python3 tools/lane_argv.py`、
+    `python -m unittest tests.test_lane_argv`。
 
 ## 车道判据的出处（全部按**钉住的那个 ref** 核过，不是按 HEAD 记的）
 
