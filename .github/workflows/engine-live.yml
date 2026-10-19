@@ -137,6 +137,74 @@ jobs:
           name: model-catalog
           path: model-catalog.json
 
+  subtitle-proof:
+    # 四项能力原先只有对话一条真跑过（还没跑成）。这条把字幕这一路补上：
+    # 引擎来自 whisper.cpp 的 ubuntu 产物、权重来自 HF、样本来自仓库自带的 jfk.wav，
+    # 三个输入的 sha256 全部预先钉好（引擎那层来自上游 digest，HF 那两层由 tools/establish_pins.py
+    # 跨主机对照立起来），跑出来必须是一份带时间戳、内容对得上的 SRT。
+    needs: discover
+    timeout-minutes: 20
+    runs-on: ubuntu-latest
+    env:
+      ENGINE_URL: https://github.com/ggml-org/whisper.cpp/releases/download/b5454/whisper-bin-ubuntu-x64.tar.gz
+      ENGINE_SHA256: a72becf15d7917f990f6313867a52638b82b7f9ef237fb0c980dac56a135781c
+      ENGINE_SIZE: "10364195"
+      MODEL_FILE: ggml-tiny.bin
+      MODEL_SIZE: "77691713"
+      MODEL_SHA256: be07e048e1e599ad46341c8d2a135645097a538221678b7acdd1b1919c6e1b21
+      SAMPLE_URL: https://raw.githubusercontent.com/ggml-org/whisper.cpp/master/samples/jfk.wav
+      SAMPLE_SIZE: "352078"
+      SAMPLE_SHA256: 59dfb9a4acb36fe2a2affc14bacbee2920ff435cb13cc314a08c13f66ba7860e
+    steps:
+      - name: 下载引擎并校上游 digest
+        run: |
+          curl -sSL --fail --max-time 300 -o engine.tar.gz "$ENGINE_URL"
+          test "$(stat -c %s engine.tar.gz)" = "$ENGINE_SIZE" || { echo "引擎体积不符"; exit 1; }
+          echo "$ENGINE_SHA256  engine.tar.gz" | sha256sum -c -
+      - name: 下载权重（HF 直连与镜像互为备选）
+        run: |
+          ok=""
+          for u in "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/$MODEL_FILE" \
+                   "https://hf-mirror.com/ggerganov/whisper.cpp/resolve/main/$MODEL_FILE"; do
+            echo "试 $u"
+            if curl -sSL --fail --max-time 900 -o model.bin "$u"; then ok=yes; break; fi
+          done
+          test -n "$ok" || { echo "两个源都拿不到 $MODEL_FILE"; exit 1; }
+          test "$(stat -c %s model.bin)" = "$MODEL_SIZE" || { echo "权重体积不符"; exit 1; }
+          echo "$MODEL_SHA256  model.bin" | sha256sum -c -
+      - name: 下载样本并校验
+        run: |
+          curl -sSL --fail --max-time 120 -o jfk.wav "$SAMPLE_URL"
+          test "$(stat -c %s jfk.wav)" = "$SAMPLE_SIZE" || { echo "样本体积不符"; exit 1; }
+          echo "$SAMPLE_SHA256  jfk.wav" | sha256sum -c -
+      - name: 定位二进制并跑出一条 SRT
+        run: |
+          mkdir -p w && tar -xzf engine.tar.gz -C w
+          echo "=== 解出来的目录（实测是 whisper-bin-ubuntu-x64/ 这一层，不是平铺）==="
+          find w -maxdepth 2 | head -20
+          BIN=$(find w -type f -name whisper-cli | head -1)
+          test -n "$BIN" || { echo "包里没有 whisper-cli，需要改选择逻辑（包内另有 main，别当它）"; exit 1; }
+          # 包里的动态库就在同一目录（libwhisper.so、libggml.so.0.26.0 等），不假设 rpath
+          export LD_LIBRARY_PATH="$(dirname "$BIN"):$LD_LIBRARY_PATH"
+          chmod +x "$BIN"
+          ldd "$BIN" | grep -i "not found" && { echo "动态库缺失"; exit 1; } || echo "动态库齐全"
+          echo "=== 同目录里的兄弟产物 ==="
+          ls "$(dirname "$BIN")" | head -12
+          #  flags 逐个在 examples/cli/cli.cpp 里查到：-f/--file、-t/--threads、-osrt/--output-srt、
+          #  -l/--language、-of/--output-file。不写 -of 时输出名是从**输入名**推的
+          #  （源码：fname_out = fname_out_.empty() ? fname_inp : fname_out_），
+          #  所以这里显式指定，别靠默认行为猜文件名。
+          #  ggml-tiny.bin 是多语版本，所以 -l en 显式给，不留给自动检测去赌时间。
+          timeout 600 "$BIN" -m model.bin -f jfk.wav -l en -t 2 -osrt -of jfk.srt > run.log 2>&1 || { tail -30 run.log; exit 1; }
+          echo "=== 产出文件 ==="; ls -l jfk.srt || { echo "没产出 jfk.srt"; tail -30 run.log; exit 1; }
+          SRT=jfk.srt
+          cat "$SRT"
+          grep -q -- '-->' "$SRT" || { echo "SRT 里没有时间戳行"; exit 1; }
+          # 已知答案对照：这段是肯尼迪名句，至少要落进一个关键词；tiny 模型措辞不稳，不逐字比
+          tr 'A-Z' 'a-z' < "$SRT" | grep -qE 'country|ask not' || { echo "转写内容与已知样本对不上"; exit 1; }
+          N=$(grep -c -- '-->' "$SRT")
+          echo "::notice::字幕车道通过：$SRT 有 $N 条带时间戳的段，引擎与权重均按上游 sha256 校验"
+
   headless-inference:
     needs: discover
     timeout-minutes: 25

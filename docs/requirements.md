@@ -72,10 +72,16 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
 ## 验收标准（在当前唯一可用验证手段 = GitHub Actions 下）
 
 1. `ci.yml`：26 个单测绿、`yaml_gate.py` 0 BAD、离线发现器解析出全部必需 target 且每个都带上游 sha256。
-2. `engine-live.yml`：`discover` 用真实 API 出 manifest；`os-inference-proof` 对
-   `manifest["inferred"]` 每一个产物解压要求 PE；`ocr-catalog` 93 条模型 URL 0 缺失；
-   `headless-inference` 在 CPU runner 上真抓到 `tokens per second > 0`。
+2. `engine-live.yml`：`discover` 用真实 API 出 manifest（每个 target 都带上游 sha256）；`os-inference-proof` 对
+   `manifest["inferred"]` 每一个产物解压要求 PE；`ocr-catalog` 93 条模型 URL 0 缺失且每条都有上游 digest；
+   `model-catalog` 盯权重目录与"上游给不给哈希"的漂移；
+   `headless-inference` 在 CPU runner 上对话真抓到 `tokens per second > 0`；
+   `subtitle-proof` 用钉好的引擎+权重+已知答案样本跑出一份**带时间戳且内容对得上**的 SRT。
 3. 目录可达性探针（`catalog_probe.py`）三条判据全过：泛词有结果、正向对照命中精确仓库、负向对照 0 条。
+4. **车道覆盖度**：四项能力里目前只有对话与字幕有执行车道。
+   生图缺一条 `sd-cli` 冒烟（最省量化也要 1,494 MiB，CI 里跑得设低步数小图）；
+   OCR 缺一条 `cargo build` + 一张图出文字的冒烟（它是唯一没有上游二进制的引擎）。
+   这两条要在 runner 可用后补，别把"只有两条能跑"说成"四项都验过"。
 
 **CI 证明不了的**：GUI 是否真打开、集显/独显上的真实性能与兼容性、DirectML/Vulkan EP 是否真的加速。
 这几项必须留到设备矩阵，交付说明里要写清，不拿 CI 绿当"能用"。

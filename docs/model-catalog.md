@@ -47,6 +47,25 @@ CI 负责核对而不是首次计算；**HF 权重与自家 R2 镜像仍必须�
 ModelScope 的对象路径可当独立旁证，HF ETag **禁止**被当校验值使用。三处大小互相印证可以放心用：
 元数据 415,182,688 == HEAD 415,182,688 == 我们的 pin。
 
+## 已经立住的两个 pin（无上游哈希的那一侧，先做一个样例）
+
+`tools/establish_pins.py` 专门处理"源不给哈希"这一侧，做法是**跨主机逐字节对照后再立 pin**，
+而不是"自己算完再自己断言相等"（那是自证）。2026-10-19 实测：
+
+| 文件 | sha256 | 大小 | 凭据 |
+|---|---|---|---|
+| `ggml-tiny.bin`（字幕默认权重） | `be07e048e1e599ad46341c8d2a135645097a538221678b7acdd1b1919c6e1b21` | 77,691,713 B | 主源 hf-mirror 整包；HEAD 声明总长 == 实收；**huggingface.co 直连的头 4 MiB 与尾 4 MiB 与主源逐字节相同** |
+| `samples/jfk.wav`（车道样本，已知答案） | `59dfb9a4acb36fe2a2affc14bacbee2920ff435cb13cc314a08c13f66ba7860e` | 352,078 B | raw.githubusercontent 整包 + github.com 同段对照；**另与 git 自己的 blob sha1 `3184d372cd2f…` 相等**（git 是内容寻址，这算独立一道旁证） |
+
+诚实地说清强度：这两条只证明**传输与镜像未改写**，provenance 仍然只有 HF / GitHub 一家。
+原先设想的"两个独立发布方"实测不成立——ModelScope 上没有 `ggerganov/whisper.cpp`（404），
+HF 上也没有 `ggml-org/whisper.cpp` 这个模型仓库（401，样本只在 GitHub 代码仓库里）。
+
+另一个实测结论会影响目录设计：**whisper.cpp 的 GitHub release 里没有任何模型**
+（30 个 release 的产物名去重 33 种，全是 xcframework/tar.gz/zip 二进制，`.bin` 命中 0）。
+所以字幕这一路只有"引擎走 GitHub（有 digest）+ 权重走 HF（无 digest，须自算）"这一种组合，
+一个能力里混着两种凭据强度，代码里不能按同一套校验假设写。
+
 ## 还没证的
 
 - 上面所有"下载耗时"是从我们自己那台出口机的一次换算，不同城市/运营商必然不同，只能当量级。
