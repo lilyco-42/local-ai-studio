@@ -75,3 +75,9 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
 
 **CI 证明不了的**：GUI 是否真打开、集显/独显上的真实性能与兼容性、DirectML/Vulkan EP 是否真的加速。
 这几项必须留到设备矩阵，交付说明里要写清，不拿 CI 绿当"能用"。
+
+## 现成工具带（不自研的那部分）
+
+"这台机器能跑什么"、"模型热切换"、"导入的 GGUF 怎么估内存"这三件事已经有 MIT/Apache 的成熟工具在做，
+清单、依据与采纳决定见 [toolbelt.md](toolbelt.md)。其中 llmfit（38,108★，MIT，今天还在 push）
+带 `--json` 与可扩目录，直接接上本文第 1 条"内置目录快照"的设计。

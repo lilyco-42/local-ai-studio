@@ -11,7 +11,9 @@
    权重运行时按需下载并做 sha256 校验，安装包不塞权重。
 
 依据与取舍见 [docs/adr/0001-engines-from-upstream-binaries.md](docs/adr/0001-engines-from-upstream-binaries.md)；
-功能分层、离线/联网边界与 MVP 切分见 [docs/requirements.md](docs/requirements.md)。
+功能分层、离线/联网边界与 MVP 切分见 [docs/requirements.md](docs/requirements.md)；
+选型/热切换/GGUF 估算这些**不自研**的部分见 [docs/toolbelt.md](docs/toolbelt.md)（llmfit、llama-swap、
+gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）。
 
 ## 现在有什么
 
