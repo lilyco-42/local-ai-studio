@@ -71,8 +71,9 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
 
 ## 验收标准（在当前唯一可用验证手段 = GitHub Actions 下）
 
-1. `ci.yml`：118 个单测绿（含 `test_yaml_gate.py` 给闸门自己的 11 条、`test_toolbelt_pins.py` 给工具带
-   钉表的 14 条、`test_catalog_snapshot.py` 给目录快照与其侧表的 16 条、`test_establish_verify.py` 给字节复核的 8 条、
+1. `ci.yml`：130 个单测绿（含 `test_yaml_gate.py` 给闸门自己的 11 条、`test_toolbelt_pins.py` 给工具带
+   钉表的 14 条、`test_catalog_snapshot.py` 给目录快照与其侧表的 16 条、`test_citation_check.py` 给出处闸门的 12 条、
+   `test_establish_verify.py` 给字节复核的 8 条、
    `test_r2_manifest.py` 给镜像清单的 6 条、`test_lane_assertions.py` + `test_image_proof_block.py`
    给车道判据的 27 条、`test_shell_vars.py` 给 shell 变量判据的 10 条），
    `yaml_gate.py` 0 BAD、
@@ -107,7 +108,7 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
    权重钉死（1.5 GB，一次下载要 45 min 级 timeout）。
    但覆盖度说的是**车道存在**，不是跑过 —— 跑过与否要看 Actions 的真实记录，目前为零。
 5. **车道里的 Python 片段要真编译**：`yaml_gate.py` 现在把两条 workflow 里的每段 `<<'PY'` 抽出来
-   `compile()`（本轮 12 段；`python tools/yaml_gate.py` 自己会打印这个数，别信文档里的静态值），
+   `compile()`（本轮 13 段；`python tools/yaml_gate.py` 自己会打印这个数，别信文档里的静态值），
    并验过它会红 —— 掺一段缩进错的 PY 进去，它按
    `文件:job#步骤 第N段` 报出语法错。这个能力是被我上一次写的车道逼出来的：
    一个多缩进两格的注释就是 IndentationError，而旧闸门只查 heredoc 是否闭合，放它过去了。
@@ -143,6 +144,15 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
    `--cors-origins` 收窄到应用来源；② whisper / sd **没有 key 可给**，只能按需起、用完停，或由外壳反代
    （外壳持有唯一端口并自己发 token）；③ UI 永不直连引擎端口。
    这一条现在只有源码级证据，实现与验证都还没做 —— 列在验收里是为了别等写外壳时才发现架构选错了。
+10. **每条 `file:line` 出处本身要能被查**：`pins/citations.json` 21 条声明，每条记
+   `repo/ref/path/line/expect/claim`；`tools/citation_check.py` 按 pin 住的 ref 取回那份文件，
+   核对**那一行仍然含着 expect 的子串**（不是只看文件在不在 —— 上游把 `cors_origins` 默认值改掉
+   而文件照在，才是我们要知道的事），子串在文件里命中不唯一就不配进这张表（建表时按此筛过）。
+   车道 `citation-drift` 先跑 `--selftest`（明知是错的必须被认成错），再逐条核对并守住
+   "至少 20 条"的覆盖度地板。这一条是给第 9 条与整张判据出处表兜底的：本轮已经踩过六次
+   "判据指向一个不存在的东西却照样跑完"（`llama-completions`、去 tag 里找 CLI、`-of jfk.srt`、
+   去日志里找 `Steps:`、grep `tokens per second`…）。
+   证过它承重：临时改一条 expect → 1 条红并打印上游实际那一行；行号整体 +1 → 21 条全红。
 
 ## 车道判据的出处（全部按**钉住的那个 ref** 核过，不是按 HEAD 记的）
 
@@ -159,7 +169,7 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
 车道第一次跑就会红在无关的地方 —— `image-proof` 原本就是这么错的（它去 grep 日志，
 而参数其实只进 PNG）。所以**每条硬编码判据都要有 ref 级出处**，上游改动时按这张表逐条重量。
 
-判据本身也不能只靠"看上去对"：`engine-live.yml` 里 10 段 `<<'PY'`（两条 workflow 合起来 12 段，
+判据本身也不能只靠"看上去对"：`engine-live.yml` 里 11 段 `<<'PY'`（两条 workflow 合起来 13 段，
 段数由 `yaml_gate.py` 打印）中有 6 段是**断言段**，
 其中 5 段已在本地预跑过（`tests/lane_replay.py` 把那段原样抽出来、放合成输入、exec 一遍，
 `SystemExit` 当结论；共 27 条用例，每段都配一条"必须过"的正向对照，另有一条

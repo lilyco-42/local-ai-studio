@@ -11,6 +11,8 @@ on:
       - "tools/model_catalog_probe.py"
       - "tools/toolbelt_pins.py"
       - "tools/catalog_snapshot.py"
+      - "tools/citation_check.py"
+      - "pins/citations.json"
       - "catalog/describe.sha256"
       - "pins/toolbelt.json"
       - ".github/workflows/engine-live.yml"
@@ -554,6 +556,40 @@ jobs:
           print("元数据片段 =", params[:220].replace("\n", " | "))
           PY
           echo "::notice::生图车道通过：引擎 ${{ needs.discover.outputs.sd_tag }} + 钉住的 Q4_0 权重，3 步 256x256 出合法 PNG"
+
+  citation-drift:
+    # 本轮所有硬结论都写成"上游某个 ref 的某一行写着某件事"（默认绑 loopback、CORS 默认 *、
+    # SRT 由服务端渲染、--api-key 默认为空…）。而这一类断言恰恰最容易悄悄失效：上一轮就踩过
+    # 六次"判据指向一个不存在的东西却照样跑完"（llama-completions、tag 里找 CLI、
+    # -of jfk.srt、去日志里找 Steps:、grep tokens per second…）。所以把出处本身做成车道。
+    # 不 needs discover：discover 一挂就会被标 skipped，结论看不见。
+    timeout-minutes: 6
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: 先跑离线对照（明知是错的必须被认成错）
+        run: python3 tools/citation_check.py --selftest
+      - name: 按 pin 住的 ref 逐条核对 file:line 的**那一行内容**
+        run: python3 tools/citation_check.py --json /tmp/citations.json
+      - name: 结论落盘并守住覆盖度
+        run: |
+          python3 - <<'PY'
+          import json
+          rows = json.load(open("/tmp/citations.json"))
+          print(f"核对 {len(rows)} 条出处")
+          if len(rows) < 20:
+              raise SystemExit(f"覆盖度掉了：只核对到 {len(rows)} 条（应当 >=20，别拿少查当通过）")
+          bad = [r for r in rows if not r["ok"]]
+          for r in bad:
+              print("  ✗", r["id"], r["problems"])
+          if bad:
+              raise SystemExit(f"{len(bad)} 条出处不再成立 —— 上游挪过行或改过默认值，"
+                               f"要么重钉 ref 并复核结论，要么更正文档，不许改成 warning 放行")
+          print("  全部出处仍然成立")
+          PY
 
   headless-inference:
     needs: discover

@@ -1,0 +1,233 @@
+[
+ {
+  "id": "llama-host-default",
+  "repo": "ggml-org/llama.cpp",
+  "ref": "b11727",
+  "path": "common/common.h",
+  "line": 648,
+  "expect": "hostnames = {\"127.0.0.1\"}",
+  "claim": "llama-server 默认只绑 loopback",
+  "as_of": "2026-10-20",
+  "line_text": "std::vector<std::string> hostnames = {\"127.0.0.1\"};"
+ },
+ {
+  "id": "llama-cors-star",
+  "repo": "ggml-org/llama.cpp",
+  "ref": "b11727",
+  "path": "common/common.h",
+  "line": 652,
+  "expect": "std::string cors_origins = \"*\";",
+  "claim": "CORS 默认是 *",
+  "as_of": "2026-10-20",
+  "line_text": "std::string cors_origins = \"*\";"
+ },
+ {
+  "id": "llama-apikeys-empty",
+  "repo": "ggml-org/llama.cpp",
+  "ref": "b11727",
+  "path": "common/common.h",
+  "line": 665,
+  "expect": "std::vector<std::string> api_keys;",
+  "claim": "默认没有 API key",
+  "as_of": "2026-10-20",
+  "line_text": "std::vector<std::string> api_keys;"
+ },
+ {
+  "id": "llama-api-key-flag",
+  "repo": "ggml-org/llama.cpp",
+  "ref": "b11727",
+  "path": "common/arg.cpp",
+  "line": 3513,
+  "expect": "{\"--api-key\"}",
+  "claim": "--api-key 存在",
+  "as_of": "2026-10-20",
+  "line_text": "{\"--api-key\"}, \"KEY\","
+ },
+ {
+  "id": "llama-cors-flag",
+  "repo": "ggml-org/llama.cpp",
+  "ref": "b11727",
+  "path": "common/arg.cpp",
+  "line": 3372,
+  "expect": "{\"--cors-origins\"}",
+  "claim": "--cors-origins 存在",
+  "as_of": "2026-10-20",
+  "line_text": "{\"--cors-origins\"}, \"ORIGINS\","
+ },
+ {
+  "id": "llama-cors-warn",
+  "repo": "ggml-org/llama.cpp",
+  "ref": "b11727",
+  "path": "tools/server/server.cpp",
+  "line": 340,
+  "expect": "params.cors_origins == \"*\" && params.api_keys.empty()",
+  "claim": "cors * + 无 key 只警告不拒绝",
+  "as_of": "2026-10-20",
+  "line_text": "if (params.cors_origins == \"*\" && params.api_keys.empty()) {"
+ },
+ {
+  "id": "llama-no-cnv",
+  "repo": "ggml-org/llama.cpp",
+  "ref": "b11727",
+  "path": "common/arg.cpp",
+  "line": 1907,
+  "expect": "\"--no-conversation\"",
+  "claim": "关对话模式的真实拼法",
+  "as_of": "2026-10-20",
+  "line_text": "{\"-no-cnv\", \"--no-conversation\"},"
+ },
+ {
+  "id": "llama-timing-print",
+  "repo": "ggml-org/llama.cpp",
+  "ref": "b11727",
+  "path": "tools/cli/cli-context.cpp",
+  "line": 657,
+  "expect": "[ Prompt: %.1f t/s | Generation: %.1f t/s ]",
+  "claim": "CLI 的速率行格式（不是库里的 tokens per second）",
+  "as_of": "2026-10-20",
+  "line_text": "\"\\n[ Prompt: %.1f t/s | Generation: %.1f t/s ]\","
+ },
+ {
+  "id": "whisper-host-default",
+  "repo": "ggml-org/whisper.cpp",
+  "ref": "b5454",
+  "path": "examples/server/server.cpp",
+  "line": 59,
+  "expect": "hostname       = \"127.0.0.1\"",
+  "claim": "whisper-server 默认只绑 loopback",
+  "as_of": "2026-10-20",
+  "line_text": "std::string hostname       = \"127.0.0.1\";"
+ },
+ {
+  "id": "whisper-port",
+  "repo": "ggml-org/whisper.cpp",
+  "ref": "b5454",
+  "path": "examples/server/server.cpp",
+  "line": 65,
+  "expect": "port          = 8080",
+  "claim": "whisper-server 默认端口",
+  "as_of": "2026-10-20",
+  "line_text": "int32_t port          = 8080;"
+ },
+ {
+  "id": "whisper-cors-star",
+  "repo": "ggml-org/whisper.cpp",
+  "ref": "b5454",
+  "path": "examples/server/server.cpp",
+  "line": 739,
+  "expect": "{\"Access-Control-Allow-Origin\", \"*\"}",
+  "claim": "whisper 发 ACAO *，且没有 key 校验",
+  "as_of": "2026-10-20",
+  "line_text": "{\"Access-Control-Allow-Origin\", \"*\"},"
+ },
+ {
+  "id": "whisper-inference-route",
+  "repo": "ggml-org/whisper.cpp",
+  "ref": "b5454",
+  "path": "examples/server/server.cpp",
+  "line": 62,
+  "expect": "inference_path = \"/inference\"",
+  "claim": "字幕主入口是 POST /inference（multipart）",
+  "as_of": "2026-10-20",
+  "line_text": "std::string inference_path = \"/inference\";"
+ },
+ {
+  "id": "whisper-srt-branch",
+  "repo": "ggml-org/whisper.cpp",
+  "ref": "b5454",
+  "path": "examples/server/server.cpp",
+  "line": 1022,
+  "expect": "params.response_format == srt_format",
+  "claim": "SRT 由服务端渲染，外壳不必自己拼",
+  "as_of": "2026-10-20",
+  "line_text": "else if (params.response_format == srt_format)"
+ },
+ {
+  "id": "whisper-load-route",
+  "repo": "ggml-org/whisper.cpp",
+  "ref": "b5454",
+  "path": "examples/server/server.cpp",
+  "line": 1175,
+  "expect": "+ \"/load\"",
+  "claim": "热切换权重走 POST /load",
+  "as_of": "2026-10-20",
+  "line_text": "svr->Post(sparams.request_path + \"/load\", [&](const Request &req, Response &res)"
+ },
+ {
+  "id": "whisper-health-route",
+  "repo": "ggml-org/whisper.cpp",
+  "ref": "b5454",
+  "path": "examples/server/server.cpp",
+  "line": 1218,
+  "expect": "+ \"/health\"",
+  "claim": "就绪探测 GET /health",
+  "as_of": "2026-10-20",
+  "line_text": "svr->Get(sparams.request_path + \"/health\", [&](const Request &, Response &res){"
+ },
+ {
+  "id": "whisper-cli-osrt",
+  "repo": "ggml-org/whisper.cpp",
+  "ref": "b5454",
+  "path": "examples/cli/cli.cpp",
+  "line": 183,
+  "expect": "arg == \"-osrt\" || arg == \"--output-srt\"",
+  "claim": "-osrt 旗标存在",
+  "as_of": "2026-10-20",
+  "line_text": "else if (arg == \"-osrt\" || arg == \"--output-srt\")           { params.output_srt "
+ },
+ {
+  "id": "sd-listen-default",
+  "repo": "leejet/stable-diffusion.cpp",
+  "ref": "95b3090664d019fcf8fa032a44d1d4793ba244b8",
+  "path": "examples/server/runtime.h",
+  "line": 22,
+  "expect": "listen_ip = \"127.0.0.1\"",
+  "claim": "sd-server 默认只绑 loopback",
+  "as_of": "2026-10-20",
+  "line_text": "std::string listen_ip = \"127.0.0.1\";"
+ },
+ {
+  "id": "sd-reflect-origin",
+  "repo": "leejet/stable-diffusion.cpp",
+  "ref": "95b3090664d019fcf8fa032a44d1d4793ba244b8",
+  "path": "examples/server/main.cpp",
+  "line": 129,
+  "expect": "Access-Control-Allow-Credentials\", \"true\"",
+  "claim": "sd 反射 Origin 且允许凭据",
+  "as_of": "2026-10-20",
+  "line_text": "res.set_header(\"Access-Control-Allow-Credentials\", \"true\");"
+ },
+ {
+  "id": "sd-job-queue-field",
+  "repo": "leejet/stable-diffusion.cpp",
+  "ref": "95b3090664d019fcf8fa032a44d1d4793ba244b8",
+  "path": "examples/server/api.md",
+  "line": 415,
+  "expect": "\"queue_position\": 2",
+  "claim": "sd 的 job 形状里有队列位置",
+  "as_of": "2026-10-20",
+  "line_text": "\"queue_position\": 2,"
+ },
+ {
+  "id": "sd-preview-field",
+  "repo": "leejet/stable-diffusion.cpp",
+  "ref": "95b3090664d019fcf8fa032a44d1d4793ba244b8",
+  "path": "examples/server/api.md",
+  "line": 443,
+  "expect": "preview.b64_json",
+  "claim": "sd 有实时预览字段",
+  "as_of": "2026-10-20",
+  "line_text": "| `preview.b64_json` | `string` | Base64-encoded PNG of the current preview fram"
+ },
+ {
+  "id": "oar-bin-name",
+  "repo": "GreatV/oar-ocr",
+  "ref": "84817f58",
+  "path": "oar-ocr-cli/Cargo.toml",
+  "line": 16,
+  "expect": "name = \"oar\"",
+  "claim": "OCR 二进制叫 oar，不叫 oar-ocr-cli",
+  "as_of": "2026-10-20",
+  "line_text": "name = \"oar\""
+ }
+]

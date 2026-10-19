@@ -259,6 +259,9 @@ sd `master-975-95b3090` 的 `--steps/--width/--height/--sampling-method/--diffus
    "支持不支持 lora/hires/preview/取消"不许写死在代码里（此前按后端检测分层只解决了一半）。
 4. **车道只覆盖了 llama 那条**（`headless-inference#4`）。whisper-server / sd-server 这一节**仍是源码级证据**，
    一次都没跑过；要不要给它们补车道，等 CI 解锁后看第一次真跑的耗时再定。
+   但"这一节的行号还成不成立"不必等 CI：`pins/citations.json` 里三家共 21 条 `file:line` 声明由
+   `citation-drift` 车道逐条核对**那一行的内容**（`tools/citation_check.py`，子串在文件里命中不唯一就不配进表）。
+   上游挪行或改默认值会红，红字带上游实际那一行写了什么。
 
 ## 分发源可达性（2026-10-19 从 CN 服务器 lain42.top 实测：HEAD 之外再做区间 GET，2 MiB 一组、4 MiB 重复三轮）
 

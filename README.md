@@ -38,6 +38,12 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   升到"两边逐字节实测一致"（对话 415 MB 与生图 1.5 GB 都验过，见 `pins/models.json`）。
 - `tools/r2_manifest.py`：从 `pins/*.json` 推导"该镜像什么"，按源分组给实测吞吐换算，
   产出 `mirror/r2-intake.json`（只是清单，不含上传动作）。
+- `tools/citation_check.py` + `pins/citations.json`：把"上游某 ref 的某一行写着某件事"这类结论
+  变成能查的东西。21 条声明各记 `repo/ref/path/line/expect`，逐条取回上游**核对那一行仍然含那个子串**
+  （只看文件在不在没用：默认值改了文件照样在），子串命中不就不唯一就不配进表。
+  建表时已经按这两条筛过；车道 `citation-drift` 先跑 `--selftest`（明知错的必须认成错）再逐条核对。
+  来历：本轮踩过六次"判据指向一个不存在的东西却照样跑完"（`llama-completions`、去 tag 里找 CLI、
+  `-of jfk.srt`、去日志里找 `Steps:`、grep `tokens per second`…）。
 - `tools/toolbelt_pins.py` + `pins/toolbelt.json`：把工具带（llmfit / llama-swap / gguf-parser）
   按 ADR-0001 同一条规矩钉成"具体 release + sha256"。12 条 pin 里 8 条有 sidecar 与 API digest
   两套机制互相对照，4 条只有 API digest（如实记 `sidecar: null`，不和前者混成一类）。

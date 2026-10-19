@@ -98,9 +98,20 @@ for f in FILES:
 pin_shas = {}
 for pf in sorted(glob.glob(os.path.join(ROOT, "pins", "*.json"))):
     with open(pf, encoding="utf-8") as fh:
-        for name, v in json.load(fh).items():
-            if isinstance(v, dict) and v.get("sha256"):
-                pin_shas[v["sha256"]] = (os.path.basename(pf), name, v.get("size"))
+        doc = json.load(fh)
+    # pins/ 下面不止一种形状：models.json/ocr.json/toolbelt.json 是 {名字: 记录}（名字就是键），
+    # citations.json 是**记录数组**（名字在 id 字段里）。上一版无条件 .items()，新加一张列表型表
+    # 就把闸门自己撞死；而第一版修法用 values() 统一取名字，又让 models.json 的出处退化成
+    # "#0/#1" —— 是 test_yaml_gate 的那条"出处要能点名"把它抓回来的。
+    if isinstance(doc, dict):
+        rows = list(doc.items())
+    elif isinstance(doc, list):
+        rows = [(v.get("id") or f"#{i}", v) for i, v in enumerate(doc)]
+    else:
+        rows = []
+    for name, v in rows:
+        if isinstance(v, dict) and v.get("sha256"):
+            pin_shas[v["sha256"]] = (os.path.basename(pf), name, v.get("size"))
 upstream_shas = set()
 for releases in rel.values():
     for r in (releases if isinstance(releases, list) else []):

@@ -21,6 +21,7 @@ jobs:
           python -m pip install --quiet pyyaml
           python -m compileall -q tools tests
           python tools/yaml_gate.py
+          python tools/citation_check.py --selftest
           python - <<'PY'
           import ast,sys
           for f in ("tools/engine_probe.py","tests/test_engine_probe.py",
