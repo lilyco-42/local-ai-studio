@@ -9,9 +9,11 @@
 """
 import json
 import os
+import sys
 import unittest
 
-import lane_replay
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import lane_replay  # noqa: E402  （discover -s tests 会自己加这条路径，单跑一个模块时不会）
 
 WORD = "OARCI2291"
 
@@ -149,6 +151,59 @@ class TestChatRatePattern(unittest.TestCase):
     def test_does_not_match_speedless_noise(self) -> None:
         import re
         self.assertFalse(re.search(self.pattern, "print_info: load time = 12.3 ms\n"))
+
+
+class TestServerLane(unittest.TestCase):
+    """常驻 llama-server 那条：ADR 说外壳要起服务，但四项能力车道原本全是 one-shot CLI，
+    那个决定从没被验证过。这里的用例只测判据本身（真起服务要等 CI）。"""
+
+    JOB, IDX = "headless-inference", 4
+
+    def code(self) -> str:
+        assert "llama-server" in lane_replay.step_name(self.JOB, self.IDX), lane_replay.step_name(self.JOB, self.IDX)
+        return lane_replay.block(self.JOB, self.IDX)
+
+    @staticmethod
+    def files(chat: str, props: str = '{"model_path":"model.gguf"}') -> dict:
+        return {"chat.json": chat, "props.json": props}
+
+    def test_openai_shape_passes(self) -> None:
+        chat = json.dumps({"choices": [{"message": {"content": "hello"}}],
+                           "usage": {"tokens_predicted": 3, "tokens_evaluated": 12}})
+        rc, log = lane_replay.run(self.code(), self.files(chat))
+        self.assertEqual(rc, 0, log)
+
+    def test_legacy_text_field_also_passes(self) -> None:
+        """/completion 的老形状用 choices[].text；两种都吃才不会因换端点而假红。"""
+        chat = json.dumps({"choices": [{"text": "hi"}], "usage": {"tokens_predicted": 1}})
+        rc, log = lane_replay.run(self.code(), self.files(chat))
+        self.assertEqual(rc, 0, log)
+
+    def test_error_body_is_red(self) -> None:
+        rc, log = lane_replay.run(self.code(), self.files('{"error": {"code": 400, "message": "bad"}}'))
+        self.assertEqual(rc, 1, log)
+        self.assertIn("error", log)
+
+    def test_empty_content_is_red_even_with_choices(self) -> None:
+        """服务活着但一个字符没吐 —— 这条必须红，且要说清是常驻这条路的问题。"""
+        chat = json.dumps({"choices": [{"message": {"content": "   "}}], "usage": {"tokens_predicted": 0}})
+        rc, log = lane_replay.run(self.code(), self.files(chat))
+        self.assertEqual(rc, 1, log)
+        self.assertIn("没拿到任何文本", log)
+
+    def test_missing_choices_key_is_not_a_crash(self) -> None:
+        """响应形状变了应当报"没拿到文本"（rc=1），而不是 KeyError（rc=99）——
+        崩掉的判据下次没人敢信它测过什么。"""
+        rc, log = lane_replay.run(self.code(), self.files('{"detail":"unauthorized"}'))
+        self.assertEqual(rc, 1, log)
+
+    def test_non_json_response_names_the_payload_not_a_crash(self) -> None:
+        """反代回 HTML 502 时，人要看见"哪个响应的哪个字节不是 JSON"，而不是只知道红了。
+        rc=99 也算判据没写对：崩掉的段落下次没人知道它测过什么。"""
+        rc, log = lane_replay.run(self.code(), self.files("<html>502 Bad Gateway</html>"))
+        self.assertEqual(rc, 1, log)
+        self.assertIn("chat.json 不是 JSON", log)
+        self.assertIn("502 Bad Gateway", log)
 
 
 class TestHarnessItself(unittest.TestCase):

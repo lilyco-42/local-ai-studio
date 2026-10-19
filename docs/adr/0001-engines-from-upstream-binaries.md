@@ -202,6 +202,11 @@ Vulkan，不必退回 CPU 的"几分钟一张"**。所以这条能力的设计�
 1. **对话、字幕、生图三项上游都带 server 形态**（`llama-server` / `whisper-server` / `sd-server`）。
    外壳应当**起一个常驻服务**，而不是一次任务起一次进程：400 MB 权重每次重新加载，
    在 0.8–1 MiB/s 的下载与秒级加载面前是不可接受的。这也正好是 LM Studio 的形态（本地 OpenAI 兼容接口）。
+   2026-10-19 补：这条决定原本四条能力车道**一条都没碰过**（全是 one-shot CLI），现在
+   `headless-inference` 多了一步真起 `llama-server` 并走 `/v1/chat/completions` 拿非空文本 ——
+   判据的路由与字段名按 `b11727` 源码核过（见 requirements.md 的出处表），但**这一步同样一次都没跑过**，
+   所以它证明的是"这个形状有车道了"，不是"常驻服务在这台 runner 上起得来"。
+   whisper / sd 两个 server 形态仍然只有包内条目表作证，没有车道。
 2. **`llama-bench` 已经在包里** → "给你这台机器实测多少 tok/s"这类 LM Studio 式能力，
    不需要自己写基准，直接调上游产物即可。
 3. **字幕这条不需要自研分段**：`whisper-cli` 的 `-osrt, --output-srt` 在

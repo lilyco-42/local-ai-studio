@@ -10,6 +10,8 @@ import sys
 import yaml
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, HERE)          # 被 import 时 sys.path[0] 不是 tools/，显式加上
+import shell_vars  # noqa: E402
 spec = importlib.util.spec_from_file_location("engine_probe", os.path.join(HERE, "engine_probe.py"))
 probe = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(probe)
@@ -65,6 +67,10 @@ for f in FILES:
             body = st.get("run", "")
             if not body:
                 continue
+            # set -u 的车道引用了本步骤没定义、runner 也不一定给的变量 → 真跑那天当场死。
+            # 这类判据必须在本地就能红：CI 现在一次都跑不了（private 仓库拿不到 runner）。
+            for ln, nm in shell_vars.unbound_refs(body, list(jenv) + list(st.get("env") or [])):
+                bad.append(f"{f}:{jn}#{i}({st.get('name','')}) 第 {ln} 行在 set -u 下引用未定义的 ${nm}")
             if len(re.findall(r"<<'PY'", body)) != len(re.findall(r"(?m)^PY$", body)):
                 bad.append(f"{f}:{jn}#{i}({st.get('name','')}) heredoc 没闭合")
             # heredoc 里的 Python 要真编译一遍：上一版我只查了闭合，

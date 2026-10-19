@@ -71,10 +71,10 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
 
 ## 验收标准（在当前唯一可用验证手段 = GitHub Actions 下）
 
-1. `ci.yml`：94 个单测绿（含 `test_yaml_gate.py` 给闸门自己的 11 条、`test_toolbelt_pins.py` 给工具带
+1. `ci.yml`：110 个单测绿（含 `test_yaml_gate.py` 给闸门自己的 11 条、`test_toolbelt_pins.py` 给工具带
    钉表的 14 条、`test_catalog_snapshot.py` 给目录快照的 8 条、`test_establish_verify.py` 给字节复核的 8 条、
    `test_r2_manifest.py` 给镜像清单的 6 条、`test_lane_assertions.py` + `test_image_proof_block.py`
-   给车道判据的 21 条），
+   给车道判据的 27 条、`test_shell_vars.py` 给 shell 变量判据的 10 条），
    `yaml_gate.py` 0 BAD、
    离线发现器解析出全部必需 target 且每个都带上游 sha256；单测在 `-W error::ResourceWarning` 下跑。
    闸门还把**车道 env 里每一条 64 位十六进制的值**反查出处（必须在 `pins/*.json` 或
@@ -86,7 +86,9 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
    `model-catalog` 盯权重目录与"上游给不给哈希"的漂移；
    `toolbelt-pins` 盯工具带 12 条 pin 的漂移，并**真下载** llmfit 验 `--json` 旗标与 JSON 结构还在；
    `catalog-snapshot` 盯内置目录快照钉住的那份上游文件有没有漂（漂了要显式重钉）；
-   `headless-inference` 在 CPU runner 上对话真抓到 `tokens per second > 0`；
+   `headless-inference` 在 CPU runner 上对话真抓到 `tokens per second > 0`，**并且同一个包再起的
+   常驻 `llama-server` 走 OpenAI 兼容 `/v1/chat/completions` 也真的产出非空文本**（ADR 的实现约束
+   第 1 条"外壳起常驻服务而非一次一进程"原本一次都没被车道碰过）；
    `subtitle-proof` 用钉好的引擎+权重+已知答案样本跑出一份**带时间戳且内容对得上**的 SRT。
 3. 目录可达性探针（`catalog_probe.py`）三条判据全过：泛词有结果、正向对照命中精确仓库、负向对照 0 条。
 4. **车道覆盖度**：四项能力**都有执行车道了** —— 对话（`headless-inference` 抓 tokens/s）、
@@ -102,7 +104,7 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
    权重钉死（1.5 GB，一次下载要 45 min 级 timeout）。
    但覆盖度说的是**车道存在**，不是跑过 —— 跑过与否要看 Actions 的真实记录，目前为零。
 5. **车道里的 Python 片段要真编译**：`yaml_gate.py` 现在把两条 workflow 里的每段 `<<'PY'` 抽出来
-   `compile()`（本轮 11 段；`python tools/yaml_gate.py` 自己会打印这个数，别信文档里的静态值），
+   `compile()`（本轮 12 段；`python tools/yaml_gate.py` 自己会打印这个数，别信文档里的静态值），
    并验过它会红 —— 掺一段缩进错的 PY 进去，它按
    `文件:job#步骤 第N段` 报出语法错。这个能力是被我上一次写的车道逼出来的：
    一个多缩进两格的注释就是 IndentationError，而旧闸门只查 heredoc 是否闭合，放它过去了。
@@ -116,12 +118,23 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
    `--verify pins/ocr.json`：字节与钉的哈希对不上就红；`catalog/defaults.json` 会把这条 pin 的
    强度级一起带出去，UI 才有东西可显示。第 6 级目前**没有任何一条到达** ——
    whisper/SD 权重实测只有一家发布，这点在交付说明里要照实写。
+8. **车道里的 shell 也不能带 `set -u` 地雷**：`tools/shell_vars.py`（挂在 `yaml_gate.py` 里跑）把每条
+   `run:` 步骤扫一遍，凡是 `set -u` 生效、而某个 `$VAR` 在本步骤从未赋值、也不在 job/step `env:` 或
+   runner 内置白名单里的，就报 `文件:job#步骤 第 N 行`。来历是 2026-10-19 新加的 llama-server 步骤：
+   原写 `export LD_LIBRARY_PATH="$(dirname "$SRV"):$LD_LIBRARY_PATH"`，而 runner 上这个变量根本不存在，
+   步骤会在**起服务之前**死掉。`bash -n` 查不出（语法是对的），shellcheck 不在依赖里。
+   三条刻意的边界，都有对应单测：`${X:-…}`/`${X:+…}` 是作者自己承认"可能没有"的写法，整段抹掉不查；
+   `<<'PY'` 里是 Python 不是 shell，扫它会养出误报；`FOO=1 bar "$FOO"` **要报** —— 那个 FOO 只进 `bar`
+   的环境，同一行的 `"$FOO"` 由当前 shell 展开，`set -u` 下确实未定义（这条是写完判据才发现自己
+   原来的"对照用例"预期错了，判据比对照对）。
+   证过它承重：把守卫去掉（临时副本，不动工作树），闸门红在第 5 行点名 `$LD_LIBRARY_PATH`。
 
 ## 车道判据的出处（全部按**钉住的那个 ref** 核过，不是按 HEAD 记的）
 
 | 车道 | 判据依赖的东西 | 出处 |
 |---|---|---|
 | `headless-inference` | 速率行 + 独立证明"真的吐了字"；关对话模式的真实拼法 | llama.cpp `b11727`：**库里** `src/llama-context.cpp:4657/4659` 会打 `%8.2f tokens per second`，但 **llama-cli 不调它** —— CLI 只在 `--show-timings`（`common/arg.cpp:1798`）下打 `[ Prompt: %.1f t/s | Generation: %.1f t/s ]`（`tools/cli/cli-context.cpp:655-660`）。判据因此两种写法都认，并另加一条与格式无关的证据：stdout 必须有非空白内容。抓不到速率时先怀疑格式（红字里顺带打 help 里的 timings/perf 开关），不再把结论写成"推理没跑起来"。关对话的真实拼法是 `-no-cnv`/`--no-conversation`（`arg.cpp:1907`），交互风险由 `< /dev/null` 兜死；`-t/-n/-ngl` 也都在 `common/arg.cpp`（**不在** `common/common.cpp`） |
+| `headless-inference`（常驻 server） | 路由名、响应字段名、**服务二进制与 CLI 是不是同一个文件** | llama.cpp `b11727`：`GET /health` = `tools/server/server.cpp:263`（返回带 `"status"`）、`POST /v1/chat/completions` = `274`、`choices[].message.content` = `tools/server/server-task.cpp:422/434`（老 `/completion` 用 `choices[].text`，判据两种都吃）、`usage.tokens_predicted` = `340`。二进制是 `llama-server` **和** `libllama-server-impl.so` 成对的（zip 条目表），所以这一步自己 `find llama-server` 并带 `LD_LIBRARY_PATH`，不复用上一步挑中的 CLI。`tokens_predicted` 缺失时**只跳过不断言**（这个键历史上叫过 `completion_tokens`，写死会养出一条永远红的车道），非空文本那条才是硬证据 |
 | `subtitle-proof` | `-osrt/--output-srt`、`-of/--output-file`、`-l`、`-m`、`-f`、`-t`；**产出文件叫什么** | whisper.cpp `b5454` 的 `examples/cli/cli.cpp:183/190/197/201/202/159`；不给 `-of` 时输出名从输入名推（同文件 `1136`）。**`-of` 要的是基名**：`fout_factory::open` 把扩展名直接拼在后面（`1165-1166`），写 `-of jfk.srt` 会得到 `jfk.srt.srt` —— 原车道就是这么写的，第一次跑必红且原因很怪。现在判据靠 `ls jfk*.srt` 发现真名，红字区分"命名变了"和"没产出字幕" |
 | `image-proof` | 参数写在**产物的 tEXt** 里而不是日志里 | sd.cpp `master-975-95b3090`：`examples/common/common.cpp:3239/3269` 拼 `Steps:`/`Size:` → `examples/common/media_io.cpp` 交给 `stbi_write_png(..., parameters)` → `thirdparty/stb_image_write.h:1210` 落成 `tEXt`、关键字 `parameters` |
 | `ocr-proof` | 包名 `oar-ocr-cli`、二进制名 `oar`、`--det/--rec/--dict` 必须一起给 | commit `84817f58…`（**不是** tag `v0.10.0` —— 那个 tag 里没有 CLI）：根 `Cargo.toml` members、`oar-ocr-cli/Cargo.toml` 的 `[[bin]] name = "oar"`、`src/args.rs` 的 `requires_all`/`conflicts_with_all` |
@@ -131,19 +144,24 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
 车道第一次跑就会红在无关的地方 —— `image-proof` 原本就是这么错的（它去 grep 日志，
 而参数其实只进 PNG）。所以**每条硬编码判据都要有 ref 级出处**，上游改动时按这张表逐条重量。
 
-判据本身也不能只靠"看上去对"：`engine-live.yml` 里 9 段 `<<'PY'`（两条 workflow 合起来 11 段，
-段数由 `yaml_gate.py` 打印）中有 5 段是**断言段**，
-其中 4 段已在本地预跑过（`tests/lane_replay.py` 把那段原样抽出来、放合成输入、exec 一遍，
-`SystemExit` 当结论；共 21 条用例，每段都配一条"必须过"的正向对照，另有一条
+判据本身也不能只靠"看上去对"：`engine-live.yml` 里 10 段 `<<'PY'`（两条 workflow 合起来 12 段，
+段数由 `yaml_gate.py` 打印）中有 6 段是**断言段**，
+其中 5 段已在本地预跑过（`tests/lane_replay.py` 把那段原样抽出来、放合成输入、exec 一遍，
+`SystemExit` 当结论；共 27 条用例，每段都配一条"必须过"的正向对照，另有一条
  mutation 检查证明它不是永远绿：同一份 OCR 输出把期望词换掉，rc 从 0 翻成 1）。
 剩下 4 段是取数/打印，不含判据；而 `ocr-proof#0` 那段工具链版本闸依赖真 `rustc`，
 预跑工具刻意不 mock 外部命令，所以它只能等 CI —— 这一条要如实留着，别当作已验。
+预跑也顺手抓到一个"看起来在测、其实什么都没测"的形状：`test_lane_assertions.py` 与
+`test_image_proof_block.py` 原来靠 `discover -s tests` 才 import 得到 `lane_replay`，
+单跑一个模块时报的是 ImportError（`Ran 1 test … errors=1`），很容易被读成"这个模块只有 1 条用例"。
+现在两个文件自己把目录加进 `sys.path`，单跑与整跑给出的用例数一致。
 
 ## 第一次真跑要盯什么（车道至今 0 次执行，这些是静态审计之后剩下的未知）
 
 1. **timeout 够不够**：`image-proof` 是 45 min（1.5 GB 权重 + 3 步推理），`ocr-proof` 是 34 min
-   （2 核 runner 上 `cargo build --release` 要过 ort / onig / tokenizers 的编译）。
-   这两个数都是估的，第一次跑就要按实际耗时改回来，别把"超时"读成"能力不行"。
+   （2 核 runner 上 `cargo build --release` 要过 ort / onig / tokenizers 的编译），
+   `headless-inference` 2026-10-19 从 25 提到 35 min（同一步里多起一次常驻 server，权重要重新加载
+   + 最长 2 分钟就绪轮询）。这三个数都是估的，第一次跑就要按实际耗时改回来，别把"超时"读成"能力不行"。
 2. **OCR 的源码 ref**：钉的是 main 的 `84817f58…`，因为 **v0.10.0 那个 tag 里没有 `oar-ocr-cli`**
    （成员表实测只有 4 项）。断言已按 raw 文件在本地核过（成员含 CLI、`[[bin]] name = "oar"`），
    剩下的未知是真编译 —— 上游若发新 tag，应该换成新 tag 而不是继续跟 main。
@@ -158,6 +176,12 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
    （ModelScope 首选、hf-mirror 备选，见 [model-catalog.md](model-catalog.md)）。
 6. **每条 pin 都会被车道自己再 `sha256sum -c` 一遍**。任何一条对不上都是"上游被换过或源在说谎"，
    要红着停下来，不许改成 warning 放行。
+7. **常驻 server 那条的未知集中在"起不起来"而不是"字段对不对"**：`/health` 轮询给的是 60 次 × 2 s
+   （≈2 分钟），2 核 runner 加载 415 MB 权重大概率够，但没测过；超时就先改这个预算，别改判据。
+   `usage.tokens_predicted` 这个键名是按 `server-task.cpp:340` 核的，历史上它叫过 `completion_tokens`，
+   所以判据写成"缺了就跳过、不硬要求"，硬证据是非空文本 —— 第一次跑要是 `/props` 有内容而
+   `usage` 没有，那是键名换了，不是推理失败。`ldd` 那条只在**报 not found 时**才红（`grep` 找不到
+   就退出 1，被 `||` 接住），所以它绿只说明"没缺失"，不说明库真的被加载了。
 
 **CI 证明不了的**：GUI 是否真打开、集显/独显上的真实性能与兼容性、DirectML/Vulkan EP 是否真的加速。
 这几项必须留到设备矩阵，交付说明里要写清，不拿 CI 绿当"能用"。

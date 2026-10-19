@@ -23,10 +23,13 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   名字里没写 OS 的（whisper 那两个）只**推断**成 win，并单列进 `manifest["inferred"]`。
 - `tools/zip_peek.py`：用 HTTP Range 只读 zip 中央目录，不下载整包、不解压、不运行，
   把上面那个推断换成条目级证据；带一正一负对照，见 ADR。
-- `tools/yaml_gate.py`：解析两条 workflow，核对 needs 链、step 输出引用、heredoc 闭合，
+- `tools/yaml_gate.py`：解析两条 workflow，核对 needs 链、step 输出引用、heredoc 闭合与**每段 PY 真编译**，
   以及车道里写死的 target 名确实存在于 manifest（已用假 target 验证它会红）。
-  还会把车道 env 里每条 `*_SHA256` 反查出处（`pins/*.json` 或上游 digest 夹具），
-  查不到、或体积抄错，都算 BAD（已用假哈希与错体积验证它会红）。
+  还会把车道 env 里每条 64 位十六进制的值（**按值形状认，不按键名**，否则 OCR 车道的
+  `DET_SHA/REC_SHA/DICT_SHA` 会漏）反查出处（`pins/*.json` 或上游 digest 夹具），
+  查不到、或体积抄错、或哈希没加引号被 YAML 读成数字，都算 BAD（已用假哈希与错体积验证它会红）。
+  另一条判据来自 `tools/shell_vars.py`：`set -u` 的车道里引用了本步骤从未定义、也不在 `env:`
+  或 runner 内置白名单里的 `$VAR` 就点名行号 —— 这类写法 `bash -n` 查不出，只会在真跑那天当场死。
 - `tools/catalog_probe.py`：目录"能不能搜"的探针（文件能下 ≠ 能浏览目录，而浏览目录才是这类的招牌交互）。
   三条判据一起成立才算过：泛词有结果、按精确仓库名能搜到它、乱词必须 0 条。
 - `tools/establish_pins.py`：给权重立 pin，两条路子 —— `download`（整包算 sha256 + 第二主机头尾 4 MiB

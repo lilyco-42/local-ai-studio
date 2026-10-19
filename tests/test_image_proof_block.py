@@ -8,12 +8,16 @@
 判据本身不验 CRC，所以这里也不填真 CRC —— 它验的是块结构与字段一致性。
 """
 
+import os
 import struct
+import sys
 import unittest
 
-import lane_replay
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import lane_replay  # noqa: E402  （discover -s tests 会自己加这条路径，单跑一个模块时不会）
 
 JOB, IDX = "image-proof", 2
+
 
 def lane_block() -> str:
     """取出 image-proof 里那段真正做产物判据的 heredoc PY（与 yaml_gate 同一个抽法）。"""

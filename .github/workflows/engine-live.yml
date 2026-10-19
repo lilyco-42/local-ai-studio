@@ -552,7 +552,9 @@ jobs:
 
   headless-inference:
     needs: discover
-    timeout-minutes: 25
+    # 25 → 35：同一步里多起了一次常驻 server（权重要再加载一遍 + 最长 2 分钟的就绪轮询）。
+    # 这两个数都是估的，第一次真跑要按实际耗时改回来（requirements.md 的"第一次真跑要盯什么"第 1 条）。
+    timeout-minutes: 35
     runs-on: ubuntu-latest
     env:
       MODEL_REPO: Qwen/Qwen2.5-0.5B-Instruct-GGUF
@@ -618,3 +620,67 @@ jobs:
           grep -qE '[^[:space:]]' out.txt || { echo "stdout 里没有任何文本，模型没产出 token"; exit 1; }
           awk -v r="$RATE" 'BEGIN{exit !(r>0)}' || { echo "速率为 0"; exit 1; }
           echo "::notice::无头推理成功 $RATE tok/s，引擎 ${{ needs.discover.outputs.llama_tag }}"
+      - name: 起常驻 llama-server，走 OpenAI 兼容接口再产一次 token
+        # ADR 的实现约束第 1 条是"外壳起常驻服务，而不是每个任务起一次进程"——
+        # 但四条能力车道全是 one-shot CLI，那个决定一次都没被车道碰过。这条补上。
+        # 路由与字段名按 b11727 源码核过，不是照 OpenAI 文档猜的：
+        #   GET  /health                server.cpp:263（返回里带 "status"）
+        #   POST /v1/chat/completions   server.cpp:274
+        #   choices[].message.content   server-task.cpp:422/434
+        #   usage.tokens_predicted      server-task.cpp:340
+        # 服务二进制与 CLI 是**两个文件**（包里还有 libllama-server-impl.so 成对），
+        # 所以这里自己 find llama-server 并带上 LD_LIBRARY_PATH，不复用上一步挑中的 CLI。
+        run: |
+          set -euo pipefail
+          SRV=$(find engine -type f -name llama-server | head -1)
+          test -n "$SRV" || { echo "包里没找到 llama-server，条目表："; find engine -maxdepth 2 -type f | head -30; exit 1; }
+          chmod +x "$SRV"
+          export LD_LIBRARY_PATH="$(dirname "$SRV")${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+          ldd "$SRV" | grep -i "not found" && { echo "llama-server 动态库缺失"; exit 1; } || echo "llama-server 动态库齐全"
+          "$SRV" -m model.gguf --host 127.0.0.1 --port 8080 -ngl 0 -c 1024 > server.log 2>&1 &
+          SRV_PID=$!
+          trap 'kill $SRV_PID 2>/dev/null || true' EXIT
+          ready=""
+          for i in $(seq 1 60); do
+            if curl -fsS --max-time 5 "http://127.0.0.1:8080/health" 2>/dev/null | grep -q '"status"'; then
+              ready=yes; break
+            fi
+            sleep 2
+          done
+          test -n "$ready" || { echo "server 60 次探测（约 2 分钟）内没就绪"; tail -40 server.log; exit 1; }
+          echo "::notice::llama-server 第 $i 次探测就绪"
+          curl -fsS --max-time 20 "http://127.0.0.1:8080/props" > props.json
+          curl -fsS --max-time 300 -H 'Content-Type: application/json' \
+            -d '{"messages":[{"role":"user","content":"Reply with exactly one word: hello"}],"max_tokens":16,"temperature":0}' \
+            "http://127.0.0.1:8080/v1/chat/completions" > chat.json
+          python3 - <<'PY'
+          import json
+
+
+          def load(name):
+              raw = open(name, encoding="utf-8", errors="replace").read()
+              try:
+                  return json.loads(raw), raw
+              except Exception as e:
+                  # 反代/网关给的常常是 HTML 502，那不是一个"接口形状变了"的故事，得说清楚
+                  raise SystemExit(f"{name} 不是 JSON（{e}）：前 160 字节 = {raw[:160]!r}")
+
+
+          props, _ = load("props.json")
+          print("/props 键 =", sorted(props)[:10])
+          d, raw = load("chat.json")
+          if "error" in d:
+              raise SystemExit(f"接口回了 error：{str(d['error'])[:200]}")
+          ch = (d.get("choices") or [{}])[0]
+          content = ((ch.get("message") or {}).get("content")) or ch.get("text") or ""
+          print("content 长度 =", len(content), "片段 =", repr(content[:60]))
+          usage = d.get("usage") or {}
+          print("usage =", {k: usage[k] for k in sorted(usage)[:6]})
+          if not content.strip():
+              print("响应片段 =", raw[:200])
+              raise SystemExit("常驻服务这条路上没拿到任何文本：与 one-shot 是不同的代码路径，不能当作已验")
+          tp = usage.get("tokens_predicted")
+          if tp is not None and not (tp > 0):
+              raise SystemExit(f"usage.tokens_predicted={tp}，服务没真解码出 token")
+          print("::notice::常驻 server 这条路通了（OpenAI 兼容 /v1/chat/completions）")
+          PY
