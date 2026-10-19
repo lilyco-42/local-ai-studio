@@ -559,6 +559,42 @@ class TestCli(unittest.TestCase):
         self.assertIn("--skip-provenance", r.stdout)     # 模式必须自己说出来
         self.assertIn("核对 0 条 needle", r.stdout)       # 没查就报 0，不许装作查过
 
+    def test_a_missing_queue_report_is_a_refusal_not_a_green(self) -> None:
+        """车道里 download-artifact 缺件只警告不红 —— 所以"核对没有输入"必须由工具自己说。"""
+        with tempfile.TemporaryDirectory() as d:
+            out = os.path.join(d, "plan.json")
+            r = subprocess.run([sys.executable, CLI, "--skip-provenance", "--queue-report",
+                                os.path.join(d, "nope.json"), "--out", out],
+                               capture_output=True, text=True)
+        self.assertEqual(r.returncode, 1, r.stdout[-400:] + r.stderr[-400:])
+        self.assertIn("不存在", r.stdout)
+        self.assertNotIn("读不动", r.stdout, "缺件与读不动是两件事，混报就分不清哪步坏了")
+        self.assertNotIn("Traceback", r.stderr, "抛异常也算红，但说不清是这件事")
+        self.assertFalse(os.path.exists(out), "拒绝了还落盘 = 那张表是凭空来的")
+
+    def test_an_unreadable_queue_report_is_refused_too(self) -> None:
+        with tempfile.TemporaryDirectory() as d:
+            bad = os.path.join(d, "r.json")
+            with open(bad, "w", encoding="utf-8") as fh:
+                fh.write("{ 不是 JSON")
+            r = subprocess.run([sys.executable, CLI, "--skip-provenance", "--queue-report", bad,
+                                "--out", os.path.join(d, "plan.json")],
+                               capture_output=True, text=True)
+        self.assertEqual(r.returncode, 1, r.stdout[-400:] + r.stderr[-400:])
+        self.assertIn("读不动", r.stdout)
+        self.assertNotIn("不存在", r.stdout, "文件明明在，报成不在会把人支到错误的那一步")
+
+    def test_a_real_report_keeps_the_cli_green(self) -> None:
+        """正向对照：真实捕获那份报告喂进去必须 0 问题并落盘（否则上面两条是"永远红"）。"""
+        with tempfile.TemporaryDirectory() as d:
+            out = os.path.join(d, "plan.json")
+            r = subprocess.run([sys.executable, CLI, "--skip-provenance", "--queue-report", QFIX,
+                                "--out", out], capture_output=True, text=True)
+        self.assertEqual(r.returncode, 0, r.stdout[-600:] + r.stderr[-300:])
+        self.assertIn("落盘", r.stdout)
+        self.assertIn("NOTE: --skip-provenance", r.stdout)   # 没查上游这句必须自报
+        self.assertIn("核对 0 条 needle", r.stdout)
+
     def test_write_refuses_to_land_a_bad_plan(self) -> None:
         """上游原文一份都取不到时，落盘这件事必须被拒 —— 不能"没查过也算出一张表"。"""
         real_read, real_fetch = cc.read_cache, cc.fetch
@@ -613,12 +649,13 @@ class TestArtifactShape(unittest.TestCase):
 class TestSourceMutants(unittest.TestCase):
     """把工具源码逐条改坏，证明上面那些判据不是装饰。
 
-    每个变异体必须让五条探针里**至少一条**不再"判据在位"：
+    每个变异体必须让六条探针里**至少一条**不再"判据在位"：
       a 离线对照（selftest）仍然全绿；
       b 重算并与已提交那张比漂移，仍然没有问题；
       c 出处 id 闸门仍然抓得住一个引用了不存在的 id 的规格；
       d 声明"上游没有"的那面旗标真混进原文时仍然点名它；
-      e 跨生产者核对（首启队列报告）的四种说法仍然各说各的。
+      e 跨生产者核对（首启队列报告）的四种说法仍然各说各的；
+      f 报告文件不在时 CLI 仍然拒绝，而不是抛异常或"没输入也算核过"。
     探针只读，不落盘 —— 变异扫描里"顺手覆盖产品表"是这一轮已经犯过两次的错。
     """
 
@@ -648,6 +685,8 @@ class TestSourceMutants(unittest.TestCase):
         ("报告自己报问题时被当成没问题", 'if report is not None and report.get("problems"):',
          'if False and report.get("problems"):'),
         ("生图的二进制名字不经过那张表", 'binary_for("sd", o)', '"sd-cli"'),
+        ("报告不存在也照样往下核", "if not os.path.exists(a.queue_report):",
+         "if False and a.queue_report:"),
     ]
 
     def load(self, src: str):
@@ -726,13 +765,35 @@ class TestSourceMutants(unittest.TestCase):
         except Exception as exc:                       # noqa: BLE001
             out["e 跨生产者核对"] = False
             out["_e 异常"] = str(exc)[:60]
+        try:
+            import tempfile as _tf
+            with _tf.TemporaryDirectory() as d:
+                out_path = os.path.join(d, "plan.json")
+                buf_e = io.StringIO()
+                with contextlib.redirect_stdout(buf_e):
+                    rc_missing = mod.main(["--skip-provenance", "--queue-report",
+                                           os.path.join(d, "nope.json"), "--out", out_path])
+                    nothing_written = not os.path.exists(out_path)
+                buf_f = io.StringIO()
+                with contextlib.redirect_stdout(buf_f):
+                    rc_real = mod.main(["--skip-provenance", "--queue-report", QFIX,
+                                        "--out", out_path])
+            # 报的是**哪一件**也要核对：只要求 rc==1 的话，"读不动"那句会替"文件不在"这句顶包
+            # （两条消息原先共用"核对没有输入"这个说法，那条变异就是这么溜过去的）。
+            out["f 核对没有输入就红"] = (rc_missing == 1 and nothing_written and rc_real == 0
+                                       and "不存在" in buf_e.getvalue()
+                                       and "读不动" not in buf_e.getvalue())
+        except Exception as exc:                       # noqa: BLE001
+            out["f 核对没有输入就红"] = False
+            out["_f 异常"] = str(exc)[:60]
         return out
 
     def test_baseline_probes_all_hold(self) -> None:
-        """正向对照：不改坏的源码，五条探针必须全部说"判据在位"。"""
+        """正向对照：不改坏的源码，六条探针必须全部说"判据在位"。"""
         self.assertEqual({k: v for k, v in self.probes(lp).items() if not k.startswith("_")},
                          {"a 离线对照": True, "b 重算与漂移": True, "c 出处 id 闸门": True,
-                          "d 缺席声明照扫": True, "e 跨生产者核对": True})
+                          "d 缺席声明照扫": True, "e 跨生产者核对": True,
+                          "f 核对没有输入就红": True})
 
     def test_every_mutant_is_caught(self) -> None:
         missed = []
@@ -746,7 +807,7 @@ class TestSourceMutants(unittest.TestCase):
 
     def test_mutant_probe_counts(self) -> None:
         """变异体数量也是账：删掉一条锚点而不说原因，就该在这里红。"""
-        self.assertEqual(len(self.MUTANTS), 13)
+        self.assertEqual(len(self.MUTANTS), 14)
 
 
 if __name__ == "__main__":

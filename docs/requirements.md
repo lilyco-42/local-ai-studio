@@ -76,7 +76,7 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
 
 ## 验收标准（在当前唯一可用验证手段 = GitHub Actions 下）
 
-1. `ci.yml`：656 个单测绿（重数：`python -W error::ResourceWarning -m unittest discover -s tests
+1. `ci.yml`：659 个单测绿（重数：`python -W error::ResourceWarning -m unittest discover -s tests
    -p "test_*.py"`；按文件数就 `python -m unittest tests.<模块名>`。2026-10-20 实测逐文件：
    `test_yaml_gate.py` 闸门自己 14、`test_toolbelt_pins.py` 工具带钉表 14、
    `test_catalog_snapshot.py` 目录快照与侧表 16、`test_citation_check.py` 出处闸门 22、
@@ -87,7 +87,7 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
    车道判据 38 + 6 = 44、`test_recommend_image.py` 生图档位表 31、`test_machine_budget.py` 装机预算 20、
    `test_lane_replay_report.py` 给分段、预跑与 job 数计数 4、`test_engine_probe.py` 产物名解析与 skipped 点名 30、
    `test_recommend_subtitle.py` 字幕四表对账 44、`test_recommend_models.py` 对话档位表 46、
-   `test_launch_plan.py` 启动计划（含 13 条源码变异体全部被抓）62、
+   `test_launch_plan.py` 启动计划（含 14 条源码变异体全部被抓）65、
    `test_install_deps.py` 装依赖清单（含 8 条源码变异体与真捕获夹具的字节校验）36、
    `test_action_pins.py` action 钉法（含 7 条源码变异体与形状对表复核）36），
    `yaml_gate.py` 0 BAD、
@@ -472,13 +472,15 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     出包那条因此会拒收"负载里只有 `whisper-cli`"的产物（只有 CLI 不算装了 server，装了也起不来）。
 
     判据的承重证明留在仓库里（不是又一次性扫描）：`tests/test_launch_plan.py` 的
-    `TestSourceMutants` 把工具源码改坏 **13 个变异体**，每个都必须让五条探针（离线对照 /
-    重算漂移 / 出处 id 闸门 / 缺席声明照扫 / 跨生产者核对）至少一条不再"在位"，并同时跑一条正向对照
-    （不改坏时五条全绿）。它当场抓出三个真 bug：`build()` 把 SPEC 里的 dict **直接塞进产物**
+    `TestSourceMutants` 把工具源码改坏 **14 个变异体**，每个都必须让六条探针（离线对照 /
+    重算漂移 / 出处 id 闸门 / 缺席声明照扫 / 跨生产者核对 / 核对没有输入就红）至少一条不再"在位"，并同时跑一条正向对照
+    （不改坏时六条全绿）。它当场抓出四个真 bug：`build()` 把 SPEC 里的 dict **直接塞进产物**
     （改产物就是改规格，现已 `deepcopy`）、`verify_spec` 里 `seen_absent` 初始化成了 list
-    （第一跑就 `TypeError`），以及探针之间**互相脏了数据** —— 出处 id 那条探针把 `SPEC` 里的 cite
-    改掉后不还回去，紧接着的跨生产者探针拿到就是被污染的规格，报出来的"红"跟变异体毫无关系。
-    现在每条改共享状态的探针都自带 `finally` 还原。输出还会自报家门：
+    （第一跑就 `TypeError`）、探针之间**互相脏了数据** —— 出处 id 那条探针把 `SPEC` 里的 cite
+    改掉后不还回去，紧接着的跨生产者探针拿到就是被污染的规格，报出来的"红"跟变异体毫无关系
+    （现在每条改共享状态的探针都自带 `finally` 还原），以及**两条错误消息共用了一个说法** ——
+    "缺件"与"读不动"都写着"核对没有输入"，于是把缺件那条分支删掉，探针照样绿；
+    现在两条消息各用只有自己能命中的词。输出还会自报家门：
     `核对 28 条 needle / 8 条缺席声明，取自 8 份上游原文（缓存 N / 现抓 M）`，
     加 `--skip-provenance` 时打 NOTE 并报 0 —— 「没查」不能长得像「查过了」。
     这一轮也踩了一次**引用不存在的出处**：SPEC 里原先写 `headless-server-chat-completions`
@@ -491,6 +493,12 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     `python3 tools/launch_plan.py --check --fill --cache .cache/refs`（联网按 pin 查）、
     `python3 tools/launch_plan.py --cache .cache/refs --queue-report tests/fixtures/first-run-queue.json --out .cache/launch-plan-with-report.json`
     （跨生产者那层：写的是 scratch 那份，有 BAD 就不落盘，所以 rc 就是那句话本身）。
+    **接线本身也踩了一次**：给 job 加 `needs` 就要同时加 `if: always()`。这一轮 `launch-plan`
+    改成 `needs: file-index` 去吃它的报告，实测在 `3781953` 那次 push 上 —— file-index 因账单
+    失败之后，launch-plan 的结论是 `skipped`、`steps: 0`，什么都没说出来；这正是本仓库已经写在
+    `file-index` 注释里的那条规则（被挂住的 job 会被标 skipped，结论看不见）。所以现在那两步带
+    `if: always()`，并且报告文件不在时由 `launch_plan.py` 自己报「不存在」再退出 1 ——
+    `download-artifact` 缺件只警告、不红，不能指望它替这条核对把关。
     **仍然没有的部分**：这些是按上游源码与文档拼出来的模板，本机一台都没起过 ——
     argv 真能被引擎接受，属于 #25 实现之后在 CI 里跑的那一轮
     （而这条仓库现在还没有 runner，见 #19）。

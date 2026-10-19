@@ -565,8 +565,19 @@ def main(argv: list[str]) -> int:
         print("NOTE: --skip-provenance —— 本轮没有向钉住的 ref 核对任何旗标")
     tables: dict = {}
     if a.queue_report:
-        with open(a.queue_report, encoding="utf-8") as fh:
-            tables["queue_report"] = json.load(fh)
+        # 报告不在 = 这条核对没有输入。让它长得像"跑过了"是最坏的一种绿：
+        # 车道里 file-index 挂掉时 download-artifact 只会警告，不会红。
+        if not os.path.exists(a.queue_report):
+            print(f"BAD: --queue-report 指向的 {a.queue_report} 不存在 —— 首启队列那一步"
+                  "没跑出报告，跨生产者核对没有输入，不许当成已核对")
+            return 1
+        try:
+            with open(a.queue_report, encoding="utf-8") as fh:
+                tables["queue_report"] = json.load(fh)
+        except (OSError, ValueError) as exc:
+            print(f"BAD: --queue-report 读不动（{type(exc).__name__}: {exc}）—— 报告读不出来，"
+                  "这一条不算核过")
+            return 1
     stats: dict = {}
     fresh, problems = build([s.strip() for s in a.os.split(",") if s.strip()],
                             [s.strip() for s in a.tiers.split(",") if s.strip()],

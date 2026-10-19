@@ -682,6 +682,10 @@ jobs:
     # 第五步吃 file-index 的产物（所以 needs 它；被挂住就是看不见结论）。
     timeout-minutes: 8
     needs: file-index
+    # `if: always()` 不是宽容，是让结论看得见：file-index 挂掉时（今天就是 —— 这仓库
+    # 拿不到 runner）没有这句的 job 会被标 skipped，而 skipped 什么都不说。
+    # 少了那份报告，下一步就明确红，不许悄悄当成"核对过了"。
+    if: always()
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4.4.0

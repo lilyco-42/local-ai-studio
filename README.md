@@ -188,13 +188,14 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   `status` 不是 agree、或走的是这条车道没做 live 比对的 `github_release_digest` 路线，都不许起进程 ——
   "没查"与"查了没对上"是两句话，报告里分开说。没有报告时产物如实标 `budget-only`（argv 与预算队列
   同源，自证不算已验）。二进制名字与出包判据共用一张表（`pack_engine.SERVER_BINARY` == `launch_plan.binary_names`：
-  负载里只有 `whisper-cli` 也算没装，外壳起不来）。车道 `launch-plan` 前三步离线（判据自测 / 62 条单测 /
+  负载里只有 `whisper-cli` 也算没装，外壳起不来）。车道 `launch-plan` 前三步离线（判据自测 / 65 条单测 /
   与已提交那张比漂移），第四步联网按 pin 现查 28 条 needle 与 8 条缺席声明，第五、六步取 `file-index`
-  的产物并按它对表；
+  的产物并按它对表（那两步带 `if: always()`：上游 job 挂掉时结论不能变成 skipped，而报告文件不在时
+  工具自己报「不存在」再退出 1）；
   输出会自报"缓存 N / 现抓 M"，`--skip-provenance` 时报 0 ——「没查」不能长得像「查过了」。
-  变异扫描留在仓库里：`tests/test_launch_plan.py::TestSourceMutants` 改坏源码 13 处，
-  五条探针（离线对照 / 重算漂移 / 出处 id 闸门 / 缺席声明照扫 / 跨生产者核对）每条至少被抓一次，
-  并带一条正向对照。
+  变异扫描留在仓库里：`tests/test_launch_plan.py::TestSourceMutants` 改坏源码 14 处，
+  六条探针（离线对照 / 重算漂移 / 出处 id 闸门 / 缺席声明照扫 / 跨生产者核对 / 核对没有输入就红）
+  每条至少被抓一次，并带一条正向对照。
 - `tools/action_pins.py` + `pins/actions.json`：**出包那只手自己也要钉住**。这一轮之前三个
   workflow 里 4 个 `uses:` 全是浮动大版本 tag（`checkout@v4`、`setup-python@v5`、
   `upload-artifact@v4`、`download-artifact@v4`，共 **45 处**）—— 仓库对引擎/权重/工具带都定了
@@ -251,6 +252,9 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
 **注意：这些车道至今一次都没跑过。** 2026-10-20 在 `4202ef0` 上又量了一次，得到的形状是：
 run 建出来了、`engine-live.yml` 的 **21 个 job 全部登记**（包括新加的 `launch-plan`），
 可每一个都是 `runner_name` 为空、`steps: 0`、2-3 秒 conclusion=failure。
+`3781953` 上再量一次还是 21 个 job，但多了一种形状：**带 `needs:` 的那个 job 是 `skipped`**
+（`launch-plan` 等的是失败的 `file-index`）—— skipped 什么都不说，所以吃别人产物的那两步现在
+带 `if: always()`，缺报告由工具自己报「不存在」再退出 1。
 真正的原因只在 check-run annotation 里，而且这次读到了原文：
 **"The job was not started because recent account payments have failed or your spending limit
 needs to be increased"** —— 是**账单/支出上限**，不是"private 仓库没有免费额度"这一句就完事。
