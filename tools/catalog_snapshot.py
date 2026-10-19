@@ -111,6 +111,67 @@ def build(raw: bytes, expect_sha: str) -> tuple[dict, dict, list[str]]:
     return snap, stats, bad
 
 
+def strength_of(name: str, pin: dict) -> tuple[dict, list[str]]:
+    """从 pin 里**实际存在的字段**推出这条的强度级，而不是把文档里的措辞抄过来。
+
+    动机很具体：`catalog/defaults.json` 原先只带 `provenance` 一句话与 `bytes_verified` 整块，
+    UI 拿不到一个可显示的级数；而 requirements 第 7 条早就写"defaults.json 会把强度级一起带出去"
+    —— 那句话当时是**未兑现的**。更重要的是：改成推导之后，它当场指出我上一轮自己在
+    model-catalog.md 里把 OCR 默认档写成"5 + 4.5"是过誉的 —— 那三条的整包字节来自**同一家**，
+    按阶梯够不到第 5 级（第 5 级要求"另一家给字节"）。
+
+    规则（每条都要有字段背书，一条都不许凭措辞猜）：
+      A 上游元数据给哈希            → 3
+      B 两家分发方给同一个哈希      → 4.5
+      C 整包真字节下回且与钉值相等  → 只在"来自另一家"时到 5；同家只算附加证据
+      D git blob sha1 相等          → 旁证，不涨级
+    """
+    ev: list[str] = []
+    rungs: set[str] = set()
+    problems: list[str] = []
+    pinned = pin.get("sha256")
+    if not isinstance(pinned, str) or len(pinned) != 64:
+        return {}, [f"{name}: 没有 64 位十六进制的 sha256，谈不上强度级"]
+
+    mh = pin.get("meta_hashes") or {}
+    sources = set(mh.get("sources") or [])
+    if {"gh", "ms"} <= sources:
+        rungs.add("4.5")
+        ev.append(f"GitHub release 的 digest 与 ModelScope 元数据 Sha256 相等"
+                  f"（两家分发方，零下载；registry 在场时另加 {int('reg' in sources)} 份作者自表）")
+    elif mh.get("oid") == pinned:
+        ev.append(f"HF 系元数据给的哈希与钉值相等（provider_count={mh.get('provider_count')}，"
+                 f"hosts={mh.get('hosts')}）—— 仍是**一家**给哈希")
+    elif mh and not ({"gh", "ms"} <= sources) and "gh" not in sources:
+        problems.append(f"{name}: meta_hashes 在，但既不是两家一致、oid 也不等于钉值 —— "
+                        f"这条的元数据背书要重看（oid={str(mh.get('oid'))[:12]}…）")
+    if mh.get("oid") == pinned or "gh" in sources:
+        rungs.add("3")
+        ev.append("上游自己给的哈希（release digest 或 tree.lfs.oid）等于钉值 → 第 3 级")
+
+    bv = pin.get("bytes_verified") or {}
+    if bv:
+        if bv.get("sha256") != pinned:
+            problems.append(f"{name}: bytes_verified 算出的哈希与钉值不等 —— 那要么上游换过文件，"
+                            f"要么这条 pin 已经作废，必须停下来查")
+        elif "跨提供方" in str(bv.get("level")):
+            rungs.add("5")
+            ev.append("整包字节从**另一家**下回、流式算出的 sha256 与钉值逐字节相等 → 第 5 级")
+        else:
+            ev.append(f"整包真字节已算过且相等，但来自同一家（{bv.get('level')}）—— "
+                      f"按阶梯这只是附加证据，不够第 5 级")
+    if pin.get("git_blob_sha1"):
+        ev.append("与 git blob sha1 相等（git 内容寻址的旁证，不涨级）")
+    if not rungs:
+        problems.append(f"{name}: 一个强度级都推不出来（字段齐了但没有任何背书），"
+                        f"宁可不写也别给个好看的数字")
+        return {}, problems
+    return ({"rungs": sorted(rungs, key=float), "evidence": ev,
+             "derived_from": sorted(k for k in ("meta_hashes", "bytes_verified",
+                                                "git_blob_sha1") if pin.get(k))},
+            problems)
+
+
 def picks_of(defaults: dict) -> dict:
     """`samples/` 那些是车道的已知答案样本，不是给用户装的模型，混进来目录就多了个假条目。"""
     return {k: v for k, v in defaults.items() if not k.startswith("samples/")}
@@ -203,14 +264,48 @@ def check_sidecar(data: bytes) -> int:
     return 1
 
 
+def defaults_check() -> int:
+    """不重写，只检查 `catalog/defaults.json` 里每条的 `strength` 还等于从 pins 推出来的结果。
+
+    为什么值得单独立一条：这张表是出厂 UI 的输入。有人在 defaults.json 上手改一个"5"
+    （或者加了条 pin 却忘了进表），车道与单测都不会红 —— 因为原本没人比对过它。
+    """
+    path = os.path.join(ROOT, "catalog", "defaults.json")
+    if not os.path.exists(path):
+        print(f"BAD：缺 {path}")
+        return 1
+    with open(path, encoding="utf-8") as fh:
+        doc = json.load(fh)
+    pins = picks_of(load_pin_layers())
+    bad: list[str] = []
+    rows = doc.get("entries") or {}
+    if set(rows) != set(pins):
+        bad.append(f"条目集合与 pins 不合：只在表里有 {sorted(set(rows) - set(pins))}、"
+                   f"只在 pins 里有 {sorted(set(pins) - set(rows))}")
+    for k, pin in pins.items():
+        st, probs = strength_of(k, pin)
+        bad += probs
+        got = rows.get(k, {}).get("strength")
+        if got != st:
+            bad.append(f"{k}: 表里的 strength 与推导不符\n      表: {got}\n      推: {st}")
+    for x in bad:
+        print("BAD:", x)
+    print(f"检查 {len(pins)} 条默认档的强度级，问题 {len(bad)} 条")
+    return 1 if bad else 0
+
+
 def main(argv) -> int:
     ap = argparse.ArgumentParser()
     g = ap.add_mutually_exclusive_group(required=True)
     g.add_argument("--live", action="store_true")
     g.add_argument("--fixtures", default="")
     g.add_argument("--raw", default="", help="用本地已下载的上游整文件（仍按钉住哈希校验）")
+    g.add_argument("--defaults-check", action="store_true",
+                   help="不碰上游，只查 catalog/defaults.json 的强度级还等不等于从 pins 推出来的结果")
     ap.add_argument("--check", action="store_true", help="只校验，不写 catalog/*.json")
     args = ap.parse_args(argv)
+    if args.defaults_check:
+        return defaults_check()
     if not args.live:
         # 夹具是上游文件的一个切片，拿它写盘会产出一份"source 声称是整文件那版"的假目录。
         # 离线只允许 --check（验规则还认得上游形状），生成必须走 --live。
@@ -249,12 +344,24 @@ def main(argv) -> int:
     # 默认档不重打数字：直接从 pins/models.json 抄记录本体，出处跟着走。
     picks = picks_of(defaults)
     dpp = os.path.join(ROOT, "catalog", "defaults.json")
-    m = emit(dpp, {"schema": 1, "from": ["pins/models.json", "pins/ocr.json"],
+    entries, sbad = {}, []
+    for k, v in picks.items():
+        st, probs = strength_of(k, v)
+        sbad += probs
+        row = {f: v[f] for f in ("sha256", "size", "primary", "provenance", "bytes_verified",
+                               "meta_hashes", "alt_sources") if f in v}
+        row["strength"] = st
+        entries[k] = row
+    if sbad:
+        for x in sbad:
+            print("BAD:", x)
+        return 1
+    m = emit(dpp, {"schema": 2, "from": ["pins/models.json", "pins/ocr.json"],
                    # 一起带出"这颗 pin 的字节被谁验过"，UI 才谈得出这句强度；
                    # 只给哈希不给强度，等于把六级证据压成一句"已校验"。
-                   "entries": {k: {f: v[f] for f in ("sha256", "size", "primary", "provenance",
-                                                   "bytes_verified")
-                                   if f in v} for k, v in picks.items()}})
+                   # 级数由 strength_of() 从 pin 的字段推出来，不是从文档抄过来 ——
+                   # 抄的话，文档写过头了这里也会跟着过头。
+                   "entries": entries})
     print(f"  写入 {dpp}：{m:,} B，默认档 {len(picks)} 条（哈希与出处都来自 pins/models.json，"
           f"排除 samples/ 车道样本 {len(defaults) - len(picks)} 条）")
     return 0

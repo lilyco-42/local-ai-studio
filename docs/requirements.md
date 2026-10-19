@@ -153,8 +153,11 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
    所以查找必须按 models.md 那条链接里的 tag 定位 —— 第一版按名字找，`--live` 立刻报冲突。
    验收动作是 `python tools/establish_pins.py --verify pins/models.json` 与
    `--verify pins/ocr.json`，外加车道 `ocr-languages` 的三步（对照仓库快照 / 对照上游现状 /
-   现场重立一张逐字段比）：字节与钉的哈希对不上就红；`catalog/defaults.json` 会把这条 pin 的
-   强度级一起带出去，UI 才有东西可显示。第 6 级目前**没有任何一条到达** ——
+   现场重立一张逐字段比）：字节与钉的哈希对不上就红。
+   **`catalog/defaults.json` 现在真的带强度级了**（前一句此前是未兑现的承诺：表里只有
+   `provenance` 与 `bytes_verified`，没有一个能显示的级数）：级数由 `strength_of()` 从 pin 字段
+   推导，`python tools/catalog_snapshot.py --defaults-check` 逐条比对，手改一个 5 或加一条 pin
+   忘了进表都会红。推导顺带改掉两句写过头的措辞，见 model-catalog 的《级数由字段推导》一节。第 6 级目前**没有任何一条到达** ——
    whisper/SD 权重实测只有一家发布，这点在交付说明里要照实写。
 8. **车道里的 shell 也不能带 `set -u` 地雷**：`tools/shell_vars.py`（挂在 `yaml_gate.py` 里跑）把每条
    `run:` 步骤扫一遍，凡是 `set -u` 生效、而某个 `$VAR` 在本步骤从未赋值、也不在 job/step `env:` 或

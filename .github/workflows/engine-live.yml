@@ -16,6 +16,7 @@ on:
       - "tools/payload_plan.py"
       - "tools/zip_peek.py"
       - "pins/payload-plan.json"
+      - "catalog/defaults.json"
       - "tools/ocr_build_surface.py"
       - "pins/ocr-build-surface.json"
       - "pins/citations.json"
@@ -314,6 +315,10 @@ jobs:
         # 后者是 2026-10-20 补的：describe.json 本身 .gitignore（可复现的派生物），
         # 所以"出厂目录长什么样"在仓库里只剩这颗哈希 —— 没有它，slim() 少抄一个字段也没人知道。
         run: python3 tools/catalog_snapshot.py --live --check
+      - name: 默认档的强度级必须是推导出来的，不是手写在表上的
+        # catalog/defaults.json 是外壳 UI 唯一的"这条 pin 有多可信"来源。
+        # 有人（包括我）在表上手改一个 5，或加了条 pin 忘了进表，都没人会红 —— 这一步就是为了让它红。
+        run: python3 tools/catalog_snapshot.py --defaults-check
 
   toolbelt-pins:
     # 工具带（llmfit / llama-swap / gguf-parser）按 ADR-0001 同一条规矩钉死：具体 release + sha256。

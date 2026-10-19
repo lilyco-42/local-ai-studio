@@ -215,14 +215,28 @@ python tools/ocr_language_pins.py --check-pins pins/ocr.json --live       # OCR 
 
 | pin | 级 | 实测凭据 |
 |---|---|---|
-| `qwen2.5-0.5b-instruct-q2_k.gguf`（对话） | **5 + 4.5** | ModelScope 元数据给哈希，**hf-mirror 下满 415,182,688 B 真字节**，实算 `9ee36184e616…` 与钉值相等；2026-10-20 另加 `--cross-hf`：HF 两主机 `lfs.oid` 也等于它 |
-| `stable-diffusion-v1-5-pruned-emaonly-Q4_0.gguf`（生图） | **5 + 4.5** | 同上，整包 1,566,768,416 B 流式算完，`b8944e9fe0b6…` 相等；`--cross-hf` 下 HF 两主机 `lfs.oid` 同值 |
-| OCR `pp-ocrv6_tiny_det/rec` 与 `ppocrv6_tiny_dict` | **5 + 4.5** | 上游 release digest 给哈希，同一条 URL 整包下回并算一致（1,780,590 / 4,462,639 / 27,156）= 第 5 级的"同家真字节"那半；**另外** `python tools/ocr_language_pins.py --check-pins pins/ocr.json` 验到 GitHub 的 `digest`、上游 ModelScope 镜像 `greatv/oar-ocr` 的元数据 `Sha256` 与 `registry.rs` 三处给的是同一个哈希、体积也相等 → 4.5 级。写进 `pins/ocr.json` 的 `meta_hashes`，车道 `ocr-languages` 每次都查。提供方仍然只有一家，所以来源独立性没涨 |
+| `qwen2.5-0.5b-instruct-q2_k.gguf`（对话） | **3 + 5**（推导结果） | ModelScope 元数据给哈希，**hf-mirror 下满 415,182,688 B 真字节**，实算 `9ee36184e616…` 与钉值相等；2026-10-20 另加 `--cross-hf`：HF 两主机 `lfs.oid` 也等于它 |
+| `stable-diffusion-v1-5-pruned-emaonly-Q4_0.gguf`（生图） | **3 + 5**（推导结果） | 同上，整包 1,566,768,416 B 流式算完，`b8944e9fe0b6…` 相等；`--cross-hf` 下 HF 两主机 `lfs.oid` 同值 |
+| OCR `pp-ocrv6_tiny_det/rec` 与 `ppocrv6_tiny_dict` | **3 + 4.5** | 上游 release digest 给哈希，同一条 URL 整包下回并算一致（1,780,590 / 4,462,639 / 27,156）= 第 5 级的"同家真字节"那半；**另外** `python tools/ocr_language_pins.py --check-pins pins/ocr.json` 验到 GitHub 的 `digest`、上游 ModelScope 镜像 `greatv/oar-ocr` 的元数据 `Sha256` 与 `registry.rs` 三处给的是同一个哈希、体积也相等 → 4.5 级。写进 `pins/ocr.json` 的 `meta_hashes`，车道 `ocr-languages` 每次都查。提供方仍然只有一家，所以来源独立性没涨 |
 | OCR 语言轴 14 种 × (rec + dict) + 共享 det | **4.5（25/28 条）** | `tools/ocr_language_pins.py` 叠四张表（models.md 两张字典表 + 语言权重表、GitHub 全部 release、ModelScope 镜像、`registry.rs`），在场来源必须给同一个哈希才立 pin。合计 117.6 MiB / 含 det 122.2 MiB，落盘 `pins/ocr-languages.json`。剩下 3 条是繁中/日/格鲁吉亚的 v3 字典：**两家都没有**，按 PaddleOCR 的一个 commit 取 raw 自算（`models.md:116` 明写它们不在 auto-download 注册表内）。查找一律按链接里的 **tag** 定位，因为同名文件在不同 tag 可以是不同内容（`ppocrv5_latin_dict.txt`：v0.1.0 是 1,634 B，v0.3.0 是 2,616 B） |
 | `ggml-tiny.bin` | 3 + 同族两主机头尾 | 整包自算 + huggingface.co 头尾 4 MiB 与 hf-mirror 逐字节一致；ModelScope 无该仓库 → **升不到第 5 级** |
 | `samples/jfk.wav` | 3 + git 旁证 | 整包自算 + 同族对照 + 与 git blob sha1 相等（内容寻址的第三方旁证） |
 | 工具带 12 条 | 3（8 条双机制） | sidecar × API digest 两套机制一致，但**都出自 GitHub 一家** |
 
+### 级数由字段推导，不由措辞决定（2026-10-20）
+
+上面这张表的级数现在写的是 `tools/catalog_snapshot.py:strength_of()` 从 pin 字段推出来的结果，
+命令是 `python tools/catalog_snapshot.py --defaults-check`（离线、不碰上游），
+车道 `catalog-snapshot` 每次都跑它。改成推导的过程当场纠正了两句我自己写过头的话：
+
+- **OCR 默认档三条不是第 5 级**：它们的 `bytes_verified` 写的是"同提供方真字节"，
+  第 5 级要求"从**另一家**下整包"。它们真正够到的是 4.5（GitHub `digest` == ModelScope
+  元数据 `Sha256`，两家分发方零下载各给同一个哈希）+ 一条同家真字节的附加证据。
+- **对话/生图那两条不写 4.5**：记进 pin 的第二家证据只有"另一家给的整包真字节"（第 5 级），
+  `meta_hashes.provider_count` 是 **1**（hf-mirror 与 huggingface.co 是同一家），
+  所以"两家元数据各给哈希"这件事对它们并没有被记下来 —— 写上去就是拿措辞冒充证据。
+
+推不出现实级数时 `strength_of()` 返回空并报问题，不会给一个好看的数字。
 **没有任何一条到第 6 级**，而且大概率永远到不了：这些权重的原始发布方各只有一家，
 ModelScope 与 HF 是两个**分发渠道**而不是两个**发布者**。交付说明里"两个来源都验过"必须写成
 "两家分发渠道给的字节一致"，不能说成"来源独立"。
