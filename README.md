@@ -12,6 +12,8 @@
 
 依据与取舍见 [docs/adr/0001-engines-from-upstream-binaries.md](docs/adr/0001-engines-from-upstream-binaries.md)；
 功能分层、离线/联网边界与 MVP 切分见 [docs/requirements.md](docs/requirements.md)；
+"只能靠 GitHub Actions 出包"这条硬约束本身的可行性（runner 缺什么、包该装什么）见
+[docs/packaging.md](docs/packaging.md)；
 选型/热切换/GGUF 估算这些**不自研**的部分见 [docs/toolbelt.md](docs/toolbelt.md)（llmfit、llama-swap、
 gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）。
 
@@ -39,7 +41,7 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
 - `tools/r2_manifest.py`：从 `pins/*.json` 推导"该镜像什么"，按源分组给实测吞吐换算，
   产出 `mirror/r2-intake.json`（只是清单，不含上传动作）。
 - `tools/citation_check.py` + `pins/citations.json`：把"上游某 ref 的某一行写着某件事"这类结论
-  变成能查的东西。21 条声明各记 `repo/ref/path/line/expect`，逐条取回上游**核对那一行仍然含那个子串**
+  变成能查的东西。25 条声明各记 `repo/ref/path/line/expect`（还多一种 `absent`：连「这份文件里没有 X」也要查），逐条取回上游**核对那一行仍然含那个子串**
   （只看文件在不在没用：默认值改了文件照样在），子串命中不就不唯一就不配进表。
   建表时已经按这两条筛过；车道 `citation-drift` 先跑 `--selftest`（明知错的必须认成错）再逐条核对。
   来历：本轮踩过六次"判据指向一个不存在的东西却照样跑完"（`llama-completions`、去 tag 里找 CLI、

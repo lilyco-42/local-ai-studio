@@ -61,7 +61,8 @@ class TestCommittedSpec(unittest.TestCase):
         self.assertGreaterEqual(len(s), 20, f"只有 {len(s)} 条，这张表的意义就是覆盖度")
         repos = {c["repo"] for c in s}
         self.assertEqual(repos, {"ggml-org/llama.cpp", "ggml-org/whisper.cpp",
-                                 "leejet/stable-diffusion.cpp", "GreatV/oar-ocr"}, repos)
+                                 "leejet/stable-diffusion.cpp", "GreatV/oar-ocr",
+                                 "tauri-apps/tauri-docs", "actions/runner-images"}, repos)
         ids = [c["id"] for c in s]
         self.assertEqual(len(ids), len(set(ids)), "id 重复会让一条声明永远查不到")
 
@@ -72,10 +73,32 @@ class TestCommittedSpec(unittest.TestCase):
 
     def test_spec_is_self_consistent(self) -> None:
         """每条记录的 line_text 必须真的含 expect —— 抓"行号或子串被手抄错"。
-        这条不查网络，所以本地就能挡住一张自相矛盾的表。"""
+        这条不查网络，所以本地就能挡住一张自相矛盾的表。
+        absent 那条走另一套形状：没有行号、也不该有抄录行。"""
         for c in self.spec():
+            if c.get("absent"):
+                self.assertIsNone(c.get("line"), f"{c['id']} 声明的是「不存在」，不该带行号")
+                self.assertNotIn(c["expect"], c["line_text"], c["id"])
+                continue
             self.assertIn(c["expect"], c["line_text"], f"{c['id']} 的 expect 与抄录的整行不符")
             self.assertGreaterEqual(c["line"], 1, c["id"])
+
+    def test_absent_claims_are_two_sided(self) -> None:
+        """"这份文件里没有 X"同样要被查：假装缺席必须红，真缺席必须过。"""
+        text = "line one" + chr(10) + "Rust 1.99.1" + chr(10)
+        hit = {"id": "x", "repo": "a/b", "ref": "r", "path": "p", "expect": "Rust",
+               "claim": "c", "absent": True}
+        self.assertEqual(len(cc.check_one(hit, text)), 1)
+        self.assertIn("不该出现", cc.check_one(hit, text)[0])
+        self.assertEqual(cc.check_one(dict(hit, expect="webkit2gtk"), text), [])
+
+    def test_absent_claim_still_needs_the_file(self) -> None:
+        """取不到文件时"没找到"不许被当成"证实了缺席"。"""
+        c = {"id": "x", "repo": "a/b", "ref": "r", "path": "p", "expect": "webkit2gtk",
+             "claim": "c", "absent": True}
+        bad = cc.check_one(c, None)
+        self.assertEqual(len(bad), 1)
+        self.assertIn("取不到", bad[0])
 
     def test_security_claims_are_on_the_list(self) -> None:
         """这一轮的结论是"默认无鉴权 + CORS *"，这几条不许哪天被顺手删掉。"""

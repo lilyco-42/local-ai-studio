@@ -71,8 +71,8 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
 
 ## 验收标准（在当前唯一可用验证手段 = GitHub Actions 下）
 
-1. `ci.yml`：199 个单测绿（含 `test_yaml_gate.py` 给闸门自己的 11 条、`test_toolbelt_pins.py` 给工具带
-   钉表的 14 条、`test_catalog_snapshot.py` 给目录快照与其侧表的 16 条、`test_citation_check.py` 给出处闸门的 12 条、
+1. `ci.yml`：201 个单测绿（含 `test_yaml_gate.py` 给闸门自己的 11 条、`test_toolbelt_pins.py` 给工具带
+   钉表的 14 条、`test_catalog_snapshot.py` 给目录快照与其侧表的 16 条、`test_citation_check.py` 给出处闸门的 14 条、
    `test_ocr_build_surface.py` 给 OCR 依赖面分类器与比对的 15 条、`test_file_index.py` 给下载层五种状态的 20 条、
    `test_payload_plan.py` 给装机负载清单的 11 条、`test_pack_engine.py` 给出包逻辑的 10 条、
    `test_establish_verify.py` 给字节复核与哈希对照的 16 条、`test_shell_vars.py` 给 shell 变量判据的 10 条、
@@ -148,7 +148,8 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
    `--cors-origins` 收窄到应用来源；② whisper / sd **没有 key 可给**，只能按需起、用完停，或由外壳反代
    （外壳持有唯一端口并自己发 token）；③ UI 永不直连引擎端口。
    这一条现在只有源码级证据，实现与验证都还没做 —— 列在验收里是为了别等写外壳时才发现架构选错了。
-10. **每条 `file:line` 出处本身要能被查**：`pins/citations.json` 21 条声明，每条记
+10. **每条 `file:line` 出处本身要能被查**：`pins/citations.json` 25 条声明（其中 1 条是 `absent`
+    型缺席断言：runner 镜像 readme 里没有 `webkit2gtk`），每条记
    `repo/ref/path/line/expect/claim`；`tools/citation_check.py` 按 pin 住的 ref 取回那份文件，
    核对**那一行仍然含着 expect 的子串**（不是只看文件在不在 —— 上游把 `cors_origins` 默认值改掉
    而文件照在，才是我们要知道的事），子串在文件里命中不唯一就不配进这张表（建表时按此筛过）。
@@ -201,6 +202,16 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     离线对照 10 条（合成 zip + 合成 tar.gz，含 digest 不符与下载失败两条），
     闸门现在同时解析三条 workflow（15 段 heredoc PY）。
     车道仍 0 次执行，所以这一条给的是"出包这一步有路、有判据、有清单格式"，不是"包已经出出来"。
+15. **"只能靠 GitHub Actions 出包"这句本身要被验，不能当审美前提**：拆开四问，答案全部来自
+    pin 住的公共来源（已进 `pins/citations.json`，由 `citation-drift` 查），详见
+    [docs/packaging.md](packaging.md)。要点：runner 镜像自带 Rust 1.99.1 与 Node 22.23.3
+    （顺带解掉 OCR 的 `rust-version = 1.95` 那个未知）；**但 Linux 侧没有 `webkit2gtk`**
+    （整份镜像 readme 命中 0 次 —— 这条做成 `absent` 型出处），而 Tauri 2 点名要
+    `libwebkit2gtk-4.1-dev` 一族，所以安装包车道第一步是 apt 装 + 打印 `pkg-config --modversion`；
+    官方 `tauri-apps/tauri-action`（MIT、1,619★、2026-10-16 仍在 push）是 `uses:` 型且
+    release **没有产物**，所以它只能按 commit SHA 钉，工具带那套 digest sha256 对它不适用。
+    最后是算术：**引擎落地就有 115.6 MiB（win-x64）**，再加 415 MB/1,566 MB 权重就不是安装包 ——
+    所以"壳装好、引擎与权重首启按下载层契约拉"是决定，不是妥协（LM Studio 同形态）。
 
 ## 车道判据的出处（全部按**钉住的那个 ref** 核过，不是按 HEAD 记的）
 

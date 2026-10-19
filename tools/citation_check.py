@@ -31,11 +31,23 @@ def url_of(c: dict) -> str:
 def check_one(c: dict, text: str | None) -> list[str]:
     """返回问题列表（空 = 这条出处仍然成立）。text=None 表示取不到文件。"""
     # 先要字段再干活：少一个键的声明不该"看起来查过了"，而该当场炸在缺的那个键上。
-    for k in ("id", "repo", "ref", "path", "line", "expect", "claim"):
+    for k in ("id", "repo", "ref", "path", "expect", "claim"):
         if k not in c:
             raise KeyError(f"出处声明 {c.get('id', '?')} 缺字段 {k!r}")
+    absent = bool(c.get("absent"))
+    if not absent and "line" not in c:
+        raise KeyError(f"出处声明 {c.get('id', '?')} 缺字段 'line'")
     if text is None:
         return [f"{c['id']}: 取不到 {url_of(c)}"]
+    if absent:
+        # "这份文件里没有 X"也是一种断言，而且是最容易悄悄失效的那种：
+        # 出包车道要靠它知道 runner 少了什么（Tauri 要 webkit2gtk-4.1，镜像里没有 → 得 apt）。
+        # 只数整文件命中次数，不看行号；命中了就把行号打出来，方便一眼看出是什么东西挤进来的。
+        hits = [i + 1 for i, l in enumerate(text.split("\n")) if c["expect"] in l]
+        if hits:
+            return [f"{c['id']}: 声明「{c['expect']!r} 不该出现」，但它在第 {hits[:5]} 行出现了"
+                    f"（声明：{c['claim']}）"]
+        return []
     lines = text.split("\n")
     ln = c["line"]
     if not 1 <= ln <= len(lines):
@@ -104,7 +116,7 @@ def main(argv) -> int:
         text = fetch(c)
         bad = check_one(c, text)
         problems += bad
-        rows.append({"id": c["id"], "url": url_of(c), "line": c["line"],
+        rows.append({"id": c["id"], "url": url_of(c), "line": c.get("line"),
                      "expect": c["expect"], "ok": not bad, "problems": bad})
     if args.json:
         with open(args.json, "w", encoding="utf-8", newline="\n") as fh:

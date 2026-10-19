@@ -229,5 +229,53 @@
   "claim": "OCR 二进制叫 oar，不叫 oar-ocr-cli",
   "as_of": "2026-10-20",
   "line_text": "name = \"oar\""
+ },
+ {
+  "id": "tauri-webkit-41",
+  "repo": "tauri-apps/tauri-docs",
+  "ref": "2e513e3f7934d68ec7fef37fc46a5aa482f8a091",
+  "path": "src/content/docs/start/prerequisites.mdx",
+  "line": 33,
+  "expect": "libwebkit2gtk-4.1-dev",
+  "claim": "Tauri 2 的 Linux 前提里要点名装 webkit2gtk-4.1 开发包",
+  "absent": false,
+  "as_of": "2026-10-20",
+  "line_text": "sudo apt install libwebkit2gtk-4.1-dev \\"
+ },
+ {
+  "id": "runner-image-no-webkit",
+  "repo": "actions/runner-images",
+  "ref": "b4067e48bd9bd803e958bfe1503ea0a06a3a127f",
+  "path": "images/ubuntu/Ubuntu2404-Readme.md",
+  "line": null,
+  "expect": "webkit2gtk",
+  "claim": "ubuntu-24.04 镜像（ubuntu24/20261018.339 那颗）整份 readme 里没有 webkit2gtk → 出包车道必须自己 apt 装",
+  "absent": true,
+  "as_of": "2026-10-20",
+  "line_text": ""
+ },
+ {
+  "id": "runner-image-rust",
+  "repo": "actions/runner-images",
+  "ref": "b4067e48bd9bd803e958bfe1503ea0a06a3a127f",
+  "path": "images/ubuntu/Ubuntu2404-Readme.md",
+  "line": 140,
+  "expect": "Rust 1.99.1",
+  "claim": "镜像自带 Rust 1.99.1 ≥ oar-ocr 要求的 1.95 → OCR 车道的工具链前提在 runner 上是现成的",
+  "absent": false,
+  "as_of": "2026-10-20",
+  "line_text": "- Rust 1.99.1"
+ },
+ {
+  "id": "oar-rust-version",
+  "repo": "GreatV/oar-ocr",
+  "ref": "84817f58",
+  "path": "Cargo.toml",
+  "line": 8,
+  "expect": "rust-version = \"1.95\"",
+  "claim": "OCR workspace 的最低工具链",
+  "absent": false,
+  "as_of": "2026-10-20",
+  "line_text": "rust-version = \"1.95\""
  }
 ]
