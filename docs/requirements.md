@@ -121,10 +121,12 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
 2. **OCR 的源码 ref**：钉的是 main 的 `84817f58…`，因为 **v0.10.0 那个 tag 里没有 `oar-ocr-cli`**
    （成员表实测只有 4 项）。断言已按 raw 文件在本地核过（成员含 CLI、`[[bin]] name = "oar"`），
    剩下的未知是真编译 —— 上游若发新 tag，应该换成新 tag 而不是继续跟 main。
-3. **sd 的动态库闭包**：包里有一整层 `.so`（`zip_peek` 条目级量过），解压后靠 `$ORIGIN`/RPATH 能不能
-   起来没证。若报 `libsd-…so: cannot open`，先查 RPATH 而不是怀疑后端。
-4. **whisper 的二进制名**：条目表里是 `whisper-cli`（不是 `whisper-main`），库在同目录，
-   车道已按深度 1–2 glob + `LD_LIBRARY_PATH` 处理；剩下的未知是它跑出来的 SRT 是否带时间戳。
+3. **sd 的动态库闭包**：包内条目已确认（`sd-cli`/`sd-server` 平铺在根，31 个 `.so` 含
+   `libggml-cpu-*.so` 与带版本号软链名），车道已按 `find` 不限深度 + `LD_LIBRARY_PATH=$(dirname)` 处理；
+   **还没证的是运行时能不能真把这套 `.so` 起来** —— 若报 `cannot open shared object`，先查 RPATH 再怀疑后端。
+4. **whisper 与 llama 的 Linux 包比 Windows 多一层同名目录**（`whisper-bin-ubuntu-x64/`、`llama-b11727/`），
+   条目与二进制名都已用整包下载核对（`whisper-cli`、`llama-server` 都在深度 1）；
+   整包 sha256 三个包都与上游 digest 相等。剩下的未知是它们跑出来的结果对不对。
 5. **runner 侧的 HF 直连**：`headless-inference` 从 `huggingface.co` 直接下权重。国内出口不可用
    这件事**不代表 GitHub runner 不可用**，两件事别混；但备选源该按 ADR 的新层级重排
    （ModelScope 首选、hf-mirror 备选，见 [model-catalog.md](model-catalog.md)）。

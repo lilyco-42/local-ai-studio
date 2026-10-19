@@ -190,6 +190,12 @@ Vulkan，不必退回 CPU 的"几分钟一张"**。所以这条能力的设计�
 | `llama-win-cpu-x64.zip` | 51 | `llama-cli.exe`、**`llama-server.exe`**、`llama.exe`、`llama-completion.exe`、`llama-bench.exe`、`llama-tts.exe`、`llama-quantize.exe`、`llama-mtmd-cli.exe`/`llava`/`qwen2vl`（多模态）、`ggml-rpc-server.exe`。**没有 `llama-simple`，也没有 `llama-completions`** |
 | `whisper-bin-x64.zip` | 41 | 全在 `Release/` 子目录；`whisper-cli.exe` **和** `main.exe` 同时存在，另有 **`whisper-server.exe`**、**`whisper-vad-speech-segments.exe`**、`whisper-quantize/bench/stream/talk-llama/lsp.exe`，以及 8 个 `test-*.exe`、`wchess.exe`、`parakeet-*.exe`、`SDL2.dll` |
 | `sd-...-Linux-Ubuntu-24.04-x86_64.zip` | 35 | 平铺根目录：`sd-cli`、**`sd-server`**（无扩展名），外加一整层运行时闭包 `libggml{,-base}.so`（含 `.so.0.27.0` 版本名）、14 个 `libggml-cpu-<微架构>.so`、`libstable-diffusion.so`、`libwebp/libwebpmux/libsharpyuv/libwebm.so`，两个 `.txt` 出处说明 |
+| `llama-b11727-bin-ubuntu-x64.tar.gz` | 61 | **Linux 包比 Windows 多一层同名目录** `llama-b11727/`：里面有 `llama-server`、`libllama.so`（+`.so.0.7.0`）、21 个 `libggml-cpu-*.so`。整包下回并算 sha256 == 上游 digest ✓ |
+| `whisper-bin-ubuntu-x64.tar.gz` | 47 | 同样多一层目录 `whisper-bin-ubuntu-x64/`：`whisper-cli`、`whisper-server`、`libwhisper.so`（+`.so.1`）。整包 sha256 == 上游 digest ✓ —— 车道里 `find -maxdepth 2` 正是为这一层写的 |
+
+（这三行里 sd 那条与上表同源：早先用 `zip_peek` 只读中央目录；本轮改成**整包下回算 sha256**，
+三个包的实算哈希都与上游 `digest` 逐字节相等 → 又添三条"GitHub 的 digest 确实是内容哈希"的证据，
+而不只是那两个早期样本。）
 
 由此定下四条实现约束：
 
