@@ -362,6 +362,46 @@ python3 tools/recommend_models.py --live --check                          # 真�
 仓库顺序仍按"引擎与权重同源"：`leejet`（就是我们随包发的 sd.cpp 的作者）优先，其余按上游下载量；
 26 行带着上传方自己声明的 `sd.cpp` / `stable-diffusion.cpp` 标签，这个兼容性声明原样带出来，不替它背书。
 
+## 三张档位表加起来的数：`tools/machine_budget.py` → `catalog/machine-budget.json`
+
+三张表各自回答"这颗选哪个"，但用户问的是另一句：**「装齐四样要占多少盘、要等多久」**。
+这个数字此前没有任何地方算过。`machine_budget.py` 只加已钉产物里的字节，一个都不估算：
+引擎净负载（`pins/payload-plan.json` 的 `totals_mib`，Range 读 zip 中央目录量的）
+ + 三张档位表该档第一行（就是默认档） + OCR 默认档三条已钉字节；
+`pins/ocr-languages.json` 的全 14 语言合计是**替代**默认档的另一个数，不许叠上去再加。
+
+| 档位 | win-x64 下载量 | 按最快已量出口（ModelScope 4.2 MiB/s） | 按最慢已量出口（hf-mirror 0.25 MiB/s） |
+|---|---|---|---|
+| 4GB | 5.90 GiB | 24.0 分钟 | 6.72 小时 |
+| 8GB | 11.70 GiB | 47.5 分钟 | 13.31 小时 |
+| 16GB | 19.25 GiB | 78.2 分钟 | 21.90 小时 |
+
+**两个数都要给。** 吞吐是 2026-10 从 lain42.top 这台 CN 出口一次量的（`r2_manifest.RATES_MIB_S`，
+产物里 `measured_at_exit` 就写这台机器），不同城市/运营商必然不同 ——
+只报"约 24 分钟"等于拿最好的网速承诺最坏的体验。
+
+三条口径由产物自己带着，因为它们每一个都会被人误用：
+`ram_statement` 写死"这是磁盘与下载量、不是峰值内存"（四项能力共用一个常驻引擎、一次只跑一项，
+把权重相加当内存需求是错的，内存那一轴由三张表各自的判据负责）；
+`missing_capabilities`（**没有产物**：macOS 的字幕，whisper 上游不发 macOS 包）与
+`unknown_landed_sizes`（**落地大小未知**：llama/whisper 的 Linux/macOS 是 tar.gz，读不了中央目录）
+是两个字段 —— 把后者当缺失能力报出去，等于谎称那项功能在 Apple silicon 上没得用。
+
+加总这一步当场逮出两条关于生图的事实，两条都以数据进产物：
+
+1. **三档的生图默认行所在仓库都不含配套件**：4/8GB 是 `second-state/stable-diffusion-v1-5-GGUF`，
+   16GB 是 `unsloth/FLUX.1-schnell-GGUF`，两张表里都只有 unet 类文件。而上游 `docs/sd.md:16` 的
+   flux 例子要 `--diffusion-model … --vae --clip_l --t5xxl`、`:17` 的 sd3.5_large 要
+   `--clip_l --clip_g --t5xxl`（两条都进了 `pins/citations.json`，由 `citation-drift` 逐行查）。
+   所以 `image_repo_carries_companions = false` 的那些档，生图那一栏只能当**下限**，
+   UI 不许说"装完这几颗就能出图"。
+2. **档位表的 `companions` 是同角色的全部量化**：`sd3.5_medium` 那行数出 17 颗编码器
+   （clip_g / clip_l / t5xxl 各五个量化）。全加进预算等于多算十几 GiB 用户根本用不到的备选，
+   所以每个角色只把**最小那颗**计入，其余记 `image_companions.alternates`。
+
+车道 `machine-budget` 三步**全离线**（输入就是上面那五张已提交的表加吞吐表；
+联网重算属于三条档位车道，那边一漂这边就跟着红）：`--selftest` → 18 条单测 → `--check`。
+
 ## 还没证的
 
 - 上面所有"下载耗时"是从我们自己那台出口机的一次换算，不同城市/运营商必然不同，只能当量级。

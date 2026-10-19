@@ -728,5 +728,27 @@
   "absent": false,
   "as_of": "2026-10-20",
   "line_text": "Using `--offload-to-cpu` allows you to offload weights to the CPU, saving VRAM without reducing generation speed."
+ },
+ {
+  "id": "sd-flux-needs-companions",
+  "repo": "leejet/stable-diffusion.cpp",
+  "ref": "95b3090664d019fcf8fa032a44d1d4793ba244b8",
+  "path": "docs/sd.md",
+  "line": 16,
+  "expect": "--diffusion-model",
+  "claim": "上游 flux 例子在 unet 之外还要 --vae --clip_l --t5xxl 三份文件",
+  "as_of": "2026-10-20",
+  "line_text": "# ./bin/sd-cli --diffusion-model  ../models/flux1-dev-q3_k.gguf --vae ../models/ae.sft --clip_l ../models/clip_l.safetensors --t5xxl ../models/t5xxl_fp16.safetensors  -p \"a lovely cat holding a sign says 'flux.cpp'\" --cfg-scale 1.0 --sampling-method euler -v --clip-on-cpu"
+ },
+ {
+  "id": "sd-sd35-needs-encoders",
+  "repo": "leejet/stable-diffusion.cpp",
+  "ref": "95b3090664d019fcf8fa032a44d1d4793ba244b8",
+  "path": "docs/sd.md",
+  "line": 17,
+  "expect": "--clip_g",
+  "claim": "sd3.5_large 的例子同样要外挂 clip_l/clip_g/t5xxl 三份编码权重",
+  "as_of": "2026-10-20",
+  "line_text": "# ./bin/sd-cli -m  ..\\models\\sd3.5_large.safetensors --clip_l ..\\models\\clip_l.safetensors --clip_g ..\\models\\clip_g.safetensors --t5xxl ..\\models\\t5xxl_fp16.safetensors  -H 1024 -W 1024 -p 'a lovely cat holding a sign says \\\"Stable diffusion 3.5 Large\\\"' --cfg-scale 4.5 --sampling-method euler -v --clip-on-cpu"
  }
 ]

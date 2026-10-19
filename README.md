@@ -52,7 +52,7 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
 - `tools/r2_manifest.py`：从 `pins/*.json` 推导"该镜像什么"，按源分组给实测吞吐换算，
   产出 `mirror/r2-intake.json`（只是清单，不含上传动作）。
 - `tools/citation_check.py` + `pins/citations.json`：把"上游某 ref 的某一行写着某件事"这类结论
-  变成能查的东西。63 条声明各记（2026-10-20 按 pin ref 实跑过一次，0 问题；`--cache .cache/refs --fill` 抓一次原文之后可离线复算） `repo/ref/path/line/expect`（还多一种 `absent`：连「这份文件里没有 X」也要查），逐条取回上游**核对那一行仍然含那个子串**
+  变成能查的东西。65 条声明各记（2026-10-20 按 pin ref 实跑过一次，0 问题；`--cache .cache/refs --fill` 抓一次原文之后可离线复算） `repo/ref/path/line/expect`（还多一种 `absent`：连「这份文件里没有 X」也要查），逐条取回上游**核对那一行仍然含那个子串**
   （只看文件在不在没用：默认值改了文件照样在），子串命中不唯一就不配进表。
   建表时已经按这两条筛过；车道 `citation-drift` 先跑 `--selftest`（明知错的必须认成错）再逐条核对。
   来历：本轮踩过六次"判据指向一个不存在的东西却照样跑完"（`llama-completions`、去 tag 里找 CLI、
@@ -120,6 +120,28 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   实测：43 个候选仓库 / 338 行权重，**191 行两家分发方给同一个 sha256**（生图能到 4.5 级，
   与字幕整轴只有 single 形成对照）；`second-state` 那颗 Q4_0 与 `pins/models.json` 已钉的 pin 逐字节相同。
   还有一条反例钉在测试里：`leejet` 的 `q4_0` 与 `q4_k` **大小一模一样而哈希不同** —— 按大小认文件是假的。
+- `tools/machine_budget.py` + `catalog/machine-budget.json`：**把已钉的五张表加成一个数** ——
+  普通人问的不是"这颗选哪个"，而是「装齐四样要占多少盘、要等多久」，而这个数此前没有任何地方算过
+  （`payload-plan` 只算引擎净负载，三张档位表只给单颗大小）。只加已钉产物里有的字节，一个都不估算：
+  引擎净负载 + 三张档位表**该档第一行** + OCR 默认档三条（全 14 语言合计是另一个数，不是相加）。
+  实测（win-x64，按 lain42.top 那台 CN 出口量到的 ModelScope 4.2 MiB/s）：
+  4GB **5.90 GiB / 约 24 分钟**、8GB **11.70 / 约 47.5 分钟**、16GB **19.25 / 约 78.2 分钟**；
+  同一批字节按最慢的那个已量出口（hf-mirror 0.25 MiB/s）是 **6.7 / 13.3 / 21.9 小时** ——
+  两个数都得给用户，否则"约 24 分钟"就是拿最好的网速承诺最坏的体验。
+  产物自己带口径：`ram_statement` 写死"这是磁盘与下载量、不是峰值内存"（四项能力共用一个常驻引擎、
+  一次只跑一项，把权重相加当内存是错的），内存那一轴由各档位表自己的判据负责。
+  两类"算不出来"分开记，不混成一个：**没有产物**（macOS 的字幕）与**落地大小未知**（tar.gz 读不了
+  中央目录）—— 后者当缺失能力报出去就等于谎称那项功能在 Apple silicon 上没得用。
+  这一步当场逮出两条关于生图的事实：① 三档的**生图默认行所在仓库都不含配套件**（4/8GB 的
+  `second-state/stable-diffusion-v1-5-GGUF`、16GB 的 `unsloth/FLUX.1-schnell-GGUF` 都只有 unet 类文件），
+  而上游 `docs/sd.md:16/17` 的 flux 与 sd3.5 例子要另给 `--vae --clip_l --t5xxl` 三份文件
+  （两条都进了出处表）→ 所以这张表的生图栏是**下限**，UI 不能说"装完这几颗就能出图"；
+  ② 档位表的 `companions` 列的是**同角色的全部量化**（`sd3.5_medium` 那行 17 颗编码器），
+  全加进预算等于多算十几 GiB 用户根本用不到的备选 → 每角色只计最小那颗，其余记 `alternates`。
+  车道 `machine-budget` 三步全离线（它的输入就是那五张已提交的表加吞吐表）：
+  `--selftest` → 18 条单测 → `--check`；20 个变异全被抓，其中三条是这轮补的：分钟数少除一个 60、
+  吞吐查表方向写反（短针 `hf-mirror` 对不上长键 `hf-mirror.com` 会静默把慢吞吐读成 0）、
+  OCR 的"下之前就能当真"写死成 `True`。
 - `tools/payload_plan.py` + `pins/payload-plan.json`：装机负载计划（出包前必须先有的数字）。
   按"没 CUDA 的 x64 / Apple silicon"选默认产物，Range 读 zip 中央目录拿逐文件大小：
   引擎净负载 win 44.2 / linux 52.1 / macOS 46.5 MiB（不含权重），`whisper-bin-x64.zip` 41 条里

@@ -1,0 +1,642 @@
+{
+ "from": [
+  "pins/payload-plan.json",
+  "catalog/defaults.json",
+  "pins/ocr-languages.json",
+  "catalog/recommendations.json",
+  "catalog/subtitle-tiers.json",
+  "catalog/image-tiers.json"
+ ],
+ "measured_at_exit": "lain42.top（CN 出口，2026-10 一次量）",
+ "per_tier": {
+  "16GB": {
+   "by_os": {
+    "linux-x64": {
+     "download_bytes": 20679604915,
+     "download_gib": 19.26,
+     "engine_download_mib": 52.1,
+     "engine_landed_mib": null,
+     "engine_rows": [
+      {
+       "asset": "llama-b11727-bin-ubuntu-x64.tar.gz",
+       "capability": "对话",
+       "download_mib": 17.1,
+       "engine": "llama",
+       "landed_mib": null,
+       "status": "needs_extract"
+      },
+      {
+       "asset": "whisper-bin-ubuntu-x64.tar.gz",
+       "capability": "字幕",
+       "download_mib": 9.9,
+       "engine": "whisper",
+       "landed_mib": null,
+       "status": "needs_extract"
+      },
+      {
+       "asset": "sd-master-95b3090-bin-Linux-Ubuntu-24.04-x86_64.zip",
+       "capability": "生图",
+       "download_mib": 25.1,
+       "engine": "sd",
+       "landed_mib": 65.0,
+       "status": "ok"
+      }
+     ],
+     "minutes_at_measured_rate": 78.3,
+     "missing_capabilities": [],
+     "unknown_landed_sizes": [
+      "字幕",
+      "对话"
+     ],
+     "worst_case_hours_at_slowest_measured": 21.91
+    },
+    "macos-arm64": {
+     "download_bytes": 20673732889,
+     "download_gib": 19.25,
+     "engine_download_mib": 46.5,
+     "engine_landed_mib": null,
+     "engine_rows": [
+      {
+       "asset": "llama-b11727-bin-macos-arm64.tar.gz",
+       "capability": "对话",
+       "download_mib": 11.7,
+       "engine": "llama",
+       "landed_mib": null,
+       "status": "needs_extract"
+      },
+      {
+       "asset": null,
+       "capability": "字幕",
+       "download_mib": null,
+       "engine": null,
+       "landed_mib": null,
+       "status": "上游无产物"
+      },
+      {
+       "asset": "sd-master-95b3090-bin-Darwin-macOS-26.6.2-arm64.zip",
+       "capability": "生图",
+       "download_mib": 34.8,
+       "engine": "sd",
+       "landed_mib": 93.9,
+       "status": "ok"
+      }
+     ],
+     "minutes_at_measured_rate": 78.2,
+     "missing_capabilities": [
+      "字幕"
+     ],
+     "unknown_landed_sizes": [
+      "对话"
+     ],
+     "worst_case_hours_at_slowest_measured": 21.91
+    },
+    "win-x64": {
+     "download_bytes": 20671321164,
+     "download_gib": 19.25,
+     "engine_download_mib": 44.2,
+     "engine_landed_mib": 115.6,
+     "engine_rows": [
+      {
+       "asset": "llama-b11727-bin-win-cpu-x64.zip",
+       "capability": "对话",
+       "download_mib": 18.8,
+       "engine": "llama",
+       "landed_mib": 47.9,
+       "status": "ok"
+      },
+      {
+       "asset": "whisper-bin-x64.zip",
+       "capability": "字幕",
+       "download_mib": 8.5,
+       "engine": "whisper",
+       "landed_mib": 22.1,
+       "status": "ok"
+      },
+      {
+       "asset": "sd-master-95b3090-bin-win-cpu-x64.zip",
+       "capability": "生图",
+       "download_mib": 16.9,
+       "engine": "sd",
+       "landed_mib": 45.6,
+       "status": "ok"
+      }
+     ],
+     "minutes_at_measured_rate": 78.2,
+     "missing_capabilities": [],
+     "unknown_landed_sizes": [],
+     "worst_case_hours_at_slowest_measured": 21.9
+    }
+   },
+   "companion_bytes": 0,
+   "image_companions": {
+    "alternates": 0,
+    "repo": "unsloth/FLUX.1-schnell-GGUF",
+    "roles": []
+   },
+   "image_repo_carries_companions": false,
+   "items": [
+    {
+     "bytes": 9001753376,
+     "file": "Qwen3-14B-Q4_K_M.gguf",
+     "from": "catalog/recommendations.json",
+     "hash_status": "agree",
+     "kind": "chat",
+     "name": "Qwen/Qwen3-14B",
+     "trusted_before_download": true
+    },
+    {
+     "bytes": 8399029280,
+     "file": "flux1-schnell-Q5_K_M.gguf",
+     "from": "catalog/image-tiers.json",
+     "hash_status": "agree",
+     "kind": "image",
+     "name": "unsloth/FLUX.1-schnell-GGUF",
+     "role": "unet",
+     "trusted_before_download": true
+    },
+    {
+     "bytes": 123297373,
+     "file": "(合计)",
+     "from": "pins/ocr-languages.json",
+     "hash_status": "mixed",
+     "kind": "ocr",
+     "name": "全 14 种语言（rec+dict）",
+     "note": "这是把默认档换成全语言时多出来的量，不是叠在默认档上",
+     "trusted_before_download": null
+    },
+    {
+     "bytes": 4462639,
+     "file": "pp-ocrv6_tiny_rec.onnx",
+     "from": "catalog/defaults.json",
+     "hash_status": "agree",
+     "kind": "ocr",
+     "name": "默认档",
+     "trusted_before_download": true
+    },
+    {
+     "bytes": 1780590,
+     "file": "pp-ocrv6_tiny_det.onnx",
+     "from": "catalog/defaults.json",
+     "hash_status": "agree",
+     "kind": "ocr",
+     "name": "默认档",
+     "trusted_before_download": true
+    },
+    {
+     "bytes": 27156,
+     "file": "ppocrv6_tiny_dict.txt",
+     "from": "catalog/defaults.json",
+     "hash_status": "agree",
+     "kind": "ocr",
+     "name": "默认档",
+     "trusted_before_download": true
+    },
+    {
+     "bytes": 3094623691,
+     "file": "ggml-large-v1.bin",
+     "from": "catalog/subtitle-tiers.json",
+     "hash_status": "single",
+     "kind": "subtitle",
+     "mem_text": "3.9 GB",
+     "name": "large-v1",
+     "trusted_before_download": false
+    }
+   ],
+   "untrusted_rows": [
+    "ggml-large-v1.bin"
+   ],
+   "weights_bytes": 20624974105
+  },
+  "4GB": {
+   "by_os": {
+    "linux-x64": {
+     "download_bytes": 6347829883,
+     "download_gib": 5.91,
+     "engine_download_mib": 52.1,
+     "engine_landed_mib": null,
+     "engine_rows": [
+      {
+       "asset": "llama-b11727-bin-ubuntu-x64.tar.gz",
+       "capability": "对话",
+       "download_mib": 17.1,
+       "engine": "llama",
+       "landed_mib": null,
+       "status": "needs_extract"
+      },
+      {
+       "asset": "whisper-bin-ubuntu-x64.tar.gz",
+       "capability": "字幕",
+       "download_mib": 9.9,
+       "engine": "whisper",
+       "landed_mib": null,
+       "status": "needs_extract"
+      },
+      {
+       "asset": "sd-master-95b3090-bin-Linux-Ubuntu-24.04-x86_64.zip",
+       "capability": "生图",
+       "download_mib": 25.1,
+       "engine": "sd",
+       "landed_mib": 65.0,
+       "status": "ok"
+      }
+     ],
+     "minutes_at_measured_rate": 24.0,
+     "missing_capabilities": [],
+     "unknown_landed_sizes": [
+      "字幕",
+      "对话"
+     ],
+     "worst_case_hours_at_slowest_measured": 6.73
+    },
+    "macos-arm64": {
+     "download_bytes": 6341957857,
+     "download_gib": 5.91,
+     "engine_download_mib": 46.5,
+     "engine_landed_mib": null,
+     "engine_rows": [
+      {
+       "asset": "llama-b11727-bin-macos-arm64.tar.gz",
+       "capability": "对话",
+       "download_mib": 11.7,
+       "engine": "llama",
+       "landed_mib": null,
+       "status": "needs_extract"
+      },
+      {
+       "asset": null,
+       "capability": "字幕",
+       "download_mib": null,
+       "engine": null,
+       "landed_mib": null,
+       "status": "上游无产物"
+      },
+      {
+       "asset": "sd-master-95b3090-bin-Darwin-macOS-26.6.2-arm64.zip",
+       "capability": "生图",
+       "download_mib": 34.8,
+       "engine": "sd",
+       "landed_mib": 93.9,
+       "status": "ok"
+      }
+     ],
+     "minutes_at_measured_rate": 24.0,
+     "missing_capabilities": [
+      "字幕"
+     ],
+     "unknown_landed_sizes": [
+      "对话"
+     ],
+     "worst_case_hours_at_slowest_measured": 6.72
+    },
+    "win-x64": {
+     "download_bytes": 6339546132,
+     "download_gib": 5.9,
+     "engine_download_mib": 44.2,
+     "engine_landed_mib": 115.6,
+     "engine_rows": [
+      {
+       "asset": "llama-b11727-bin-win-cpu-x64.zip",
+       "capability": "对话",
+       "download_mib": 18.8,
+       "engine": "llama",
+       "landed_mib": 47.9,
+       "status": "ok"
+      },
+      {
+       "asset": "whisper-bin-x64.zip",
+       "capability": "字幕",
+       "download_mib": 8.5,
+       "engine": "whisper",
+       "landed_mib": 22.1,
+       "status": "ok"
+      },
+      {
+       "asset": "sd-master-95b3090-bin-win-cpu-x64.zip",
+       "capability": "生图",
+       "download_mib": 16.9,
+       "engine": "sd",
+       "landed_mib": 45.6,
+       "status": "ok"
+      }
+     ],
+     "minutes_at_measured_rate": 24.0,
+     "missing_capabilities": [],
+     "unknown_landed_sizes": [],
+     "worst_case_hours_at_slowest_measured": 6.72
+    }
+   },
+   "companion_bytes": 0,
+   "image_companions": {
+    "alternates": 0,
+    "repo": "second-state/stable-diffusion-v1-5-GGUF",
+    "roles": []
+   },
+   "image_repo_carries_companions": false,
+   "items": [
+    {
+     "bytes": 2497281312,
+     "file": "Qwen3-4B-Q4_K_M.gguf",
+     "from": "catalog/recommendations.json",
+     "hash_status": "agree",
+     "kind": "chat",
+     "name": "Qwen/Qwen3-4B",
+     "trusted_before_download": true
+    },
+    {
+     "bytes": 2132586944,
+     "file": "stable-diffusion-v1-5-pruned-emaonly-f16.gguf",
+     "from": "catalog/image-tiers.json",
+     "hash_status": "agree",
+     "kind": "image",
+     "name": "second-state/stable-diffusion-v1-5-GGUF",
+     "role": "unet",
+     "trusted_before_download": true
+    },
+    {
+     "bytes": 123297373,
+     "file": "(合计)",
+     "from": "pins/ocr-languages.json",
+     "hash_status": "mixed",
+     "kind": "ocr",
+     "name": "全 14 种语言（rec+dict）",
+     "note": "这是把默认档换成全语言时多出来的量，不是叠在默认档上",
+     "trusted_before_download": null
+    },
+    {
+     "bytes": 4462639,
+     "file": "pp-ocrv6_tiny_rec.onnx",
+     "from": "catalog/defaults.json",
+     "hash_status": "agree",
+     "kind": "ocr",
+     "name": "默认档",
+     "trusted_before_download": true
+    },
+    {
+     "bytes": 1780590,
+     "file": "pp-ocrv6_tiny_det.onnx",
+     "from": "catalog/defaults.json",
+     "hash_status": "agree",
+     "kind": "ocr",
+     "name": "默认档",
+     "trusted_before_download": true
+    },
+    {
+     "bytes": 27156,
+     "file": "ppocrv6_tiny_dict.txt",
+     "from": "catalog/defaults.json",
+     "hash_status": "agree",
+     "kind": "ocr",
+     "name": "默认档",
+     "trusted_before_download": true
+    },
+    {
+     "bytes": 1533763059,
+     "file": "ggml-medium.bin",
+     "from": "catalog/subtitle-tiers.json",
+     "hash_status": "single",
+     "kind": "subtitle",
+     "mem_text": "2.1 GB",
+     "name": "medium",
+     "trusted_before_download": false
+    }
+   ],
+   "untrusted_rows": [
+    "ggml-medium.bin"
+   ],
+   "weights_bytes": 6293199073
+  },
+  "8GB": {
+   "by_os": {
+    "linux-x64": {
+     "download_bytes": 12571666259,
+     "download_gib": 11.71,
+     "engine_download_mib": 52.1,
+     "engine_landed_mib": null,
+     "engine_rows": [
+      {
+       "asset": "llama-b11727-bin-ubuntu-x64.tar.gz",
+       "capability": "对话",
+       "download_mib": 17.1,
+       "engine": "llama",
+       "landed_mib": null,
+       "status": "needs_extract"
+      },
+      {
+       "asset": "whisper-bin-ubuntu-x64.tar.gz",
+       "capability": "字幕",
+       "download_mib": 9.9,
+       "engine": "whisper",
+       "landed_mib": null,
+       "status": "needs_extract"
+      },
+      {
+       "asset": "sd-master-95b3090-bin-Linux-Ubuntu-24.04-x86_64.zip",
+       "capability": "生图",
+       "download_mib": 25.1,
+       "engine": "sd",
+       "landed_mib": 65.0,
+       "status": "ok"
+      }
+     ],
+     "minutes_at_measured_rate": 47.6,
+     "missing_capabilities": [],
+     "unknown_landed_sizes": [
+      "字幕",
+      "对话"
+     ],
+     "worst_case_hours_at_slowest_measured": 13.32
+    },
+    "macos-arm64": {
+     "download_bytes": 12565794233,
+     "download_gib": 11.7,
+     "engine_download_mib": 46.5,
+     "engine_landed_mib": null,
+     "engine_rows": [
+      {
+       "asset": "llama-b11727-bin-macos-arm64.tar.gz",
+       "capability": "对话",
+       "download_mib": 11.7,
+       "engine": "llama",
+       "landed_mib": null,
+       "status": "needs_extract"
+      },
+      {
+       "asset": null,
+       "capability": "字幕",
+       "download_mib": null,
+       "engine": null,
+       "landed_mib": null,
+       "status": "上游无产物"
+      },
+      {
+       "asset": "sd-master-95b3090-bin-Darwin-macOS-26.6.2-arm64.zip",
+       "capability": "生图",
+       "download_mib": 34.8,
+       "engine": "sd",
+       "landed_mib": 93.9,
+       "status": "ok"
+      }
+     ],
+     "minutes_at_measured_rate": 47.6,
+     "missing_capabilities": [
+      "字幕"
+     ],
+     "unknown_landed_sizes": [
+      "对话"
+     ],
+     "worst_case_hours_at_slowest_measured": 13.32
+    },
+    "win-x64": {
+     "download_bytes": 12563382508,
+     "download_gib": 11.7,
+     "engine_download_mib": 44.2,
+     "engine_landed_mib": 115.6,
+     "engine_rows": [
+      {
+       "asset": "llama-b11727-bin-win-cpu-x64.zip",
+       "capability": "对话",
+       "download_mib": 18.8,
+       "engine": "llama",
+       "landed_mib": 47.9,
+       "status": "ok"
+      },
+      {
+       "asset": "whisper-bin-x64.zip",
+       "capability": "字幕",
+       "download_mib": 8.5,
+       "engine": "whisper",
+       "landed_mib": 22.1,
+       "status": "ok"
+      },
+      {
+       "asset": "sd-master-95b3090-bin-win-cpu-x64.zip",
+       "capability": "生图",
+       "download_mib": 16.9,
+       "engine": "sd",
+       "landed_mib": 45.6,
+       "status": "ok"
+      }
+     ],
+     "minutes_at_measured_rate": 47.5,
+     "missing_capabilities": [],
+     "unknown_landed_sizes": [],
+     "worst_case_hours_at_slowest_measured": 13.31
+    }
+   },
+   "companion_bytes": 0,
+   "image_companions": {
+    "alternates": 0,
+    "repo": "second-state/stable-diffusion-v1-5-GGUF",
+    "roles": []
+   },
+   "image_repo_carries_companions": false,
+   "items": [
+    {
+     "bytes": 5027784512,
+     "file": "Qwen3-8B-Q4_K_M.gguf",
+     "from": "catalog/recommendations.json",
+     "hash_status": "agree",
+     "kind": "chat",
+     "name": "Qwen/Qwen3-8B",
+     "trusted_before_download": true
+    },
+    {
+     "bytes": 4265059488,
+     "file": "stable-diffusion-v1-5-pruned-emaonly-f32.gguf",
+     "from": "catalog/image-tiers.json",
+     "hash_status": "agree",
+     "kind": "image",
+     "name": "second-state/stable-diffusion-v1-5-GGUF",
+     "role": "unet",
+     "trusted_before_download": true
+    },
+    {
+     "bytes": 123297373,
+     "file": "(合计)",
+     "from": "pins/ocr-languages.json",
+     "hash_status": "mixed",
+     "kind": "ocr",
+     "name": "全 14 种语言（rec+dict）",
+     "note": "这是把默认档换成全语言时多出来的量，不是叠在默认档上",
+     "trusted_before_download": null
+    },
+    {
+     "bytes": 4462639,
+     "file": "pp-ocrv6_tiny_rec.onnx",
+     "from": "catalog/defaults.json",
+     "hash_status": "agree",
+     "kind": "ocr",
+     "name": "默认档",
+     "trusted_before_download": true
+    },
+    {
+     "bytes": 1780590,
+     "file": "pp-ocrv6_tiny_det.onnx",
+     "from": "catalog/defaults.json",
+     "hash_status": "agree",
+     "kind": "ocr",
+     "name": "默认档",
+     "trusted_before_download": true
+    },
+    {
+     "bytes": 27156,
+     "file": "ppocrv6_tiny_dict.txt",
+     "from": "catalog/defaults.json",
+     "hash_status": "agree",
+     "kind": "ocr",
+     "name": "默认档",
+     "trusted_before_download": true
+    },
+    {
+     "bytes": 3094623691,
+     "file": "ggml-large-v1.bin",
+     "from": "catalog/subtitle-tiers.json",
+     "hash_status": "single",
+     "kind": "subtitle",
+     "mem_text": "3.9 GB",
+     "name": "large-v1",
+     "trusted_before_download": false
+    }
+   ],
+   "untrusted_rows": [
+    "ggml-large-v1.bin"
+   ],
+   "weights_bytes": 12517035449
+  }
+ },
+ "ram_statement": "本文件的 download_bytes 是磁盘与下载量，不是峰值内存",
+ "rates_mib_s": {
+  "hf-mirror": 0.25,
+  "modelscope": 4.2
+ },
+ "rule": {
+  "image_companions": "生图的配套件（clip/t5/vae）按 weights 里的真实字节加，查不到就报问题、不估算；同一角色的多个量化是**备选**不是都要下，只把最小那颗计入，其余记 alternates；默认行所在仓库没有配套件时，该档的生图部分只是下限（上游 flux/sd3.5 例子要另给三份文件）",
+  "ocr": "默认档三条与全 14 语言合计是两个数，不能相加",
+  "ram": "不加内存：四项能力共用一个常驻引擎、一次跑一项，内存那一轴由各档位表自己的判据负责",
+  "sum": "只加已钉产物里的字节：引擎净负载(payload-plan totals_mib) + 各档默认权重(三张档位表该档第一行) + OCR(默认档三条已钉字节)",
+  "time": "等待时间用 lain42.top 这台 CN 出口一次量的吞吐换算，只当量级"
+ },
+ "schema": 1,
+ "tiers": [
+  "4GB",
+  "8GB",
+  "16GB"
+ ],
+ "totals_gib": {
+  "16GB": {
+   "linux-x64": 19.26,
+   "macos-arm64": 19.25,
+   "win-x64": 19.25
+  },
+  "4GB": {
+   "linux-x64": 5.91,
+   "macos-arm64": 5.91,
+   "win-x64": 5.9
+  },
+  "8GB": {
+   "linux-x64": 11.71,
+   "macos-arm64": 11.7,
+   "win-x64": 11.7
+  }
+ }
+}

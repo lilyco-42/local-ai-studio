@@ -23,6 +23,11 @@ on:
       - "tests/fixtures/whisper_*"
       - "catalog/recommendations.json"
       - "tests/fixtures/recommend_slice.json"
+      # 装机预算把上面那五张表加成"这台机器首启要下多少"，所以它的输入是别人的产物：
+      # 任何一张重算过而预算没跟着重出，machine-budget 这条必须红 —— 吞吐表也算输入。
+      - "tools/machine_budget.py"
+      - "catalog/machine-budget.json"
+      - "tools/r2_manifest.py"
       - "tools/payload_plan.py"
       - "tools/zip_peek.py"
       - "pins/payload-plan.json"
@@ -610,6 +615,28 @@ jobs:
         run: python3 tools/recommend_image.py --fixtures tests/fixtures --check
       - name: 真取搜索与两家文件表重算（上游撤仓库/改许可/换哈希都要看得见）
         run: python3 tools/recommend_image.py --live --check
+
+  machine-budget:
+    # 普通人问的不是"这颗选哪个"，而是「我装齐四样要占多少盘、要等多久」。
+    # 这个数此前没有任何地方算过：payload-plan 只算引擎净负载，三张档位表只给单颗大小。
+    # 三步全离线 —— 它的输入就是已提交那五张表（payload-plan / defaults / ocr-languages /
+    # 三张档位表里取两张的默认行）加 r2_manifest 的实测吞吐，所以任何一张被重算过而预算没跟着
+    # 重出，这里必然红。它不联网：联网重算属于上面三条档位车道，那边一漂这边就跟着漂。
+    # 口径由产物自己带着（ram_statement / rule）：**加的是磁盘与下载量，不是内存**，
+    # 生图配套件（t5/clip/vae）必须一起算 —— 只报 unet 等于把真实下载量少算几倍。
+    timeout-minutes: 8
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: 判据本身（离线对照：明知会被少算的必须被算出来）
+        run: python3 tools/machine_budget.py --selftest
+      - name: 判据单测（含穿过生成器的 OCR 信任标记、吞吐查表方向、分钟数独立重算）
+        run: python -m unittest tests.test_machine_budget -v
+      - name: 用已提交那五张表重算并与预算比漂移（字节/分钟/缺失能力都要对得上）
+        run: python3 tools/machine_budget.py --check
 
   ocr-build-surface:
     # 四项能力里只有 OCR 要现场编译，而"钉 commit"对它**并不等于钉住构建输入**：
