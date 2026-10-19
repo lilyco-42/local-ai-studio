@@ -184,6 +184,10 @@ jobs:
       - uses: actions/checkout@v4
       - name: 与仓库快照自洽（离线，上游今天心情不好也照样能红）
         run: python3 tools/ocr_language_pins.py --check --fixtures
+      - name: 默认档那张 pin 的两家元数据也必须一致
+        # pins/ocr.json 那三条的 meta_hashes 是这张工具补进去的（4.5 级）。
+        # 上游哪天重发一次文件，这里会先于出包车道红 —— 而不是等到用户装到一半才发现哈希对不上。
+        run: python3 tools/ocr_language_pins.py --check-pins pins/ocr.json --live
       - name: 与上游四张表逐条复核（真漂移）
         run: python3 tools/ocr_language_pins.py --check --live
       - name: 重新立一张表，要求与已提交的那张逐字段相等

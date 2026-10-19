@@ -143,6 +143,11 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
    **28 条 rec/dict 里 25 条是"两家分发方给同一个 sha256"**，剩下 3 条（繁中/日/格鲁吉亚的
    v3 字典）两家都没有，只能按 PaddleOCR 的一个 commit 取 raw 自算哈希。
    合计 117.6 MiB（含字典）/ 122.2 MiB（含共享 det），落盘成 `pins/ocr-languages.json`。
+   **同一个工具也复核默认档**：`--check-pins pins/ocr.json` 验到 tiny det/rec 与字典三条在
+   GitHub `digest`、ModelScope 元数据、`registry.rs` 三处给的是同一个哈希、体积也相等
+   → 那三条从 3 级升到 **4.5**，追加进 `pins/ocr.json` 的 `meta_hashes`（写文件前有一道
+   "只许追加、原值动一下就拒写"的形状守卫，因为这张表是车道的输入，被顺手重写不会红，
+   只会从此不再复核那件事）。顺序是刻意的：先有工具与 pin 字段，文档才写 4.5。
    这一轮还量出一个会坑死朴素实现的 fact：同一文件名在 `v0.1.0` 与 `v0.3.0` 里可以是
    **两个不同文件**（`ppocrv5_latin_dict.txt` 1,634 B/`3c0a8a79…` vs 2,616 B/`ccbcc457…`），
    所以查找必须按 models.md 那条链接里的 tag 定位 —— 第一版按名字找，`--live` 立刻报冲突。

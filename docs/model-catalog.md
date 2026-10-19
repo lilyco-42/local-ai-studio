@@ -200,6 +200,7 @@ python tools/catalog_snapshot.py --raw 整文件 --check  # 拿本地已下载�
 python tools/establish_pins.py --verify pins/models.json                 # 全部元数据来的 pin 都升一级
 python tools/establish_pins.py --cross-hf pins/models.json                 # 第二家给哈希：只比元数据，不下载
 python tools/establish_pins.py --verify pins/models.json --only qwen2.5   # 只升某一条（1.5 GB 那条要单独挑）
+python tools/ocr_language_pins.py --check-pins pins/ocr.json --live       # OCR 默认档：GitHub × ModelScope × registry.rs 三处对齐
 ```
 
 三条硬规矩，都是这轮踩出来的：
@@ -216,7 +217,7 @@ python tools/establish_pins.py --verify pins/models.json --only qwen2.5   # 只�
 |---|---|---|
 | `qwen2.5-0.5b-instruct-q2_k.gguf`（对话） | **5 + 4.5** | ModelScope 元数据给哈希，**hf-mirror 下满 415,182,688 B 真字节**，实算 `9ee36184e616…` 与钉值相等；2026-10-20 另加 `--cross-hf`：HF 两主机 `lfs.oid` 也等于它 |
 | `stable-diffusion-v1-5-pruned-emaonly-Q4_0.gguf`（生图） | **5 + 4.5** | 同上，整包 1,566,768,416 B 流式算完，`b8944e9fe0b6…` 相等；`--cross-hf` 下 HF 两主机 `lfs.oid` 同值 |
-| OCR `pp-ocrv6_tiny_det/rec` 与 `ppocrv6_tiny_dict` | **3 + 同家真字节** | 上游 release digest 给哈希，同一条 URL 整包下回并算一致（1,780,590 / 4,462,639 / 27,156）；**提供方只有一个**。2026-10-20 另顺手量到上游 ModelScope 镜像 `greatv/oar-ocr` 对这三条也给同一个 sha256、体积也相等（一次脚本输出，还没进工具与 pin，所以级数**先不涨** —— 见任务 #33） |
+| OCR `pp-ocrv6_tiny_det/rec` 与 `ppocrv6_tiny_dict` | **5 + 4.5** | 上游 release digest 给哈希，同一条 URL 整包下回并算一致（1,780,590 / 4,462,639 / 27,156）= 第 5 级的"同家真字节"那半；**另外** `python tools/ocr_language_pins.py --check-pins pins/ocr.json` 验到 GitHub 的 `digest`、上游 ModelScope 镜像 `greatv/oar-ocr` 的元数据 `Sha256` 与 `registry.rs` 三处给的是同一个哈希、体积也相等 → 4.5 级。写进 `pins/ocr.json` 的 `meta_hashes`，车道 `ocr-languages` 每次都查。提供方仍然只有一家，所以来源独立性没涨 |
 | OCR 语言轴 14 种 × (rec + dict) + 共享 det | **4.5（25/28 条）** | `tools/ocr_language_pins.py` 叠四张表（models.md 两张字典表 + 语言权重表、GitHub 全部 release、ModelScope 镜像、`registry.rs`），在场来源必须给同一个哈希才立 pin。合计 117.6 MiB / 含 det 122.2 MiB，落盘 `pins/ocr-languages.json`。剩下 3 条是繁中/日/格鲁吉亚的 v3 字典：**两家都没有**，按 PaddleOCR 的一个 commit 取 raw 自算（`models.md:116` 明写它们不在 auto-download 注册表内）。查找一律按链接里的 **tag** 定位，因为同名文件在不同 tag 可以是不同内容（`ppocrv5_latin_dict.txt`：v0.1.0 是 1,634 B，v0.3.0 是 2,616 B） |
 | `ggml-tiny.bin` | 3 + 同族两主机头尾 | 整包自算 + huggingface.co 头尾 4 MiB 与 hf-mirror 逐字节一致；ModelScope 无该仓库 → **升不到第 5 级** |
 | `samples/jfk.wav` | 3 + git 旁证 | 整包自算 + 同族对照 + 与 git blob sha1 相等（内容寻址的第三方旁证） |

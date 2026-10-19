@@ -385,6 +385,82 @@ def load_live() -> tuple[str, dict, dict, dict]:
     return md, gh, ms, reg
 
 
+def augment_json_pins(path: str, gh: dict, ms: dict, reg: dict,
+                      write: bool = False) -> tuple[list[dict], list[str]]:
+    """给一张既有的 pin 表（`{"文件名": {...sha256, size...}}`）补 `meta_hashes`，
+    顺便回答"这条到底是 3 级还是 4.5 级"。
+
+    只允许**追加**：原有条目的每个键、每个值、以及顶层键集合都必须一字不变，
+    否则拒写。理由很具体 —— 这张表是车道的输入，一次"顺手重写"把 `bytes_verified`
+    弄丢，车道不会红，只会从此不再复核那件事。
+    """
+    with open(path, encoding="utf-8") as fh:
+        doc = json.load(fh)
+    if not isinstance(doc, dict):
+        return [], [f"{path}: 顶层不是对象（这张工具只认 文件名→条目 的形状）"]
+    rows, problems, new_doc = [], [], {}
+    for name, ent in doc.items():
+        if not isinstance(ent, dict) or not isinstance(ent.get("sha256"), str):
+            problems.append(f"{name}: 条目里没有 sha256 字符串，跳过（不猜它是哪颗）")
+            continue
+        url = ent.get("primary") or (ent.get("bytes_verified") or {}).get("url") or ""
+        m = ASSET_URL.search(url)
+        row = {"file": name, "url": url, "tag": m.group(1) if m else ent.get("release")}
+        pin, bad = overlay(row, gh, ms, reg)
+        problems += [f"{name}: {b}" for b in bad]
+        if pin is None:
+            continue
+        if pin["sha256"] != ent["sha256"]:
+            problems.append(f"{name}: 钉的是 {ent['sha256'][:12]}…，两家元数据现在给 "
+                            f"{pin['sha256'][:12]}… —— 先查上游换没换文件，再谈改 pin")
+            continue
+        if pin["size"] != ent.get("size"):
+            problems.append(f"{name}: 体积不符（表里 {ent.get('size')}，现在 {pin['size']}）")
+            continue
+        added = {
+            "meta_hashes": {
+                "sources": pin["sources"], "sha256": pin["sha256"], "size": pin["size"],
+                "level": pin["level"], "note": pin["note"], "as_of": "2026-10-20",
+                "release": row["tag"]},
+        }
+        rows.append({"file": name, "level": pin["level"], "sources": pin["sources"]})
+        if write:
+            merged = dict(ent)
+            merged.update(added)
+            new_doc[name] = merged
+        else:
+            new_doc[name] = ent
+    if write:
+        problems += shape_guard(doc, new_doc)
+        if not problems:
+            with open(path, "w", encoding="utf-8", newline="\n") as fh:
+                json.dump(new_doc, fh, ensure_ascii=False, indent=1, sort_keys=True)
+                fh.write("\n")
+    return rows, problems
+
+
+def shape_guard(old: dict, new: dict) -> list[str]:
+    """追加写入的守门：顶层键集合不变、每个条目只多不少、原值一个都不许动。"""
+    bad = []
+    if set(old) != set(new):
+        bad.append(f"顶层键集合变了：少了 {sorted(set(old) - set(new))}、"
+                   f"多了 {sorted(set(new) - set(old))}")
+        return bad
+    for k, v in old.items():
+        nv = new[k]
+        if not isinstance(v, dict):
+            if nv != v:
+                bad.append(f"{k}: 标量值被改写")
+            continue
+        lost = sorted(set(v) - set(nv))
+        changed = sorted(x for x in set(v) & set(nv) if v[x] != nv[x])
+        if lost:
+            bad.append(f"{k}: 丢了键 {lost}")
+        if changed:
+            bad.append(f"{k}: 改了既有键 {changed}（这个工具只许追加 meta_hashes）")
+    return bad
+
+
 def main(argv: list[str]) -> int:
     ap = argparse.ArgumentParser(prog="ocr_language_pins.py")
     g = ap.add_mutually_exclusive_group(required=True)
@@ -394,9 +470,24 @@ def main(argv: list[str]) -> int:
     ap.add_argument("--pins", default=os.path.join(REPO, "pins", "ocr-languages.json"))
     ap.add_argument("--pins-out", default="", help="落盘路径（默认 --pins；只有无 BAD 才写）")
     ap.add_argument("--check", action="store_true", help="与已落盘的 pin 比漂移，而不是重立一张表")
+    ap.add_argument("--check-pins", default="",
+                    help="只核对另一张 pin 表（如 pins/ocr.json）的哈希与两家元数据是否还一致")
+    ap.add_argument("--augment-pins", default="",
+                    help="给那张表**追加** meta_hashes（只追加，原值动一下就拒写）")
     a = ap.parse_args(argv)
 
     md, gh, ms, reg = load_live() if a.live else load_fixtures()
+
+    if a.check_pins or a.augment_pins:
+        target = a.augment_pins or a.check_pins
+        rows, problems = augment_json_pins(target, gh, ms, reg, write=bool(a.augment_pins))
+        for r in rows:
+            print(f"  {r['file']:<32} 级 {r['level']:<4} 来源 {'+'.join(r['sources'])}")
+        for x in problems:
+            print("BAD:", x)
+        verb = "追加 meta_hashes" if a.augment_pins else "核对"
+        print(f"{verb} {target}：{len(rows)} 条对上，问题 {len(problems)} 条")
+        return 1 if problems else 0
 
     if a.check:
         pins = json.load(open(a.pins, encoding="utf-8"))
