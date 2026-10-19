@@ -129,13 +129,27 @@ def rows_for(os_label: str, targets: dict, live: bool) -> tuple[list[dict], list
     return rows, bad
 
 
-def plan(fixture_dir: str, os_labels: list[str], live: bool) -> tuple[dict, list[str]]:
+def load_targets(fixture_dir: str, manifest_path: str = "") -> dict:
+    """两种输入：discover 车道产出的 manifest（真跑用的就是这个），或离线夹具里的三家 release。
+    只留离线那条路的话，打包车道就只能对着昨天的产物表选文件 —— 那正是命名漂移会咬人的地方。"""
+    if manifest_path:
+        with open(manifest_path, encoding="utf-8") as fh:
+            doc = json.load(fh)
+        targets = doc.get("targets") if isinstance(doc, dict) else None
+        if not isinstance(targets, dict) or not targets:
+            raise SystemExit(f"{manifest_path} 里没有非空的 targets 表，无法选产物")
+        return targets
     ep = _load("engine_probe")
     rel = {}
     for e in ep.UPSTREAM:
         with open(os.path.join(fixture_dir, f"{e}.json"), encoding="utf-8") as fh:
-            rel[e] = json.load(fh)          # CI 的 unit 跑 -W error::ResourceWarning，裸 open 会变成错误
-    targets = ep.manifest_of(ep.plan(rel))["targets"]
+            rel[e] = json.load(fh)      # CI 的 unit 跑 -W error::ResourceWarning，裸 open 会变成错误
+    return ep.manifest_of(ep.plan(rel))["targets"]
+
+
+def plan(os_labels: list[str], live: bool, fixture_dir: str = "",
+         manifest_path: str = "") -> tuple[dict, list[str]]:
+    targets = load_targets(fixture_dir, manifest_path)
     all_rows, bad = [], []
     for label in os_labels:
         rows, b = rows_for(label, targets, live)
@@ -161,12 +175,13 @@ def plan(fixture_dir: str, os_labels: list[str], live: bool) -> tuple[dict, list
 def main(argv) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--fixtures", default=os.path.join(ROOT, "tests", "fixtures"))
+    ap.add_argument("--manifest", default="", help="discover 产出的 manifest.json（给了就用它，不读夹具）")
     ap.add_argument("--live", action="store_true", help="Range 读 zip 中央目录，出逐文件清单")
     ap.add_argument("--os", default="win-x64,linux-x64,macos-arm64")
     ap.add_argument("--json", default="")
     args = ap.parse_args(argv)
     labels = [s.strip() for s in args.os.split(",") if s.strip()]
-    out, bad = plan(args.fixtures, labels, args.live)
+    out, bad = plan(labels, args.live, "" if args.manifest else args.fixtures, args.manifest)
     for l in labels:
         print(f"== {l}：引擎合计 {out['totals_mib'][l]} MiB（还没算权重）")
         for r in out["os"][l]:

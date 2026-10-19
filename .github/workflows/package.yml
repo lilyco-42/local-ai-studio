@@ -1,0 +1,77 @@
+name: 出包（引擎负载与逐文件清单）
+# 这一条只做"引擎负载"，不是最终的桌面安装包 —— 外壳还没写。
+# 但它把两件必须先有真东西的东西产出来：
+# ① 每个 OS 默认档实际要带的文件清单（含逐文件 sha256 与体积），外壳运行时按这份清单校验引擎；
+# ② `payload_plan` 里那些 `needs_extract` 的行（llama/whisper 的 Linux/macOS 包是 tar.gz，
+#    中央目录读不出来）在这里被真正解开答出来 —— 之前只能标"不知道"。
+# 下载与解包只发生在 runner 上：本机的硬约束是不编译不运行，连下载解包都不在这台机器做。
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "tools/pack_engine.py"
+      - "tools/payload_plan.py"
+      - "tools/engine_probe.py"
+      - "pins/payload-plan.json"
+      - ".github/workflows/package.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  engine-payload:
+    strategy:
+      fail-fast: false
+      matrix:
+        os_tag: [win-x64, linux-x64, macos-arm64]
+    timeout-minutes: 25
+    # 取包与解包和"目标 OS"无关（zip / tar.gz 在 ubuntu 上都能正确读），
+    # 所以这里不用 mac/windows runner —— 它们更慢且有配额问题。
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: 离线对照（合成 zip 与 tar.gz，证明收集规则不是永远绿）
+        run: python3 tools/pack_engine.py --selfcheck
+      - name: 用最新 release 现场选产物（不看 releases/latest：whisper 那个是 0 产物）
+        run: python3 tools/engine_probe.py --live --json /tmp/manifest.json
+      - name: 按这份 manifest 刷装机计划（逐文件读中央目录）
+        run: python3 tools/payload_plan.py --manifest /tmp/manifest.json --live --json /tmp/payload-plan.json
+      - name: 下载 → 校上游 digest → 解包 → 逐文件清单
+        run: python3 tools/pack_engine.py --plan /tmp/payload-plan.json --os "${{ matrix.os_tag }}" --out "dist/${{ matrix.os_tag }}"
+      - name: 清单要自洽，且负载目录里不许留压缩包
+        env:
+          OS_TAG: ${{ matrix.os_tag }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, os, re
+          d = os.path.join("dist", os.environ["OS_TAG"])
+          doc = json.load(open(os.path.join(d, "payload-manifest.json"), encoding="utf-8"))
+          rows = doc["engines"]
+          print(f"{os.environ['OS_TAG']}: {len(rows)} 个引擎，合计 {doc['total_shipped_mib']} MiB")
+          if not rows:
+              raise SystemExit("一个引擎都没落成，这不能算出包")
+          for e in rows:
+              if e["status"] != "ok":
+                  raise SystemExit(f"{e['engine']} 状态是 {e['status']}，不是 ok")
+              files = {f["file"] for f in e["files"]}
+              if not any(re.match(r"^(llama-server|whisper-cli|sd-cli|llama-cli|whisper-server|sd-server)(\.exe)?$", f)
+                         for f in files):
+                  raise SystemExit(f"{e['engine']}: 清单里没有主二进制 {sorted(files)[:6]}")
+              for f in e["files"]:
+                  if not re.fullmatch(r"[0-9a-f]{64}", f["sha256"]) or not f["bytes"]:
+                      raise SystemExit(f"{e['engine']}: {f['file']} 的哈希/体积不完整")
+          leftover = [n for n in os.listdir(d) if n.endswith((".zip", ".tar.gz", ".gz"))]
+          if leftover:
+              raise SystemExit(f"负载目录里还留着压缩包 {leftover} —— 装机包里不该有二次解包")
+          print("  每个引擎都有主二进制与逐文件 sha256，目录里没有残留压缩包")
+          PY
+      - name: 上传引擎负载
+        uses: actions/upload-artifact@v4
+        with:
+          name: engine-payload-${{ matrix.os_tag }}
+          path: dist/${{ matrix.os_tag }}/
+          retention-days: 14

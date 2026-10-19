@@ -71,10 +71,10 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
 
 ## 验收标准（在当前唯一可用验证手段 = GitHub Actions 下）
 
-1. `ci.yml`：189 个单测绿（含 `test_yaml_gate.py` 给闸门自己的 11 条、`test_toolbelt_pins.py` 给工具带
+1. `ci.yml`：199 个单测绿（含 `test_yaml_gate.py` 给闸门自己的 11 条、`test_toolbelt_pins.py` 给工具带
    钉表的 14 条、`test_catalog_snapshot.py` 给目录快照与其侧表的 16 条、`test_citation_check.py` 给出处闸门的 12 条、
    `test_ocr_build_surface.py` 给 OCR 依赖面分类器与比对的 15 条、`test_file_index.py` 给下载层五种状态的 20 条、
-   `test_payload_plan.py` 给装机负载清单的 11 条、
+   `test_payload_plan.py` 给装机负载清单的 11 条、`test_pack_engine.py` 给出包逻辑的 10 条、
    `test_establish_verify.py` 给字节复核与哈希对照的 16 条、`test_shell_vars.py` 给 shell 变量判据的 10 条、
    `test_r2_manifest.py` 给镜像清单的 6 条、`test_lane_assertions.py` + `test_image_proof_block.py`
    给车道判据的 32 条），
@@ -188,7 +188,19 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     两个真实缺口写清楚而不是藏起来：
     ① **whisper.cpp 的 release 没有 macOS 产物** → 字幕在 Apple silicon 上只能自编译或不做（产品决定，已立任务）；
     ② llama/whisper 的 Linux 与 macOS 包是 **tar.gz**，中央目录读不了（格式决定），
-    那几行如实标 `needs_extract`，逐文件清单只能由 CI 真打包时产出。
+    那几行如实标 `needs_extract`，逐文件清单由出包车道解开作答（见第 14 条）。
+14. **出包车道已经有了，且它先校哈希再解包**（`tools/pack_engine.py` + `.github/workflows/package.yml`）：
+    按 OS 矩阵（win-x64 / linux-x64 / macos-arm64）取 `payload-plan` 选中的产物 →
+    **整包 sha256 必须等于上游 digest，对不上就停，不许"先解包再说"** →
+    stdlib 解包（不调外部 unzip/tar）→ 按收集规则落成**扁平布局**
+    （llama 的顶层同名目录与 whisper 的 `Release/` 都拉平，这是 `$ORIGIN` 找运行库的前提）→
+    逐文件 sha256 + 体积写 `payload-manifest.json` 并上传为 artifact。
+    自查三件：主二进制必须在位、清单里不许残留被排除的东西、负载目录里不许留压缩包
+    （留着就等于把二次解包推给用户首启）。同名不同目录的成员**不许静默覆盖**，
+    要点名进排除表 —— 覆盖会让"装进去的文件"与"清单里的文件"不是同一份。
+    离线对照 10 条（合成 zip + 合成 tar.gz，含 digest 不符与下载失败两条），
+    闸门现在同时解析三条 workflow（15 段 heredoc PY）。
+    车道仍 0 次执行，所以这一条给的是"出包这一步有路、有判据、有清单格式"，不是"包已经出出来"。
 
 ## 车道判据的出处（全部按**钉住的那个 ref** 核过，不是按 HEAD 记的）
 

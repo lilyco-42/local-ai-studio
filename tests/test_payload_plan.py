@@ -55,7 +55,7 @@ def run(entries_table, os_labels=None):
     real = pp.ENTRIES_OVERRIDE
     pp.ENTRIES_OVERRIDE = fake
     try:
-        return pp.plan(FIX, os_labels or OS, live=True)
+        return pp.plan(os_labels or OS, True, fixture_dir=FIX)
     finally:
         pp.ENTRIES_OVERRIDE = real
 
@@ -125,7 +125,7 @@ class TestControlsAreLoadBearing(unittest.TestCase):
     def test_offline_mode_does_not_claim_per_file_lists(self) -> None:
         out, bad = run(TABLES)
         del out, bad
-        plan, bad2 = pp.plan(FIX, OS, live=False)
+        plan, bad2 = pp.plan(OS, False, fixture_dir=FIX)
         self.assertEqual(bad2, [])
         for r in plan["rows"]:
             self.assertNotIn("shipped", r, "没读中央目录就不许给出逐文件结论")

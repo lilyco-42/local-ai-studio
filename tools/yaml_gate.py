@@ -20,8 +20,8 @@ ROOT = os.path.abspath(os.path.join(HERE, ".."))
 # 默认查两条，但允许传路径：这样"闸门本身会不会红"能被单测用临时文件证明，
 # 而不是只能靠我手工掺假再手工还原。
 FILES = (sys.argv[1:] or
-         [os.path.join(ROOT, ".github", "workflows", "ci.yml"),
-          os.path.join(ROOT, ".github", "workflows", "engine-live.yml")])
+         [os.path.join(ROOT, ".github", "workflows", f)
+          for f in ("ci.yml", "engine-live.yml", "package.yml")])
 rel = {e: json.load(open(os.path.join(HERE, "..", "tests", "fixtures", f"{e}.json"), encoding="utf-8"))
        for e in probe.UPSTREAM}
 keys = set(probe.manifest_of(probe.plan(rel))["targets"])

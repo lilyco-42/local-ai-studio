@@ -66,6 +66,11 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   引擎净负载 win 44.2 / linux 52.1 / macOS 46.5 MiB（不含权重），`whisper-bin-x64.zip` 41 条里
   收 31 排除 10 个 `test-*.exe`。tar.gz（llama/whisper 的 Linux 与 macOS 包）读不了中央目录，
   如实标 `needs_extract`；**whisper 上游根本没有 macOS 产物** —— 字幕在 Apple silicon 上要自编译。
+- `tools/pack_engine.py` + `.github/workflows/package.yml`：**出包这一步**。按 OS 矩阵取装机计划选中的产物 →
+  整包 sha256 必须等于上游 digest（对不上就停，不解包）→ stdlib 解包并把顶层目录与 `Release/` 拉平
+  （`$ORIGIN` 找运行库的前提）→ 逐文件哈希与体积写 `payload-manifest.json` 上传为 artifact。
+  同名不同目录的成员不许静默覆盖；主二进制缺席、清单里残留被排除的东西、目录里留着压缩包都会红。
+  10 条离线对照（合成 zip 与 tar.gz，含"digest 不符"与"下载失败"）。
 - `.github/workflows/ci.yml`：静态门禁（含 yaml_gate）+ 单测（夹具是真实 API 捕获）+ 离线跑发现器
   与离线回放工具带钉表。
 - `.github/workflows/engine-live.yml`：打真实 API 发现产物 → 下载 linux 引擎（不编译）→ 下载 pin 住的
