@@ -113,6 +113,24 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
    强度级一起带出去，UI 才有东西可显示。第 6 级目前**没有任何一条到达** ——
    whisper/SD 权重实测只有一家发布，这点在交付说明里要照实写。
 
+## 第一次真跑要盯什么（车道至今 0 次执行，这些是静态审计之后剩下的未知）
+
+1. **timeout 够不够**：`image-proof` 是 45 min（1.5 GB 权重 + 3 步推理），`ocr-proof` 是 34 min
+   （2 核 runner 上 `cargo build --release` 要过 ort / onig / tokenizers 的编译）。
+   这两个数都是估的，第一次跑就要按实际耗时改回来，别把"超时"读成"能力不行"。
+2. **OCR 的源码 ref**：钉的是 main 的 `84817f58…`，因为 **v0.10.0 那个 tag 里没有 `oar-ocr-cli`**
+   （成员表实测只有 4 项）。断言已按 raw 文件在本地核过（成员含 CLI、`[[bin]] name = "oar"`），
+   剩下的未知是真编译 —— 上游若发新 tag，应该换成新 tag 而不是继续跟 main。
+3. **sd 的动态库闭包**：包里有一整层 `.so`（`zip_peek` 条目级量过），解压后靠 `$ORIGIN`/RPATH 能不能
+   起来没证。若报 `libsd-…so: cannot open`，先查 RPATH 而不是怀疑后端。
+4. **whisper 的二进制名**：条目表里是 `whisper-cli`（不是 `whisper-main`），库在同目录，
+   车道已按深度 1–2 glob + `LD_LIBRARY_PATH` 处理；剩下的未知是它跑出来的 SRT 是否带时间戳。
+5. **runner 侧的 HF 直连**：`headless-inference` 从 `huggingface.co` 直接下权重。国内出口不可用
+   这件事**不代表 GitHub runner 不可用**，两件事别混；但备选源该按 ADR 的新层级重排
+   （ModelScope 首选、hf-mirror 备选，见 [model-catalog.md](model-catalog.md)）。
+6. **每条 pin 都会被车道自己再 `sha256sum -c` 一遍**。任何一条对不上都是"上游被换过或源在说谎"，
+   要红着停下来，不许改成 warning 放行。
+
 **CI 证明不了的**：GUI 是否真打开、集显/独显上的真实性能与兼容性、DirectML/Vulkan EP 是否真的加速。
 这几项必须留到设备矩阵，交付说明里要写清，不拿 CI 绿当"能用"。
 

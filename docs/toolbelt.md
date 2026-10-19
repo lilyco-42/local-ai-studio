@@ -62,6 +62,17 @@ ADR-0001 只解决了"引擎从哪来"。但把普通人电脑用起来还差三
   README 那句安装命令是给仓库外的人看的门面话 —— 车道必须 `git clone` 后
   `cargo build --release -p oar-ocr-cli`。库本体 `oar-ocr` 是发布的，`.crate` 在 crates.io 上有校验和，
   所以"取源码"这一步仍然可以按上游哈希钉住，只是**可执行文件这一层没有预编译产物**（与 ADR 里那条一致）。
+- **更要命的是：`oar-ocr-cli` 不在任何一个 tag 里，只在 main 上。** 2026-10-19 逐 ref 查过：
+  `v0.10.0`（commit `f755256f…`）的根 `Cargo.toml` 成员表是
+  `[".", "oar-ocr-derive", "oar-ocr-core", "oar-ocr-vl"]` —— **没有 CLI**；
+  main（`84817f58…`，比 v0.10.0 领先 24 个提交）才有 `oar-ocr-bench` 与 `oar-ocr-cli`，
+  而 `[workspace.package] version` 仍然写着 `0.10.0`（所以"版本号 0.10.0"根本不区分这两者）。
+  结论：OCR 车道只能**钉 commit**，钉 tag 会在取源码那步红得没道理。
+  同一轮还修掉两处会红在错地方的断言：成员表里写的是裸名字 `"oar-ocr-cli"`，
+  `name = "oar-ocr-cli"` 只在 CLI 自己的 `Cargo.toml` 里（`[[bin]] name = "oar"`）。
+  CLI 的旗标面也按那个 commit 读过源码：`--size` 与 `--det/--rec/--dict` 互斥
+  （`conflicts_with_all`），三个自定义模型必须一起给（`requires_all`），
+  `--output` 是**目录**、不给就打到 stdout（车道用 `> out.txt`）。
 - **工具链版本是硬前提**：workspace 里写 `edition = "2024"`、`rust-version = "1.95"`。
   runner 上的默认 toolchain 不够新就会在依赖解析阶段失败，所以 OCR 车道要显式 `rustup toolchain install`。
 - **CI 没有"小而快"的扩散模型可用**（本轮实测 hf-mirror 的 `tree` 大小）：

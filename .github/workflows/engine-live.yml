@@ -329,8 +329,11 @@ jobs:
     timeout-minutes: 34
     runs-on: ubuntu-latest
     env:
-      TAG: v0.10.0
-      COMMIT: f755256f260d3760a062a6051d23826958972c33   # v0.10.0 解引用后的 commit（gh api git/ref/tags 实测）
+      # 钉 commit 而不是 tag：2026-10-19 实测 **v0.10.0 那个 tag 里没有 oar-ocr-cli**
+      # （根 Cargo.toml 的 members 只有 ". / oar-ocr-derive / oar-ocr-core / oar-ocr-vl"），
+      # CLI 是发版之后才并进 main 的 —— 该 commit 比 v0.10.0 领先 24 个提交。
+      # 按 tag 钉的话这条车道会在"取源码"那步就红，而且是红得没道理。
+      SRC_REF: 84817f58d7a0932d5368a9fa18105ba5d842af29   # main，feat(vl): add native Youtu-Parsing-Omni support (#227)
       DET_SHA: 193bab7a04fca699a6c82e6abb5b81bdb28177f0abd4062552b04908dafb19f8
       REC_SHA: 9ef676d6ed3c88256a2d92c640c44f25b0c40947e111b14b8be8f594091563e6
       DICT_SHA: c5cbe34ef40c29c4df07ed012bf96569cb69a2d2a01a07027e9f13cb832bd9cd
@@ -356,12 +359,21 @@ jobs:
           PY
       - name: 按提交号取源码
         run: |
-          git clone --depth 1 --branch "$TAG" https://github.com/greatv/oar-ocr.git src
+          git init -q src
           cd src
-          git fetch --depth 1 origin "$COMMIT" 2>/dev/null || true
-          HEAD_SHA=$(git rev-parse HEAD^{commit})
-          test "$HEAD_SHA" = "$COMMIT" || { echo "tag $TAG 指向 $HEAD_SHA，与钉住的 $COMMIT 不符（上游重打过 tag）"; exit 1; }
-          grep -q 'name = "oar-ocr-cli"' Cargo.toml || { echo "workspace 成员名变了"; exit 1; }
+          git remote add origin https://github.com/GreatV/oar-ocr.git
+          git fetch -q --depth 1 origin "$SRC_REF"
+          git checkout -q FETCH_HEAD
+          test "$(git rev-parse HEAD)" = "$SRC_REF" \
+            || { echo "检出的不是钉住的那颗 commit"; exit 1; }
+          # 这两条断言是 2026-10-19 加上的：上一版拿 tag 去 clone，而那个 tag 里根本没有 CLI；
+          # 又拿 `name = "oar-ocr-cli"` 去 grep 根 Cargo.toml —— 成员表写的是裸名字，
+          # `name = ` 只在 CLI 自己的 Cargo.toml 里，两条都会红在错的地方。
+          grep -q '"oar-ocr-cli"' Cargo.toml \
+            || { echo "workspace 成员表里没有 oar-ocr-cli（这就是 v0.10.0 那个 tag 的情况）"; exit 1; }
+          grep -q 'name = "oar"' oar-ocr-cli/Cargo.toml \
+            || { echo "CLI 的 [[bin]] 名字不是 oar，产物路径要改"; exit 1; }
+          grep -q 'edition = "2024"' Cargo.toml || { echo "workspace edition 变了，工具链要求要重量"; exit 1; }
       - name: 编译 CLI（CI 编译，本机禁止）
         working-directory: src
         run: |
@@ -371,6 +383,9 @@ jobs:
           "$BIN" --help > "$RUNNER_TEMP/help.txt" 2>&1 || true
           head -25 "$RUNNER_TEMP/help.txt"
       - name: 取三个模型文件并按上游 digest 校验
+        # 模型/字典来自 release **v0.7.0**，与上面源码的 commit 不同源是有意为之：
+        # 这三条 tiny 文件只在 v0.7.0 那批产物里（2026-10-19 逐条下整包验过：
+        # 1,780,590 / 4,462,639 / 27,156 B，实算 sha256 与 pins/ocr.json 相等）。
         run: |
           base=https://github.com/greatv/oar-ocr/releases/download/v0.7.0
           curl -sSL --fail --max-time 300 -o det.onnx  "$base/pp-ocrv6_tiny_det.onnx"
