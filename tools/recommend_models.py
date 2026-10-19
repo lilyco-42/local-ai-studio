@@ -57,7 +57,10 @@ PER_TIER = 5
 SCAN_MULT = 3                # 每档最多扫 per_tier×SCAN_MULT 条候选来凑满，防止无限联网
 PROVIDER_PREF = ("ggml-org", "unsloth", "mradermacher")
 QUANT_PREF = ("Q4_K_M", "Q4_K_S", "Q5_K_M", "Q3_K_M", "Q2_K", "Q4_0", "IQ4_XS", "Q8_0")
-RISKY_LICENSE = re.compile(r"(^|-)(nc|other|unknown)(-|$)")
+# `nc` / `other` / `unknown` 之外还要认 openrail 系：实测 SD1.5 的 GGUF 仓库标的是
+# `creativeml-openrail-m`（对生成物有使用限制），而它字面上不含 nc/other/unknown —— 生图那张表
+# 差点把这条许可当成"不需要显示"就发出去（许可到得了用户是合规红线）。
+RISKY_LICENSE = re.compile(r"(^|-)(nc|other|unknown)(-|$)|openrail|rail-m")
 
 
 def chat_rows(models: list[dict]) -> list[dict]:
@@ -325,7 +328,10 @@ def check(committed: dict, fresh: dict) -> list[str]:
         if b is None:
             bad.append(f"{k[0]}/{k[1]}: 这一档现在解不出来了（仓库或文件漂了，或它挪了档）")
             continue
-        for f in ("repo", "file", "sha256", "size", "status"):
+        # 许可与 use_case 也要比：`RISKY_LICENSE` 一改（比如生图那边发现 openrail 系没被标），
+        # 这张表的 license_flag 就悄悄过期了 —— 而"许可必须到得了用户"是合规红线。
+        for f in ("repo", "file", "sha256", "size", "status", "license", "license_flag",
+                  "use_case", "recommended_ram_gb", "min_ram_gb"):
             if a[f] != b[f]:
                 bad.append(f"{k[1]}.{f}: {str(a[f])[:40]!r} → {str(b[f])[:40]!r}")
     return bad

@@ -150,6 +150,19 @@ class TestPickFile(unittest.TestCase):
         got, why = rm.pick_file(sorted(hf), lambda n: hf[n]["size"], 8.0, "Q4_K_M", ("Q-X",))
         self.assertIsNone(got, "半个模型不是可加载文件")
         self.assertIn("整只", why)
+        # 单独测分片判据：把形状判据关掉（stems=()），挡住的必须还是分片那一条，
+        # 否则"两道闸其实只有一道在起作用"这件事没人知道（变异扫描就是这样漏掉的）
+        got2, why2 = rm.pick_file(sorted(hf), lambda n: hf[n]["size"], 8.0, "Q4_K_M", ())
+        self.assertIsNone(got2, "关掉形状判据后仍不许返回分片")
+        self.assertIn("整只", why2)
+
+    def test_licensed_regex_covers_openrail_family(self) -> None:
+        # 这条正则被三张表共用（生图那边先发现 openrail 系漏标），所以它得单独钉住，
+        # 不能只靠"某一行恰好带这个许可"的语料 —— 对话这张表的语料里就没有
+        for lic, risky in (("creativeml-openrail-m", True), ("openrail++", True),
+                           ("cc-by-nc-4.0", True), ("unknown", True),
+                           ("mit", False), ("apache-2.0", False), ("qwen-research", False)):
+            self.assertEqual(bool(rm.RISKY_LICENSE.search(lic)), risky, lic)
 
     def test_model_level_quant_hint_used_when_preferred_list_misses(self) -> None:
         hf = {"Q-X-Q5_K_L.gguf": entry(SHA_A, 3_000_000_000)}
@@ -432,6 +445,17 @@ class TestCheck(unittest.TestCase):
         committed["rule"]["quant"] = "Q8_0/Q4_K_M"
         bad = rm.check(committed, self.fresh())
         self.assertTrue(any("选择规则变了" in x for x in bad))
+
+    def test_license_or_ram_reclassification_is_caught(self) -> None:
+        # 许可与内存字段也进比对：RISKY_LICENSE 一改（生图那边发现 openrail 系漏标），
+        # 这张表的 license_flag 就悄悄过期，而"许可必须到得了用户"是合规红线
+        for field, value in (("license", "cc-by-nc-4.0"), ("license_flag", "需向用户显示"),
+                             ("use_case", "Instruction following, chat"),
+                             ("recommended_ram_gb", 0.1), ("min_ram_gb", 0.2)):
+            committed = self.fresh()
+            committed["tiers_rows"]["8GB"][0][field] = value
+            bad = rm.check(committed, self.fresh())
+            self.assertTrue(any(field in x for x in bad), (field, bad[:2]))
 
 
 class TestCli(unittest.TestCase):

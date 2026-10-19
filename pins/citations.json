@@ -668,5 +668,65 @@
   "absent": false,
   "as_of": "2026-10-20",
   "line_text": "{ \"zh\",  { 1,  \"chinese\",         } },"
+ },
+ {
+  "id": "image-perf-headroom",
+  "repo": "leejet/stable-diffusion.cpp",
+  "ref": "95b3090664d019fcf8fa032a44d1d4793ba244b8",
+  "path": "docs/performance.md",
+  "line": 143,
+  "expect": "128 MiB of headroom",
+  "claim": "分段执行的容量检查留 128 MiB 余量（生图档位表的 fit 为什么只能算术、不能承诺内存）",
+  "absent": false,
+  "as_of": "2026-10-20",
+  "line_text": "an additional 128 MiB of headroom in both available device memory and any explicit"
+ },
+ {
+  "id": "image-perf-floor",
+  "repo": "leejet/stable-diffusion.cpp",
+  "ref": "95b3090664d019fcf8fa032a44d1d4793ba244b8",
+  "path": "docs/performance.md",
+  "line": 145,
+  "expect": "512 MiB device",
+  "claim": "容量检查保住的设备底线 512 MiB",
+  "absent": false,
+  "as_of": "2026-10-20",
+  "line_text": "subsequent capacity checks can consume it while still preserving the 512 MiB device"
+ },
+ {
+  "id": "image-readme-perf",
+  "repo": "leejet/stable-diffusion.cpp",
+  "ref": "95b3090664d019fcf8fa032a44d1d4793ba244b8",
+  "path": "README.md",
+  "line": 157,
+  "expect": "performance guide",
+  "claim": "README 把内存/显存这件事推到 docs/performance.md（不是给一张静态表）",
+  "absent": false,
+  "as_of": "2026-10-20",
+  "line_text": "If you want to improve performance or reduce VRAM/RAM usage, please refer to [performance guide](./docs/performance.md)."
+ },
+ {
+  "id": "image-sd-safetensors",
+  "repo": "leejet/stable-diffusion.cpp",
+  "ref": "95b3090664d019fcf8fa032a44d1d4793ba244b8",
+  "path": "docs/sd.md",
+  "line": 5,
+  "expect": "huggingface.co/stable-diffusion-v1-5/stable-diffusion-v1-5",
+  "claim": "上游模型文档只给 safetensors 出处：GGUF 量化全在社区仓库，所以生图候选池必须由搜索推导",
+  "absent": false,
+  "as_of": "2026-10-20",
+  "line_text": "- Stable Diffusion v1.5 from https://huggingface.co/stable-diffusion-v1-5/stable-diffusion-v1-5"
+ },
+ {
+  "id": "image-offload-cpu",
+  "repo": "leejet/stable-diffusion.cpp",
+  "ref": "95b3090664d019fcf8fa032a44d1d4793ba244b8",
+  "path": "docs/performance.md",
+  "line": 102,
+  "expect": "saving VRAM without reducing generation speed",
+  "claim": "装不下时的官方开关之一 —— UI 该给的是这些开关，不是我们编的内存系数",
+  "absent": false,
+  "as_of": "2026-10-20",
+  "line_text": "Using `--offload-to-cpu` allows you to offload weights to the CPU, saving VRAM without reducing generation speed."
  }
 ]

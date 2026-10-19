@@ -15,6 +15,10 @@ on:
       - "tools/file_index.py"
       - "tools/recommend_models.py"
       - "tools/recommend_subtitle.py"
+      - "tools/recommend_image.py"
+      - "catalog/image-tiers.json"
+      - "tests/fixtures/image_*"
+      - "tests/fixtures/sd_*"
       - "catalog/subtitle-tiers.json"
       - "tests/fixtures/whisper_*"
       - "catalog/recommendations.json"
@@ -584,6 +588,28 @@ jobs:
         run: python3 tools/recommend_subtitle.py --fixtures tests/fixtures --check
       - name: 真取四张表重算（上游改表、撤文件、档位凑不满都要红）
         run: python3 tools/recommend_subtitle.py --live --check
+
+  image-tiers:
+    # 生图这一档与前两张**来源不同**：llmfit 里生图 0 条，whisper 那种上游内存表也不存在
+    # （sd.cpp 的 docs/sd.md 只给 safetensors 出处，GGUF 全在社区仓库）。
+    # 所以候选池由上游搜索推导、按下载量排，且这张表**故意不给内存承诺**：
+    # docs/performance.md 说内存是运行时量的（分段执行、128 MiB 余量、512 MiB 底线），
+    # 我们能核对的只有文件级大小与两家哈希。这三条出处由 citation-drift 逐行查。
+    # 档位只认主体权重（unet）：FLUX 那类仓库里 t5xxl / clip / vae 都比主体小，
+    # 只按大小排会把文本编码器推荐成"出图的那个模型"。
+    timeout-minutes: 15
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: 判据单测（离线；含与已钉 SD1.5 pin 的跨产物一致性与整张表深比对）
+        run: python -m unittest tests.test_recommend_image -v
+      - name: 用真捕获离线重算并与已提交那张比漂移（不联网也要红得起来）
+        run: python3 tools/recommend_image.py --fixtures tests/fixtures --check
+      - name: 真取搜索与两家文件表重算（上游撤仓库/改许可/换哈希都要看得见）
+        run: python3 tools/recommend_image.py --live --check
 
   ocr-build-surface:
     # 四项能力里只有 OCR 要现场编译，而"钉 commit"对它**并不等于钉住构建输入**：

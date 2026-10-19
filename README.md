@@ -52,7 +52,7 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
 - `tools/r2_manifest.py`：从 `pins/*.json` 推导"该镜像什么"，按源分组给实测吞吐换算，
   产出 `mirror/r2-intake.json`（只是清单，不含上传动作）。
 - `tools/citation_check.py` + `pins/citations.json`：把"上游某 ref 的某一行写着某件事"这类结论
-  变成能查的东西。57 条声明各记（2026-10-20 按 pin ref 实跑过一次，0 问题；`--cache .cache/refs --fill` 抓一次原文之后可离线复算） `repo/ref/path/line/expect`（还多一种 `absent`：连「这份文件里没有 X」也要查），逐条取回上游**核对那一行仍然含那个子串**
+  变成能查的东西。63 条声明各记（2026-10-20 按 pin ref 实跑过一次，0 问题；`--cache .cache/refs --fill` 抓一次原文之后可离线复算） `repo/ref/path/line/expect`（还多一种 `absent`：连「这份文件里没有 X」也要查），逐条取回上游**核对那一行仍然含那个子串**
   （只看文件在不在没用：默认值改了文件照样在），子串命中不唯一就不配进表。
   建表时已经按这两条筛过；车道 `citation-drift` 先跑 `--selftest`（明知错的必须认成错）再逐条核对。
   来历：本轮踩过六次"判据指向一个不存在的东西却照样跑完"（`llama-completions`、去 tag 里找 CLI、
@@ -105,6 +105,21 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   车道 `subtitle-tiers`：`--selftest`（含明知是错的必须认成错）→ 41 条单测（含"这张表算出的
   `ggml-tiny.bin` sha256 必须逐字节等于 `pins/models.json` 里字幕车道已钉那颗 pin"这条跨产物不变量）
   → `--fixtures --check` 离线重算 → `--live --check`。
+- `tools/recommend_image.py` + `catalog/image-tiers.json`：**生图这一档的来源又不同**，
+  所以它故意不写内存承诺。llmfit 里生图 0 条、sd.cpp 的 `docs/sd.md` 只给 safetensors 出处
+  （GGUF 全在社区仓库），因此候选池由**上游搜索**按家族查询推导、按 `downloads` 排（查询串进产物，
+  车道能发现多了一个家族），仓库顺序是 `leejet`（引擎作者自己也发 gguf）> 其余按下载量。
+  三条实测出来的判据形状：**档位只认 `role=unet` 的主体权重**（`Green-Sky/flux.1-schnell-GGUF` 的清单里
+  `t5xxl_q3_k` / `clip_l-q8_0` / `ae-f16` 都比主体小，只按大小排会把文本编码器推荐成"出图的那个模型"），
+  配套件跟着每一行走（`companions`）；**成人内容按上游自己的 `not-for-all-audiences` 标签挡**，
+  不按仓库名猜（这次捕获里有 2 个仓库带这个标签，仍留在 `weights` 里但不进档位）；
+  **许可缺失也算要显示**（43 个仓库里 7 个没 license 标签，`str(None)` 是 "None"，纯正则会把"没有许可"
+  当成"许可没问题"）；`creativeml-openrail-m` / `openrail++` 也进标记（SD1.5 就是这条）。
+  内存这一项写死为 `memory_claim: none`，依据是 `docs/performance.md` 说它是**运行时量出来的**
+  （分段执行留 128 MiB 余量、设备底线 512 MiB、README `:157` 把人推到这份文档）—— 三行都进了出处表。
+  实测：43 个候选仓库 / 338 行权重，**191 行两家分发方给同一个 sha256**（生图能到 4.5 级，
+  与字幕整轴只有 single 形成对照）；`second-state` 那颗 Q4_0 与 `pins/models.json` 已钉的 pin 逐字节相同。
+  还有一条反例钉在测试里：`leejet` 的 `q4_0` 与 `q4_k` **大小一模一样而哈希不同** —— 按大小认文件是假的。
 - `tools/payload_plan.py` + `pins/payload-plan.json`：装机负载计划（出包前必须先有的数字）。
   按"没 CUDA 的 x64 / Apple silicon"选默认产物，Range 读 zip 中央目录拿逐文件大小：
   引擎净负载 win 44.2 / linux 52.1 / macOS 46.5 MiB（不含权重），`whisper-bin-x64.zip` 41 条里

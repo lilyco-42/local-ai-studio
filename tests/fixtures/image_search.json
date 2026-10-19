@@ -1,0 +1,857 @@
+{
+ "errors": {},
+ "queries": {
+  "flux schnell gguf": [
+   {
+    "_id": "66bd6834f4f021dce64b20d3",
+    "createdAt": "2024-08-15T02:30:12.000Z",
+    "downloads": 126176,
+    "id": "city96/FLUX.1-schnell-gguf",
+    "library_name": "gguf",
+    "likes": 364,
+    "modelId": "city96/FLUX.1-schnell-gguf",
+    "pipeline_tag": "text-to-image",
+    "private": false,
+    "tags": [
+     "gguf",
+     "text-to-image",
+     "image-generation",
+     "flux",
+     "base_model:black-forest-labs/FLUX.1-schnell",
+     "base_model:quantized:black-forest-labs/FLUX.1-schnell",
+     "license:apache-2.0",
+     "region:us"
+    ]
+   },
+   {
+    "_id": "68626bf794640fe6cf34e3e2",
+    "createdAt": "2025-06-30T10:50:31.000Z",
+    "downloads": 35469,
+    "id": "unsloth/FLUX.1-schnell-GGUF",
+    "likes": 32,
+    "modelId": "unsloth/FLUX.1-schnell-GGUF",
+    "pipeline_tag": "text-to-image",
+    "private": false,
+    "tags": [
+     "gguf",
+     "text-to-image",
+     "image-generation",
+     "flux",
+     "en",
+     "base_model:black-forest-labs/FLUX.1-schnell",
+     "base_model:quantized:black-forest-labs/FLUX.1-schnell",
+     "license:apache-2.0",
+     "region:us"
+    ]
+   },
+   {
+    "_id": "66caa22e1c056a55082f451e",
+    "createdAt": "2024-08-25T03:17:02.000Z",
+    "downloads": 18906,
+    "id": "leejet/FLUX.1-schnell-gguf",
+    "likes": 9,
+    "modelId": "leejet/FLUX.1-schnell-gguf",
+    "private": false,
+    "tags": [
+     "gguf",
+     "sd.cpp",
+     "stable-diffusion.cpp",
+     "flux",
+     "en",
+     "base_model:black-forest-labs/FLUX.1-schnell",
+     "base_model:quantized:black-forest-labs/FLUX.1-schnell",
+     "license:apache-2.0",
+     "region:us"
+    ]
+   },
+   {
+    "_id": "66cdd590621fbbea368b35d8",
+    "createdAt": "2024-08-27T13:33:04.000Z",
+    "downloads": 6204,
+    "id": "lllyasviel/FLUX.1-schnell-gguf",
+    "library_name": "gguf",
+    "likes": 34,
+    "modelId": "lllyasviel/FLUX.1-schnell-gguf",
+    "pipeline_tag": "text-to-image",
+    "private": false,
+    "tags": [
+     "gguf",
+     "text-to-image",
+     "image-generation",
+     "flux",
+     "base_model:black-forest-labs/FLUX.1-schnell",
+     "base_model:quantized:black-forest-labs/FLUX.1-schnell",
+     "license:apache-2.0",
+     "region:us"
+    ]
+   },
+   {
+    "_id": "66caceb0185790889794dce4",
+    "createdAt": "2024-08-25T06:26:56.000Z",
+    "downloads": 5894,
+    "id": "second-state/FLUX.1-schnell-GGUF",
+    "likes": 17,
+    "modelId": "second-state/FLUX.1-schnell-GGUF",
+    "pipeline_tag": "text-to-image",
+    "private": false,
+    "tags": [
+     "gguf",
+     "text-to-image",
+     "image-generation",
+     "flux",
+     "en",
+     "base_model:black-forest-labs/FLUX.1-schnell",
+     "base_model:quantized:black-forest-labs/FLUX.1-schnell",
+     "license:apache-2.0",
+     "region:us"
+    ]
+   },
+   {
+    "_id": "66c70bcdc797952bc237afa5",
+    "createdAt": "2024-08-22T09:58:37.000Z",
+    "downloads": 3332,
+    "id": "Green-Sky/flux.1-schnell-GGUF",
+    "likes": 12,
+    "modelId": "Green-Sky/flux.1-schnell-GGUF",
+    "private": false,
+    "tags": [
+     "gguf",
+     "sd.cpp",
+     "stable-diffusion.cpp",
+     "flux",
+     "en",
+     "base_model:black-forest-labs/FLUX.1-schnell",
+     "base_model:quantized:black-forest-labs/FLUX.1-schnell",
+     "license:apache-2.0",
+     "region:us"
+    ]
+   },
+   {
+    "_id": "6accc8e84f17af076e2ddc51",
+    "createdAt": "2026-10-12T11:47:52.000Z",
+    "downloads": 2169,
+    "id": "Haijun-AI/FLUX.1-schnell-GGUF",
+    "likes": 1,
+    "modelId": "Haijun-AI/FLUX.1-schnell-GGUF",
+    "pipeline_tag": "text-to-image",
+    "private": false,
+    "tags": [
+     "gguf",
+     "text-to-image",
+     "image-generation",
+     "flux",
+     "en",
+     "license:apache-2.0",
+     "region:us"
+    ]
+   },
+   {
+    "_id": "66c3dd7fef1f45cd71a799a6",
+    "createdAt": "2024-08-20T00:04:15.000Z",
+    "downloads": 594,
+    "id": "mhnakif/flux-schnell-dev-merge-gguf",
+    "likes": 2,
+    "modelId": "mhnakif/flux-schnell-dev-merge-gguf",
+    "private": false,
+    "tags": [
+     "gguf",
+     "region:us"
+    ]
+   },
+   {
+    "_id": "699d2c50f05509e5bc04460a",
+    "createdAt": "2026-02-24T04:42:56.000Z",
+    "downloads": 358,
+    "id": "vava22684/FLUX.1-schnell-gguf",
+    "library_name": "gguf",
+    "likes": 0,
+    "modelId": "vava22684/FLUX.1-schnell-gguf",
+    "pipeline_tag": "text-to-image",
+    "private": false,
+    "tags": [
+     "gguf",
+     "text-to-image",
+     "image-generation",
+     "flux",
+     "base_model:black-forest-labs/FLUX.1-schnell",
+     "base_model:quantized:black-forest-labs/FLUX.1-schnell",
+     "license:apache-2.0",
+     "region:us"
+    ]
+   },
+   {
+    "_id": "67322bd50ae3565538aa858f",
+    "createdAt": "2024-11-11T16:07:49.000Z",
+    "downloads": 303,
+    "id": "gpustack/FLUX.1-schnell-GGUF",
+    "likes": 2,
+    "modelId": "gpustack/FLUX.1-schnell-GGUF",
+    "pipeline_tag": "text-to-image",
+    "private": false,
+    "tags": [
+     "gguf",
+     "text-to-image",
+     "image-generation",
+     "flux",
+     "en",
+     "license:apache-2.0",
+     "region:us"
+    ]
+   },
+   {
+    "_id": "66c694f70a20f2e8179b28fd",
+    "createdAt": "2024-08-22T01:31:35.000Z",
+    "downloads": 245,
+    "id": "OlegSkutte/FLUX.1-schnell-GGUF",
+    "likes": 5,
+    "modelId": "OlegSkutte/FLUX.1-schnell-GGUF",
+    "pipeline_tag": "text-to-image",
+    "private": false,
+    "tags": [
+     "gguf",
+     "stable-diffusion.cpp",
+     "text-to-image",
+     "license:apache-2.0",
+     "region:us"
+    ]
+   },
+   {
+    "_id": "66ca3e008cf98c262b3d5f2a",
+    "createdAt": "2024-08-24T20:09:36.000Z",
+    "downloads": 198,
+    "id": "Niansuh/FLUX.1-schnell-gguf",
+    "library_name": "gguf",
+    "likes": 2,
+    "modelId": "Niansuh/FLUX.1-schnell-gguf",
+    "pipeline_tag": "text-to-image",
+    "private": false,
+    "tags": [
+     "gguf",
+     "text-to-image",
+     "image-generation",
+     "flux",
+     "base_model:black-forest-labs/FLUX.1-schnell",
+     "base_model:quantized:black-forest-labs/FLUX.1-schnell",
+     "license:apache-2.0",
+     "region:us"
+    ]
+   }
+  ],
+  "sd3 gguf": [
+   {
+    "_id": "671a13e6447c240da424ec9f",
+    "createdAt": "2024-10-24T09:31:18.000Z",
+    "downloads": 9817,
+    "id": "calcuis/sd3.5-large-gguf",
+    "library_name": "diffusers",
+    "likes": 75,
+    "modelId": "calcuis/sd3.5-large-gguf",
+    "pipeline_tag": "text-to-image",
+    "private": false,
+    "tags": [
+     "diffusers",
+     "safetensors",
+     "gguf",
+     "stable-diffusion",
+     "gguf-comfy",
+     "text-to-image",
+     "en",
+     "base_model:stabilityai/stable-diffusion-3.5-large",
+     "base_model:quantized:stabilityai/stable-diffusion-3.5-large",
+     "doi:10.57967/hf/3389",
+     "license:other",
+     "region:us"
+    ]
+   },
+   {
+    "_id": "67224e2a60a43ac8b61c0497",
+    "createdAt": "2024-10-30T15:18:02.000Z",
+    "downloads": 4516,
+    "id": "calcuis/sd3.5-medium-gguf",
+    "library_name": "diffusers",
+    "likes": 20,
+    "modelId": "calcuis/sd3.5-medium-gguf",
+    "pipeline_tag": "text-to-image",
+    "private": false,
+    "tags": [
+     "diffusers",
+     "safetensors",
+     "gguf",
+     "stable-diffusion",
+     "gguf-comfy",
+     "text-to-image",
+     "en",
+     "base_model:stabilityai/stable-diffusion-3.5-medium",
+     "base_model:quantized:stabilityai/stable-diffusion-3.5-medium",
+     "doi:10.57967/hf/3410",
+     "license:other",
+     "region:us"
+    ]
+   },
+   {
+    "_id": "67c6d1f549cc4d38e96e934f",
+    "createdAt": "2025-03-04T10:12:05.000Z",
+    "downloads": 1517,
+    "id": "gguf-org/sd3.5-large-gguf",
+    "likes": 4,
+    "modelId": "gguf-org/sd3.5-large-gguf",
+    "pipeline_tag": "text-to-image",
+    "private": false,
+    "tags": [
+     "gguf",
+     "gguf-node",
+     "text-to-image",
+     "en",
+     "base_model:Comfy-Org/stable-diffusion-3.5-fp8",
+     "base_model:quantized:Comfy-Org/stable-diffusion-3.5-fp8",
+     "license:other",
+     "region:us"
+    ]
+   },
+   {
+    "_id": "68a06a327865a41204b01197",
+    "createdAt": "2025-08-16T11:23:30.000Z",
+    "downloads": 845,
+    "id": "calcuis/sd3.5-lite-gguf",
+    "likes": 7,
+    "modelId": "calcuis/sd3.5-lite-gguf",
+    "pipeline_tag": "text-to-image",
+    "private": false,
+    "tags": [
+     "gguf",
+     "gguf-connector",
+     "gguf-node",
+     "text-to-image",
+     "en",
+     "license:other",
+     "region:us"
+    ]
+   },
+   {
+    "_id": "671d09655469df52c24fb11c",
+    "createdAt": "2024-10-26T15:23:17.000Z",
+    "downloads": 571,
+    "id": "stduhpf/SD3.5-Large-GGUF-mixed-sdcpp",
+    "likes": 4,
+    "modelId": "stduhpf/SD3.5-Large-GGUF-mixed-sdcpp",
+    "private": false,
+    "tags": [
+     "gguf",
+     "base_model:stabilityai/stable-diffusion-3.5-large",
+     "base_model:quantized:stabilityai/stable-diffusion-3.5-large",
+     "license:other",
+     "region:us"
+    ]
+   },
+   {
+    "_id": "671ba4e5c5294d90bda22f6c",
+    "createdAt": "2024-10-25T14:02:13.000Z",
+    "downloads": 374,
+    "id": "stduhpf/SD3.5-Large-Turbo-GGUF-mixed-sdcpp",
+    "likes": 6,
+    "modelId": "stduhpf/SD3.5-Large-Turbo-GGUF-mixed-sdcpp",
+    "private": false,
+    "tags": [
+     "gguf",
+     "base_model:stabilityai/stable-diffusion-3.5-large-turbo",
+     "base_model:quantized:stabilityai/stable-diffusion-3.5-large-turbo",
+     "license:other",
+     "region:us"
+    ]
+   },
+   {
+    "_id": "672b5aa6b2f2dc21e1c0b371",
+    "createdAt": "2024-11-06T12:01:42.000Z",
+    "downloads": 78,
+    "id": "MaziyarPanahi/SD3_prompt-llama_8b-GGUF",
+    "likes": 0,
+    "modelId": "MaziyarPanahi/SD3_prompt-llama_8b-GGUF",
+    "pipeline_tag": "text-generation",
+    "private": false,
+    "tags": [
+     "gguf",
+     "mistral",
+     "quantized",
+     "2-bit",
+     "3-bit",
+     "4-bit",
+     "5-bit",
+     "6-bit",
+     "8-bit",
+     "GGUF",
+     "text-generation",
+     "base_model:matrixglitch/SD3_prompt-llama_8b",
+     "base_model:quantized:matrixglitch/SD3_prompt-llama_8b",
+     "region:us",
+     "conversational"
+    ]
+   }
+  ],
+  "sdxl gguf": [
+   {
+    "_id": "69b2c78f44f53239a8bf2dac",
+    "createdAt": "2026-03-12T14:02:55.000Z",
+    "downloads": 8117,
+    "id": "nuupy/WAI-illustrious-SDXL-GGUF",
+    "likes": 5,
+    "modelId": "nuupy/WAI-illustrious-SDXL-GGUF",
+    "private": false,
+    "tags": [
+     "gguf",
+     "license:other",
+     "region:us"
+    ]
+   },
+   {
+    "_id": "67bbaa126b4c76145df04ea4",
+    "createdAt": "2025-02-23T23:06:58.000Z",
+    "downloads": 6522,
+    "id": "kekusprod/WAI-NSFW-illustrious-SDXL-v110-GGUF",
+    "likes": 16,
+    "modelId": "kekusprod/WAI-NSFW-illustrious-SDXL-v110-GGUF",
+    "private": false,
+    "tags": [
+     "gguf",
+     "not-for-all-audiences",
+     "base_model:John6666/wai-nsfw-illustrious-v110-sdxl",
+     "base_model:quantized:John6666/wai-nsfw-illustrious-v110-sdxl",
+     "region:us"
+    ]
+   },
+   {
+    "_id": "679092dd5d1b6c3741952797",
+    "createdAt": "2025-01-22T06:40:29.000Z",
+    "downloads": 4340,
+    "id": "hum-ma/SDXL-models-GGUF",
+    "library_name": "diffusers",
+    "likes": 35,
+    "modelId": "hum-ma/SDXL-models-GGUF",
+    "pipeline_tag": "text-to-image",
+    "private": false,
+    "tags": [
+     "diffusers",
+     "gguf",
+     "text-to-image",
+     "region:us"
+    ]
+   },
+   {
+    "_id": "662c607ce3cb9e1cde3f809d",
+    "createdAt": "2024-04-27T02:18:36.000Z",
+    "downloads": 3540,
+    "id": "OlegSkutte/sdxl-turbo-GGUF",
+    "likes": 18,
+    "modelId": "OlegSkutte/sdxl-turbo-GGUF",
+    "pipeline_tag": "text-to-image",
+    "private": false,
+    "tags": [
+     "gguf",
+     "stable-diffusion.cpp",
+     "text-to-image",
+     "base_model:stabilityai/sdxl-turbo",
+     "base_model:quantized:stabilityai/sdxl-turbo",
+     "license:other",
+     "region:us"
+    ]
+   },
+   {
+    "_id": "65fa87b5734d7aabdcf02315",
+    "createdAt": "2024-03-20T06:52:37.000Z",
+    "downloads": 2992,
+    "id": "mzwing/SDXL-Lightning-GGUF",
+    "likes": 18,
+    "modelId": "mzwing/SDXL-Lightning-GGUF",
+    "private": false,
+    "tags": [
+     "gguf",
+     "region:us"
+    ]
+   },
+   {
+    "_id": "662c661034f94a2b82931b94",
+    "createdAt": "2024-04-27T02:42:24.000Z",
+    "downloads": 2716,
+    "id": "OlegSkutte/SDXL-Lightning-GGUF",
+    "likes": 16,
+    "modelId": "OlegSkutte/SDXL-Lightning-GGUF",
+    "pipeline_tag": "text-to-image",
+    "private": false,
+    "tags": [
+     "gguf",
+     "stable-diffusion.cpp",
+     "text-to-image",
+     "base_model:ByteDance/SDXL-Lightning",
+     "base_model:quantized:ByteDance/SDXL-Lightning",
+     "license:openrail++",
+     "region:us"
+    ]
+   },
+   {
+    "_id": "6abd89cd3b342d55f87a674f",
+    "createdAt": "2026-09-30T22:14:37.000Z",
+    "downloads": 2638,
+    "id": "AEUPH/sdxl-unet-q8-gguf",
+    "library_name": "diffusers",
+    "likes": 1,
+    "modelId": "AEUPH/sdxl-unet-q8-gguf",
+    "private": false,
+    "tags": [
+     "diffusers",
+     "gguf",
+     "stable-diffusion",
+     "stable-diffusion-xl",
+     "sdxl",
+     "quantized",
+     "q8_0",
+     "unet",
+     "invokeai",
+     "comfyui",
+     "base_model:stabilityai/stable-diffusion-xl-base-1.0",
+     "base_model:quantized:stabilityai/stable-diffusion-xl-base-1.0",
+     "license:apache-2.0",
+     "region:us"
+    ]
+   },
+   {
+    "_id": "67c9aa2f2fbe1bf3d93cf2d9",
+    "createdAt": "2025-03-06T13:59:11.000Z",
+    "downloads": 1860,
+    "id": "HyperX-Sentience/SDXL-GGUF",
+    "likes": 19,
+    "modelId": "HyperX-Sentience/SDXL-GGUF",
+    "pipeline_tag": "text-to-image",
+    "private": false,
+    "tags": [
+     "gguf",
+     "stable-diffusion-xl",
+     "text-to-image",
+     "quantization",
+     "unet",
+     "vae",
+     "clip",
+     "dataset:stabilityai/stable-diffusion-xl-base-1.0",
+     "dataset:stabilityai/stable-diffusion-xl-refiner-1.0",
+     "base_model:stabilityai/stable-diffusion-xl-base-1.0",
+     "base_model:quantized:stabilityai/stable-diffusion-xl-base-1.0",
+     "license:openrail++",
+     "region:us"
+    ]
+   },
+   {
+    "_id": "677f4656a0843d06966800e2",
+    "createdAt": "2025-01-09T03:45:26.000Z",
+    "downloads": 1334,
+    "id": "Old-Fisherman/SDXL_Finetune_GGUF_Files",
+    "likes": 30,
+    "modelId": "Old-Fisherman/SDXL_Finetune_GGUF_Files",
+    "private": false,
+    "tags": [
+     "gguf",
+     "base_model:stabilityai/stable-diffusion-xl-base-1.0",
+     "base_model:quantized:stabilityai/stable-diffusion-xl-base-1.0",
+     "license:other",
+     "region:us"
+    ]
+   },
+   {
+    "_id": "6966577c9de3d3568eefe5da",
+    "createdAt": "2026-01-13T14:32:28.000Z",
+    "downloads": 695,
+    "id": "void-gryph/wai-illustrious-sdxl-GGUF",
+    "likes": 3,
+    "modelId": "void-gryph/wai-illustrious-sdxl-GGUF",
+    "private": false,
+    "tags": [
+     "gguf",
+     "stable-diffusion",
+     "illustrious",
+     "comfyui",
+     "license:other",
+     "endpoints_compatible",
+     "region:us"
+    ]
+   },
+   {
+    "_id": "6a282155f1cdef7ab0d1594a",
+    "createdAt": "2026-06-09T14:21:09.000Z",
+    "downloads": 446,
+    "id": "HappyAcc/wai-ani-nsfw-ponyxl-v140-sdxl-q8_0.gguf",
+    "likes": 2,
+    "modelId": "HappyAcc/wai-ani-nsfw-ponyxl-v140-sdxl-q8_0.gguf",
+    "private": false,
+    "tags": [
+     "gguf",
+     "region:us",
+     "not-for-all-audiences"
+    ]
+   },
+   {
+    "_id": "6a2dc77ec5212beb9380777f",
+    "createdAt": "2026-06-13T21:11:26.000Z",
+    "downloads": 404,
+    "id": "TinyRick1489/WAI-illustrious-SDXL-v12-GGUF",
+    "likes": 0,
+    "modelId": "TinyRick1489/WAI-illustrious-SDXL-v12-GGUF",
+    "private": false,
+    "tags": [
+     "gguf",
+     "region:us"
+    ]
+   }
+  ],
+  "stable-diffusion gguf": [
+   {
+    "_id": "668d49722413acbd542efead",
+    "createdAt": "2024-07-09T14:30:10.000Z",
+    "downloads": 52762,
+    "id": "second-state/stable-diffusion-v1-5-GGUF",
+    "likes": 39,
+    "modelId": "second-state/stable-diffusion-v1-5-GGUF",
+    "pipeline_tag": "text-to-image",
+    "private": false,
+    "tags": [
+     "gguf",
+     "stable-diffusion",
+     "stable-diffusion-diffusers",
+     "text-to-image",
+     "base_model:runwayml/stable-diffusion-v1-5",
+     "base_model:quantized:runwayml/stable-diffusion-v1-5",
+     "license:creativeml-openrail-m",
+     "region:us"
+    ]
+   },
+   {
+    "_id": "673c5c247c76de1988fb8163",
+    "createdAt": "2024-11-19T09:36:36.000Z",
+    "downloads": 24079,
+    "id": "second-state/stable-diffusion-3.5-large-GGUF",
+    "library_name": "diffusers",
+    "likes": 18,
+    "modelId": "second-state/stable-diffusion-3.5-large-GGUF",
+    "pipeline_tag": "text-to-image",
+    "private": false,
+    "tags": [
+     "diffusers",
+     "gguf",
+     "text-to-image",
+     "stable-diffusion",
+     "en",
+     "base_model:stabilityai/stable-diffusion-3.5-large",
+     "base_model:quantized:stabilityai/stable-diffusion-3.5-large",
+     "license:other",
+     "region:us"
+    ]
+   },
+   {
+    "_id": "6741bd499be44d083e53b3eb",
+    "createdAt": "2024-11-23T11:32:25.000Z",
+    "downloads": 21496,
+    "id": "second-state/stable-diffusion-3.5-medium-GGUF",
+    "library_name": "diffusers",
+    "likes": 13,
+    "modelId": "second-state/stable-diffusion-3.5-medium-GGUF",
+    "pipeline_tag": "text-to-image",
+    "private": false,
+    "tags": [
+     "diffusers",
+     "gguf",
+     "text-to-image",
+     "stable-diffusion",
+     "en",
+     "base_model:stabilityai/stable-diffusion-3.5-medium",
+     "base_model:quantized:stabilityai/stable-diffusion-3.5-medium",
+     "license:other",
+     "region:us"
+    ]
+   },
+   {
+    "_id": "672dafd0a1e855c329cd8376",
+    "createdAt": "2024-11-08T06:29:36.000Z",
+    "downloads": 6398,
+    "id": "gpustack/stable-diffusion-v1-5-GGUF",
+    "likes": 4,
+    "modelId": "gpustack/stable-diffusion-v1-5-GGUF",
+    "pipeline_tag": "text-to-image",
+    "private": false,
+    "tags": [
+     "gguf",
+     "stable-diffusion",
+     "stable-diffusion-diffusers",
+     "text-to-image",
+     "arxiv:2207.12598",
+     "arxiv:2112.10752",
+     "arxiv:2103.00020",
+     "arxiv:2205.11487",
+     "arxiv:1910.09700",
+     "license:creativeml-openrail-m",
+     "region:us"
+    ]
+   },
+   {
+    "_id": "67183a3a4d8d08e031d49c84",
+    "createdAt": "2024-10-22T23:50:18.000Z",
+    "downloads": 5554,
+    "id": "city96/stable-diffusion-3.5-large-gguf",
+    "library_name": "gguf",
+    "likes": 135,
+    "modelId": "city96/stable-diffusion-3.5-large-gguf",
+    "pipeline_tag": "text-to-image",
+    "private": false,
+    "tags": [
+     "gguf",
+     "text-to-image",
+     "image-generation",
+     "stable-diffusion",
+     "en",
+     "base_model:stabilityai/stable-diffusion-3.5-large",
+     "base_model:quantized:stabilityai/stable-diffusion-3.5-large",
+     "license:other",
+     "region:us"
+    ]
+   },
+   {
+    "_id": "672dc8e162371d59e7f83956",
+    "createdAt": "2024-11-08T08:16:33.000Z",
+    "downloads": 4631,
+    "id": "gpustack/stable-diffusion-xl-base-1.0-GGUF",
+    "likes": 4,
+    "modelId": "gpustack/stable-diffusion-xl-base-1.0-GGUF",
+    "pipeline_tag": "text-to-image",
+    "private": false,
+    "tags": [
+     "gguf",
+     "text-to-image",
+     "stable-diffusion",
+     "arxiv:2307.01952",
+     "arxiv:2211.01324",
+     "arxiv:2108.01073",
+     "arxiv:2112.10752",
+     "license:openrail++",
+     "region:us"
+    ]
+   },
+   {
+    "_id": "672dbfd9f5257413d3ea28ec",
+    "createdAt": "2024-11-08T07:38:01.000Z",
+    "downloads": 2772,
+    "id": "gpustack/stable-diffusion-v2-1-GGUF",
+    "likes": 0,
+    "modelId": "gpustack/stable-diffusion-v2-1-GGUF",
+    "pipeline_tag": "text-to-image",
+    "private": false,
+    "tags": [
+     "gguf",
+     "stable-diffusion",
+     "text-to-image",
+     "arxiv:2112.10752",
+     "arxiv:2202.00512",
+     "arxiv:1910.09700",
+     "license:openrail++",
+     "region:us"
+    ]
+   },
+   {
+    "_id": "6721871c8ec93aa80bac629e",
+    "createdAt": "2024-10-30T01:08:44.000Z",
+    "downloads": 2723,
+    "id": "city96/stable-diffusion-3.5-medium-gguf",
+    "library_name": "gguf",
+    "likes": 60,
+    "modelId": "city96/stable-diffusion-3.5-medium-gguf",
+    "pipeline_tag": "text-to-image",
+    "private": false,
+    "tags": [
+     "gguf",
+     "text-to-image",
+     "image-generation",
+     "stable-diffusion",
+     "en",
+     "base_model:stabilityai/stable-diffusion-3.5-medium",
+     "base_model:quantized:stabilityai/stable-diffusion-3.5-medium",
+     "license:other",
+     "region:us"
+    ]
+   },
+   {
+    "_id": "69ab536631cf315b24f47e88",
+    "createdAt": "2026-03-06T22:21:26.000Z",
+    "downloads": 2587,
+    "id": "kostakoff/stable-diffusion-v1-5-GGUF",
+    "likes": 1,
+    "modelId": "kostakoff/stable-diffusion-v1-5-GGUF",
+    "pipeline_tag": "text-to-image",
+    "private": false,
+    "tags": [
+     "gguf",
+     "stable-diffusion",
+     "text-to-image",
+     "stable-diffusion.cpp",
+     "sd.cpp",
+     "base_model:stable-diffusion-v1-5/stable-diffusion-v1-5",
+     "base_model:quantized:stable-diffusion-v1-5/stable-diffusion-v1-5",
+     "license:creativeml-openrail-m",
+     "region:us"
+    ]
+   },
+   {
+    "_id": "69aa85ab3acfa2bc86dd6376",
+    "createdAt": "2026-03-06T07:43:39.000Z",
+    "downloads": 2561,
+    "id": "kostakoff/stable-diffusion-xl-base-1.0-GGUF",
+    "likes": 2,
+    "modelId": "kostakoff/stable-diffusion-xl-base-1.0-GGUF",
+    "pipeline_tag": "text-to-image",
+    "private": false,
+    "tags": [
+     "gguf",
+     "text-to-image",
+     "stable-diffusion",
+     "stable-diffusion.cpp",
+     "sd.cpp",
+     "base_model:stabilityai/stable-diffusion-xl-base-1.0",
+     "base_model:quantized:stabilityai/stable-diffusion-xl-base-1.0",
+     "license:openrail++",
+     "region:us"
+    ]
+   },
+   {
+    "_id": "67185da2794f23e63be6a38b",
+    "createdAt": "2024-10-23T02:21:22.000Z",
+    "downloads": 2271,
+    "id": "city96/stable-diffusion-3.5-large-turbo-gguf",
+    "library_name": "gguf",
+    "likes": 78,
+    "modelId": "city96/stable-diffusion-3.5-large-turbo-gguf",
+    "pipeline_tag": "text-to-image",
+    "private": false,
+    "tags": [
+     "gguf",
+     "text-to-image",
+     "image-generation",
+     "stable-diffusion",
+     "en",
+     "base_model:stabilityai/stable-diffusion-3.5-large-turbo",
+     "base_model:quantized:stabilityai/stable-diffusion-3.5-large-turbo",
+     "license:other",
+     "region:us"
+    ]
+   },
+   {
+    "_id": "67301a65bb65e3817244f009",
+    "createdAt": "2024-11-10T02:28:53.000Z",
+    "downloads": 2138,
+    "id": "gpustack/stable-diffusion-xl-1.0-turbo-GGUF",
+    "likes": 8,
+    "modelId": "gpustack/stable-diffusion-xl-1.0-turbo-GGUF",
+    "pipeline_tag": "text-to-image",
+    "private": false,
+    "tags": [
+     "gguf",
+     "text-to-image",
+     "license:other",
+     "region:us"
+    ]
+   }
+  ]
+ }
+}
