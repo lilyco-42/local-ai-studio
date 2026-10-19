@@ -237,6 +237,8 @@ def main(argv) -> int:
     ap.add_argument("--json", default="", help="把 pin 表写到这个路径")
     ap.add_argument("--check", default="", help="与已提交的钉表逐字段比对，漂移即红")
     ap.add_argument("--dump-fixtures", default="")
+    ap.add_argument("--print-urls", action="store_true",
+                    help="按 key|url|size 输出钉住的产物地址，给国内出口探针当输入（不手抄 URL）")
     args = ap.parse_args(argv)
 
     if args.fixtures:
@@ -248,6 +250,14 @@ def main(argv) -> int:
     pins, bad = build(releases, sidecars)
     if args.dump_fixtures:
         dump_fixtures(args.dump_fixtures, releases, sidecars)
+
+    if args.print_urls:
+        # 机读模式：只输出 key|url|size，给 tools/gh_release_reach.sh 当输入
+        for key in sorted(pins):
+            print("%s|%s|%s" % (key, pins[key]["url"], pins[key]["size"]))
+        for b in bad:
+            print("BAD " + b, file=sys.stderr)
+        return 1 if bad else 0
 
     n_two = sum(1 for v in pins.values() if v["sidecar"] == "一致")
     print(f"来源：{src} · 立住 {len(pins)} 条，其中两套机制对照一致 {n_two} 条，"

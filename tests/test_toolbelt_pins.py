@@ -59,6 +59,25 @@ class TestReplay(unittest.TestCase):
             self.assertTrue(v["url"].startswith("https://github.com/"), key)
 
 
+    def test_print_urls_outlet_keeps_the_probe_contract(self) -> None:
+        """tools/gh_release_reach.sh 吃的是 `key|url|size` 三段：分隔符或字段顺序一改，
+        国内出口探针会静默数到 0 条还在报"负向对照通过"。所以锁真出口，不锁我自己重拼的字符串。"""
+        import subprocess
+        import sys
+        r = subprocess.run([sys.executable, os.path.join(HERE, "..", "tools", "toolbelt_pins.py"),
+                            "--fixtures", FIX, "--print-urls"], capture_output=True, text=True)
+        self.assertEqual(r.returncode, 0, r.stderr)
+        lines = [x for x in r.stdout.splitlines() if x.strip()]
+        self.assertEqual(len(lines), 12)
+        with open(PINS, encoding="utf-8") as fh:
+            pins = json.load(fh)
+        for line in lines:
+            key, url, size = line.split("|")
+            self.assertIn(key, pins)
+            self.assertTrue(url.startswith("https://github.com/"), key)
+            self.assertEqual(size, str(pins[key]["size"]))
+
+
 class TestGates(unittest.TestCase):
     def test_tampered_sidecar_is_red(self) -> None:
         """把 llmfit 的一个 sidecar 首字符改掉：两套机制对不上必须点名，不能挑好看的用。"""

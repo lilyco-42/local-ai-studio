@@ -248,7 +248,7 @@ spending limit needs to be increased"*。同账号的 public 仓库当天早些�
 
 二选一，由用户定：把仓库改 public（车道立刻能跑，但仓库名与 README/ADR 公开），
 或在 Settings→Billing 加付款方式 / 提高 Actions 支出上限。
-在此之前，"47 个 target / 45 个单测 / 93 个模型 URL 全部命中 / 47 个 target 都有上游 sha256 /
+在此之前，"47 个 target / 46 个单测 / 93 个模型 URL 全部命中 / 47 个 target 都有上游 sha256 /
 工具带 12 条 pin 其中 8 条有两套机制对照"都只是本机 python 证据。
 （这些数字每次改动都会漂，复核命令是同一条：`python tools/yaml_gate.py &&
 python -W error::ResourceWarning -m unittest discover -s tests -p "test_*.py"`。）
@@ -262,6 +262,12 @@ python -W error::ResourceWarning -m unittest discover -s tests -p "test_*.py"`�
   对话权重 ModelScope 与 hf-mirror 都拿到过真字节（HF 直连国内不可用）；引擎与 OCR 权重
   GitHub 可用但波动大（同一资产 0.10 / 0.28 MiB/s），自家 R2 三次采样稳定在 0.82–1.01 MiB/s，
   所以引擎也应进 R2。HF 索引只当同步用的上游，不当用户侧下载地址。
+  **工具带同理，且这次量到了更差的一端**：2026-10-19 用 `tools/gh_release_reach.sh` 从同一台 CN 服务器
+  复测，llmfit / llama-swap / gguf-parser 的 linux x64 产物都可达且支持 Range（206 + `content-range`
+  总长与钉表逐字节一致，负向对照 404），但 1 MiB 档吞吐只有 **0.012–0.017 MiB/s** ——
+  三件合计约 37.7 MiB，走 GitHub 是 45 分钟量级，走 R2（0.82–1.01 MiB/s）是 40 秒量级。
+  同一 URL 从本机（Windows+代理）是 1.350 MiB/s，所以慢的是出口不是产物。
+  数字来自单主机单时段，只用于决定分发层级，不当用户侧承诺。
 - **i18n 语言集**：已按实测拆成两条轴并给出默认包，见 [../i18n.md](../i18n.md)。
   识别侧 14 种语言共 23 个 rec 权重（单个 7.4–12.8 MiB），全装约 **122 MiB** ——
   OCR 的多语言便宜到不该做成高级功能；但**繁中、日文、格鲁吉亚语只有 PP-OCRv3 的语言包**，

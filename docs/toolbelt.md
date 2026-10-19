@@ -100,7 +100,7 @@ python tools/toolbelt_pins.py --fixtures tests/fixtures           # 离线回放
 
 - sidecar 与 API digest 是两套独立机制，`sha256sum` 格式 `<64hex>␣␣<文件名>`；实测文件名与哈希都对得上。
   任何一条对不上就进 `bad` 且 rc=1，**不许挑一个好看的用**（改一个字符即红，见 `test_tampered_sidecar_is_red`）。
-- 半张钉表不落盘：`bad` 非空时 `--json` 直接拒绝写文件。`tests/test_toolbelt_pins.py` 13 条里有
+- 半张钉表不落盘：`bad` 非空时 `--json` 直接拒绝写文件。`tests/test_toolbelt_pins.py` 14 条里有
   7 条是负向对照（缺 digest、缺产物、上游改名、sidecar 被改、checksums 缺失），
   专门防"检查永远绿等于没检查"。
 - `gguf-parser` 那 4 条只有单一机制，强度低于另外 8 条 —— 这句写进 pin 表的 `sidecar: null`，
@@ -109,3 +109,39 @@ python tools/toolbelt_pins.py --fixtures tests/fixtures           # 离线回放
   与 `recommend --json`：哈希只证明字节没变，不证明文档里记的旗标还在。
   退出码不作判据（runner 上一个模型都没有），判据是 stdout 必须能解析成 JSON、help 里必须有 `--json`。
 - 仍未证的是执行：这条车道和其余九条一样，一次都没跑过（private 仓库分不到 runner）。
+
+## 国内出口能不能把这些二进制拉下来（2026-10-19 实测）
+
+工具带是要进安装包的，所以"能不能钉住"不够，还得回答"国内用户第一次下载要等多久"。
+探针 `tools/gh_release_reach.sh` 在 lain42.top 上跑（URL 由 `toolbelt_pins.py --print-urls` 从钉表给，不手抄），
+每条先取 64 KiB 判可达与 Range，再取 1 MiB 判吞吐，末尾一条不存在的产物必须 404：
+
+```
+python tools/toolbelt_pins.py --fixtures tests/fixtures --print-urls | grep linux \
+  | sed "s@.*@'&'@" | tr '\n' ' ' > /tmp/specs
+{ echo "set -- $(cat /tmp/specs)"; cat tools/gh_release_reach.sh; } \
+  | ssh -i ~/.ssh/lain42.pem root@lain42.top 'bash -s'
+```
+
+（spec 里有 `|`，必须整体单引号后交给 `set --`；早先直接把 spec 拼进 ssh 命令行，
+远端 shell 把 `|` 当管道，报的是 "No such file or directory"，一次测量都没做成。）
+
+| 产物（linux x64） | 钉的总长 | 64 KiB | 1 MiB 吞吐 | 整包外推 |
+|---|---|---|---|---|
+| gguf-parser v0.26.4 | 9,224,344 B | 206 + `Accept-Ranges: bytes`，2.37 s | 0.017 MiB/s | 521 s（8.7 min） |
+| llama-swap v265 | 23,187,896 B | 206 + 同上，2.27 s | 0.014 MiB/s | 1,617 s（**27.0 min**） |
+| llmfit v1.1.17 | 7,160,946 B | 206 + 同上，1.96 s | 0.012 MiB/s | 575 s（9.6 min） |
+
+三条 `content-range` 声明的总长与钉表逐字节一致，负向对照回 404 ✓。
+
+**结论与限制**：
+- GitHub release 在这台 CN 出口上**可达、可断点续传，但吞吐只有 0.012–0.017 MiB/s**。
+  工具带 linux x64 三件合计约 37.7 MiB：走 GitHub 是 45 分钟量级，走自家 R2
+  （同机早前实测 0.82–1.01 MiB/s）是 40 秒量级 → **工具带也必须进 R2**，
+  这与 ADR-0001 对引擎的结论同源，不是新猜测。
+- 同一 URL 从本机（Windows + 代理）取到 1.350 MiB/s，说明慢的是**出口**不是产物本身。
+- 采样是单主机、单时段、1 MiB 档，只能用来决定分发设计，不能当用户侧性能承诺；
+  与早轮"GitHub 同一资产 0.10 / 0.28 MiB/s"合起来看，这条路的**波动横跨一个数量级**，
+  这本身就是把它降级为备选源的理由。
+- 首轮 64 KiB 有一次 27.3 s 的读数不是吞吐：复测 ttfb 只有 1.2–2.4 s，那次是冷启动/排队，
+  所以这里全部改用 1 MiB 档算速率。
