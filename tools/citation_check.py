@@ -107,7 +107,7 @@ def main(argv) -> int:
         rows.append({"id": c["id"], "url": url_of(c), "line": c["line"],
                      "expect": c["expect"], "ok": not bad, "problems": bad})
     if args.json:
-        with open(args.json, "w", encoding="utf-8") as fh:
+        with open(args.json, "w", encoding="utf-8", newline="\n") as fh:
             json.dump(rows, fh, ensure_ascii=False, indent=1)
     print(f"核对 {len(spec)} 条 file:line 出处，问题 {len(problems)} 条")
     for p in problems:
