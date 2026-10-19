@@ -1,4 +1,21 @@
 {
+ "first_run_totals_gib": {
+  "16GB": {
+   "linux-x64": 11.44,
+   "macos-arm64": 11.43,
+   "win-x64": 11.43
+  },
+  "4GB": {
+   "linux-x64": 3.93,
+   "macos-arm64": 3.92,
+   "win-x64": 3.92
+  },
+  "8GB": {
+   "linux-x64": 7.74,
+   "macos-arm64": 7.73,
+   "win-x64": 7.73
+  }
+ },
  "from": [
   "pins/payload-plan.json",
   "catalog/defaults.json",
@@ -12,6 +29,7 @@
   "16GB": {
    "by_os": {
     "linux-x64": {
+     "deferred_image_bytes": 10079502016,
      "download_bytes": 22360077651,
      "download_gib": 20.82,
      "engine_download_mib": 52.1,
@@ -42,12 +60,17 @@
        "status": "ok"
       }
      ],
+     "first_run_bytes": 12280575635,
+     "first_run_gib": 11.44,
+     "first_run_minutes_at_measured_rate": 46.5,
+     "first_run_worst_case_hours_at_slowest_measured": 13.01,
      "minutes_at_measured_rate": 84.6,
      "missing_capabilities": [],
      "unknown_landed_sizes": [],
      "worst_case_hours_at_slowest_measured": 23.69
     },
     "macos-arm64": {
+     "deferred_image_bytes": 10079502016,
      "download_bytes": 22354205625,
      "download_gib": 20.82,
      "engine_download_mib": 46.5,
@@ -78,6 +101,10 @@
        "status": "ok"
       }
      ],
+     "first_run_bytes": 12274703609,
+     "first_run_gib": 11.43,
+     "first_run_minutes_at_measured_rate": 46.5,
+     "first_run_worst_case_hours_at_slowest_measured": 13.01,
      "minutes_at_measured_rate": 84.6,
      "missing_capabilities": [
       "字幕"
@@ -86,6 +113,7 @@
      "worst_case_hours_at_slowest_measured": 23.69
     },
     "win-x64": {
+     "deferred_image_bytes": 10079502016,
      "download_bytes": 22351793900,
      "download_gib": 20.82,
      "engine_download_mib": 44.2,
@@ -116,6 +144,10 @@
        "status": "ok"
       }
      ],
+     "first_run_bytes": 12272291884,
+     "first_run_gib": 11.43,
+     "first_run_minutes_at_measured_rate": 46.4,
+     "first_run_worst_case_hours_at_slowest_measured": 13.0,
      "minutes_at_measured_rate": 84.6,
      "missing_capabilities": [],
      "unknown_landed_sizes": [],
@@ -149,6 +181,7 @@
    "items": [
     {
      "bytes": 9001753376,
+     "default_install": true,
      "file": "Qwen3-14B-Q4_K_M.gguf",
      "from": "catalog/recommendations.json",
      "hash_status": "agree",
@@ -161,6 +194,7 @@
     },
     {
      "bytes": 8175240416,
+     "default_install": false,
      "file": "flux1-schnell-Q5_0.gguf",
      "from": "catalog/image-tiers.json",
      "hash_status": "agree",
@@ -175,6 +209,7 @@
     {
      "bytes": 1605835296,
      "companion_of": "flux1-schnell-Q5_0.gguf",
+     "default_install": false,
      "file": "t5xxl-Q2_K.gguf",
      "from": "catalog/image-tiers.json",
      "group_alternates": 7,
@@ -191,6 +226,7 @@
     {
      "bytes": 167656704,
      "companion_of": "flux1-schnell-Q5_0.gguf",
+     "default_install": false,
      "file": "ae-f16.gguf",
      "from": "catalog/image-tiers.json",
      "group_alternates": 0,
@@ -207,6 +243,7 @@
     {
      "bytes": 130769600,
      "companion_of": "flux1-schnell-Q5_0.gguf",
+     "default_install": false,
      "file": "clip_l-Q8_0.gguf",
      "from": "catalog/image-tiers.json",
      "group_alternates": 1,
@@ -222,6 +259,7 @@
     },
     {
      "bytes": 123297373,
+     "default_install": true,
      "file": "(合计)",
      "from": "pins/ocr-languages.json",
      "hash_status": "mixed",
@@ -236,6 +274,7 @@
     },
     {
      "bytes": 4462639,
+     "default_install": true,
      "file": "pp-ocrv6_tiny_rec.onnx",
      "from": "catalog/defaults.json",
      "hash_status": "agree",
@@ -248,6 +287,7 @@
     },
     {
      "bytes": 1780590,
+     "default_install": true,
      "file": "pp-ocrv6_tiny_det.onnx",
      "from": "catalog/defaults.json",
      "hash_status": "agree",
@@ -260,6 +300,7 @@
     },
     {
      "bytes": 27156,
+     "default_install": true,
      "file": "ppocrv6_tiny_dict.txt",
      "from": "catalog/defaults.json",
      "hash_status": "agree",
@@ -272,6 +313,7 @@
     },
     {
      "bytes": 3094623691,
+     "default_install": true,
      "file": "ggml-large-v1.bin",
      "from": "catalog/subtitle-tiers.json",
      "hash_status": "single",
@@ -292,6 +334,7 @@
   "4GB": {
    "by_os": {
     "linux-x64": {
+     "deferred_image_bytes": 2132586944,
      "download_bytes": 6347829883,
      "download_gib": 5.91,
      "engine_download_mib": 52.1,
@@ -322,12 +365,17 @@
        "status": "ok"
       }
      ],
+     "first_run_bytes": 4215242939,
+     "first_run_gib": 3.93,
+     "first_run_minutes_at_measured_rate": 16.0,
+     "first_run_worst_case_hours_at_slowest_measured": 4.47,
      "minutes_at_measured_rate": 24.0,
      "missing_capabilities": [],
      "unknown_landed_sizes": [],
      "worst_case_hours_at_slowest_measured": 6.73
     },
     "macos-arm64": {
+     "deferred_image_bytes": 2132586944,
      "download_bytes": 6341957857,
      "download_gib": 5.91,
      "engine_download_mib": 46.5,
@@ -358,6 +406,10 @@
        "status": "ok"
       }
      ],
+     "first_run_bytes": 4209370913,
+     "first_run_gib": 3.92,
+     "first_run_minutes_at_measured_rate": 15.9,
+     "first_run_worst_case_hours_at_slowest_measured": 4.46,
      "minutes_at_measured_rate": 24.0,
      "missing_capabilities": [
       "字幕"
@@ -366,6 +418,7 @@
      "worst_case_hours_at_slowest_measured": 6.72
     },
     "win-x64": {
+     "deferred_image_bytes": 2132586944,
      "download_bytes": 6339546132,
      "download_gib": 5.9,
      "engine_download_mib": 44.2,
@@ -396,6 +449,10 @@
        "status": "ok"
       }
      ],
+     "first_run_bytes": 4206959188,
+     "first_run_gib": 3.92,
+     "first_run_minutes_at_measured_rate": 15.9,
+     "first_run_worst_case_hours_at_slowest_measured": 4.46,
      "minutes_at_measured_rate": 24.0,
      "missing_capabilities": [],
      "unknown_landed_sizes": [],
@@ -418,6 +475,7 @@
    "items": [
     {
      "bytes": 2497281312,
+     "default_install": true,
      "file": "Qwen3-4B-Q4_K_M.gguf",
      "from": "catalog/recommendations.json",
      "hash_status": "agree",
@@ -430,6 +488,7 @@
     },
     {
      "bytes": 2132586944,
+     "default_install": false,
      "file": "stable-diffusion-v1-5-pruned-emaonly-f16.gguf",
      "from": "catalog/image-tiers.json",
      "hash_status": "agree",
@@ -443,6 +502,7 @@
     },
     {
      "bytes": 123297373,
+     "default_install": true,
      "file": "(合计)",
      "from": "pins/ocr-languages.json",
      "hash_status": "mixed",
@@ -457,6 +517,7 @@
     },
     {
      "bytes": 4462639,
+     "default_install": true,
      "file": "pp-ocrv6_tiny_rec.onnx",
      "from": "catalog/defaults.json",
      "hash_status": "agree",
@@ -469,6 +530,7 @@
     },
     {
      "bytes": 1780590,
+     "default_install": true,
      "file": "pp-ocrv6_tiny_det.onnx",
      "from": "catalog/defaults.json",
      "hash_status": "agree",
@@ -481,6 +543,7 @@
     },
     {
      "bytes": 27156,
+     "default_install": true,
      "file": "ppocrv6_tiny_dict.txt",
      "from": "catalog/defaults.json",
      "hash_status": "agree",
@@ -493,6 +556,7 @@
     },
     {
      "bytes": 1533763059,
+     "default_install": true,
      "file": "ggml-medium.bin",
      "from": "catalog/subtitle-tiers.json",
      "hash_status": "single",
@@ -513,6 +577,7 @@
   "8GB": {
    "by_os": {
     "linux-x64": {
+     "deferred_image_bytes": 4265059488,
      "download_bytes": 12571666259,
      "download_gib": 11.71,
      "engine_download_mib": 52.1,
@@ -543,12 +608,17 @@
        "status": "ok"
       }
      ],
+     "first_run_bytes": 8306606771,
+     "first_run_gib": 7.74,
+     "first_run_minutes_at_measured_rate": 31.4,
+     "first_run_worst_case_hours_at_slowest_measured": 8.8,
      "minutes_at_measured_rate": 47.6,
      "missing_capabilities": [],
      "unknown_landed_sizes": [],
      "worst_case_hours_at_slowest_measured": 13.32
     },
     "macos-arm64": {
+     "deferred_image_bytes": 4265059488,
      "download_bytes": 12565794233,
      "download_gib": 11.7,
      "engine_download_mib": 46.5,
@@ -579,6 +649,10 @@
        "status": "ok"
       }
      ],
+     "first_run_bytes": 8300734745,
+     "first_run_gib": 7.73,
+     "first_run_minutes_at_measured_rate": 31.4,
+     "first_run_worst_case_hours_at_slowest_measured": 8.8,
      "minutes_at_measured_rate": 47.6,
      "missing_capabilities": [
       "字幕"
@@ -587,6 +661,7 @@
      "worst_case_hours_at_slowest_measured": 13.32
     },
     "win-x64": {
+     "deferred_image_bytes": 4265059488,
      "download_bytes": 12563382508,
      "download_gib": 11.7,
      "engine_download_mib": 44.2,
@@ -617,6 +692,10 @@
        "status": "ok"
       }
      ],
+     "first_run_bytes": 8298323020,
+     "first_run_gib": 7.73,
+     "first_run_minutes_at_measured_rate": 31.4,
+     "first_run_worst_case_hours_at_slowest_measured": 8.79,
      "minutes_at_measured_rate": 47.5,
      "missing_capabilities": [],
      "unknown_landed_sizes": [],
@@ -639,6 +718,7 @@
    "items": [
     {
      "bytes": 5027784512,
+     "default_install": true,
      "file": "Qwen3-8B-Q4_K_M.gguf",
      "from": "catalog/recommendations.json",
      "hash_status": "agree",
@@ -651,6 +731,7 @@
     },
     {
      "bytes": 4265059488,
+     "default_install": false,
      "file": "stable-diffusion-v1-5-pruned-emaonly-f32.gguf",
      "from": "catalog/image-tiers.json",
      "hash_status": "agree",
@@ -664,6 +745,7 @@
     },
     {
      "bytes": 123297373,
+     "default_install": true,
      "file": "(合计)",
      "from": "pins/ocr-languages.json",
      "hash_status": "mixed",
@@ -678,6 +760,7 @@
     },
     {
      "bytes": 4462639,
+     "default_install": true,
      "file": "pp-ocrv6_tiny_rec.onnx",
      "from": "catalog/defaults.json",
      "hash_status": "agree",
@@ -690,6 +773,7 @@
     },
     {
      "bytes": 1780590,
+     "default_install": true,
      "file": "pp-ocrv6_tiny_det.onnx",
      "from": "catalog/defaults.json",
      "hash_status": "agree",
@@ -702,6 +786,7 @@
     },
     {
      "bytes": 27156,
+     "default_install": true,
      "file": "ppocrv6_tiny_dict.txt",
      "from": "catalog/defaults.json",
      "hash_status": "agree",
@@ -714,6 +799,7 @@
     },
     {
      "bytes": 3094623691,
+     "default_install": true,
      "file": "ggml-large-v1.bin",
      "from": "catalog/subtitle-tiers.json",
      "hash_status": "single",
@@ -738,6 +824,7 @@
   "modelscope": 4.2
  },
  "rule": {
+  "default_install": "首装默认只下 chat、ocr、subtitle；image 按产品约束第 5 条要显式触发 + 后台 + 可续传（最省的量化档实测也 1,494 MiB，按这台 CN 出口量到的速率是 25–30 分钟，而 OCR 4.6+15.8 MiB、字幕 181.3 MiB 是分钟级）。download_* 是装齐四项能力的总量，first_run_* 才是点完安装要等的量，两个数都进产物，UI 不许把它们混成一个",
   "image_companions": "生图的配套件（clip/t5/vae）按 weights 里的真实字节加，查不到就报问题、不估算；同一角色的多个量化是**备选**不是都要下，只把最小那颗计入，其余记 alternates；档位表判为 incomplete（需要但同仓库没有）或 unknown_arch（判不了）的那些档，生图部分只是下限，判定依据是上游 docs/sd.md 的 txt2img 例子那四行（每行都有 file:line 出处）",
   "ocr": "默认档三条与全 14 语言合计是两个数，不能相加",
   "ram": "不加内存：四项能力共用一个常驻引擎、一次跑一项，内存那一轴由各档位表自己的判据负责",

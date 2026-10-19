@@ -1,8 +1,8 @@
 {
- "sha256": "94007bebc0b34562a3fb6baeb2e7b5084b751bcf663994c6eddbfdce838828a6",
- "size": 10285,
+ "sha256": "f29ac265193e063531450cf0d50aeb0a426aca9a981ff8ce3388161b79654bbf",
+ "size": 10711,
  "captured_at": "2026-10-20",
  "how": "python tools/file_index.py --queue catalog/machine-budget.json --json <out> 的真实输出（不是照 README 编的）",
- "composition": "15 行 = 11 颗走 hf_metadata 且 matches_pin=true + 3 颗 OCR 走 github_release_digest（checked=false，它们的 live 比对在 oar-ocr release 那条车道）+ 1 行 route=not_a_file 的「(合计)」",
- "note": "这份是**另一个生产者**的产物：tools/launch_plan.py 的 --queue-report 吃的就是这个形状。哈希只属于这次捕获本身，不能拿来当上游没变的证据；车道里传的是同一次 CI 运行产出的 artifact first-run-queue，不是这份夹具 —— 夹具只用来让离线测试能按真实形状核对，而不是我自己想象一个 JSON。"
+ "composition": "15 行 = 11 行走 hf_metadata 且 matches_pin=true + 3 颗 OCR 走 github_release_digest（checked=false，它们的 live 比对在 oar-ocr release 那条车道）+ 1 行 route=not_a_file 的「(合计)」；15 行全部带 default_install：9 行首装、6 行显式触发（生图整族，产品约束第 5 条）",
+ "note": "这份是**另一个生产者**的产物：tools/launch_plan.py 的 --queue-report 吃的就是这个形状，而 install_stage 那一项读的就是这里的 default_install —— 字段缺了工具会报，不许猜。哈希只属于这次捕获本身，不能拿来当上游没变的证据；车道里传的是同一次 CI 运行产出的 artifact first-run-queue，不是这份夹具。"
 }

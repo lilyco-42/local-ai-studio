@@ -636,11 +636,29 @@ class TestArtifactShape(unittest.TestCase):
         for cap, spec in doc["capabilities"].items():
             self.assertGreaterEqual(len(spec["flags_verified"]), 4, cap)
 
-    def test_rule_texts_keep_the_four_answers(self) -> None:
+    def test_rule_texts_keep_the_five_answers(self) -> None:
         doc = artifact()
         self.assertEqual(sorted(doc["rule"]),
-                         ["auth", "image_model_args", "listener", "provenance"])
+                         ["auth", "image_model_args", "install_stage", "listener", "provenance"])
         self.assertIn("127.0.0.1", doc["rule"]["listener"])
+        self.assertIn("default_install", doc["rule"]["install_stage"])
+
+    def test_the_stage_is_read_from_the_budget_policy(self) -> None:
+        """shape 主张按字面钉：三项首装、生图显式触发 —— 这一条漂了就是政策表或读法变了。"""
+        doc = artifact()
+        self.assertEqual({c: s["install_stage"] for c, s in doc["capabilities"].items()},
+                         {"对话": "first_run", "字幕": "first_run",
+                          "文字识别": "first_run", "生图": "on_demand"})
+        # 半装半不装不许被读成某一档：那是"点了命令行缺一颗料"，不是取舍。
+        import copy
+        budget = copy.deepcopy(load("catalog/machine-budget.json"))
+        for blk in budget["per_tier"].values():
+            for it in blk["items"]:
+                if it.get("kind") == "image" and it.get("companion_of"):
+                    it["default_install"] = True
+        _doc, problems = lp.build(OS3, TIERS, "", False, check_provenance=False,
+                                  tables={"budget": budget})
+        self.assertTrue(any("半装" in p for p in problems), problems)
 
     def test_citation_floor_still_clears_after_adding_launch_cites(self) -> None:
         self.assertGreaterEqual(len(cite_ids()), cc.MIN_CITATIONS)
@@ -654,7 +672,7 @@ class TestSourceMutants(unittest.TestCase):
       b 重算并与已提交那张比漂移，仍然没有问题；
       c 出处 id 闸门仍然抓得住一个引用了不存在的 id 的规格；
       d 声明"上游没有"的那面旗标真混进原文时仍然点名它；
-      e 跨生产者核对（首启队列报告）的四种说法仍然各说各的；
+      e 跨生产者核对（首启队列报告 + 预算的 default_install 政策）的六种说法仍然各说各的；
       f 报告文件不在时 CLI 仍然拒绝，而不是抛异常或"没输入也算核过"。
     探针只读，不落盘 —— 变异扫描里"顺手覆盖产品表"是这一轮已经犯过两次的错。
     """
@@ -687,6 +705,8 @@ class TestSourceMutants(unittest.TestCase):
         ("生图的二进制名字不经过那张表", 'binary_for("sd", o)', '"sd-cli"'),
         ("报告不存在也照样往下核", "if not os.path.exists(a.queue_report):",
          "if False and a.queue_report:"),
+        ("半装半不装不再报", "if len(flags) > 1:", "if False and len(flags) > 1:"),
+        ("政策字段缺失也不报", "if unknown:", "if False and unknown:"),
     ]
 
     def load(self, src: str):
@@ -756,12 +776,27 @@ class TestSourceMutants(unittest.TestCase):
             _b2, p2 = report_build(mod, one(matches_pin=False, checked=True, status="disagree"))
             _b3, p3 = report_build(mod, one(matches_pin=False, checked=False))
             _b4, p4 = report_build(mod, queue_report(lambda r: r.update(problems=["有一颗没对上"])))
+            mixed = copy.deepcopy(load("catalog/machine-budget.json"))
+            for blk in mixed["per_tier"].values():
+                for it in blk["items"]:
+                    if it.get("kind") == "image" and it.get("companion_of"):
+                        it["default_install"] = True
+            _b5, p5 = mod.build(OS3, TIERS, "", False, check_provenance=False,
+                                tables={"budget": mixed})
+            gap = copy.deepcopy(load("catalog/machine-budget.json"))
+            for blk in gap["per_tier"].values():
+                for it in blk["items"]:
+                    it.pop("default_install", None)
+            _b6, p6 = mod.build(OS3, TIERS, "", False, check_provenance=False,
+                                tables={"budget": gap})
             out["e 跨生产者核对"] = (
                 len(named) == 11 and p0 == []
                 and any("起的不是下的那一颗" in x for x in p1)
                 and any("两家哈希没对上" in x for x in p2)
                 and any("没在这条车道做 live 比对" in x for x in p3)
-                and any("报告自己就有" in x for x in p4))
+                and any("报告自己就有" in x for x in p4)
+                and any("半装" in x for x in p5)
+                and any("没写 default_install" in x for x in p6))
         except Exception as exc:                       # noqa: BLE001
             out["e 跨生产者核对"] = False
             out["_e 异常"] = str(exc)[:60]
@@ -807,7 +842,7 @@ class TestSourceMutants(unittest.TestCase):
 
     def test_mutant_probe_counts(self) -> None:
         """变异体数量也是账：删掉一条锚点而不说原因，就该在这里红。"""
-        self.assertEqual(len(self.MUTANTS), 14)
+        self.assertEqual(len(self.MUTANTS), 16)
 
 
 if __name__ == "__main__":

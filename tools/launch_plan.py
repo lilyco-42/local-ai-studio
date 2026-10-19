@@ -391,6 +391,22 @@ def build(os_labels: list[str], tiers: list[str], cache: str = "", fill: bool = 
             if len(ocr_items) != 3:
                 problems.append(f"文字识别: 默认档应是 det/rec/dict 三颗，队列里是 {len(ocr_items)} 颗 "
                                 "—— argv 的三个旗标没有对应的料")
+        # 这一档点名的那些颗，是不是**装完就有**？约束第 5 条把生图整族推后了，
+        # 所以外壳必须按这一项决定"起进程前先问用户要不要下"，而不是点了命令发现缺料。
+        stage_files = sorted(set(named) | set(entry.get("queue_ocr_files") or []))
+        if stage_files:
+            unknown = [n for n in stage_files if "default_install" not in (pool.get(n) or {})]
+            if unknown:
+                problems.append(f"{cap}: 点名的 {unknown[0]} 等 {len(unknown)} 颗没写 default_install "
+                                "—— 装不装这一颗是政策，不许这一层替它猜")
+            flags = {bool((pool.get(n) or {}).get("default_install")) for n in stage_files
+                     if "default_install" in (pool.get(n) or {})}
+            if len(flags) > 1:
+                problems.append(f"{cap}: 点名的 {len(stage_files)} 颗里有的算首装、有的算显式触发 —— "
+                                "这条命令行敲下去会缺一颗料（要整族一起触发，不许半装）")
+            entry["install_stage"] = "first_run" if flags == {True} else "on_demand"
+        else:
+            entry["install_stage"] = None
         plan[cap] = entry
     doc = {"schema": 1, "bind_address": BIND,
            "rule": {"listener": "每一项能力都只绑 127.0.0.1；外壳是唯一监听口，UI 只连外壳",
@@ -401,7 +417,11 @@ def build(os_labels: list[str], tiers: list[str], cache: str = "", fill: bool = 
                                         "说预算里真算进了哪几颗；两张表对不上就报，不选一边。"
                                         "模板里写的是文件名（{flux1-schnell-Q5_0.gguf}），"
                                         "所以「起的正是下的那一颗」是可核对的",
-                    "provenance": "每个 needle 都按钉住的 ref 现查（absent 也要查不到才算数）"},
+                    "provenance": "每个 needle 都按钉住的 ref 现查（absent 也要查不到才算数）",
+                    "install_stage": "每项能力标 first_run 或 on_demand，读的是 machine-budget 的 "
+                                     "default_install 政策（约束第 5 条：生图族要显式触发 + 后台 + 可续传）。"
+                                     "外壳据此决定『点这条命令行之前要不要先问用户下载』—— "
+                                     "半装半不装（同一族里有的默认、有的不默认）是问题，不是取舍"},
            "capabilities": plan}
     return doc, problems
 
@@ -417,7 +437,7 @@ def check(committed: dict, fresh: dict) -> list[str]:
             continue
         for key in ("mode", "bind", "engine_auth", "readiness", "request", "by_tier",
                     "argv_template", "subcommand", "omit", "companion_flags", "cites",
-                    "named_files", "queue_link", "flags_verified", "flags_absent"):
+                    "named_files", "queue_link", "install_stage", "flags_verified", "flags_absent"):
             if key in spec and old.get(key) != spec[key]:
                 bad.append(f"{cap}.{key}: {str(old.get(key))[:60]!r} → {str(spec[key])[:60]!r}")
         if old.get("binaries") != spec["binaries"]:

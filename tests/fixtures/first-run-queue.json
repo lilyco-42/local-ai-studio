@@ -9,6 +9,7 @@
     "huggingface.co"
    ],
    "checked": true,
+   "default_install": true,
    "fastest": "https://www.modelscope.cn/models/ggml-org/Qwen3-14B-GGUF/resolve/master/Qwen3-14B-Q4_K_M.gguf",
    "file": "Qwen3-14B-Q4_K_M.gguf",
    "kind": "chat",
@@ -36,6 +37,7 @@
     "huggingface.co"
    ],
    "checked": true,
+   "default_install": false,
    "fastest": "https://www.modelscope.cn/models/second-state/FLUX.1-schnell-GGUF/resolve/master/flux1-schnell-Q5_0.gguf",
    "file": "flux1-schnell-Q5_0.gguf",
    "kind": "image",
@@ -63,6 +65,7 @@
     "huggingface.co"
    ],
    "checked": true,
+   "default_install": false,
    "fastest": "https://www.modelscope.cn/models/second-state/FLUX.1-schnell-GGUF/resolve/master/t5xxl-Q2_K.gguf",
    "file": "t5xxl-Q2_K.gguf",
    "kind": "image",
@@ -90,6 +93,7 @@
     "huggingface.co"
    ],
    "checked": true,
+   "default_install": false,
    "fastest": "https://www.modelscope.cn/models/second-state/FLUX.1-schnell-GGUF/resolve/master/ae-f16.gguf",
    "file": "ae-f16.gguf",
    "kind": "image",
@@ -117,6 +121,7 @@
     "huggingface.co"
    ],
    "checked": true,
+   "default_install": false,
    "fastest": "https://www.modelscope.cn/models/second-state/FLUX.1-schnell-GGUF/resolve/master/clip_l-Q8_0.gguf",
    "file": "clip_l-Q8_0.gguf",
    "kind": "image",
@@ -139,6 +144,7 @@
   {
    "bytes": 123297373,
    "checked": false,
+   "default_install": true,
    "file": "(合计)",
    "kind": "ocr",
    "note": "这是把默认档换成全语言时多出来的量，不是叠在默认档上；它不是一个文件，所以进不了首启队列（不等于没验过 —— 逐条在 pins/ocr-languages.json 与 ocr-languages 车道）",
@@ -154,6 +160,7 @@
   {
    "bytes": 4462639,
    "checked": false,
+   "default_install": true,
    "file": "pp-ocrv6_tiny_rec.onnx",
    "kind": "ocr",
    "note": "确认路线不在这条车道（GitHub release 的 asset digest；live 由 ocr-languages 的 --check-pins --live 查）",
@@ -169,6 +176,7 @@
   {
    "bytes": 1780590,
    "checked": false,
+   "default_install": true,
    "file": "pp-ocrv6_tiny_det.onnx",
    "kind": "ocr",
    "note": "确认路线不在这条车道（GitHub release 的 asset digest；live 由 ocr-languages 的 --check-pins --live 查）",
@@ -184,6 +192,7 @@
   {
    "bytes": 27156,
    "checked": false,
+   "default_install": true,
    "file": "ppocrv6_tiny_dict.txt",
    "kind": "ocr",
    "note": "确认路线不在这条车道（GitHub release 的 asset digest；live 由 ocr-languages 的 --check-pins --live 查）",
@@ -204,6 +213,7 @@
     "huggingface.co"
    ],
    "checked": true,
+   "default_install": true,
    "fastest": "https://www.modelscope.cn/models/ggerganov/whisper.cpp/resolve/master/ggml-large-v1.bin",
    "file": "ggml-large-v1.bin",
    "kind": "subtitle",
@@ -231,6 +241,7 @@
     "huggingface.co"
    ],
    "checked": true,
+   "default_install": true,
    "fastest": "https://www.modelscope.cn/models/unsloth/Qwen3-4B-GGUF/resolve/master/Qwen3-4B-Q4_K_M.gguf",
    "file": "Qwen3-4B-Q4_K_M.gguf",
    "kind": "chat",
@@ -258,6 +269,7 @@
     "huggingface.co"
    ],
    "checked": true,
+   "default_install": false,
    "fastest": "https://www.modelscope.cn/models/second-state/stable-diffusion-v1-5-GGUF/resolve/master/stable-diffusion-v1-5-pruned-emaonly-f16.gguf",
    "file": "stable-diffusion-v1-5-pruned-emaonly-f16.gguf",
    "kind": "image",
@@ -285,6 +297,7 @@
     "huggingface.co"
    ],
    "checked": true,
+   "default_install": true,
    "fastest": "https://www.modelscope.cn/models/ggerganov/whisper.cpp/resolve/master/ggml-medium.bin",
    "file": "ggml-medium.bin",
    "kind": "subtitle",
@@ -311,6 +324,7 @@
     "huggingface.co"
    ],
    "checked": true,
+   "default_install": true,
    "fastest": "https://www.modelscope.cn/models/unsloth/Qwen3-8B-GGUF/resolve/master/Qwen3-8B-Q4_K_M.gguf",
    "file": "Qwen3-8B-Q4_K_M.gguf",
    "kind": "chat",
@@ -338,6 +352,7 @@
     "huggingface.co"
    ],
    "checked": true,
+   "default_install": false,
    "fastest": "https://www.modelscope.cn/models/second-state/stable-diffusion-v1-5-GGUF/resolve/master/stable-diffusion-v1-5-pruned-emaonly-f32.gguf",
    "file": "stable-diffusion-v1-5-pruned-emaonly-f32.gguf",
    "kind": "image",

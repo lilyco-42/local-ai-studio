@@ -57,6 +57,10 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
    所以生图权重**不进首装默认队列**，必须显式触发 + 后台 + 可续传；
    而 OCR（4.6+15.8 MiB）与字幕（181.3 MiB）是可以默认的。数字见
    [model-catalog.md](model-catalog.md)。
+   **这一条此前只是一句文档**：装机预算与首启队列都把生图算进"首装"，于是那句"约 24.0 分钟"里
+   含着用户根本没点的 2,033.8 MiB（16GB 档是 9,612.6 MiB）。现在它是一张机器读的表
+   （`machine-budget.json` 的 `default_install` + `first_run_*` / `download_*` 两组数，
+   `pins/launch-plan.json` 每项能力的 `install_stage`），半装半不装直接红 —— 见验收第 20 条。
 
 ## MVP / MVP+ 切分
 
@@ -76,19 +80,19 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
 
 ## 验收标准（在当前唯一可用验证手段 = GitHub Actions 下）
 
-1. `ci.yml`：669 个单测绿（重数：`python -W error::ResourceWarning -m unittest discover -s tests
+1. `ci.yml`：672 个单测绿（重数：`python -W error::ResourceWarning -m unittest discover -s tests
    -p "test_*.py"`；按文件数就 `python -m unittest tests.<模块名>`。2026-10-20 实测逐文件：
    `test_yaml_gate.py` 闸门自己 14、`test_lane_argv.py` 车道 ↔ 启动表一致（含 9 个 workflow 文本变异）10、
    `test_toolbelt_pins.py` 工具带钉表 14、
    `test_catalog_snapshot.py` 目录快照与侧表 16、`test_citation_check.py` 出处闸门 22、
-   `test_ocr_build_surface.py` OCR 依赖面 15、`test_file_index.py` 下载层五种状态与首启队列 33、
+   `test_ocr_build_surface.py` OCR 依赖面 15、`test_file_index.py` 下载层五种状态与首启队列 35、
    `test_payload_plan.py` 装机负载（含 tar 成员表与缺口点名）19、`test_pack_engine.py` 出包逻辑 10、
    `test_establish_verify.py` 字节复核 16、`test_shell_vars.py` shell 变量判据 14、
    `test_r2_manifest.py` 镜像清单 6、`test_lane_assertions.py` + `test_image_proof_block.py`
    车道判据 38 + 6 = 44、`test_recommend_image.py` 生图档位表 31、`test_machine_budget.py` 装机预算 20、
    `test_lane_replay_report.py` 给分段、预跑与 job 数计数 4、`test_engine_probe.py` 产物名解析与 skipped 点名 30、
    `test_recommend_subtitle.py` 字幕四表对账 44、`test_recommend_models.py` 对话档位表 46、
-   `test_launch_plan.py` 启动计划（含 14 条源码变异体全部被抓）65、
+   `test_launch_plan.py` 启动计划（含 16 条源码变异体全部被抓）66、
    `test_install_deps.py` 装依赖清单（含 8 条源码变异体与真捕获夹具的字节校验）36、
    `test_action_pins.py` action 钉法（含 7 条源码变异体与形状对表复核）36），
    `yaml_gate.py` 0 BAD、
@@ -367,9 +371,14 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     "这颗选哪个"，普通人问的是另一句。这个数字此前没有任何地方算过 —— `payload-plan` 只算引擎净负载，
     档位表只给单颗大小。`tools/machine_budget.py` 只加**已钉产物里有的字节**：引擎净负载 + 三张档位表
     该档第一行（默认档）+ OCR 默认档三条；`pins/ocr-languages.json` 的全 14 语言合计是**替代**默认档的
-    另一个数，不许叠上去再加。实测（win-x64）：4GB **5.90 GiB**、8GB **11.70**、16GB **20.82**；
-    按 lain42.top 那台 CN 出口量到的 ModelScope 4.2 MiB/s 折成 **24.0 / 47.5 / 84.6 分钟**，
-    按同一次量到的最慢出口 hf-mirror 0.25 MiB/s 折成 **6.72 / 13.31 / 23.68 小时**。
+    另一个数，不许叠上去再加。实测（win-x64）分两组：**首装默认** 4GB **3.92 GiB**、8GB **7.73**、
+    16GB **11.43**，按 lain42.top 量到的 ModelScope 4.2 MiB/s 折成 **15.9 / 31.4 / 46.4 分钟**
+    （最慢出口 **4.46 / 8.79 / 13.0 小时**）；**装齐四样** 才是 4GB **5.90 GiB**、8GB **11.70**、
+    16GB **20.82**，折成 **24.0 / 47.5 / 84.6 分钟**（最慢出口 **6.72 / 13.31 / 23.68 小时**）。
+    这两组此前被并成一组：生图那部分（4GB 档就有 2,033.8 MiB）按**产品约束第 5 条**要显式触发，
+    不该混进"点完安装要等多久"。现在政策在产物里（`default_install`：chat/subtitle/ocr 默认、image 不默认），
+    `first_run_*` 与 `download_*` 各一套，`--check` 两个数都比；缺 `default_install` 字段的行会被报出来，
+    同一族里半装半不装也直接红（下载层与启动表都不许猜）。
     三条口径由产物自己带着（`rule` / `ram_statement` / `measured_at_exit`），因为它们都会被人误用：
     ① 这是**磁盘与下载量，不是峰值内存** —— 四项能力共用一个常驻引擎、一次只跑一项（第 10 条），
        把权重相加当内存需求是错的，内存那一轴由三张表各自的判据负责；
@@ -469,11 +478,15 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     来源，拿它自证是空转）。这份报告的**真实捕获**钉在 `tests/fixtures/first-run-queue.json`
     （15 行、11 行 `matches_pin=true`，字节哈希记在同目录 `.meta.json`），所以这条跨产物的核对
     在还没有 runner 的今天也能离线重算。
+    每项能力还标 `install_stage`（`first_run` / `on_demand`），读的是 `machine-budget` 那张
+    `default_install` 政策表：对话/字幕/文字识别是首装就有，生图整族要显式触发 —— 外壳据此
+    决定敲这条命令行之前要不要先问用户下载。字段缺失不许这一层猜（报），同一族里半装半不装
+    也直接红：那是"命令敲下去缺一颗料"，不是一种取舍。
     起进程要点名的 server 名字现在也只有**一张表**：`launch_plan.SERVER_BASE` ⇄ `pack_engine.SERVER_BINARY`，
     出包那条因此会拒收"负载里只有 `whisper-cli`"的产物（只有 CLI 不算装了 server，装了也起不来）。
 
     判据的承重证明留在仓库里（不是又一次性扫描）：`tests/test_launch_plan.py` 的
-    `TestSourceMutants` 把工具源码改坏 **14 个变异体**，每个都必须让六条探针（离线对照 /
+    `TestSourceMutants` 把工具源码改坏 **16 个变异体**，每个都必须让六条探针（离线对照 /
     重算漂移 / 出处 id 闸门 / 缺席声明照扫 / 跨生产者核对 / 核对没有输入就红）至少一条不再"在位"，并同时跑一条正向对照
     （不改坏时六条全绿）。它当场抓出四个真 bug：`build()` 把 SPEC 里的 dict **直接塞进产物**
     （改产物就是改规格，现已 `deepcopy`）、`verify_spec` 里 `seen_absent` 初始化成了 list

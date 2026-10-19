@@ -47,10 +47,18 @@ ARTIFACTS = ("pins/payload-plan.json", "catalog/defaults.json", "pins/ocr-langua
 OUT = os.path.join(ROOT, "catalog", "machine-budget.json")
 # 每个档位取"这张表该档的第一行"当默认档。顺序是被上游数字决定的，不是我觉得哪个好用。
 CAPS = ("chat", "subtitle", "image")
+# 首装默认装哪几类。这是**产品约束第 5 条**（docs/requirements.md），不是我想省事的取舍：
+# 生图最省的量化档实测也 1,494 MiB，按这台 CN 出口量到的速率要 25–30 分钟，
+# 而 OCR（det+rec 4.6+15.8 MiB）与字幕（181.3 MiB）是分钟级 —— 所以生图必须显式触发、后台、可续传。
+# 这一条此前**只写在文档里，预算与首启队列都把它当"默认装"**：同一份预研里两个生产者给了相反的答案，
+# UI 上那句"首装约 X 分钟"就会把生图的量算进用户刚点完"安装"的那段时间。
+DEFAULT_INSTALL = {"chat": True, "subtitle": True, "ocr": True, "image": False}
 # 逐 OS 要比的字段。等待时间也在里面：它是从 r2_manifest 的实测吞吐算出来的，
 # 吞吐表一改这份预算就必须重出，否则 UI 上那句"约 X 分钟"就和量出来的速率脱钩了。
 CHECKED_OS_KEYS = ("download_bytes", "engine_download_mib", "engine_landed_mib",
-                   "minutes_at_measured_rate", "worst_case_hours_at_slowest_measured")
+                   "minutes_at_measured_rate", "worst_case_hours_at_slowest_measured",
+                   "first_run_bytes", "first_run_gib", "first_run_minutes_at_measured_rate",
+                   "first_run_worst_case_hours_at_slowest_measured", "deferred_image_bytes")
 
 
 def load(root: str) -> dict:
@@ -208,6 +216,13 @@ def build(arts: dict) -> tuple[dict, list[str]]:
         items, p, comps = weight_items(arts, tier)
         problems += p
         items += ocr_items(arts)
+        for it in items:
+            if it["kind"] not in DEFAULT_INSTALL:
+                problems.append(f"{tier}: 出现未知的 kind={it['kind']!r} —— "
+                                "首装默认那张政策表没这一类，不许猜一个默认值")
+                continue
+            it["default_install"] = DEFAULT_INSTALL[it["kind"]]
+        deferred = sum(i["bytes"] for i in items if not i.get("default_install", True))
         if not p and not items:
             problems.append(f"{tier} 档一项权重都没有，预算等于空表")
         by_os = {}
@@ -229,6 +244,9 @@ def build(arts: dict) -> tuple[dict, list[str]]:
                                      if r.get("engine") and r.get("uncompressed_mib") is None})
             fast, note = rate_mib_s("modelscope")
             slow, _ = rate_mib_s("hf-mirror")
+            # 两条路分开给：**点完"安装"就要等的量**（引擎 + 默认装的那几类权重）与
+            # **全能力装齐的量**（含显式触发才下的生图）。只报后者等于替用户决定了他要点两次按钮的事。
+            first_bytes = total_bytes - deferred
             by_os[os_key] = {
                 "engine_download_mib": eng_mib,
                 # tar.gz 读不了中央目录（payload-plan 里标着 needs_extract）→ 落地大小只能是未知，
@@ -241,9 +259,18 @@ def build(arts: dict) -> tuple[dict, list[str]]:
                                              if fast else None),
                 "worst_case_hours_at_slowest_measured": (round(total_bytes / MIB / slow / 3600, 2)
                                                         if slow else None),
+                "first_run_bytes": first_bytes,
+                "first_run_gib": round(first_bytes / 1024 ** 3, 2),
+                "first_run_minutes_at_measured_rate": (round(first_bytes / MIB / fast / 60, 1)
+                                                       if fast else None),
+                "first_run_worst_case_hours_at_slowest_measured": (
+                    round(first_bytes / MIB / slow / 3600, 2) if slow else None),
+                "deferred_image_bytes": deferred,
                 "missing_capabilities": missing,
                 "unknown_landed_sizes": unknown_landed,
             }
+            if deferred > total_bytes or first_bytes > total_bytes:
+                problems.append(f"{tier}/{os_key}: 首装量算得比总量还大 —— 减法用错了")
         per[tier] = {
             "items": sorted(items, key=lambda i: (i["kind"], -i["bytes"])),
             "weights_bytes": sum(i["bytes"] for i in items),
@@ -257,10 +284,19 @@ def build(arts: dict) -> tuple[dict, list[str]]:
             "by_os": by_os,
         }
     totals = {t: {o: per[t]["by_os"][o]["download_gib"] for o in per[t]["by_os"]} for t in tiers}
+    first_totals = {t: {o: per[t]["by_os"][o]["first_run_gib"] for o in per[t]["by_os"]}
+                    for t in tiers}
     return {"schema": 1,
             "from": list(ARTIFACTS),
             "rule": {"sum": "只加已钉产物里的字节：引擎净负载(payload-plan totals_mib) + "
                             "各档默认权重(三张档位表该档第一行) + OCR(默认档三条已钉字节)",
+                     "default_install": "首装默认只下 " + "、".join(
+                         sorted(k for k, v in DEFAULT_INSTALL.items() if v)) +
+                         "；" + "、".join(sorted(k for k, v in DEFAULT_INSTALL.items() if not v)) +
+                         " 按产品约束第 5 条要显式触发 + 后台 + 可续传（最省的量化档实测也 1,494 MiB，"
+                         "按这台 CN 出口量到的速率是 25–30 分钟，而 OCR 4.6+15.8 MiB、字幕 181.3 MiB "
+                         "是分钟级）。download_* 是装齐四项能力的总量，first_run_* 才是点完安装要等的量，"
+                         "两个数都进产物，UI 不许把它们混成一个",
                      "image_companions": "生图的配套件（clip/t5/vae）按 weights 里的真实字节加，"
                                           "查不到就报问题、不估算；同一角色的多个量化是**备选**不是都要下，"
                                           "只把最小那颗计入，其余记 alternates；"
@@ -275,7 +311,8 @@ def build(arts: dict) -> tuple[dict, list[str]]:
             "rates_mib_s": {"modelscope": rate_mib_s("modelscope")[0],
                             "hf-mirror": rate_mib_s("hf-mirror")[0]},
             "ram_statement": "本文件的 download_bytes 是磁盘与下载量，不是峰值内存",
-            "tiers": tiers, "totals_gib": totals, "per_tier": per}, problems
+            "tiers": tiers, "totals_gib": totals, "first_run_totals_gib": first_totals,
+            "per_tier": per}, problems
 
 
 def check(committed: dict, fresh: dict) -> list[str]:
@@ -288,6 +325,10 @@ def check(committed: dict, fresh: dict) -> list[str]:
     if committed.get("tiers") != fresh.get("tiers"):
         bad.append(f"档位集合变了：{committed.get('tiers')} → {fresh.get('tiers')}")
         return bad
+    for key in ("totals_gib", "first_run_totals_gib"):
+        if committed.get(key) != fresh.get(key):
+            bad.append(f"{key} 变了 {committed.get(key)} → {fresh.get(key)}"
+                       "（装齐与首装是两个数，UI 上那句'约 X GiB / 约 Y 分钟'按哪一个说的要跟着重看）")
     for t in fresh["tiers"]:
         c, f = committed["per_tier"].get(t, {}), fresh["per_tier"][t]
         if [(i["file"], i.get("repo"), i.get("sha256")) for i in c.get("items", [])] != \
@@ -439,6 +480,29 @@ def selftest() -> int:
                    f"{round(want / MIB / fast / 60, 1)}")
     if o["worst_case_hours_at_slowest_measured"] != round(want / MIB / slow / 3600, 2):
         bad.append("最慢档的小时数也不是字节/慢吞吐/3600 算出来的")
+    # 首装与装齐是两个数（产品约束第 5 条）。这里全部**独立再算一遍**比：
+    # 只判"字段在不在"的话，把生图也偷偷算进首装是不会红的。
+    img_bytes = sum(i["bytes"] for i in out["per_tier"]["4GB"]["items"] if i["kind"] == "image")
+    if img_bytes <= 0:
+        bad.append("夹具里没有生图权重，下面三条对照全是空转")
+    if o["deferred_image_bytes"] != img_bytes:
+        bad.append(f"显式触发的那部分算错：{o['deferred_image_bytes']} ≠ {img_bytes}")
+    if o["first_run_bytes"] != o["download_bytes"] - o["deferred_image_bytes"]:
+        bad.append(f"首装量不是总量减负量：{o['first_run_bytes']} vs "
+                   f"{o['download_bytes']} - {o['deferred_image_bytes']}")
+    if o["first_run_minutes_at_measured_rate"] != round(o["first_run_bytes"] / MIB / fast / 60, 1):
+        bad.append("首装分钟数不是独立算出来的（字节/吞吐/60）")
+    # 这张政策表必须是**读出来的**：翻一下它，首装量就要跟着变，否则说明代码里另写死了一份。
+    saved_di = DEFAULT_INSTALL["image"]
+    try:
+        DEFAULT_INSTALL["image"] = True
+        flipped = build(arts)[0]["per_tier"]["4GB"]["by_os"]["win-x64"]
+    finally:
+        DEFAULT_INSTALL["image"] = saved_di
+    if flipped["deferred_image_bytes"] != 0 or flipped["first_run_bytes"] != flipped["download_bytes"]:
+        bad.append("把政策表里生图改成默认装之后首装量没跟着变 —— 这个数不是从政策读的")
+    if build(arts)[0]["per_tier"]["4GB"]["by_os"]["win-x64"]["deferred_image_bytes"] != img_bytes:
+        bad.append("还原政策后首装量没还原（对照之间脏了数据）")
     # 查表方向：工具里用的是短针（"hf-mirror"），表里的键是主机名（"hf-mirror.com"）。
     # 方向写反了不会抛错，只会静默把慢吞吐读成 0，于是最慢档整个消失。
     for needle, key in (("modelscope", "modelscope"), ("hf-mirror", "hf-mirror.com")):
@@ -469,8 +533,11 @@ def selftest() -> int:
     empty["catalog/recommendations.json"]["tiers_rows"]["4GB"] = []
     if not any("对话 在 4GB 档没有任何行" in p for p in build(empty)[1]):
         bad.append("档位表空了，预算当无事发生")
-    print("---- 结论 ----  合计 %d 字节 / %s GiB / 实测 ModelScope 约 %s 分钟"
-          % (o["download_bytes"], o["download_gib"], o["minutes_at_measured_rate"]))
+    print("---- 结论 ----  装齐 %d 字节 / %s GiB / 约 %s 分钟；"
+          "首装 %d 字节 / %s GiB / 约 %s 分钟（生图 %d 字节按约束第 5 条显式触发）"
+          % (o["download_bytes"], o["download_gib"], o["minutes_at_measured_rate"],
+             o["first_run_bytes"], o["first_run_gib"], o["first_run_minutes_at_measured_rate"],
+             o["deferred_image_bytes"]))
     for x in bad:
         print("  BAD:", x)
     print("BAD 数量 =", len(bad))
@@ -504,6 +571,9 @@ def main(argv: list[str]) -> int:
                   f" 实测吞吐约 {ov['minutes_at_measured_rate']} 分钟"
                   f"{'，缺:' + '/'.join(ov['missing_capabilities']) if ov['missing_capabilities'] else ''}"
                   f"{'，落地未知:' + '/'.join(ov['unknown_landed_sizes']) if ov['unknown_landed_sizes'] else ''}")
+            print(f"        其中首装（不含生图）{ov['first_run_gib']:>7.2f} GiB"
+                  f" 约 {ov['first_run_minutes_at_measured_rate']} 分钟；"
+                  f"生图 {round(ov['deferred_image_bytes'] / 1024 ** 2, 1)} MiB 要显式触发")
     print("要下完自算的行：", sorted({f for t in fresh['tiers']
                                 for f in fresh['per_tier'][t]['untrusted_rows']}))
     for t in fresh["tiers"]:

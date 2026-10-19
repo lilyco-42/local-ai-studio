@@ -202,8 +202,29 @@ class TestFirstRunQueue(unittest.TestCase):
 
     def item(self, **kw):
         base = {"kind": "chat", "repo": "A/B", "file": "m.gguf", "sha256": SHA,
-                "bytes": 7, "resolve_via": "hf_metadata", "tiers": ["4GB"]}
+                "bytes": 7, "resolve_via": "hf_metadata", "tiers": ["4GB"],
+                # 首装政策由 machine-budget 那侧写；这里不给的话，下载层会报"字段缺失"。
+                "default_install": True}
         return dict(base, **kw)
+
+    def test_a_budget_row_without_the_policy_is_reported_not_guessed(self) -> None:
+        """约束第 5 条那个 default_install 必须由上游那张表给：缺了就报，不许这一层猜一个。"""
+        tree = {"m.gguf": {"sha256": SHA, "size": 7}}
+        it = {k: v for k, v in self.item().items() if k != "default_install"}
+        _rows, bad = self.run_q([it], (tree, "huggingface.co", None),
+                                (tree, "www.modelscope.cn", None))
+        self.assertTrue(any("default_install" in b for b in bad), bad)
+        _rows2, bad2 = self.run_q([self.item()], (tree, "huggingface.co", None),
+                                  (tree, "www.modelscope.cn", None))
+        self.assertEqual(bad2, [], "正向对照：政策在场时不许报")
+
+    def test_the_deferred_flag_survives_into_the_row(self) -> None:
+        """外壳按报告决定"起进程前先问要不要下"，所以这一项必须活着走出这一层。"""
+        tree = {"m.gguf": {"sha256": SHA, "size": 7}}
+        rows, _bad = self.run_q([self.item(default_install=False)],
+                                (tree, "huggingface.co", None),
+                                (tree, "www.modelscope.cn", None))
+        self.assertIs(rows[0]["default_install"], False, rows[0])
 
     def run_q(self, items, hf_ret, ms_ret, floor=1):
         return fi.check_queue(items, fetch_hf=lambda r, rev="main": hf_ret,

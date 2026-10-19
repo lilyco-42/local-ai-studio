@@ -189,6 +189,12 @@ def check_queue(items: list[dict], fetch_hf=hf_files, fetch_ms=ms_files,
         base = {"kind": it["kind"], "repo": it.get("repo"), "file": it["file"],
                 "bytes": it.get("bytes"), "sha256": it.get("sha256"),
                 "tiers": it["tiers"], "route": via, "checked": False}
+        # 首装下不下这一颗，是**预算那张表的政策**（产品约束第 5 条：生图要显式触发），
+        # 不由这条车道猜一个默认值 —— 缺字段就是输入漂了，报出来。
+        if "default_install" not in it:
+            bad.append(f"{it['kind']}/{it['file']}: 预算行没有 default_install 字段 —— "
+                       "这一颗算不算首装不许由下载层来猜")
+        base["default_install"] = it.get("default_install", True)
         if via == "not_a_file":
             base["note"] = it.get("note") or "合计数字，不是一个文件"
             rows.append(base)
@@ -323,8 +329,15 @@ def main(argv) -> int:
                   f"路线={r['route']:<21} 确认={str(r['checked']):<5}"
                   f"{('状态=' + str(r.get('status'))) if r.get('status') else (r.get('note') or '')[:44]}")
         n_ok = sum(1 for r in rows if r["checked"])
+        n_def = sum(1 for r in rows if r.get("default_install"))
+        mib_def = round(sum((r.get("bytes") or 0) for r in rows if r.get("default_install"))
+                        / 1024 ** 2, 1)
+        mib_on = round(sum((r.get("bytes") or 0) for r in rows if not r.get("default_install"))
+                       / 1024 ** 2, 1)
         print(f"队列 {len(rows)} 项（去重自 {len(budget['per_tier'])} 档），"
               f"live 确认 {n_ok} 项，未确认 {len(rows) - n_ok} 项")
+        print(f"其中首装默认 {n_def} 项 / {mib_def} MiB，显式触发 {len(rows) - n_def} 项 / "
+              f"{mib_on} MiB（约束第 5 条：生图不进默认）")
         if args.json:
             with open(args.json, "w", encoding="utf-8", newline="\n") as fh:
                 json.dump({"from": args.queue, "items": rows, "problems": bad},
