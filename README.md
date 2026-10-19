@@ -35,9 +35,14 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
 ## 这套 CI 能证明什么、不能证明什么
 
 能证明：上游产物可发现、可下载、校验对得上、在无 GPU 的 runner 上真能产出 token。
-**不能证明：图形界面真的打得开。** 桌面外壳交付时必须另找设备验证，不拿 CI 绿当"能用"。
+**注意：这些车道至今一次都没跑过** —— 仓库是 private，这个账号给 private 仓库分不到 runner
+（job 两秒失败、`steps: []`，原因只在 check-run annotation 里）。所以下面"能证明"目前是设计意图，不是结果。
+**也不能证明：图形界面真的打得开。** 桌面外壳交付时必须另找设备验证，不拿 CI 绿当"能用"。
 
 
 ## 待定
 
-仓库名 / public-private / 外壳许可（AGPL-3.0-or-later 还是 MIT）/ 模型目录来源 / i18n 语言集。
+仓库名（`local-ai-studio` 是占位）、外壳许可（AGPL-3.0-or-later 还是 MIT，所以现在**故意没放 LICENSE**）、
+模型目录来源的细节。可见性已经定了 private，代价就是跑不了 CI —— 解法在上一条里，等你选。
+i18n 已经按实测拆成"识别语言"与"界面语言"两条轴并给出默认包，见
+[docs/i18n.md](docs/i18n.md)。
