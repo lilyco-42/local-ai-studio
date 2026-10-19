@@ -309,9 +309,15 @@ jobs:
           #  （源码：fname_out = fname_out_.empty() ? fname_inp : fname_out_），
           #  所以这里显式指定，别靠默认行为猜文件名。
           #  ggml-tiny.bin 是多语版本，所以 -l en 显式给，不留给自动检测去赌时间。
-          timeout 600 "$BIN" -m model.bin -f jfk.wav -l en -t 2 -osrt -of jfk.srt > run.log 2>&1 || { tail -30 run.log; exit 1; }
-          echo "=== 产出文件 ==="; ls -l jfk.srt || { echo "没产出 jfk.srt"; tail -30 run.log; exit 1; }
-          SRT=jfk.srt
+          #  `-of` 给的是**基名**，不是完整文件名：b5454 的 fout_factory
+          #  （examples/cli/cli.cpp:1165-1166）是把扩展名直接拼在给定名字后面，
+          #  写 `-of jfk.srt` 得到的是 `jfk.srt.srt`，而原来的判据会去 ls jfk.srt —— 必红且原因很怪。
+          #  产出名仍靠 glob 找：上游哪天换扩展名，红字要说"命名变了"，不是"没产出字幕"。
+          timeout 600 "$BIN" -m model.bin -f jfk.wav -l en -t 2 -osrt -of jfk > run.log 2>&1 || { tail -30 run.log; exit 1; }
+          echo "=== 产出文件 ==="; ls -l
+          SRT=$(ls -1 jfk*.srt 2>/dev/null | head -1)
+          test -n "$SRT" || { echo "没找到 jfk*.srt —— 上游改了输出命名或扩展名"; tail -30 run.log; exit 1; }
+          echo "实际产出的字幕文件：$SRT"
           cat "$SRT"
           grep -q -- '-->' "$SRT" || { echo "SRT 里没有时间戳行"; exit 1; }
           # 已知答案对照：这段是肯尼迪名句，至少要落进一个关键词；tiny 模型措辞不稳，不逐字比
