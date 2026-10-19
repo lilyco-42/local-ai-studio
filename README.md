@@ -210,11 +210,16 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
 ## 这套 CI 能证明什么、不能证明什么
 
 能证明：上游产物可发现、可下载、校验对得上、在无 GPU 的 runner 上真能产出 token。
-**注意：这些车道至今一次都没跑过** —— 仓库是 private，这个账号给 private 仓库分不到 runner。
-观察到的形状有两种，都不执行任何一步：早先是 job 两秒失败、`steps: []`（原因只在 check-run
-annotation 里）；2026-10-19 这两次 push 则是**一直停在 queued**（`gh run view <id> --json jobs`
-给 `runner_name: null`、`steps: 0`，annotations 接口 404），21 分钟没动过。所以别把"queued"
-读成"在排队、等等就有"。所以下面"能证明"目前是设计意图，不是结果。
+**注意：这些车道至今一次都没跑过。** 2026-10-20 在 `4202ef0` 上又量了一次，得到的形状是：
+run 建出来了、`engine-live.yml` 的 **21 个 job 全部登记**（包括新加的 `launch-plan`），
+可每一个都是 `runner_name` 为空、`steps: 0`、2-3 秒 conclusion=failure。
+真正的原因只在 check-run annotation 里，而且这次读到了原文：
+**"The job was not started because recent account payments have failed or your spending limit
+needs to be increased"** —— 是**账单/支出上限**，不是"private 仓库没有免费额度"这一句就完事。
+复现：`gh api repos/lilyco-42/local-ai-studio/actions/runs/<id>/jobs`（注意要 run **id**，
+用 run number 会 404），再 `gh api repos/.../check-runs/<job id>/annotations`。
+更早两次 push 停在 queued 二十分钟不动，别把"queued"读成"在排队、等等就有"。
+所以下面"能证明"目前是设计意图，不是结果。
 **也不能证明：图形界面真的打得开。** 桌面外壳交付时必须另找设备验证，不拿 CI 绿当"能用"。
 
 

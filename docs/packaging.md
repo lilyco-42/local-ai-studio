@@ -61,8 +61,12 @@ LM Studio 也是这个形态（壳先装好、模型首启下载），所以"安
 
 ## 还欠什么（都在等一个决定，不是技术问题）
 
-- **CI 本身没跑过**：仓库 private，这个账号给 private 分不到 runner（现在表现为 job 永久停在
-  `queued`、`runner_name: null`）。上面 ①②④ 都是本机读公共来源量的，**唯独"车道真跑一遍装出包"必须等解锁**（#19）。
+- **CI 本身没跑过**：2026-10-20 在 `4202ef0` 上量到的形状是 run 建了、`engine-live.yml` 的 21 个
+  job 全部登记，但每个都 `runner_name` 空、`steps: 0`、2-3 秒 failure；原因只在 check-run
+  annotation 里，写的是**账单/支出上限**（"recent account payments have failed or your spending
+  limit needs to be increased"），不是"private 没有免费额度"一句话。逐条复现命令与完整观察
+  记在 README 末段"这套 CI 能证明什么"。上面 ①②④ 都是本机读公共来源量的，
+  **唯独"车道真跑一遍装出包"必须等解锁**（#19）。
 - **签名**：macOS 要 Apple 证书 + notarization secrets；Windows 签名要代码签名证书，不签就吃 SmartScreen 提示。
   这两件都要花钱/要账号，由他定；不签名也能出包，只是首启有警告。
 - **macOS 的字幕**：上游 whisper.cpp 没有 macOS 的**可执行**产物（`payload-plan` 里那行 `上游无产物`， 同排的 `asset_evidence` 记着 xcframework 的成员表与"里面没有 whisper-cli"这一事实），
