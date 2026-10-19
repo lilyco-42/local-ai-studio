@@ -131,6 +131,18 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
    的环境，同一行的 `"$FOO"` 由当前 shell 展开，`set -u` 下确实未定义（这条是写完判据才发现自己
    原来的"对照用例"预期错了，判据比对照对）。
    证过它承重：把守卫去掉（临时副本，不动工作树），闸门红在第 5 行点名 `$LD_LIBRARY_PATH`。
+9. **外壳必须是唯一的监听口，引擎端口不许直接给 UI**（出处是 2026-10-20 读三家 pin ref 的源码，
+   见 [ADR-0001 的"三个 server 的接口与默认安全形状"](adr/0001-engines-from-upstream-binaries.md)）：
+   三家默认都只绑 loopback（llama `common.h:648`、whisper `server.cpp:59/65`、sd `runtime.h:22-23`），
+   这一条是安全的；但**鉴权与 CORS 不是** —— llama 有 `--api-key` 而默认为空（`arg.cpp:3513`）且
+   `cors_origins` 默认 `*`（`common.h:652`，`*` + 无 key 上游只打一句警告 `server.cpp:340`）；
+   whisper 直接发 `Access-Control-Allow-Origin: *` 且**代码里没有任何 key 校验**（`server.cpp:738-740`）；
+   sd 把请求的 `Origin` 原样反射进 ACAO 再配 `Allow-Credentials: true`（`main.cpp:123-131`）。
+   也就是说：用户开着我们的应用再打开任意网页，那个网页就能驱动本机的模型 —— 对"本地自用的无审查对话"
+   这项目标是必须防的。验收动作因此不是"能起服务"而是三条：① llama 起来时必须带 `--api-key` 且
+   `--cors-origins` 收窄到应用来源；② whisper / sd **没有 key 可给**，只能按需起、用完停，或由外壳反代
+   （外壳持有唯一端口并自己发 token）；③ UI 永不直连引擎端口。
+   这一条现在只有源码级证据，实现与验证都还没做 —— 列在验收里是为了别等写外壳时才发现架构选错了。
 
 ## 车道判据的出处（全部按**钉住的那个 ref** 核过，不是按 HEAD 记的）
 

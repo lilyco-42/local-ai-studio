@@ -232,6 +232,34 @@ Vulkan，不必退回 CPU 的"几分钟一张"**。所以这条能力的设计�
 sd `master-975-95b3090` 的 `--steps/--width/--height/--sampling-method/--diffusion-model/-v` 全在。
 （同一天 OCR 那条就是因为按 HEAD 读成员表、却钉了 tag，才发现 tag 里根本没有 CLI —— 见 `8b70b91`。）
 
+## 三个 server 的接口与默认安全形状（2026-10-20 按 pin 住的 ref 读源码，不是按 OpenAI/A1111 文档猜的）
+
+上面第 1 条约束说"外壳起常驻服务"，但当时只有条目表证明这三个二进制存在。这一节把"真起起来要调什么、
+默认安不安全"读出来，出处都是钉住的 ref 的行号：
+
+| 事项 | llama.cpp `b11727` | whisper.cpp `b5454` | sd.cpp `95b3090…` |
+|---|---|---|---|
+| 就绪探测 | `GET /health`（`tools/server/server.cpp:263`） | `GET /health`（`examples/server/server.cpp:1218-1227`）：**未就绪回 503** + `{"status":"loading model"}` | 没有 /health；`GET /sdapi/v1/progress`（`api.md:282-299`）能间接看忙闲 |
+| 默认监听 | `hostnames = {"127.0.0.1"}`（`common/common.h:648`） | `127.0.0.1:8080`（`server.cpp:59/65`） | `127.0.0.1:1234`（`examples/server/runtime.h:22-23`） |
+| 鉴权 | `--api-key`（`common/arg.cpp:3513-3514`），**默认为空**（`common.h:665`） | **没有任何 key/auth**（全文无此字段） | **同样没有** |
+| CORS | `cors_origins = "*"` 是默认（`common.h:652`）；`*` + 无 key 时上游只**警告**（`server.cpp:340-342`） | `Access-Control-Allow-Origin: *`（`server.cpp:738-740`，allow-headers 里写着 `authorization` 但没有代码校验它） | pre-routing 把请求的 `Origin` **原样反射**进 ACAO，并配 `Allow-Credentials: true`、Methods/Headers `*`（`examples/server/main.cpp:123-131`） |
+| 主调用 | `POST /v1/chat/completions`（`server.cpp:274`）→ `choices[].message.content`（`server-task.cpp:422/434`） | `POST /inference` **multipart**（字段 `file`，`server.cpp:826/839`） | `POST /sdcpp/v1/img_gen`、A1111 的 `POST /sdapi/v1/txt2img`、OpenAI 的 `POST /v1/images/generations` → `data[].b64_json`（`api.md:28/38/56/132`） |
+| 白送的能力 | `/props`（运行时真值） | **SRT 由服务端渲染**：`response_format=srt` 逐段拼 `序号 / HH:MM:SS,mmm --> / 文本`，content-type `application/x-subrip`，支持 `offset_n` 与 diarize（`server.cpp:1022-1042`）；`verbose_json` 给 `segments[].text/from/to/words/no_speech_prob`（`1065-1156`）；`POST /load` 热切换权重（字段 `model` 是**文件路径**，`1175-1200`） | **job 模型 + 取消 + 实时预览**：`queued/generating/completed/failed/cancelled` + `queue_position`（`api.md:393-420`）、`GET /sdcpp/v1/jobs/{id}` 带 `preview.b64_json`（边采样边更新）、`POST /sdcpp/v1/jobs/{id}/cancel`、`GET /sdcpp/v1/capabilities` 的 `features_by_mode`（`lora/hires/vae_tiling/cache/cancel_*/preview`，`api.md:630-650`） |
+
+四条设计后果：
+
+1. **"默认安全"只在绑定这条轴上成立**。三家都只绑 loopback，但一个无 key + `*` CORS 的本地接口
+   意味着用户随便打开的网页就能驱动这台机器上的模型 —— 对"无审查对话"这项目标尤其是要防的。
+   所以外壳必须自己占住唯一监听口：llama 那条要显式给 `--api-key` 并把 `--cors-origins` 收窄到应用来源；
+   whisper / sd **没有 key 可给**，只能"按需起、用完停"，或由外壳反代（外壳持有唯一端口并自己发 token）。
+   这不是上游缺陷清单，是我们的实现约束，写进 requirements 的验收里。
+2. **三家不是一个接口形状**。multipart 上传（whisper）与 JSON chat（llama）与 JSON job（sd）互不相同，
+   "统一成一个 OpenAI 兼容网关"的想法只在对话那侧成立 —— UI/调度抽象要按"每能力一个本地服务"设计。
+3. **功能分层有可探测的出处**：sd 的 `capabilities` 与 llama 的 `/props` 是运行时真值，
+   "支持不支持 lora/hires/preview/取消"不许写死在代码里（此前按后端检测分层只解决了一半）。
+4. **车道只覆盖了 llama 那条**（`headless-inference#4`）。whisper-server / sd-server 这一节**仍是源码级证据**，
+   一次都没跑过；要不要给它们补车道，等 CI 解锁后看第一次真跑的耗时再定。
+
 ## 分发源可达性（2026-10-19 从 CN 服务器 lain42.top 实测：HEAD 之外再做区间 GET，2 MiB 一组、4 MiB 重复三轮）
 
 第一次只发 HEAD 得到的结论有两处不能信：ModelScope 回 200 其实跳到了仓库页面，
