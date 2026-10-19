@@ -1,21 +1,6 @@
 {
  "gaps": [
   {
-   "capability": "对话",
-   "os": "linux-x64",
-   "status": "needs_extract"
-  },
-  {
-   "capability": "字幕",
-   "os": "linux-x64",
-   "status": "needs_extract"
-  },
-  {
-   "capability": "对话",
-   "os": "macos-arm64",
-   "status": "needs_extract"
-  },
-  {
    "capability": "字幕",
    "os": "macos-arm64",
    "status": "上游无产物"
@@ -29,12 +14,24 @@
     "capability": "对话",
     "digest": "sha256:17bfcf2217ab5168888dd629a833e264babd488c0512fe18bc66e49632f00241",
     "engine": "llama",
+    "entries": 61,
+    "excluded": [],
+    "excluded_count": 0,
     "inferred_platform": false,
-    "note": "tar.gz 的中央目录读不了（格式决定），逐文件清单只能由 CI 打包时产出",
     "os": "linux-x64",
+    "packed_sum_mib": null,
+    "pairing": [],
+    "reader": "tar-stream",
     "release": "b11727",
-    "status": "needs_extract",
-    "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11727/llama-b11727-bin-ubuntu-x64.tar.gz"
+    "shipped": 61,
+    "status": "ok",
+    "uncompressed_mib": 44.3,
+    "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11727/llama-b11727-bin-ubuntu-x64.tar.gz",
+    "verified_bytes": {
+     "bytes": 17971994,
+     "digest_matches": true,
+     "sha256": "17bfcf2217ab5168888dd629a833e264babd488c0512fe18bc66e49632f00241"
+    }
    },
    {
     "archive_mib": 9.9,
@@ -42,12 +39,35 @@
     "capability": "字幕",
     "digest": "sha256:a72becf15d7917f990f6313867a52638b82b7f9ef237fb0c980dac56a135781c",
     "engine": "whisper",
+    "entries": 47,
+    "excluded": [
+     "whisper-bin-ubuntu-x64/test-whisper-zero-samples",
+     "whisper-bin-ubuntu-x64/test-parakeet-full-diffusion",
+     "whisper-bin-ubuntu-x64/test-whisper-lang-detect-abort",
+     "whisper-bin-ubuntu-x64/test-parakeet",
+     "whisper-bin-ubuntu-x64/test-parakeet-full-jfk",
+     "whisper-bin-ubuntu-x64/test-parakeet-full-gb1",
+     "whisper-bin-ubuntu-x64/test-common-utf8",
+     "whisper-bin-ubuntu-x64/test-vad-full",
+     "whisper-bin-ubuntu-x64/test-vad",
+     "whisper-bin-ubuntu-x64/test-whisper-buffer-loader"
+    ],
+    "excluded_count": 10,
     "inferred_platform": false,
-    "note": "tar.gz 的中央目录读不了（格式决定），逐文件清单只能由 CI 打包时产出",
     "os": "linux-x64",
+    "packed_sum_mib": null,
+    "pairing": [],
+    "reader": "tar-stream",
     "release": "b5454",
-    "status": "needs_extract",
-    "url": "https://github.com/ggml-org/whisper.cpp/releases/download/b5454/whisper-bin-ubuntu-x64.tar.gz"
+    "shipped": 37,
+    "status": "ok",
+    "uncompressed_mib": 26.8,
+    "url": "https://github.com/ggml-org/whisper.cpp/releases/download/b5454/whisper-bin-ubuntu-x64.tar.gz",
+    "verified_bytes": {
+     "bytes": 10364195,
+     "digest_matches": true,
+     "sha256": "a72becf15d7917f990f6313867a52638b82b7f9ef237fb0c980dac56a135781c"
+    }
    },
    {
     "archive_mib": 25.1,
@@ -62,11 +82,13 @@
     "os": "linux-x64",
     "packed_sum_mib": 25.1,
     "pairing": [],
+    "reader": "zip-central-directory",
     "release": "master-975-95b3090",
     "shipped": 35,
     "status": "ok",
     "uncompressed_mib": 65.0,
-    "url": "https://github.com/leejet/stable-diffusion.cpp/releases/download/master-975-95b3090/sd-master-95b3090-bin-Linux-Ubuntu-24.04-x86_64.zip"
+    "url": "https://github.com/leejet/stable-diffusion.cpp/releases/download/master-975-95b3090/sd-master-95b3090-bin-Linux-Ubuntu-24.04-x86_64.zip",
+    "verified_bytes": null
    }
   ],
   "macos-arm64": [
@@ -76,18 +98,88 @@
     "capability": "对话",
     "digest": "sha256:46d40093b6946854525682ce4ac53dcf4fd4b2e94ee03dd24e7b4f64ed039b95",
     "engine": "llama",
+    "entries": 61,
+    "excluded": [],
+    "excluded_count": 0,
     "inferred_platform": false,
-    "note": "tar.gz 的中央目录读不了（格式决定），逐文件清单只能由 CI 打包时产出",
     "os": "macos-arm64",
+    "packed_sum_mib": null,
+    "pairing": [],
+    "reader": "tar-stream",
     "release": "b11727",
-    "status": "needs_extract",
-    "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11727/llama-b11727-bin-macos-arm64.tar.gz"
+    "shipped": 61,
+    "status": "ok",
+    "uncompressed_mib": 31.0,
+    "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11727/llama-b11727-bin-macos-arm64.tar.gz",
+    "verified_bytes": {
+     "bytes": 12292958,
+     "digest_matches": true,
+     "sha256": "46d40093b6946854525682ce4ac53dcf4fd4b2e94ee03dd24e7b4f64ed039b95"
+    }
    },
    {
     "asset": null,
+    "asset_evidence": [
+     {
+      "asset": "whisper-b5454-xcframework.zip",
+      "entries": 200,
+      "has_main_binary": false,
+      "kinds": [
+       "(无扩展名)",
+       ".h",
+       ".modulemap",
+       ".plist",
+       ".yml"
+      ]
+     },
+     {
+      "asset": "whisper-b5130-xcframework.zip",
+      "entries": 200,
+      "has_main_binary": false,
+      "kinds": [
+       "(无扩展名)",
+       ".h",
+       ".modulemap",
+       ".plist",
+       ".yml"
+      ]
+     },
+     {
+      "asset": "whisper-b5127-xcframework.zip",
+      "entries": 200,
+      "has_main_binary": false,
+      "kinds": [
+       "(无扩展名)",
+       ".h",
+       ".modulemap",
+       ".plist",
+       ".yml"
+      ]
+     }
+    ],
     "capability": "字幕",
     "note": "选择条件 {'engine': 'whisper', 'platform': 'macos'} 在 discover 的产物表里唯一命中 0 次",
     "os": "macos-arm64",
+    "same_engine_platform_assets": [
+     {
+      "asset": "whisper-b5454-xcframework.zip",
+      "because": "排除词 'xcframework'（库包/附带资产，不是能起进程的产物）",
+      "mib": 62.8,
+      "release": "b5454"
+     },
+     {
+      "asset": "whisper-b5130-xcframework.zip",
+      "because": "排除词 'xcframework'（库包/附带资产，不是能起进程的产物）",
+      "mib": 54.5,
+      "release": "b5130"
+     },
+     {
+      "asset": "whisper-b5127-xcframework.zip",
+      "because": "排除词 'xcframework'（库包/附带资产，不是能起进程的产物）",
+      "mib": 54.5,
+      "release": "b5127"
+     }
+    ],
     "status": "上游无产物"
    },
    {
@@ -103,11 +195,13 @@
     "os": "macos-arm64",
     "packed_sum_mib": 34.8,
     "pairing": [],
+    "reader": "zip-central-directory",
     "release": "master-975-95b3090",
     "shipped": 5,
     "status": "ok",
     "uncompressed_mib": 93.9,
-    "url": "https://github.com/leejet/stable-diffusion.cpp/releases/download/master-975-95b3090/sd-master-95b3090-bin-Darwin-macOS-26.6.2-arm64.zip"
+    "url": "https://github.com/leejet/stable-diffusion.cpp/releases/download/master-975-95b3090/sd-master-95b3090-bin-Darwin-macOS-26.6.2-arm64.zip",
+    "verified_bytes": null
    }
   ],
   "win-x64": [
@@ -124,11 +218,13 @@
     "os": "win-x64",
     "packed_sum_mib": 18.7,
     "pairing": [],
+    "reader": "zip-central-directory",
     "release": "b11727",
     "shipped": 51,
     "status": "ok",
     "uncompressed_mib": 47.9,
-    "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11727/llama-b11727-bin-win-cpu-x64.zip"
+    "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11727/llama-b11727-bin-win-cpu-x64.zip",
+    "verified_bytes": null
    },
    {
     "archive_mib": 8.5,
@@ -154,11 +250,13 @@
     "os": "win-x64",
     "packed_sum_mib": 8.5,
     "pairing": [],
+    "reader": "zip-central-directory",
     "release": "b5454",
     "shipped": 31,
     "status": "ok",
     "uncompressed_mib": 22.1,
-    "url": "https://github.com/ggml-org/whisper.cpp/releases/download/b5454/whisper-bin-x64.zip"
+    "url": "https://github.com/ggml-org/whisper.cpp/releases/download/b5454/whisper-bin-x64.zip",
+    "verified_bytes": null
    },
    {
     "archive_mib": 16.9,
@@ -173,11 +271,13 @@
     "os": "win-x64",
     "packed_sum_mib": 16.9,
     "pairing": [],
+    "reader": "zip-central-directory",
     "release": "master-975-95b3090",
     "shipped": 20,
     "status": "ok",
     "uncompressed_mib": 45.6,
-    "url": "https://github.com/leejet/stable-diffusion.cpp/releases/download/master-975-95b3090/sd-master-95b3090-bin-win-cpu-x64.zip"
+    "url": "https://github.com/leejet/stable-diffusion.cpp/releases/download/master-975-95b3090/sd-master-95b3090-bin-win-cpu-x64.zip",
+    "verified_bytes": null
    }
   ]
  },
@@ -195,11 +295,13 @@
    "os": "win-x64",
    "packed_sum_mib": 18.7,
    "pairing": [],
+   "reader": "zip-central-directory",
    "release": "b11727",
    "shipped": 51,
    "status": "ok",
    "uncompressed_mib": 47.9,
-   "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11727/llama-b11727-bin-win-cpu-x64.zip"
+   "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11727/llama-b11727-bin-win-cpu-x64.zip",
+   "verified_bytes": null
   },
   {
    "archive_mib": 8.5,
@@ -225,11 +327,13 @@
    "os": "win-x64",
    "packed_sum_mib": 8.5,
    "pairing": [],
+   "reader": "zip-central-directory",
    "release": "b5454",
    "shipped": 31,
    "status": "ok",
    "uncompressed_mib": 22.1,
-   "url": "https://github.com/ggml-org/whisper.cpp/releases/download/b5454/whisper-bin-x64.zip"
+   "url": "https://github.com/ggml-org/whisper.cpp/releases/download/b5454/whisper-bin-x64.zip",
+   "verified_bytes": null
   },
   {
    "archive_mib": 16.9,
@@ -244,11 +348,13 @@
    "os": "win-x64",
    "packed_sum_mib": 16.9,
    "pairing": [],
+   "reader": "zip-central-directory",
    "release": "master-975-95b3090",
    "shipped": 20,
    "status": "ok",
    "uncompressed_mib": 45.6,
-   "url": "https://github.com/leejet/stable-diffusion.cpp/releases/download/master-975-95b3090/sd-master-95b3090-bin-win-cpu-x64.zip"
+   "url": "https://github.com/leejet/stable-diffusion.cpp/releases/download/master-975-95b3090/sd-master-95b3090-bin-win-cpu-x64.zip",
+   "verified_bytes": null
   },
   {
    "archive_mib": 17.1,
@@ -256,12 +362,24 @@
    "capability": "对话",
    "digest": "sha256:17bfcf2217ab5168888dd629a833e264babd488c0512fe18bc66e49632f00241",
    "engine": "llama",
+   "entries": 61,
+   "excluded": [],
+   "excluded_count": 0,
    "inferred_platform": false,
-   "note": "tar.gz 的中央目录读不了（格式决定），逐文件清单只能由 CI 打包时产出",
    "os": "linux-x64",
+   "packed_sum_mib": null,
+   "pairing": [],
+   "reader": "tar-stream",
    "release": "b11727",
-   "status": "needs_extract",
-   "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11727/llama-b11727-bin-ubuntu-x64.tar.gz"
+   "shipped": 61,
+   "status": "ok",
+   "uncompressed_mib": 44.3,
+   "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11727/llama-b11727-bin-ubuntu-x64.tar.gz",
+   "verified_bytes": {
+    "bytes": 17971994,
+    "digest_matches": true,
+    "sha256": "17bfcf2217ab5168888dd629a833e264babd488c0512fe18bc66e49632f00241"
+   }
   },
   {
    "archive_mib": 9.9,
@@ -269,12 +387,35 @@
    "capability": "字幕",
    "digest": "sha256:a72becf15d7917f990f6313867a52638b82b7f9ef237fb0c980dac56a135781c",
    "engine": "whisper",
+   "entries": 47,
+   "excluded": [
+    "whisper-bin-ubuntu-x64/test-whisper-zero-samples",
+    "whisper-bin-ubuntu-x64/test-parakeet-full-diffusion",
+    "whisper-bin-ubuntu-x64/test-whisper-lang-detect-abort",
+    "whisper-bin-ubuntu-x64/test-parakeet",
+    "whisper-bin-ubuntu-x64/test-parakeet-full-jfk",
+    "whisper-bin-ubuntu-x64/test-parakeet-full-gb1",
+    "whisper-bin-ubuntu-x64/test-common-utf8",
+    "whisper-bin-ubuntu-x64/test-vad-full",
+    "whisper-bin-ubuntu-x64/test-vad",
+    "whisper-bin-ubuntu-x64/test-whisper-buffer-loader"
+   ],
+   "excluded_count": 10,
    "inferred_platform": false,
-   "note": "tar.gz 的中央目录读不了（格式决定），逐文件清单只能由 CI 打包时产出",
    "os": "linux-x64",
+   "packed_sum_mib": null,
+   "pairing": [],
+   "reader": "tar-stream",
    "release": "b5454",
-   "status": "needs_extract",
-   "url": "https://github.com/ggml-org/whisper.cpp/releases/download/b5454/whisper-bin-ubuntu-x64.tar.gz"
+   "shipped": 37,
+   "status": "ok",
+   "uncompressed_mib": 26.8,
+   "url": "https://github.com/ggml-org/whisper.cpp/releases/download/b5454/whisper-bin-ubuntu-x64.tar.gz",
+   "verified_bytes": {
+    "bytes": 10364195,
+    "digest_matches": true,
+    "sha256": "a72becf15d7917f990f6313867a52638b82b7f9ef237fb0c980dac56a135781c"
+   }
   },
   {
    "archive_mib": 25.1,
@@ -289,11 +430,13 @@
    "os": "linux-x64",
    "packed_sum_mib": 25.1,
    "pairing": [],
+   "reader": "zip-central-directory",
    "release": "master-975-95b3090",
    "shipped": 35,
    "status": "ok",
    "uncompressed_mib": 65.0,
-   "url": "https://github.com/leejet/stable-diffusion.cpp/releases/download/master-975-95b3090/sd-master-95b3090-bin-Linux-Ubuntu-24.04-x86_64.zip"
+   "url": "https://github.com/leejet/stable-diffusion.cpp/releases/download/master-975-95b3090/sd-master-95b3090-bin-Linux-Ubuntu-24.04-x86_64.zip",
+   "verified_bytes": null
   },
   {
    "archive_mib": 11.7,
@@ -301,18 +444,88 @@
    "capability": "对话",
    "digest": "sha256:46d40093b6946854525682ce4ac53dcf4fd4b2e94ee03dd24e7b4f64ed039b95",
    "engine": "llama",
+   "entries": 61,
+   "excluded": [],
+   "excluded_count": 0,
    "inferred_platform": false,
-   "note": "tar.gz 的中央目录读不了（格式决定），逐文件清单只能由 CI 打包时产出",
    "os": "macos-arm64",
+   "packed_sum_mib": null,
+   "pairing": [],
+   "reader": "tar-stream",
    "release": "b11727",
-   "status": "needs_extract",
-   "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11727/llama-b11727-bin-macos-arm64.tar.gz"
+   "shipped": 61,
+   "status": "ok",
+   "uncompressed_mib": 31.0,
+   "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11727/llama-b11727-bin-macos-arm64.tar.gz",
+   "verified_bytes": {
+    "bytes": 12292958,
+    "digest_matches": true,
+    "sha256": "46d40093b6946854525682ce4ac53dcf4fd4b2e94ee03dd24e7b4f64ed039b95"
+   }
   },
   {
    "asset": null,
+   "asset_evidence": [
+    {
+     "asset": "whisper-b5454-xcframework.zip",
+     "entries": 200,
+     "has_main_binary": false,
+     "kinds": [
+      "(无扩展名)",
+      ".h",
+      ".modulemap",
+      ".plist",
+      ".yml"
+     ]
+    },
+    {
+     "asset": "whisper-b5130-xcframework.zip",
+     "entries": 200,
+     "has_main_binary": false,
+     "kinds": [
+      "(无扩展名)",
+      ".h",
+      ".modulemap",
+      ".plist",
+      ".yml"
+     ]
+    },
+    {
+     "asset": "whisper-b5127-xcframework.zip",
+     "entries": 200,
+     "has_main_binary": false,
+     "kinds": [
+      "(无扩展名)",
+      ".h",
+      ".modulemap",
+      ".plist",
+      ".yml"
+     ]
+    }
+   ],
    "capability": "字幕",
    "note": "选择条件 {'engine': 'whisper', 'platform': 'macos'} 在 discover 的产物表里唯一命中 0 次",
    "os": "macos-arm64",
+   "same_engine_platform_assets": [
+    {
+     "asset": "whisper-b5454-xcframework.zip",
+     "because": "排除词 'xcframework'（库包/附带资产，不是能起进程的产物）",
+     "mib": 62.8,
+     "release": "b5454"
+    },
+    {
+     "asset": "whisper-b5130-xcframework.zip",
+     "because": "排除词 'xcframework'（库包/附带资产，不是能起进程的产物）",
+     "mib": 54.5,
+     "release": "b5130"
+    },
+    {
+     "asset": "whisper-b5127-xcframework.zip",
+     "because": "排除词 'xcframework'（库包/附带资产，不是能起进程的产物）",
+     "mib": 54.5,
+     "release": "b5127"
+    }
+   ],
    "status": "上游无产物"
   },
   {
@@ -328,11 +541,13 @@
    "os": "macos-arm64",
    "packed_sum_mib": 34.8,
    "pairing": [],
+   "reader": "zip-central-directory",
    "release": "master-975-95b3090",
    "shipped": 5,
    "status": "ok",
    "uncompressed_mib": 93.9,
-   "url": "https://github.com/leejet/stable-diffusion.cpp/releases/download/master-975-95b3090/sd-master-95b3090-bin-Darwin-macOS-26.6.2-arm64.zip"
+   "url": "https://github.com/leejet/stable-diffusion.cpp/releases/download/master-975-95b3090/sd-master-95b3090-bin-Darwin-macOS-26.6.2-arm64.zip",
+   "verified_bytes": null
   }
  ],
  "totals_mib": {

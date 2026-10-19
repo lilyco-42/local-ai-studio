@@ -76,16 +76,17 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
 
 ## 验收标准（在当前唯一可用验证手段 = GitHub Actions 下）
 
-1. `ci.yml`：502 个单测绿（重数：`python -W error::ResourceWarning -m unittest discover -s tests
+1. `ci.yml`：516 个单测绿（重数：`python -W error::ResourceWarning -m unittest discover -s tests
    -p "test_*.py"`；按文件数就 `python -m unittest tests.<模块名>`。2026-10-20 实测逐文件：
    `test_yaml_gate.py` 闸门自己 11、`test_toolbelt_pins.py` 工具带钉表 14、
    `test_catalog_snapshot.py` 目录快照与侧表 16、`test_citation_check.py` 出处闸门 20、
    `test_ocr_build_surface.py` OCR 依赖面 15、`test_file_index.py` 下载层五种状态与首启队列 33、
-   `test_payload_plan.py` 装机负载 11、`test_pack_engine.py` 出包逻辑 10、
+   `test_payload_plan.py` 装机负载（含 tar 成员表与缺口点名）19、`test_pack_engine.py` 出包逻辑 10、
    `test_establish_verify.py` 字节复核 16、`test_shell_vars.py` shell 变量判据 14、
    `test_r2_manifest.py` 镜像清单 6、`test_lane_assertions.py` + `test_image_proof_block.py`
-   车道判据 38 + 6 = 44、`test_recommend_image.py` 生图档位表 31、`test_machine_budget.py` 装机预算 18、
-   `test_lane_replay_report.py` 给分段与预跑计数 3），
+   车道判据 38 + 6 = 44、`test_recommend_image.py` 生图档位表 31、`test_machine_budget.py` 装机预算 20、
+   `test_lane_replay_report.py` 给分段与预跑计数 3、`test_engine_probe.py` 产物名解析与 skipped 点名 30、
+   `test_recommend_subtitle.py` 字幕四表对账 44、`test_recommend_models.py` 对话档位表 46），
    `yaml_gate.py` 0 BAD、
    离线发现器解析出全部必需 target 且每个都带上游 sha256；单测在 `-W error::ResourceWarning` 下跑。
    闸门还把**车道 env 里每一条 64 位十六进制的值**反查出处（必须在 `pins/*.json` 或
@@ -244,9 +245,14 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     三条判据：主二进制不许被过滤掉、排除规则的总命中数不许为 0（**不逐包要求** ——
     llama/sd 的包里本来就没有 `test-*`，上一版就是这么误红的）、win 的 `x-impl.dll` 不许成孤儿。
     两个真实缺口写清楚而不是藏起来：
-    ① **whisper.cpp 的 release 没有 macOS 产物** → 字幕在 Apple silicon 上只能自编译或不做（产品决定，已立任务）；
-    ② llama/whisper 的 Linux 与 macOS 包是 **tar.gz**，中央目录读不了（格式决定），
-    那几行如实标 `needs_extract`，逐文件清单由出包车道解开作答（见第 15 条）。
+    ① **whisper.cpp 的 release 不为 Apple 平台发可执行文件**：唯一相关附件是 `whisper-b5454-xcframework.zip`，成员表（200 条）里只有各 slice 的 framework/Headers、库本体与 dSYM， 数不出 `whisper-cli`/`whisper-server` —— 所以字幕在 Apple silicon 上要么 CI 自己编（可以链这份库）， 要么不做（产品决定，已立任务 #29）；这一条不由散文负责：`payload_plan.py --live` 会把 `same_engine_platform_assets` 与 `asset_evidence`（条目数、有没有主二进制、扩展名分布）写进产物；
+    ② llama/whisper 的 Linux 与 macOS 包是 **tar.gz**，没有中央目录可读（格式决定）。
+    这不再是缺口了：`--live` 把它取到临时文件、**只读 tar 成员表**（不解包、不执行），
+    并且顺手要求"取回字节数 == release 声明的 size"与"整包 sha256 == 上游 digest"，
+    任一条不符就当场抛错而不是交出一份看起来完整的清单。实测三颗 CPU 包全部相等
+    （llama ubuntu 17,971,994 B `17bfcf22…`、whisper ubuntu 10,364,195 B `a72becf1…`
+    —— 后者与字幕车道钉的那颗逐字符相同、llama macOS 12,292,958 B `46d40093…`）。
+    只有"格式不认识"或"没跑 `--live`"的行才留在 `needs_extract`。
 15. **出包车道已经有了，且它先校哈希再解包**（`tools/pack_engine.py` + `.github/workflows/package.yml`）：
     按 OS 矩阵（win-x64 / linux-x64 / macos-arm64）取 `payload-plan` 选中的产物 →
     **整包 sha256 必须等于上游 digest，对不上就停，不许"先解包再说"** →
@@ -352,8 +358,9 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
        承诺最坏体验；查表的短针（`hf-mirror`）必须对得上表里的长键（`hf-mirror.com`），
        方向写反不报错、只会静默把慢吞吐读成 0 让整个最慢档消失，这条有独立用例；
     ③ **"没有产物"与"落地大小未知"是两件事**：macOS 的字幕是上游没发（`missing_capabilities`），
-       Linux/macOS 的 tar.gz 是读不了中央目录（`unknown_landed_sizes`）—— 把后者当缺失能力报出去
-       等于谎称那项功能在这台机器上没得用。
+       某行格式读不出成员表时才标 `unknown_landed_sizes`（`needs_extract`）—— 把后者当缺失能力
+       报出去等于谎称那项功能在这台机器上没得用。这一版之前 Linux/macOS 两档全靠它标"落地未知"，
+       现在三颗 tar 包读了成员表，三个 OS 的落地大小都是实测值。
     加总这一步反过来把生图那条链改了三处，方向全是**少算**，这就是为什么要把它单独算一遍：
     ④ **原先三档选中的生图默认行，仓库里都没有配套件**，而上游 `docs/sd.md:16` 的 flux 例子要
        `--vae --clip_l --t5xxl`、`:17` 的 sd3.5_large 要 `--clip_l --clip_g --t5xxl`（连同 `:13/:14/:15`

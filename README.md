@@ -148,8 +148,8 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   两个数都得给用户，否则"约 24 分钟"就是拿最好的网速承诺最坏的体验。
   产物自己带口径：`ram_statement` 写死"这是磁盘与下载量、不是峰值内存"（四项能力共用一个常驻
   引擎、一次只跑一项），内存那一轴由各档位表自己的判据负责；两类"算不出来"也分开记：
-  **没有产物**（macOS 的字幕，whisper 上游不发 macOS 包）与**落地大小未知**（llama/whisper 的
-  Linux/macOS 是 tar.gz，读不了中央目录）—— 混成一个就等于谎称那项功能在 Apple silicon 上没得用。
+  **没有产物**（macOS 的字幕：whisper 为 Apple 平台只发 xcframework 库、没有可执行文件）与  **落地大小未知**（某个包格式我们
+  读不出成员表时才标 `needs_extract`）—— 混成一个就等于谎称那项功能在这台机器上没得用。
   这张表一算出来就把生图那条链改了三处，方向全是"少算"：
   ① 三档原本选中的默认行**仓库里都没有配套件**，而上游 `docs/sd.md:16` 的 flux 例子要
   `--vae --clip_l --t5xxl`、`:17` 的 sd3.5_large 要 `--clip_l --clip_g --t5xxl`
@@ -167,10 +167,16 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   车道 `machine-budget` 三步全离线（它的输入就是那五张已提交的表加吞吐表）：`--selftest` →
   18 条单测 → `--check`。
 - `tools/payload_plan.py` + `pins/payload-plan.json`：装机负载计划（出包前必须先有的数字）。
-  按"没 CUDA 的 x64 / Apple silicon"选默认产物，Range 读 zip 中央目录拿逐文件大小：
-  引擎净负载 win 44.2 / linux 52.1 / macOS 46.5 MiB（不含权重），`whisper-bin-x64.zip` 41 条里
-  收 31 排除 10 个 `test-*.exe`。tar.gz（llama/whisper 的 Linux 与 macOS 包）读不了中央目录，
-  如实标 `needs_extract`；**whisper 上游根本没有 macOS 产物** —— 字幕在 Apple silicon 上要自编译。
+  按"没 CUDA 的 x64 / Apple silicon"选默认产物，zip 用 Range 读中央目录、tar.gz 读成员表
+  （都只读名字与大小，不解包、不执行）拿逐文件大小：引擎净负载 win 44.2 / linux 52.1 /
+  macOS 46.5 MiB，**落地** win 115.6 / linux 136.1 / macOS 124.9 MiB（都不含权重）；
+  `whisper-bin-x64.zip` 41 条里收 31、排除 10 个 `test-*.exe`，Linux 那个 tar 包同样数出 10 个测试程序。
+  tar.gz 那三行是**取到临时文件后整包算过 sha256 并等于上游 release digest** 才算读到的
+  （体积也要等于 release 声明，否则当截断）；zip 那几行只读了尾部中央目录，本来就没有整包字节，
+  所以两种行的证据强度不同，产物里只有前者带 `verified_bytes`。
+  **whisper 上游根本没有 macOS 的可执行产物** —— b5454 唯一的 Apple 附件是
+  `whisper-b5454-xcframework.zip`（200 条：framework/Headers + 各 slice 的库与 dSYM，
+  没有 `whisper-cli`/`whisper-server`），所以字幕在 Apple silicon 上要么 CI 自己编、要么不做。
 - `tools/pack_engine.py` + `.github/workflows/package.yml`：**出包这一步**。按 OS 矩阵取装机计划选中的产物 →
   整包 sha256 必须等于上游 digest（对不上就停，不解包）→ stdlib 解包并把顶层目录与 `Release/` 拉平
   （`$ORIGIN` 找运行库的前提）→ 逐文件哈希与体积写 `payload-manifest.json` 上传为 artifact。

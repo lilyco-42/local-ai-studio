@@ -149,5 +149,150 @@ class TestCommittedPlan(unittest.TestCase):
                 self.assertTrue(r.get("digest", "").startswith("sha256:"))
 
 
+class TestTarAndGapEvidence(unittest.TestCase):
+    """tar.gz 那几条路（读成员表 + 体积与整包哈希复核）与缺口行的"上游到底发了什么"。"""
+
+    def make_tar(self, d, names, gz=True):
+        import io
+        import tarfile
+        path = os.path.join(d, ("p.tar.gz" if gz else "p.tar"))
+        with tarfile.open(path, "w:gz" if gz else "w") as tf:
+            for n, sz in names:
+                ti = tarfile.TarInfo(n)
+                ti.size = sz
+                tf.addfile(ti, io.BytesIO(b"x" * sz))
+        return path
+
+    def sha(self, path):
+        import hashlib
+        h = hashlib.sha256()
+        with open(path, "rb") as fh:
+            for chunk in iter(lambda: fh.read(1 << 20), b""):
+                h.update(chunk)
+        return h.hexdigest()
+
+    def test_tar_summary_reads_members_and_confirms_bytes(self) -> None:
+        import tempfile
+        names = [("llama-b11727/llama-server", 300), ("llama-b11727/libggml-cpu.so", 700),
+                 ("llama-b11727/test-me", 5)]
+        with tempfile.TemporaryDirectory() as d:
+            p = self.make_tar(d, names)
+            es, meta = pp.tar_summary(p, os.path.getsize(p), self.sha(p))
+        self.assertEqual([e["name"] for e in es], [n for n, _ in names])
+        self.assertEqual(sum(e["size"] for e in es), 1005)
+        self.assertTrue(all(e["packed"] is None for e in es),
+                        "tar 没有逐文件压缩大小，不能填个数字假装是 zip")
+        self.assertTrue(meta["digest_matches"], meta)
+
+    def test_digest_matches_is_false_when_nothing_was_compared(self) -> None:
+        """没给 digest 可比时不许写 True —— 那一栏是给"验过"用的，不是给"没验"用的。"""
+        import tempfile
+        with tempfile.TemporaryDirectory() as d:
+            path = self.make_tar(d, [("a/bin", 10)])
+            size = os.path.getsize(path)
+            _es, meta = pp.tar_summary(path)
+        self.assertIs(meta["digest_matches"], False, meta)
+        self.assertEqual(meta["bytes"], size, meta)
+
+    def test_truncated_package_is_not_reported_as_read(self) -> None:
+        import tempfile
+        with tempfile.TemporaryDirectory() as d:
+            p = self.make_tar(d, [("a/bin", 10)])
+            with self.assertRaises(SystemExit) as e:
+                pp.tar_summary(p, os.path.getsize(p) + 1, None)
+        self.assertIn("截断", str(e.exception))
+
+    def test_unexpected_digest_is_fatal(self) -> None:
+        import tempfile
+        with tempfile.TemporaryDirectory() as d:
+            p = self.make_tar(d, [("a/bin", 10)])
+            with self.assertRaises(SystemExit) as e:
+                pp.tar_summary(p, os.path.getsize(p), "f" * 64)
+        self.assertIn("不是上游那个", str(e.exception))
+
+    def test_unknown_format_is_not_guessed(self) -> None:
+        es, reader, meta = pp.entries_for("https://x/pkg.7z", 10, None)
+        self.assertEqual((es, reader, meta), ([], "unknown-format", {}))
+
+    def gap_targets(self):
+        """macos 上 llama/sd 有主包、whisper 没有 —— 缺口行该点名 xcframework。"""
+        def t(eng, plat, arch, backend, asset):
+            return {"engine": eng, "platform": plat, "arch": arch, "backend": backend,
+                    "bundle": "main", "asset": asset, "url": f"https://x/{asset}",
+                    "size": 1048576, "digest": "sha256:" + "0" * 64, "release": "b5454"}
+        return {
+            "llama": t("llama", "macos", "arm64", "base", "llama-macos-arm64.tar.gz"),
+            "sd": t("sd", "macos", "arm64", "base", "sd-macos-arm64.zip"),
+            "whisper-win": t("whisper", "win", "x64", "base", "whisper-win.zip"),
+        }
+
+    SKIPPED = [{"engine": "whisper", "release": "b5454", "asset": "whisper-b5454-xcframework.zip",
+                "url": "https://x/whisper-b5454-xcframework.zip", "size": 62800000,
+                "because": "排除词 'xcframework'（库包/附带资产，不是能起进程的产物）"}]
+
+    FRAMEWORK = es("whisper.xcframework/macos-arm64/whisper.framework/whisper",
+                   "whisper.xcframework/macos-arm64/whisper.framework/Headers/whisper.h",
+                   "whisper.xcframework/macos-arm64/dSYMs/whisper.dSYM/Contents/Info.plist")
+
+    def run_gap(self, entries):
+        def fake(url):
+            if "xcframework" in url:
+                return entries
+            if "llama" in url:
+                return es("llama-server")
+            return es("sd-cli", "sd-server")
+        real = pp.ENTRIES_OVERRIDE
+        pp.ENTRIES_OVERRIDE = fake
+        try:
+            return pp.rows_for("macos-arm64", self.gap_targets(), True, self.SKIPPED)
+        finally:
+            pp.ENTRIES_OVERRIDE = real
+
+    def test_gap_row_names_the_apple_asset_and_proves_it_is_not_a_cli(self) -> None:
+        rows, bad = self.run_gap(self.FRAMEWORK)
+        sub = next(r for r in rows if r["capability"] == "字幕")
+        self.assertEqual(sub["status"], "上游无产物")
+        self.assertEqual([a["asset"] for a in sub["same_engine_platform_assets"]],
+                         ["whisper-b5454-xcframework.zip"])
+        self.assertIn("xcframework", sub["same_engine_platform_assets"][0]["because"])
+        self.assertEqual(sub["asset_evidence"][0]["has_main_binary"], False,
+                         "framework 里没有 whisper-cli，这一条要数得出来")
+        self.assertEqual(bad, [])
+
+    def test_same_judge_says_true_when_the_asset_does_carry_the_binary(self) -> None:
+        """正向对照：换成含 whisper-cli 的条目表，判据就得说 True（否则上面那条是永远 False）。"""
+        _rows, _bad = None, None
+        real = pp.ENTRIES_OVERRIDE
+        pp.ENTRIES_OVERRIDE = lambda url: es("whisper-cli", "whisper-server")
+        try:
+            rows = pp.rows_for("macos-arm64", self.gap_targets(), True, self.SKIPPED)[0]
+        finally:
+            pp.ENTRIES_OVERRIDE = real
+        sub = next(r for r in rows if r["capability"] == "字幕")
+        self.assertEqual(sub["asset_evidence"][0]["has_main_binary"], True, sub)
+
+    def test_committed_plan_carries_the_apple_evidence(self) -> None:
+        """已提交那张表里，macOS 字幕这一行必须点名 xcframework 并给出成员表证据。"""
+        import json
+        with open(os.path.join(HERE, "..", "pins", "payload-plan.json"), encoding="utf-8") as fh:
+            plan = json.load(fh)
+        sub = next(r for r in plan["os"]["macos-arm64"] if r["capability"] == "字幕")
+        self.assertTrue(sub["same_engine_platform_assets"], sub)
+        self.assertTrue(sub["asset_evidence"], sub)
+        for ev in sub["asset_evidence"]:
+            self.assertFalse(ev["has_main_binary"], ev)
+            self.assertGreater(ev["entries"], 0)
+        # 三颗 tar 包读了成员表之后，Linux/macOS 不再是"只能由 CI 解开作答"
+        for os_label in ("linux-x64", "macos-arm64"):
+            known = [r for r in plan["os"][os_label] if r.get("engine")]
+            self.assertTrue(all(r.get("uncompressed_mib") for r in known),
+                            (os_label, [(r["capability"], r["status"]) for r in known]))
+            for r in known:
+                if r["status"] == "needs_extract":
+                    self.fail(f"{os_label}/{r['capability']} 还标着 needs_extract")
+                if r.get("verified_bytes"):
+                    self.assertTrue(r["verified_bytes"]["digest_matches"], r["asset"])
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -221,5 +221,36 @@ class TestPlan(unittest.TestCase):
             self.assertGreater(v["size"], 1024 * 100, f"{target} 大小可疑")
 
 
+class TestSkippedAssets(unittest.TestCase):
+    """被挡掉的附件要能被点名 —— "这个平台没有主包"与"上游发了但不是可执行产物"是两件事。"""
+
+    def test_xcframework_is_recorded_with_its_reason(self) -> None:
+        releases = {"whisper": load("whisper")}
+        skipped = probe.skipped_of(releases)
+        xc = [s for s in skipped if "xcframework" in s["asset"]]
+        self.assertTrue(xc, [s["asset"] for s in skipped][:8])
+        self.assertIn("xcframework", xc[0]["because"])
+        self.assertTrue(xc[0]["url"].startswith("https://"), xc[0])
+        self.assertIsNone(probe.parse_asset("whisper", xc[0]["asset"]),
+                          "既然被 parse_asset 收下了，就不该同时出现在 skipped 里")
+
+    def test_main_products_are_never_in_the_skipped_list(self) -> None:
+        """反向对照：正常能用的产物不许混进 skipped（那样点名就变成"上游啥都发了"）。"""
+        releases = {"whisper": load("whisper")}
+        skipped = {s["asset"] for s in probe.skipped_of(releases)}
+        kept = {v["asset"] for v in probe.plan(releases).values()}
+        self.assertEqual(skipped & kept, set(), sorted(skipped & kept))
+
+    def test_exclusion_reason_is_not_a_single_string(self) -> None:
+        self.assertIn("xcframework", probe.exclusion_reason("whisper", "whisper-x-xcframework.zip"))
+        self.assertIn("没匹配", probe.exclusion_reason("whisper", "彻底不认识的东西.tar.gz"))
+
+    def test_manifest_only_carries_skipped_when_given(self) -> None:
+        got = probe.plan({"whisper": load("whisper")})
+        self.assertNotIn("skipped", probe.manifest_of(got),
+                         "单参数调用不该多出一个键 —— 老消费者按形状取数会被惊到")
+        self.assertIn("skipped", probe.manifest_of(got, []))
+
+
 if __name__ == "__main__":
     unittest.main()

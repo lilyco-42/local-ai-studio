@@ -15,23 +15,23 @@
      "download_bytes": 22360077651,
      "download_gib": 20.82,
      "engine_download_mib": 52.1,
-     "engine_landed_mib": null,
+     "engine_landed_mib": 136.1,
      "engine_rows": [
       {
        "asset": "llama-b11727-bin-ubuntu-x64.tar.gz",
        "capability": "对话",
        "download_mib": 17.1,
        "engine": "llama",
-       "landed_mib": null,
-       "status": "needs_extract"
+       "landed_mib": 44.3,
+       "status": "ok"
       },
       {
        "asset": "whisper-bin-ubuntu-x64.tar.gz",
        "capability": "字幕",
        "download_mib": 9.9,
        "engine": "whisper",
-       "landed_mib": null,
-       "status": "needs_extract"
+       "landed_mib": 26.8,
+       "status": "ok"
       },
       {
        "asset": "sd-master-95b3090-bin-Linux-Ubuntu-24.04-x86_64.zip",
@@ -44,25 +44,22 @@
      ],
      "minutes_at_measured_rate": 84.6,
      "missing_capabilities": [],
-     "unknown_landed_sizes": [
-      "字幕",
-      "对话"
-     ],
+     "unknown_landed_sizes": [],
      "worst_case_hours_at_slowest_measured": 23.69
     },
     "macos-arm64": {
      "download_bytes": 22354205625,
      "download_gib": 20.82,
      "engine_download_mib": 46.5,
-     "engine_landed_mib": null,
+     "engine_landed_mib": 124.9,
      "engine_rows": [
       {
        "asset": "llama-b11727-bin-macos-arm64.tar.gz",
        "capability": "对话",
        "download_mib": 11.7,
        "engine": "llama",
-       "landed_mib": null,
-       "status": "needs_extract"
+       "landed_mib": 31.0,
+       "status": "ok"
       },
       {
        "asset": null,
@@ -85,9 +82,7 @@
      "missing_capabilities": [
       "字幕"
      ],
-     "unknown_landed_sizes": [
-      "对话"
-     ],
+     "unknown_landed_sizes": [],
      "worst_case_hours_at_slowest_measured": 23.69
     },
     "win-x64": {
@@ -300,23 +295,23 @@
      "download_bytes": 6347829883,
      "download_gib": 5.91,
      "engine_download_mib": 52.1,
-     "engine_landed_mib": null,
+     "engine_landed_mib": 136.1,
      "engine_rows": [
       {
        "asset": "llama-b11727-bin-ubuntu-x64.tar.gz",
        "capability": "对话",
        "download_mib": 17.1,
        "engine": "llama",
-       "landed_mib": null,
-       "status": "needs_extract"
+       "landed_mib": 44.3,
+       "status": "ok"
       },
       {
        "asset": "whisper-bin-ubuntu-x64.tar.gz",
        "capability": "字幕",
        "download_mib": 9.9,
        "engine": "whisper",
-       "landed_mib": null,
-       "status": "needs_extract"
+       "landed_mib": 26.8,
+       "status": "ok"
       },
       {
        "asset": "sd-master-95b3090-bin-Linux-Ubuntu-24.04-x86_64.zip",
@@ -329,25 +324,22 @@
      ],
      "minutes_at_measured_rate": 24.0,
      "missing_capabilities": [],
-     "unknown_landed_sizes": [
-      "字幕",
-      "对话"
-     ],
+     "unknown_landed_sizes": [],
      "worst_case_hours_at_slowest_measured": 6.73
     },
     "macos-arm64": {
      "download_bytes": 6341957857,
      "download_gib": 5.91,
      "engine_download_mib": 46.5,
-     "engine_landed_mib": null,
+     "engine_landed_mib": 124.9,
      "engine_rows": [
       {
        "asset": "llama-b11727-bin-macos-arm64.tar.gz",
        "capability": "对话",
        "download_mib": 11.7,
        "engine": "llama",
-       "landed_mib": null,
-       "status": "needs_extract"
+       "landed_mib": 31.0,
+       "status": "ok"
       },
       {
        "asset": null,
@@ -370,9 +362,7 @@
      "missing_capabilities": [
       "字幕"
      ],
-     "unknown_landed_sizes": [
-      "对话"
-     ],
+     "unknown_landed_sizes": [],
      "worst_case_hours_at_slowest_measured": 6.72
     },
     "win-x64": {
@@ -526,23 +516,23 @@
      "download_bytes": 12571666259,
      "download_gib": 11.71,
      "engine_download_mib": 52.1,
-     "engine_landed_mib": null,
+     "engine_landed_mib": 136.1,
      "engine_rows": [
       {
        "asset": "llama-b11727-bin-ubuntu-x64.tar.gz",
        "capability": "对话",
        "download_mib": 17.1,
        "engine": "llama",
-       "landed_mib": null,
-       "status": "needs_extract"
+       "landed_mib": 44.3,
+       "status": "ok"
       },
       {
        "asset": "whisper-bin-ubuntu-x64.tar.gz",
        "capability": "字幕",
        "download_mib": 9.9,
        "engine": "whisper",
-       "landed_mib": null,
-       "status": "needs_extract"
+       "landed_mib": 26.8,
+       "status": "ok"
       },
       {
        "asset": "sd-master-95b3090-bin-Linux-Ubuntu-24.04-x86_64.zip",
@@ -555,25 +545,22 @@
      ],
      "minutes_at_measured_rate": 47.6,
      "missing_capabilities": [],
-     "unknown_landed_sizes": [
-      "字幕",
-      "对话"
-     ],
+     "unknown_landed_sizes": [],
      "worst_case_hours_at_slowest_measured": 13.32
     },
     "macos-arm64": {
      "download_bytes": 12565794233,
      "download_gib": 11.7,
      "engine_download_mib": 46.5,
-     "engine_landed_mib": null,
+     "engine_landed_mib": 124.9,
      "engine_rows": [
       {
        "asset": "llama-b11727-bin-macos-arm64.tar.gz",
        "capability": "对话",
        "download_mib": 11.7,
        "engine": "llama",
-       "landed_mib": null,
-       "status": "needs_extract"
+       "landed_mib": 31.0,
+       "status": "ok"
       },
       {
        "asset": null,
@@ -596,9 +583,7 @@
      "missing_capabilities": [
       "字幕"
      ],
-     "unknown_landed_sizes": [
-      "对话"
-     ],
+     "unknown_landed_sizes": [],
      "worst_case_hours_at_slowest_measured": 13.32
     },
     "win-x64": {

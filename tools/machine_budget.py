@@ -24,7 +24,7 @@
      不同城市/运营商必然不同；产物里 `measured_at_exit` 就写这台机器，不装作普适。
 
 macOS 那一档现在必然缺一块：`pins/payload-plan.json` 的 gaps 里写着
-**字幕在 macos-arm64 上游无产物**（whisper.cpp 不发 macOS 包），所以 macOS 的预算
+**字幕在 macos-arm64 上游无产物**（whisper.cpp 不为 Apple 平台发可执行文件，只发 xcframework 库；逐文件成员表由 payload-plan 的 `asset_evidence` 记着），所以 macOS 的预算
 天生只含三项能力 + 一句 flag —— 这不是 bug，是把未决事项算进去。
 """
 from __future__ import annotations
@@ -214,7 +214,9 @@ def build(arts: dict) -> tuple[dict, list[str]]:
         for os_key, eng in sorted(plan["os"].items()):
             eng_mib = float(plan["totals_mib"][os_key])
             total_bytes = sum(i["bytes"] for i in items) + int(round(eng_mib * MIB))
-            landed = [r.get("uncompressed_mib") for r in eng]
+            # 只有"真的有引擎产物"的行才参与落地大小：没产物那一行是**缺席不是未知**，
+            # 把它算进 all(...) 会让整个 macOS 的落地大小被一个不存在的包拖成未知。
+            landed = [r.get("uncompressed_mib") for r in eng if r.get("engine")]
             landed_mib = round(sum(v for v in landed if v), 1)
             rows = [{"capability": r["capability"], "engine": r.get("engine"),
                      "asset": r.get("asset"), "status": r["status"],

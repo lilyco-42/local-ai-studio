@@ -531,7 +531,7 @@ jobs:
           python-version: "3.12"
       - name: 离线：产物级选择与大小（选错产物就是打错包）
         run: python3 tools/payload_plan.py
-      - name: 逐文件：Range 读 zip 中央目录（tar.gz 如实标 needs_extract）
+      - name: 逐文件：zip 读中央目录、tar.gz 读成员表（并对 release 声明的体积与 digest 复核整包）
         run: python3 tools/payload_plan.py --live
 
   file-index:

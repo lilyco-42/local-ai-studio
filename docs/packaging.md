@@ -65,5 +65,5 @@ LM Studio 也是这个形态（壳先装好、模型首启下载），所以"安
   `queued`、`runner_name: null`）。上面 ①②④ 都是本机读公共来源量的，**唯独"车道真跑一遍装出包"必须等解锁**（#19）。
 - **签名**：macOS 要 Apple 证书 + notarization secrets；Windows 签名要代码签名证书，不签就吃 SmartScreen 提示。
   这两件都要花钱/要账号，由他定；不签名也能出包，只是首启有警告。
-- **macOS 的字幕**：上游 whisper.cpp 没有 macOS 产物（`payload-plan` 里那行 `上游无产物`），
+- **macOS 的字幕**：上游 whisper.cpp 没有 macOS 的**可执行**产物（`payload-plan` 里那行 `上游无产物`， 同排的 `asset_evidence` 记着 xcframework 的成员表与"里面没有 whisper-cli"这一事实），
   要么自编译（CI 里 cmake + Metal）、要么这个平台先不做字幕（#29）。

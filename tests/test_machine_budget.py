@@ -163,18 +163,18 @@ class TestArithmetic(unittest.TestCase):
                       "换算用的吞吐是哪台机器量的，必须写在产物里")
 
     def test_missing_and_unknown_landed_are_different_things(self) -> None:
+        plan = src("pins/payload-plan.json")
         mac = self.d["per_tier"]["4GB"]["by_os"]["macos-arm64"]
-        lin = self.d["per_tier"]["4GB"]["by_os"]["linux-x64"]
-        win = self.d["per_tier"]["4GB"]["by_os"]["win-x64"]
         self.assertEqual(mac["missing_capabilities"], ["字幕"], "whisper 上游没有 macOS 产物")
         self.assertNotIn("对话", mac["missing_capabilities"])
-        self.assertIn("对话", mac["unknown_landed_sizes"])
-        self.assertEqual(sorted(lin["unknown_landed_sizes"]), ["字幕", "对话"])
-        self.assertEqual(lin["missing_capabilities"], [])
-        self.assertEqual(win["missing_capabilities"], [])
-        self.assertEqual(win["unknown_landed_sizes"], [])
-        self.assertIsNone(mac["engine_landed_mib"], "有一行读不了就得整体标未知")
-        self.assertIsNotNone(win["engine_landed_mib"])
+        for os_key, ov in self.d["per_tier"]["4GB"]["by_os"].items():
+            # 三个 OS 都不该再有"落地大小未知"：tar.gz 那几行现在读了成员表
+            self.assertEqual(ov["unknown_landed_sizes"], [], os_key)
+            self.assertIsNotNone(ov["engine_landed_mib"], os_key)
+            want = round(sum(r.get("uncompressed_mib") or 0 for r in plan["os"][os_key]), 1)
+            self.assertAlmostEqual(ov["engine_landed_mib"], want, places=1, msg=os_key)
+        # "没有产物"与"落地大小未知"是两件事这条判据本身，由 --selftest 里那行
+        # needs_extract 的合成包负责（真数据现在三行都有落地大小了，读产物的测试碰不到它）
 
     def test_budget_refuses_to_invent_a_memory_number(self) -> None:
         self.assertEqual(self.d["ram_statement"], "本文件的 download_bytes 是磁盘与下载量，不是峰值内存")
@@ -284,6 +284,41 @@ class TestCli(unittest.TestCase):
             self.assertIn("要下完自算的行", text)
             self.assertTrue(os.path.exists(os.path.join(d, "budget.json")),
                             "给了 --out 却没落盘")
+
+
+class TestAbsentVersusUnknown(unittest.TestCase):
+    """缺席与未知是两件事，落地大小这一栏最容易被拖浑。"""
+
+    def arts(self, eng_rows, totals):
+        return {
+            "pins/payload-plan.json": {"totals_mib": {"win-x64": totals}, "os": {"win-x64": eng_rows},
+                                       "gaps": []},
+            "catalog/defaults.json": {"entries": {}},
+            "pins/ocr-languages.json": {},
+            "catalog/recommendations.json": {"tiers": ["4GB"], "tiers_rows": {"4GB": []}},
+            "catalog/subtitle-tiers.json": {"tiers_rows": {"4GB": []}},
+            "catalog/image-tiers.json": {"tiers_rows": {"4GB": []}, "weights": []},
+        }
+
+    def test_a_row_without_an_engine_contributes_nothing_rather_than_unknown(self) -> None:
+        arts = self.arts([{"capability": "对话", "engine": "llama", "status": "ok",
+                           "archive_mib": 5.0, "uncompressed_mib": 10.0},
+                          {"capability": "字幕", "engine": None, "status": "上游无产物",
+                           "archive_mib": None}], 5.0)
+        blk = mb.build(arts)[0]["per_tier"]["4GB"]["by_os"]["win-x64"]
+        self.assertEqual(blk["engine_landed_mib"], 10.0, blk)
+        self.assertEqual(blk["unknown_landed_sizes"], [], blk)
+        self.assertEqual(blk["missing_capabilities"], ["字幕"], blk)
+
+    def test_a_real_needs_extract_row_still_makes_landed_size_unknown(self) -> None:
+        """反向：真读不了成员表的那一行，仍然必须把整机标成未知。"""
+        arts = self.arts([{"capability": "对话", "engine": "llama", "status": "needs_extract",
+                           "archive_mib": 5.0},
+                          {"capability": "字幕", "engine": "whisper", "status": "ok",
+                           "archive_mib": 2.0, "uncompressed_mib": 4.0}], 7.0)
+        blk = mb.build(arts)[0]["per_tier"]["4GB"]["by_os"]["win-x64"]
+        self.assertIsNone(blk["engine_landed_mib"], blk)
+        self.assertEqual(blk["unknown_landed_sizes"], ["对话"], blk)
 
 
 if __name__ == "__main__":

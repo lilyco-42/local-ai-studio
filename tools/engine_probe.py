@@ -236,16 +236,53 @@ def pin_missing(got: dict) -> list[str]:
     return sorted(out)
 
 
-def manifest_of(got: dict) -> dict:
+def exclusion_reason(engine: str, name: str) -> str:
+    """为什么这条附件没进产物表 —— 缺口行要点名，不能只说"上游无产物"。"""
+    for tok in EXCLUDE_TOKENS:
+        if tok in name:
+            return f"排除词 {tok!r}（库包/附带资产，不是能起进程的产物）"
+    for rx, _b, _f in PATTERNS[engine]:
+        m = rx.match(name)
+        if not m:
+            continue
+        arch = _arch_of(m.groupdict().get("rest") or "")
+        if arch in EXCLUDE_ARCH:
+            return f"排除架构 {arch!r}"
+    return "没匹配到任何已知产物形状"
+
+
+def skipped_of(releases: dict) -> list[dict]:
+    """被 `parse_asset` 挡掉的附件原样记下来。
+
+    "这个平台没有主包"与"上游为它发了东西、只是那东西不是可执行产物"是两件事：
+    whisper 的 Apple 附件就是后者（`whisper-*-xcframework.zip` 只有 framework 与库）。
+    不记下来的话，缺口行只能写"上游无产物"，而决定（#29）要的恰恰是"上游到底发了什么"。
+    """
+    out = []
+    for engine, rels in releases.items():
+        for rel in rels:
+            for a in rel.get("assets") or []:
+                if parse_asset(engine, a.get("name") or "") is None:
+                    out.append({"engine": engine, "release": rel.get("tag_name"),
+                                "asset": a.get("name"), "url": a.get("browser_download_url"),
+                                "size": a.get("size"),
+                                "because": exclusion_reason(engine, a.get("name") or "")})
+    return out
+
+
+def manifest_of(got: dict, skipped: list[dict] | None = None) -> dict:
     """CI 直接按这份结构取产物：inferred 是"OS 靠猜、必须解压证实"的 target 清单，
     车道要遍历的正是它，不能拿一个本来就写了 win 的产物去当证据。
     no_pin 是上游 digest 缺失的 target；非空就必须红，别让下载端退回"不校验"。"""
-    return {
+    m = {
         "targets": got,
         "counts": {e: sum(1 for v in got.values() if v["engine"] == e) for e in UPSTREAM},
         "inferred": sorted(k for k, v in got.items() if v["inferred_platform"]),
         "no_pin": pin_missing(got),
     }
+    if skipped is not None:
+        m["skipped"] = skipped
+    return m
 
 
 def main(argv: list[str]) -> int:
@@ -267,7 +304,7 @@ def main(argv: list[str]) -> int:
             releases[engine] = json.load(open(os.path.join(args.fixtures, f"{engine}.json"), encoding="utf-8"))
 
     got = plan(releases)
-    manifest = manifest_of(got)
+    manifest = manifest_of(got, skipped_of(releases))
     if args.json:
         with open(args.json, "w", encoding="utf-8") as fh:
             json.dump(manifest, fh, ensure_ascii=False, indent=1, sort_keys=True)
