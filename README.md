@@ -52,8 +52,8 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
 - `tools/r2_manifest.py`：从 `pins/*.json` 推导"该镜像什么"，按源分组给实测吞吐换算，
   产出 `mirror/r2-intake.json`（只是清单，不含上传动作）。
 - `tools/citation_check.py` + `pins/citations.json`：把"上游某 ref 的某一行写着某件事"这类结论
-  变成能查的东西。52 条声明各记（2026-10-20 按 pin ref 实跑过一次，0 问题；`--cache .cache/refs --fill` 抓一次原文之后可离线复算） `repo/ref/path/line/expect`（还多一种 `absent`：连「这份文件里没有 X」也要查），逐条取回上游**核对那一行仍然含那个子串**
-  （只看文件在不在没用：默认值改了文件照样在），子串命中不就不唯一就不配进表。
+  变成能查的东西。57 条声明各记（2026-10-20 按 pin ref 实跑过一次，0 问题；`--cache .cache/refs --fill` 抓一次原文之后可离线复算） `repo/ref/path/line/expect`（还多一种 `absent`：连「这份文件里没有 X」也要查），逐条取回上游**核对那一行仍然含那个子串**
+  （只看文件在不在没用：默认值改了文件照样在），子串命中不唯一就不配进表。
   建表时已经按这两条筛过；车道 `citation-drift` 先跑 `--selftest`（明知错的必须认成错）再逐条核对。
   来历：本轮踩过六次"判据指向一个不存在的东西却照样跑完"（`llama-completions`、去 tag 里找 CLI、
   `-of jfk.srt`、去日志里找 `Steps:`、grep `tokens per second`…）。
@@ -88,6 +88,23 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   实测定过这两条为什么要存在：只按 `≤ 档位` 排，8GB/16GB 档的前两行和 4GB 一模一样（都是 0.6B）；
   只取偏好第一名，8GB 档拿到 `ggml-org/Qwen3-8B-GGUF` 的 Q8_0 —— 8,709,518,656 字节，比机器总内存还大。
   车道 `recommendations`：先跑离线判据（含"用真元数据切片重算已提交那张表"），再 `--live --check` 盯上游漂移。
+- `tools/recommend_subtitle.py` + `catalog/subtitle-tiers.json`：**字幕这一档**的同一件事，但换一个来源。
+  对话那张靠 llmfit 的拟合值，而 **llmfit 目录里 ASR 只有 5 条**（OCR/生图 0 条）—— 字幕没有拟合值可用，
+  只能回到 whisper.cpp 自己写的四张表：README 的 `Model | Disk | Mem`（峰值内存是上游给的，不是我拍的换算）、
+  `models/README.md` 的 `Model | Disk | SHA` 与三条语义规则（`.en` 只有英文、`-q5_0` 是量化、
+  `for-tests-` 前缀的文件是空壳）、`models/download-ggml-model.sh` 的白名单与下载源（域名从脚本读）、
+  宿主仓库 `ggerganov/whisper.cpp` 的文件表。**Mem 只按上游两张表的 Disk 原文精确相等来接**，
+  所以量化档与 `large-v3-turbo` 是 `fit=unknown`（只列进候选表、不进档位推荐 —— 上游没给数字就不假装知道）。
+  默认档另加一条我们自己的余量规则：`Mem <= 档位 × 0.5`（4 GB 机器不该被推荐峰值 ~3.9 GB 的大档），
+  纯算术的"塞得进"另列一栏。实测（b5454）：33 个可下载模型、22 个没有官方峰值内存；
+  4GB → medium / 8GB、16GB → large-v3。整轴哈希只有 HF 一家给（ModelScope 返回 0 个文件，
+  实测）→ 全部 `single`，且 `distributor_absent` 标出"实测最快那个源根本没有这个仓库"。
+  语言这一轴也从源码量出来：`src/whisper.cpp:286` 的 `g_lang` 表实测 **100 种语言、id 从 0 连续到 99**
+  （`en`=0、`zh`=1、`yue`=99 粤语）。UI 的下拉应当在运行时问 `whisper_lang_str()`，我们读这张表
+  只是为了量出这一轴有多宽并盯住上游改动（表形状一变就该红，而不是下拉少了一项没人知道）。
+  车道 `subtitle-tiers`：`--selftest`（含明知是错的必须认成错）→ 41 条单测（含"这张表算出的
+  `ggml-tiny.bin` sha256 必须逐字节等于 `pins/models.json` 里字幕车道已钉那颗 pin"这条跨产物不变量）
+  → `--fixtures --check` 离线重算 → `--live --check`。
 - `tools/payload_plan.py` + `pins/payload-plan.json`：装机负载计划（出包前必须先有的数字）。
   按"没 CUDA 的 x64 / Apple silicon"选默认产物，Range 读 zip 中央目录拿逐文件大小：
   引擎净负载 win 44.2 / linux 52.1 / macOS 46.5 MiB（不含权重），`whisper-bin-x64.zip` 41 条里

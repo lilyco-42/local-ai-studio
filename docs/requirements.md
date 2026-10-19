@@ -194,7 +194,7 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
    `--cors-origins` 收窄到应用来源；② whisper / sd **没有 key 可给**，只能按需起、用完停，或由外壳反代
    （外壳持有唯一端口并自己发 token）；③ UI 永不直连引擎端口。
    这一条现在只有源码级证据，实现与验证都还没做 —— 列在验收里是为了别等写外壳时才发现架构选错了。
-11. **每条 `file:line` 出处本身要能被查**：`pins/citations.json` 52 条声明（其中 1 条是 `absent`
+11. **每条 `file:line` 出处本身要能被查**：`pins/citations.json` 57 条声明（其中 1 条是 `absent`
     型缺席断言：runner 镜像 readme 里没有 `webkit2gtk`），每条记
    `repo/ref/path/line/expect/claim`；`tools/citation_check.py` 按 pin 住的 ref 取回那份文件，
    核对**那一行仍然含着 expect 的子串**（不是只看文件在不在 —— 上游把 `cors_origins` 默认值改掉
@@ -203,13 +203,15 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
    "至少 20 条"的覆盖度地板。这一条是给第 10 条与整张判据出处表兜底的：本轮已经踩过六次
    "判据指向一个不存在的东西却照样跑完"（`llama-completions`、去 tag 里找 CLI、`-of jfk.srt`、
    去日志里找 `Steps:`、grep `tokens per second`…）。
-   证过它承重：临时改一条 expect → 1 条红并打印上游实际那一行；行号整体 +1 →
-   行号整体 +1 → **51 条全红**（52 条里除 1 条 `absent` 型之外全部；那条本来就不看行号），
+   证过它承重：临时改一条 expect → 1 条红并打印上游实际那一行；
+   行号整体 +1 → **56 条全红**（57 条里除 1 条 `absent` 型之外全部；那条本来就不看行号），
    也就是说这张表里没有一条"永远绿"的摆设。这件事现在**不必联网也能重跑**：
-   `python tools/citation_check.py --cache .cache/refs --fill` 抓一次原文（21 份、828 KB，
-   目录已 .gitignore），之后 `--cache .cache/refs` 离线复算就是"52 条真查了、0 条跳过"；
+   `python tools/citation_check.py --cache .cache/refs --fill` 抓一次原文（24 份、838 KB，
+   目录已 .gitignore），之后 `--cache .cache/refs` 离线复算就是"57 条真查了、0 条跳过"；
    跳过的那些会被点名说"不是通过，是没查"，这条本身有单测守着。
-   2026-10-20 全部 52 条按 pin ref 联网实跑过一次（0 问题），车道 `citation-drift` 本身仍是 0 次执行。
+   重数这三句：`python tools/citation_check.py --cache .cache/refs`（计数行）与
+   「把每条 line 加一再核对」那段（`tests/test_citation_check.py` 里有同形状的用例）。
+   2026-10-20 全部 57 条按 pin ref 联网实跑过一次（0 问题），车道 `citation-drift` 本身仍是 0 次执行。
 12. **OCR 的依赖图要真的被钉住**（这条目前是**未达成**状态，写在这里是为了不让它被"车道绿了"蒙过去）：
    上游 oar-ocr 不发 `Cargo.lock`（实测 404，正向对照 206），而 40 个外部包里只有 `ort` 是 `=` 精确钉的、
    其余 37 个是 caret → `cargo build` 会在构建时重新解析。所以：
@@ -282,6 +284,32 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     `--live --check` 盯上游漂移；而 `--fixtures` 那条路**永远不许落盘**（本轮被自己咬过：
     一次没带 `--check` 的 `--fixtures` 把整张产品表覆盖成切片算出的那张，行数照样 15，
     只有 `candidate_pool` 从 1,283 掉到 45 —— 现在闸门看的就是这个计数）。
+18. **字幕这一档不能沿用对话那张表的来源，四张上游表必须互相对账**：llmfit 目录里
+    **ASR 只有 5 条**（OCR/生图 0 条，已实测），所以"这台机器跑哪颗 whisper 模型"没有拟合值可用，
+    `tools/recommend_subtitle.py` 只能回到 whisper.cpp 自己写的东西：README 的 `Model | Disk | Mem`
+    （峰值内存 ~273 MB…~3.9 GB 是**上游给的**，不是我们按文件大小乘一个系数拍的）、
+    `models/README.md` 的 `Model | Disk | SHA`（16 行）与三条语义规则（`.en` 只有英文、
+    `-q5_0` 是量化、**`for-tests-` 前缀的模型文件是空的**——按"仓库里所有 .bin"收集就会把 CI 占位符
+    当权重发给用户）、`models/download-ggml-model.sh` 的 30 条白名单与下载源（域名从脚本读）、
+    宿主仓库 `ggerganov/whisper.cpp` 的文件表。**验收要看五件事**：
+    ① `Mem` 只在上游两张表的 `Disk` 原文**精确相等**时才套用（`large-v3-turbo` 实测 1.5 GiB
+    与 large 档的 2.9 GiB 不是同一档 → 它就没有内存数字，`fit=unknown`，**只列进候选表、不进档位推荐**；
+    量化档同理 —— 上游只给未量化档的 Mem，宁缺毋滥）；
+    ② 默认档另加我们自己的余量规则 `Mem <= 档位 × 0.5`，而"塞得进吗"另列一栏纯算术
+    （4 GB 机器算术上装得下峰值 ~3.9 GB 的大档，但那是把系统挤死的算术）；
+    ③ 上游三张表自己就互相不一致 —— 实测 `small.en-tdrz` 在脚本白名单里但宿主没有该文件，
+    宿主有 4 个 `.en-q8_0` 而脚本没列。这类**上游内部的出入记成产物里的 `deltas`，
+    由 `check()` 盯着集合变化**，而不是让车道天天红（红要有原因）；
+    ④ 整轴哈希只有 HF 一家给（ModelScope 对该仓库实测返回 0 个文件），所以每一条都是
+    `single`、都要标 `usable_before_download=false`，并把"实测最快那个源根本不存在"写进
+    `distributor_absent` 让 UI 灰掉那条候选 —— **不许因为镜像站名字像就当成两家确认**；
+    ⑤ 跨产物不变量：这张表算出的 `ggml-tiny.bin` sha256 必须逐字节等于
+    `pins/models.json` 里字幕车道已经钉住的那颗 pin（否则"车道用的模型"与"推荐给用户的模型"
+    就是两套真相）。语言这一轴也量出来了：`src/whisper.cpp:286` 的 `g_lang` 表 **100 种语言、
+    id 从 0 连续到 99**（`en`=0、`zh`=1、`yue`=99），而 `.en` 档只有英文（上游 `models/README.md:63`）
+    → **UI 选 `.en` 模型时语言下拉必须只剩英文**，下拉本身应由外壳运行时问引擎
+    （`whisper_lang_str`），不把 100 个名字抄成会过期的副本。车道 `subtitle-tiers` 四步全在，
+    前三步不联网也能红。
 
 ## 车道判据的出处（全部按**钉住的那个 ref** 核过，不是按 HEAD 记的）
 
@@ -296,6 +324,7 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
 | `ocr-proof` | 包名 `oar-ocr-cli`、二进制名 `oar`、`--det/--rec/--dict` 必须一起给 | commit `84817f58…`（**不是** tag `v0.10.0` —— 那个 tag 里没有 CLI）：根 `Cargo.toml` members、`oar-ocr-cli/Cargo.toml` 的 `[[bin]] name = "oar"`、`src/args.rs` 的 `requires_all`/`conflicts_with_all` |
 | `ocr-languages` | OCR 的语言轴能不能「下载前就信」：产物在哪个 tag、两家分发方给不给同一个哈希、字典与权重是否成对 | oar-ocr `84817f58`：`oar-ocr-core/src/core/download/registry.rs:10` 写 `MODELSCOPE_REPO = "greatv/oar-ocr"`（第二个分发方就是上游自己的 ModelScope 镜像）、`:4` 声明条目按名字排序是为了二分查找（所以工具替上游守着这条排序，乱序当场抛）；`docs/models.md:116` 明写 v3 各语言字典**不在 auto-download 注册表内**，要另从 PaddleOCR 取 —— 那三份 pin 因此只能「按 commit 自算」。查找一律按 models.md 链接里的 **tag** 定位：`ppocrv5_latin_dict.txt` 在 v0.1.0 是 1,634 B / `3c0a8a79…`、在 v0.3.0 是 2,616 B / `ccbcc457…`，按名字找第一版就把拉丁语字典钉错了（`--live` 报「来源哈希不一致」才逼出来） |
 | `recommendations` | 「文件要整只、要塞得进本档」这两条判据的依据不是 file:line，而是**同一次运行里两家给回来的文件清单本身**（切片入库，`--live --check` 每次都重测） | `ggml-org/Qwen3-8B-GGUF` 的 6 条 `.gguf` 只有 BF16（16,388,044,096 B）、Q8_0（8,709,518,656 B > 8 GB 机器总内存）和 `dflash-*`/`dspark-*` 草稿（1,120,250,336 B —— 按大小它反而最先合档，所以形状判据必须排在大小判据**前面**）；同一次捕获里 ModelScope 对 7 个 `mradermacher/*` 仓库各返回 **0** 条 `.gguf`，而对 unsloth 给 7–26 条，所以那 7 行只能是 `single`（第二家不镜像重打包方），UI 必须说"下完自己算" |
+| `subtitle-tiers` | 字幕档位表的四个来源与"哪一条不许我们替上游补数字" | whisper.cpp `b5454`：`README.md:138-144` 是 `Model \| Disk \| Mem` 表（`Mem` 列 tiny `~273 MB` → large `~3.9 GB`，`:140` 已进 `pins/citations.json`）；`models/README.md:63` 明写 **Models are multilingual unless the model name includes `.en`**（顺序按这条排）、同一文件 `:67` 明写 **`for-tests-` 前缀的模型文件是空的**（收集清单按名字排掉）；`models/download-ggml-model.sh:9` 写死宿主 `src="https://huggingface.co/ggerganov/whisper.cpp"`（下载源从脚本读出来，不硬编码在我们代码里）。哈希只有一家给：同一次捕获里 HF `tree.lfs.oid` 有 47 条、ModelScope 对该仓库 **0 条** → 整轴 `single`，`ggml-tiny.bin` 的 oid 与 `pins/models.json` 那颗 pin 逐字节相同（正向对照）。上游自己不一致的两处也记进产物 `upstream_deltas`：白名单有 `small.en-tdrz` 而宿主无此文件；宿主有 4 个 `.en-q8_0` 而白名单没列 |
 | 引擎与权重输入 | 上游 `digest` 就是内容哈希 | 五个包整包下回实算相等（llama b11727、whisper b5454、sd 95b3090、qwen 415 MB、SD1.5 1.5 GB），见 `pins/models.json` 的 `bytes_verified` |
 
 写这张表的理由：CI 现在一次都跑不了，而"日志里会出现某串"这类假设一旦错，

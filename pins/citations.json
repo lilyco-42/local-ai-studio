@@ -601,5 +601,72 @@
   "absent": false,
   "as_of": "2026-10-20",
   "line_text": "The language-specific PP-OCRv3 dictionaries are different from the PP-OCRv5 dictionaries and are not part of the auto-download registry. Download them from PaddleOCR and pass the local path to the recognition builder. The PP-OCRv4 English checkpoint uses the same `en_dict.txt` file as PP-OCRv3 English."
+ },
+ {
+  "id": "subtitle-mem-tiny",
+  "repo": "ggml-org/whisper.cpp",
+  "ref": "b5454",
+  "path": "README.md",
+  "line": 140,
+  "expect": "| tiny   | 75 MiB  | ~273 MB |",
+  "claim": "whisper.cpp 上游自己给了 tiny 的峰值内存（字幕档位判据的那一个数字不是我拍的换算）",
+  "as_of": "2026-10-20",
+  "line_text": "| tiny   | 75 MiB  | ~273 MB |"
+ },
+ {
+  "id": "subtitle-default-model",
+  "repo": "ggml-org/whisper.cpp",
+  "ref": "b5454",
+  "path": "README.md",
+  "line": 80,
+  "expect": "./models/download-ggml-model.sh base.en",
+  "claim": "上游 quick start 自己用的默认模型是 base.en（所以我们把 .en 只当英文档，不当通用档）",
+  "as_of": "2026-10-20",
+  "line_text": "sh ./models/download-ggml-model.sh base.en"
+ },
+ {
+  "id": "subtitle-multilingual-rule",
+  "repo": "ggml-org/whisper.cpp",
+  "ref": "b5454",
+  "path": "models/README.md",
+  "line": 63,
+  "expect": "multilingual unless the model name includes",
+  "claim": "上游明写：名字里没有 .en 的都是多语言档（推荐表按这条排顺序）",
+  "as_of": "2026-10-20",
+  "line_text": "Models are multilingual unless the model name includes `.en`. Models ending in `-q5_0` are [quantized](../README.md#quantization). Models ending in `-tdrz` support local diarization (marking of speaker turns) using [tinydiarize](https://github.com/akashmjn/tinydiarize). More information about models is available [upstream (openai/whisper)](https://github.com/openai/whisper#available-models-and-languages). The list above is a subset of the models supported by the [download-ggml-model.sh](download-ggml-model.sh) script, but many more are available at https://huggingface.co/ggerganov/whisper.cpp/tree/main and elsewhere."
+ },
+ {
+  "id": "subtitle-for-tests-empty",
+  "repo": "ggml-org/whisper.cpp",
+  "ref": "b5454",
+  "path": "models/README.md",
+  "line": 67,
+  "expect": "prefixed with `for-tests-`",
+  "claim": "上游明写 for-tests- 前缀的模型文件是空的、只给 CI 用（收集清单必须按名字排掉）",
+  "as_of": "2026-10-20",
+  "line_text": "The model files prefixed with `for-tests-` are empty (i.e. do not contain any weights) and are used by the CI for"
+ },
+ {
+  "id": "subtitle-model-host",
+  "repo": "ggml-org/whisper.cpp",
+  "ref": "b5454",
+  "path": "models/download-ggml-model.sh",
+  "line": 9,
+  "expect": "src=\"https://huggingface.co/ggerganov/whisper.cpp\"",
+  "claim": "上游脚本写死模型宿主在 huggingface.co/ggerganov/whisper.cpp（下载源从脚本读，不硬编码）",
+  "as_of": "2026-10-20",
+  "line_text": "src=\"https://huggingface.co/ggerganov/whisper.cpp\""
+ },
+ {
+  "id": "subtitle-lang-zh-id",
+  "repo": "ggml-org/whisper.cpp",
+  "ref": "b5454",
+  "path": "src/whisper.cpp",
+  "line": 288,
+  "expect": "{ \"zh\",  { 1,",
+  "claim": "字幕的语言表在这里，且 zh 的 id 是 1（语言下拉的基本盘）",
+  "absent": false,
+  "as_of": "2026-10-20",
+  "line_text": "{ \"zh\",  { 1,  \"chinese\",         } },"
  }
 ]

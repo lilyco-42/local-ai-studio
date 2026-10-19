@@ -1,0 +1,2066 @@
+{
+ "fit_unknown": 22,
+ "from": [
+  "whisper.cpp README.md 的 Memory usage 表",
+  "whisper.cpp models/README.md 的 Model|Disk|SHA 表与三条语义规则",
+  "whisper.cpp models/download-ggml-model.sh 的白名单与下载源",
+  "whisper.cpp src/whisper.cpp 的 g_lang 语言表",
+  "宿主仓库 ggerganov/whisper.cpp 的 tree.lfs.oid（+ ModelScope 对照）"
+ ],
+ "inventory": 33,
+ "languages": {
+  "codes": [
+   "en",
+   "zh",
+   "de",
+   "es",
+   "ru",
+   "ko",
+   "fr",
+   "ja",
+   "pt",
+   "tr",
+   "pl",
+   "ca",
+   "nl",
+   "ar",
+   "sv",
+   "it",
+   "id",
+   "hi",
+   "fi",
+   "vi",
+   "he",
+   "uk",
+   "el",
+   "ms",
+   "cs",
+   "ro",
+   "da",
+   "hu",
+   "ta",
+   "no",
+   "th",
+   "ur",
+   "hr",
+   "bg",
+   "lt",
+   "la",
+   "mi",
+   "ml",
+   "cy",
+   "sk",
+   "te",
+   "fa",
+   "lv",
+   "bn",
+   "sr",
+   "az",
+   "sl",
+   "kn",
+   "et",
+   "mk",
+   "br",
+   "eu",
+   "is",
+   "hy",
+   "ne",
+   "mn",
+   "bs",
+   "kk",
+   "sq",
+   "sw",
+   "gl",
+   "mr",
+   "pa",
+   "si",
+   "km",
+   "sn",
+   "yo",
+   "so",
+   "af",
+   "oc",
+   "ka",
+   "be",
+   "tg",
+   "sd",
+   "gu",
+   "am",
+   "yi",
+   "lo",
+   "uz",
+   "fo",
+   "ht",
+   "ps",
+   "tk",
+   "nn",
+   "mt",
+   "sa",
+   "lb",
+   "my",
+   "bo",
+   "tl",
+   "mg",
+   "as",
+   "tt",
+   "haw",
+   "ln",
+   "ha",
+   "ba",
+   "jw",
+   "su",
+   "yue"
+  ],
+  "count": 100,
+  "decl_line": 286,
+  "file": "src/whisper.cpp",
+  "has": {
+   "de": 2,
+   "en": 0,
+   "es": 3,
+   "fr": 6,
+   "ja": 7,
+   "ko": 5,
+   "ru": 4,
+   "yue": 99,
+   "zh": 1
+  },
+  "ids_contiguous_from_zero": true
+ },
+ "ref": "b5454",
+ "rows": [
+  {
+   "distributor_absent": [
+    "modelscope"
+   ],
+   "download_url_upstream": "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml/ggml-base-q5_1.bin",
+   "english_only": false,
+   "family": "base",
+   "file": "ggml-base-q5_1.bin",
+   "fits": {
+    "16GB": null,
+    "4GB": null,
+    "8GB": null
+   },
+   "mem_bytes": null,
+   "mem_source": "量化档：上游只给未量化档的 Mem，量化档没有官方峰值内存数字",
+   "mem_text": null,
+   "multilingual": true,
+   "name": "base-q5_1",
+   "providers": [
+    "hf"
+   ],
+   "quant": "q5_1",
+   "recommended_for": {
+    "16GB": null,
+    "4GB": null,
+    "8GB": null
+   },
+   "sha256": "422f1ae452ade6f30a004d7e5c6a43195e4433bc370bf23fac9cc591f01a8898",
+   "size": 59707625,
+   "status": "single",
+   "upstream_blob_sha1": null,
+   "upstream_disk_text": null,
+   "upstream_table_line": null,
+   "urls": [
+    "https://www.modelscope.cn/models/ggerganov/whisper.cpp/resolve/master/ggml-base-q5_1.bin",
+    "https://hf-mirror.com/ggerganov/whisper.cpp/resolve/main/ggml-base-q5_1.bin",
+    "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base-q5_1.bin"
+   ],
+   "usable_before_download": false
+  },
+  {
+   "distributor_absent": [
+    "modelscope"
+   ],
+   "download_url_upstream": "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml/ggml-base-q8_0.bin",
+   "english_only": false,
+   "family": "base",
+   "file": "ggml-base-q8_0.bin",
+   "fits": {
+    "16GB": null,
+    "4GB": null,
+    "8GB": null
+   },
+   "mem_bytes": null,
+   "mem_source": "量化档：上游只给未量化档的 Mem，量化档没有官方峰值内存数字",
+   "mem_text": null,
+   "multilingual": true,
+   "name": "base-q8_0",
+   "providers": [
+    "hf"
+   ],
+   "quant": "q8_0",
+   "recommended_for": {
+    "16GB": null,
+    "4GB": null,
+    "8GB": null
+   },
+   "sha256": "c577b9a86e7e048a0b7eada054f4dd79a56bbfa911fbdacf900ac5b567cbb7d9",
+   "size": 81768585,
+   "status": "single",
+   "upstream_blob_sha1": null,
+   "upstream_disk_text": null,
+   "upstream_table_line": null,
+   "urls": [
+    "https://www.modelscope.cn/models/ggerganov/whisper.cpp/resolve/master/ggml-base-q8_0.bin",
+    "https://hf-mirror.com/ggerganov/whisper.cpp/resolve/main/ggml-base-q8_0.bin",
+    "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base-q8_0.bin"
+   ],
+   "usable_before_download": false
+  },
+  {
+   "distributor_absent": [
+    "modelscope"
+   ],
+   "download_url_upstream": "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml/ggml-base.bin",
+   "english_only": false,
+   "family": "base",
+   "file": "ggml-base.bin",
+   "fits": {
+    "16GB": true,
+    "4GB": true,
+    "8GB": true
+   },
+   "mem_bytes": 388000000.0,
+   "mem_source": "上游 Memory usage 表（:141）",
+   "mem_text": "388 MB",
+   "multilingual": true,
+   "name": "base",
+   "providers": [
+    "hf"
+   ],
+   "quant": null,
+   "recommended_for": {
+    "16GB": true,
+    "4GB": true,
+    "8GB": true
+   },
+   "sha256": "60ed5bc3dd14eea856493d334349b405782ddcaf0028d4b5df4088345fba2efe",
+   "size": 147951465,
+   "status": "single",
+   "upstream_blob_sha1": "465707469ff3a37a2b9b8d8f89f2f99de7299dac",
+   "upstream_disk_text": "142 MiB",
+   "upstream_table_line": 48,
+   "urls": [
+    "https://www.modelscope.cn/models/ggerganov/whisper.cpp/resolve/master/ggml-base.bin",
+    "https://hf-mirror.com/ggerganov/whisper.cpp/resolve/main/ggml-base.bin",
+    "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base.bin"
+   ],
+   "usable_before_download": false
+  },
+  {
+   "distributor_absent": [
+    "modelscope"
+   ],
+   "download_url_upstream": "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml/ggml-base.en-q5_1.bin",
+   "english_only": true,
+   "family": "base",
+   "file": "ggml-base.en-q5_1.bin",
+   "fits": {
+    "16GB": null,
+    "4GB": null,
+    "8GB": null
+   },
+   "mem_bytes": null,
+   "mem_source": "量化档：上游只给未量化档的 Mem，量化档没有官方峰值内存数字",
+   "mem_text": null,
+   "multilingual": false,
+   "name": "base.en-q5_1",
+   "providers": [
+    "hf"
+   ],
+   "quant": "q5_1",
+   "recommended_for": {
+    "16GB": null,
+    "4GB": null,
+    "8GB": null
+   },
+   "sha256": "4baf70dd0d7c4247ba2b81fafd9c01005ac77c2f9ef064e00dcf195d0e2fdd2f",
+   "size": 59721011,
+   "status": "single",
+   "upstream_blob_sha1": null,
+   "upstream_disk_text": null,
+   "upstream_table_line": null,
+   "urls": [
+    "https://www.modelscope.cn/models/ggerganov/whisper.cpp/resolve/master/ggml-base.en-q5_1.bin",
+    "https://hf-mirror.com/ggerganov/whisper.cpp/resolve/main/ggml-base.en-q5_1.bin",
+    "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base.en-q5_1.bin"
+   ],
+   "usable_before_download": false
+  },
+  {
+   "distributor_absent": [
+    "modelscope"
+   ],
+   "download_url_upstream": "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml/ggml-base.en-q8_0.bin",
+   "english_only": true,
+   "family": "base",
+   "file": "ggml-base.en-q8_0.bin",
+   "fits": {
+    "16GB": null,
+    "4GB": null,
+    "8GB": null
+   },
+   "mem_bytes": null,
+   "mem_source": "量化档：上游只给未量化档的 Mem，量化档没有官方峰值内存数字",
+   "mem_text": null,
+   "multilingual": false,
+   "name": "base.en-q8_0",
+   "providers": [
+    "hf"
+   ],
+   "quant": "q8_0",
+   "recommended_for": {
+    "16GB": null,
+    "4GB": null,
+    "8GB": null
+   },
+   "sha256": "a4d4a0768075e13cfd7e19df3ae2dbc4a68d37d36a7dad45e8410c9a34f8c87e",
+   "size": 81781811,
+   "status": "single",
+   "upstream_blob_sha1": null,
+   "upstream_disk_text": null,
+   "upstream_table_line": null,
+   "urls": [
+    "https://www.modelscope.cn/models/ggerganov/whisper.cpp/resolve/master/ggml-base.en-q8_0.bin",
+    "https://hf-mirror.com/ggerganov/whisper.cpp/resolve/main/ggml-base.en-q8_0.bin",
+    "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base.en-q8_0.bin"
+   ],
+   "usable_before_download": false
+  },
+  {
+   "distributor_absent": [
+    "modelscope"
+   ],
+   "download_url_upstream": "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml/ggml-base.en.bin",
+   "english_only": true,
+   "family": "base",
+   "file": "ggml-base.en.bin",
+   "fits": {
+    "16GB": true,
+    "4GB": true,
+    "8GB": true
+   },
+   "mem_bytes": 388000000.0,
+   "mem_source": "上游 Memory usage 表（:141）",
+   "mem_text": "388 MB",
+   "multilingual": false,
+   "name": "base.en",
+   "providers": [
+    "hf"
+   ],
+   "quant": null,
+   "recommended_for": {
+    "16GB": true,
+    "4GB": true,
+    "8GB": true
+   },
+   "sha256": "a03779c86df3323075f5e796cb2ce5029f00ec8869eee3fdfb897afe36c6d002",
+   "size": 147964211,
+   "status": "single",
+   "upstream_blob_sha1": "137c40403d78fd54d454da0f9bd998f78703390c",
+   "upstream_disk_text": "142 MiB",
+   "upstream_table_line": 49,
+   "urls": [
+    "https://www.modelscope.cn/models/ggerganov/whisper.cpp/resolve/master/ggml-base.en.bin",
+    "https://hf-mirror.com/ggerganov/whisper.cpp/resolve/main/ggml-base.en.bin",
+    "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base.en.bin"
+   ],
+   "usable_before_download": false
+  },
+  {
+   "distributor_absent": [
+    "modelscope"
+   ],
+   "download_url_upstream": "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml/ggml-large-v1.bin",
+   "english_only": false,
+   "family": "large",
+   "file": "ggml-large-v1.bin",
+   "fits": {
+    "16GB": true,
+    "4GB": true,
+    "8GB": true
+   },
+   "mem_bytes": 3900000000.0,
+   "mem_source": "上游 Memory usage 表（:144）",
+   "mem_text": "3.9 GB",
+   "multilingual": true,
+   "name": "large-v1",
+   "providers": [
+    "hf"
+   ],
+   "quant": null,
+   "recommended_for": {
+    "16GB": true,
+    "4GB": false,
+    "8GB": true
+   },
+   "sha256": "7d99f41a10525d0206bddadd86760181fa920438b6b33237e3118ff6c83bb53d",
+   "size": 3094623691,
+   "status": "single",
+   "upstream_blob_sha1": "b1caaf735c4cc1429223d5a74f0f4d0b9b59a299",
+   "upstream_disk_text": "2.9 GiB",
+   "upstream_table_line": 55,
+   "urls": [
+    "https://www.modelscope.cn/models/ggerganov/whisper.cpp/resolve/master/ggml-large-v1.bin",
+    "https://hf-mirror.com/ggerganov/whisper.cpp/resolve/main/ggml-large-v1.bin",
+    "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-large-v1.bin"
+   ],
+   "usable_before_download": false
+  },
+  {
+   "distributor_absent": [
+    "modelscope"
+   ],
+   "download_url_upstream": "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml/ggml-large-v2-q5_0.bin",
+   "english_only": false,
+   "family": "large",
+   "file": "ggml-large-v2-q5_0.bin",
+   "fits": {
+    "16GB": null,
+    "4GB": null,
+    "8GB": null
+   },
+   "mem_bytes": null,
+   "mem_source": "量化档：上游只给未量化档的 Mem，量化档没有官方峰值内存数字",
+   "mem_text": null,
+   "multilingual": true,
+   "name": "large-v2-q5_0",
+   "providers": [
+    "hf"
+   ],
+   "quant": "q5_0",
+   "recommended_for": {
+    "16GB": null,
+    "4GB": null,
+    "8GB": null
+   },
+   "sha256": "3a214837221e4530dbc1fe8d734f302af393eb30bd0ed046042ebf4baf70f6f2",
+   "size": 1080732091,
+   "status": "single",
+   "upstream_blob_sha1": "00e39f2196344e901b3a2bd5814807a769bd1630",
+   "upstream_disk_text": "1.1 GiB",
+   "upstream_table_line": 57,
+   "urls": [
+    "https://www.modelscope.cn/models/ggerganov/whisper.cpp/resolve/master/ggml-large-v2-q5_0.bin",
+    "https://hf-mirror.com/ggerganov/whisper.cpp/resolve/main/ggml-large-v2-q5_0.bin",
+    "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-large-v2-q5_0.bin"
+   ],
+   "usable_before_download": false
+  },
+  {
+   "distributor_absent": [
+    "modelscope"
+   ],
+   "download_url_upstream": "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml/ggml-large-v2-q8_0.bin",
+   "english_only": false,
+   "family": "large",
+   "file": "ggml-large-v2-q8_0.bin",
+   "fits": {
+    "16GB": null,
+    "4GB": null,
+    "8GB": null
+   },
+   "mem_bytes": null,
+   "mem_source": "量化档：上游只给未量化档的 Mem，量化档没有官方峰值内存数字",
+   "mem_text": null,
+   "multilingual": true,
+   "name": "large-v2-q8_0",
+   "providers": [
+    "hf"
+   ],
+   "quant": "q8_0",
+   "recommended_for": {
+    "16GB": null,
+    "4GB": null,
+    "8GB": null
+   },
+   "sha256": "fef54e6d898246a65c8285bfa83bd1807e27fadf54d5d4e81754c47634737e8c",
+   "size": 1656129691,
+   "status": "single",
+   "upstream_blob_sha1": null,
+   "upstream_disk_text": null,
+   "upstream_table_line": null,
+   "urls": [
+    "https://www.modelscope.cn/models/ggerganov/whisper.cpp/resolve/master/ggml-large-v2-q8_0.bin",
+    "https://hf-mirror.com/ggerganov/whisper.cpp/resolve/main/ggml-large-v2-q8_0.bin",
+    "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-large-v2-q8_0.bin"
+   ],
+   "usable_before_download": false
+  },
+  {
+   "distributor_absent": [
+    "modelscope"
+   ],
+   "download_url_upstream": "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml/ggml-large-v2.bin",
+   "english_only": false,
+   "family": "large",
+   "file": "ggml-large-v2.bin",
+   "fits": {
+    "16GB": true,
+    "4GB": true,
+    "8GB": true
+   },
+   "mem_bytes": 3900000000.0,
+   "mem_source": "上游 Memory usage 表（:144）",
+   "mem_text": "3.9 GB",
+   "multilingual": true,
+   "name": "large-v2",
+   "providers": [
+    "hf"
+   ],
+   "quant": null,
+   "recommended_for": {
+    "16GB": true,
+    "4GB": false,
+    "8GB": true
+   },
+   "sha256": "9a423fe4d40c82774b6af34115b8b935f34152246eb19e80e376071d3f999487",
+   "size": 3094623691,
+   "status": "single",
+   "upstream_blob_sha1": "0f4c8e34f21cf1a914c59d8b3ce882345ad349d6",
+   "upstream_disk_text": "2.9 GiB",
+   "upstream_table_line": 56,
+   "urls": [
+    "https://www.modelscope.cn/models/ggerganov/whisper.cpp/resolve/master/ggml-large-v2.bin",
+    "https://hf-mirror.com/ggerganov/whisper.cpp/resolve/main/ggml-large-v2.bin",
+    "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-large-v2.bin"
+   ],
+   "usable_before_download": false
+  },
+  {
+   "distributor_absent": [
+    "modelscope"
+   ],
+   "download_url_upstream": "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml/ggml-large-v3-q5_0.bin",
+   "english_only": false,
+   "family": "large",
+   "file": "ggml-large-v3-q5_0.bin",
+   "fits": {
+    "16GB": null,
+    "4GB": null,
+    "8GB": null
+   },
+   "mem_bytes": null,
+   "mem_source": "量化档：上游只给未量化档的 Mem，量化档没有官方峰值内存数字",
+   "mem_text": null,
+   "multilingual": true,
+   "name": "large-v3-q5_0",
+   "providers": [
+    "hf"
+   ],
+   "quant": "q5_0",
+   "recommended_for": {
+    "16GB": null,
+    "4GB": null,
+    "8GB": null
+   },
+   "sha256": "d75795ecff3f83b5faa89d1900604ad8c780abd5739fae406de19f23ecd98ad1",
+   "size": 1081140203,
+   "status": "single",
+   "upstream_blob_sha1": "e6e2ed78495d403bef4b7cff42ef4aaadcfea8de",
+   "upstream_disk_text": "1.1 GiB",
+   "upstream_table_line": 59,
+   "urls": [
+    "https://www.modelscope.cn/models/ggerganov/whisper.cpp/resolve/master/ggml-large-v3-q5_0.bin",
+    "https://hf-mirror.com/ggerganov/whisper.cpp/resolve/main/ggml-large-v3-q5_0.bin",
+    "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-large-v3-q5_0.bin"
+   ],
+   "usable_before_download": false
+  },
+  {
+   "distributor_absent": [
+    "modelscope"
+   ],
+   "download_url_upstream": "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml/ggml-large-v3-turbo-q5_0.bin",
+   "english_only": false,
+   "family": "large",
+   "file": "ggml-large-v3-turbo-q5_0.bin",
+   "fits": {
+    "16GB": null,
+    "4GB": null,
+    "8GB": null
+   },
+   "mem_bytes": null,
+   "mem_source": "量化档：上游只给未量化档的 Mem，量化档没有官方峰值内存数字",
+   "mem_text": null,
+   "multilingual": true,
+   "name": "large-v3-turbo-q5_0",
+   "providers": [
+    "hf"
+   ],
+   "quant": "q5_0",
+   "recommended_for": {
+    "16GB": null,
+    "4GB": null,
+    "8GB": null
+   },
+   "sha256": "394221709cd5ad1f40c46e6031ca61bce88931e6e088c188294c6d5a55ffa7e2",
+   "size": 574041195,
+   "status": "single",
+   "upstream_blob_sha1": "e050f7970618a659205450ad97eb95a18d69c9ee",
+   "upstream_disk_text": "547 MiB",
+   "upstream_table_line": 61,
+   "urls": [
+    "https://www.modelscope.cn/models/ggerganov/whisper.cpp/resolve/master/ggml-large-v3-turbo-q5_0.bin",
+    "https://hf-mirror.com/ggerganov/whisper.cpp/resolve/main/ggml-large-v3-turbo-q5_0.bin",
+    "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-large-v3-turbo-q5_0.bin"
+   ],
+   "usable_before_download": false
+  },
+  {
+   "distributor_absent": [
+    "modelscope"
+   ],
+   "download_url_upstream": "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml/ggml-large-v3-turbo-q8_0.bin",
+   "english_only": false,
+   "family": "large",
+   "file": "ggml-large-v3-turbo-q8_0.bin",
+   "fits": {
+    "16GB": null,
+    "4GB": null,
+    "8GB": null
+   },
+   "mem_bytes": null,
+   "mem_source": "量化档：上游只给未量化档的 Mem，量化档没有官方峰值内存数字",
+   "mem_text": null,
+   "multilingual": true,
+   "name": "large-v3-turbo-q8_0",
+   "providers": [
+    "hf"
+   ],
+   "quant": "q8_0",
+   "recommended_for": {
+    "16GB": null,
+    "4GB": null,
+    "8GB": null
+   },
+   "sha256": "317eb69c11673c9de1e1f0d459b253999804ec71ac4c23c17ecf5fbe24e259a1",
+   "size": 874188075,
+   "status": "single",
+   "upstream_blob_sha1": null,
+   "upstream_disk_text": null,
+   "upstream_table_line": null,
+   "urls": [
+    "https://www.modelscope.cn/models/ggerganov/whisper.cpp/resolve/master/ggml-large-v3-turbo-q8_0.bin",
+    "https://hf-mirror.com/ggerganov/whisper.cpp/resolve/main/ggml-large-v3-turbo-q8_0.bin",
+    "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-large-v3-turbo-q8_0.bin"
+   ],
+   "usable_before_download": false
+  },
+  {
+   "distributor_absent": [
+    "modelscope"
+   ],
+   "download_url_upstream": "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml/ggml-large-v3-turbo.bin",
+   "english_only": false,
+   "family": "large",
+   "file": "ggml-large-v3-turbo.bin",
+   "fits": {
+    "16GB": null,
+    "4GB": null,
+    "8GB": null
+   },
+   "mem_bytes": null,
+   "mem_source": "实测 1.5 GiB 与上游 large 档的 Disk 2.9 GiB 不是同一档，不敢套用它的 Mem",
+   "mem_text": null,
+   "multilingual": true,
+   "name": "large-v3-turbo",
+   "providers": [
+    "hf"
+   ],
+   "quant": null,
+   "recommended_for": {
+    "16GB": null,
+    "4GB": null,
+    "8GB": null
+   },
+   "sha256": "1fc70f774d38eb169993ac391eea357ef47c88757ef72ee5943879b7e8e2bc69",
+   "size": 1624555275,
+   "status": "single",
+   "upstream_blob_sha1": "4af2b29d7ec73d781377bfd1758ca957a807e941",
+   "upstream_disk_text": "1.5 GiB",
+   "upstream_table_line": 60,
+   "urls": [
+    "https://www.modelscope.cn/models/ggerganov/whisper.cpp/resolve/master/ggml-large-v3-turbo.bin",
+    "https://hf-mirror.com/ggerganov/whisper.cpp/resolve/main/ggml-large-v3-turbo.bin",
+    "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-large-v3-turbo.bin"
+   ],
+   "usable_before_download": false
+  },
+  {
+   "distributor_absent": [
+    "modelscope"
+   ],
+   "download_url_upstream": "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml/ggml-large-v3.bin",
+   "english_only": false,
+   "family": "large",
+   "file": "ggml-large-v3.bin",
+   "fits": {
+    "16GB": true,
+    "4GB": true,
+    "8GB": true
+   },
+   "mem_bytes": 3900000000.0,
+   "mem_source": "上游 Memory usage 表（:144）",
+   "mem_text": "3.9 GB",
+   "multilingual": true,
+   "name": "large-v3",
+   "providers": [
+    "hf"
+   ],
+   "quant": null,
+   "recommended_for": {
+    "16GB": true,
+    "4GB": false,
+    "8GB": true
+   },
+   "sha256": "64d182b440b98d5203c4f9bd541544d84c605196c4f7b845dfa11fb23594d1e2",
+   "size": 3095033483,
+   "status": "single",
+   "upstream_blob_sha1": "ad82bf6a9043ceed055076d0fd39f5f186ff8062",
+   "upstream_disk_text": "2.9 GiB",
+   "upstream_table_line": 58,
+   "urls": [
+    "https://www.modelscope.cn/models/ggerganov/whisper.cpp/resolve/master/ggml-large-v3.bin",
+    "https://hf-mirror.com/ggerganov/whisper.cpp/resolve/main/ggml-large-v3.bin",
+    "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-large-v3.bin"
+   ],
+   "usable_before_download": false
+  },
+  {
+   "distributor_absent": [
+    "modelscope"
+   ],
+   "download_url_upstream": "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml/ggml-medium-q5_0.bin",
+   "english_only": false,
+   "family": "medium",
+   "file": "ggml-medium-q5_0.bin",
+   "fits": {
+    "16GB": null,
+    "4GB": null,
+    "8GB": null
+   },
+   "mem_bytes": null,
+   "mem_source": "量化档：上游只给未量化档的 Mem，量化档没有官方峰值内存数字",
+   "mem_text": null,
+   "multilingual": true,
+   "name": "medium-q5_0",
+   "providers": [
+    "hf"
+   ],
+   "quant": "q5_0",
+   "recommended_for": {
+    "16GB": null,
+    "4GB": null,
+    "8GB": null
+   },
+   "sha256": "19fea4b380c3a618ec4723c3eef2eb785ffba0d0538cf43f8f235e7b3b34220f",
+   "size": 539212467,
+   "status": "single",
+   "upstream_blob_sha1": null,
+   "upstream_disk_text": null,
+   "upstream_table_line": null,
+   "urls": [
+    "https://www.modelscope.cn/models/ggerganov/whisper.cpp/resolve/master/ggml-medium-q5_0.bin",
+    "https://hf-mirror.com/ggerganov/whisper.cpp/resolve/main/ggml-medium-q5_0.bin",
+    "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-medium-q5_0.bin"
+   ],
+   "usable_before_download": false
+  },
+  {
+   "distributor_absent": [
+    "modelscope"
+   ],
+   "download_url_upstream": "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml/ggml-medium-q8_0.bin",
+   "english_only": false,
+   "family": "medium",
+   "file": "ggml-medium-q8_0.bin",
+   "fits": {
+    "16GB": null,
+    "4GB": null,
+    "8GB": null
+   },
+   "mem_bytes": null,
+   "mem_source": "量化档：上游只给未量化档的 Mem，量化档没有官方峰值内存数字",
+   "mem_text": null,
+   "multilingual": true,
+   "name": "medium-q8_0",
+   "providers": [
+    "hf"
+   ],
+   "quant": "q8_0",
+   "recommended_for": {
+    "16GB": null,
+    "4GB": null,
+    "8GB": null
+   },
+   "sha256": "42a1ffcbe4167d224232443396968db4d02d4e8e87e213d3ee2e03095dea6502",
+   "size": 823369779,
+   "status": "single",
+   "upstream_blob_sha1": null,
+   "upstream_disk_text": null,
+   "upstream_table_line": null,
+   "urls": [
+    "https://www.modelscope.cn/models/ggerganov/whisper.cpp/resolve/master/ggml-medium-q8_0.bin",
+    "https://hf-mirror.com/ggerganov/whisper.cpp/resolve/main/ggml-medium-q8_0.bin",
+    "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-medium-q8_0.bin"
+   ],
+   "usable_before_download": false
+  },
+  {
+   "distributor_absent": [
+    "modelscope"
+   ],
+   "download_url_upstream": "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml/ggml-medium.bin",
+   "english_only": false,
+   "family": "medium",
+   "file": "ggml-medium.bin",
+   "fits": {
+    "16GB": true,
+    "4GB": true,
+    "8GB": true
+   },
+   "mem_bytes": 2100000000.0,
+   "mem_source": "上游 Memory usage 表（:143）",
+   "mem_text": "2.1 GB",
+   "multilingual": true,
+   "name": "medium",
+   "providers": [
+    "hf"
+   ],
+   "quant": null,
+   "recommended_for": {
+    "16GB": true,
+    "4GB": true,
+    "8GB": true
+   },
+   "sha256": "6c14d5adee5f86394037b4e4e8b59f1673b6cee10e3cf0b11bbdbee79c156208",
+   "size": 1533763059,
+   "status": "single",
+   "upstream_blob_sha1": "fd9727b6e1217c2f614f9b698455c4ffd82463b4",
+   "upstream_disk_text": "1.5 GiB",
+   "upstream_table_line": 53,
+   "urls": [
+    "https://www.modelscope.cn/models/ggerganov/whisper.cpp/resolve/master/ggml-medium.bin",
+    "https://hf-mirror.com/ggerganov/whisper.cpp/resolve/main/ggml-medium.bin",
+    "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-medium.bin"
+   ],
+   "usable_before_download": false
+  },
+  {
+   "distributor_absent": [
+    "modelscope"
+   ],
+   "download_url_upstream": "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml/ggml-medium.en-q5_0.bin",
+   "english_only": true,
+   "family": "medium",
+   "file": "ggml-medium.en-q5_0.bin",
+   "fits": {
+    "16GB": null,
+    "4GB": null,
+    "8GB": null
+   },
+   "mem_bytes": null,
+   "mem_source": "量化档：上游只给未量化档的 Mem，量化档没有官方峰值内存数字",
+   "mem_text": null,
+   "multilingual": false,
+   "name": "medium.en-q5_0",
+   "providers": [
+    "hf"
+   ],
+   "quant": "q5_0",
+   "recommended_for": {
+    "16GB": null,
+    "4GB": null,
+    "8GB": null
+   },
+   "sha256": "76733e26ad8fe1c7a5bf7531a9d41917b2adc0f20f2e4f5531688a8c6cd88eb0",
+   "size": 539225533,
+   "status": "single",
+   "upstream_blob_sha1": null,
+   "upstream_disk_text": null,
+   "upstream_table_line": null,
+   "urls": [
+    "https://www.modelscope.cn/models/ggerganov/whisper.cpp/resolve/master/ggml-medium.en-q5_0.bin",
+    "https://hf-mirror.com/ggerganov/whisper.cpp/resolve/main/ggml-medium.en-q5_0.bin",
+    "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-medium.en-q5_0.bin"
+   ],
+   "usable_before_download": false
+  },
+  {
+   "distributor_absent": [
+    "modelscope"
+   ],
+   "download_url_upstream": "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml/ggml-medium.en-q8_0.bin",
+   "english_only": true,
+   "family": "medium",
+   "file": "ggml-medium.en-q8_0.bin",
+   "fits": {
+    "16GB": null,
+    "4GB": null,
+    "8GB": null
+   },
+   "mem_bytes": null,
+   "mem_source": "量化档：上游只给未量化档的 Mem，量化档没有官方峰值内存数字",
+   "mem_text": null,
+   "multilingual": false,
+   "name": "medium.en-q8_0",
+   "providers": [
+    "hf"
+   ],
+   "quant": "q8_0",
+   "recommended_for": {
+    "16GB": null,
+    "4GB": null,
+    "8GB": null
+   },
+   "sha256": "43fa2cd084de5a04399a896a9a7a786064e221365c01700cea4666005218f11c",
+   "size": 823382461,
+   "status": "single",
+   "upstream_blob_sha1": null,
+   "upstream_disk_text": null,
+   "upstream_table_line": null,
+   "urls": [
+    "https://www.modelscope.cn/models/ggerganov/whisper.cpp/resolve/master/ggml-medium.en-q8_0.bin",
+    "https://hf-mirror.com/ggerganov/whisper.cpp/resolve/main/ggml-medium.en-q8_0.bin",
+    "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-medium.en-q8_0.bin"
+   ],
+   "usable_before_download": false
+  },
+  {
+   "distributor_absent": [
+    "modelscope"
+   ],
+   "download_url_upstream": "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml/ggml-medium.en.bin",
+   "english_only": true,
+   "family": "medium",
+   "file": "ggml-medium.en.bin",
+   "fits": {
+    "16GB": true,
+    "4GB": true,
+    "8GB": true
+   },
+   "mem_bytes": 2100000000.0,
+   "mem_source": "上游 Memory usage 表（:143）",
+   "mem_text": "2.1 GB",
+   "multilingual": false,
+   "name": "medium.en",
+   "providers": [
+    "hf"
+   ],
+   "quant": null,
+   "recommended_for": {
+    "16GB": true,
+    "4GB": true,
+    "8GB": true
+   },
+   "sha256": "cc37e93478338ec7700281a7ac30a10128929eb8f427dda2e865faa8f6da4356",
+   "size": 1533774781,
+   "status": "single",
+   "upstream_blob_sha1": "8c30f0e44ce9560643ebd10bbe50cd20eafd3723",
+   "upstream_disk_text": "1.5 GiB",
+   "upstream_table_line": 54,
+   "urls": [
+    "https://www.modelscope.cn/models/ggerganov/whisper.cpp/resolve/master/ggml-medium.en.bin",
+    "https://hf-mirror.com/ggerganov/whisper.cpp/resolve/main/ggml-medium.en.bin",
+    "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-medium.en.bin"
+   ],
+   "usable_before_download": false
+  },
+  {
+   "distributor_absent": [
+    "modelscope"
+   ],
+   "download_url_upstream": "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml/ggml-small-q5_1.bin",
+   "english_only": false,
+   "family": "small",
+   "file": "ggml-small-q5_1.bin",
+   "fits": {
+    "16GB": null,
+    "4GB": null,
+    "8GB": null
+   },
+   "mem_bytes": null,
+   "mem_source": "量化档：上游只给未量化档的 Mem，量化档没有官方峰值内存数字",
+   "mem_text": null,
+   "multilingual": true,
+   "name": "small-q5_1",
+   "providers": [
+    "hf"
+   ],
+   "quant": "q5_1",
+   "recommended_for": {
+    "16GB": null,
+    "4GB": null,
+    "8GB": null
+   },
+   "sha256": "ae85e4a935d7a567bd102fe55afc16bb595bdb618e11b2fc7591bc08120411bb",
+   "size": 190085487,
+   "status": "single",
+   "upstream_blob_sha1": null,
+   "upstream_disk_text": null,
+   "upstream_table_line": null,
+   "urls": [
+    "https://www.modelscope.cn/models/ggerganov/whisper.cpp/resolve/master/ggml-small-q5_1.bin",
+    "https://hf-mirror.com/ggerganov/whisper.cpp/resolve/main/ggml-small-q5_1.bin",
+    "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-small-q5_1.bin"
+   ],
+   "usable_before_download": false
+  },
+  {
+   "distributor_absent": [
+    "modelscope"
+   ],
+   "download_url_upstream": "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml/ggml-small-q8_0.bin",
+   "english_only": false,
+   "family": "small",
+   "file": "ggml-small-q8_0.bin",
+   "fits": {
+    "16GB": null,
+    "4GB": null,
+    "8GB": null
+   },
+   "mem_bytes": null,
+   "mem_source": "量化档：上游只给未量化档的 Mem，量化档没有官方峰值内存数字",
+   "mem_text": null,
+   "multilingual": true,
+   "name": "small-q8_0",
+   "providers": [
+    "hf"
+   ],
+   "quant": "q8_0",
+   "recommended_for": {
+    "16GB": null,
+    "4GB": null,
+    "8GB": null
+   },
+   "sha256": "49c8fb02b65e6049d5fa6c04f81f53b867b5ec9540406812c643f177317f779f",
+   "size": 264464607,
+   "status": "single",
+   "upstream_blob_sha1": null,
+   "upstream_disk_text": null,
+   "upstream_table_line": null,
+   "urls": [
+    "https://www.modelscope.cn/models/ggerganov/whisper.cpp/resolve/master/ggml-small-q8_0.bin",
+    "https://hf-mirror.com/ggerganov/whisper.cpp/resolve/main/ggml-small-q8_0.bin",
+    "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-small-q8_0.bin"
+   ],
+   "usable_before_download": false
+  },
+  {
+   "distributor_absent": [
+    "modelscope"
+   ],
+   "download_url_upstream": "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml/ggml-small.bin",
+   "english_only": false,
+   "family": "small",
+   "file": "ggml-small.bin",
+   "fits": {
+    "16GB": true,
+    "4GB": true,
+    "8GB": true
+   },
+   "mem_bytes": 852000000.0,
+   "mem_source": "上游 Memory usage 表（:142）",
+   "mem_text": "852 MB",
+   "multilingual": true,
+   "name": "small",
+   "providers": [
+    "hf"
+   ],
+   "quant": null,
+   "recommended_for": {
+    "16GB": true,
+    "4GB": true,
+    "8GB": true
+   },
+   "sha256": "1be3a9b2063867b937e64e2ec7483364a79917e157fa98c5d94b5c1fffea987b",
+   "size": 487601967,
+   "status": "single",
+   "upstream_blob_sha1": "55356645c2b361a969dfd0ef2c5a50d530afd8d5",
+   "upstream_disk_text": "466 MiB",
+   "upstream_table_line": 50,
+   "urls": [
+    "https://www.modelscope.cn/models/ggerganov/whisper.cpp/resolve/master/ggml-small.bin",
+    "https://hf-mirror.com/ggerganov/whisper.cpp/resolve/main/ggml-small.bin",
+    "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-small.bin"
+   ],
+   "usable_before_download": false
+  },
+  {
+   "distributor_absent": [
+    "modelscope"
+   ],
+   "download_url_upstream": "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml/ggml-small.en-q5_1.bin",
+   "english_only": true,
+   "family": "small",
+   "file": "ggml-small.en-q5_1.bin",
+   "fits": {
+    "16GB": null,
+    "4GB": null,
+    "8GB": null
+   },
+   "mem_bytes": null,
+   "mem_source": "量化档：上游只给未量化档的 Mem，量化档没有官方峰值内存数字",
+   "mem_text": null,
+   "multilingual": false,
+   "name": "small.en-q5_1",
+   "providers": [
+    "hf"
+   ],
+   "quant": "q5_1",
+   "recommended_for": {
+    "16GB": null,
+    "4GB": null,
+    "8GB": null
+   },
+   "sha256": "bfdff4894dcb76bbf647d56263ea2a96645423f1669176f4844a1bf8e478ad30",
+   "size": 190098681,
+   "status": "single",
+   "upstream_blob_sha1": null,
+   "upstream_disk_text": null,
+   "upstream_table_line": null,
+   "urls": [
+    "https://www.modelscope.cn/models/ggerganov/whisper.cpp/resolve/master/ggml-small.en-q5_1.bin",
+    "https://hf-mirror.com/ggerganov/whisper.cpp/resolve/main/ggml-small.en-q5_1.bin",
+    "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-small.en-q5_1.bin"
+   ],
+   "usable_before_download": false
+  },
+  {
+   "distributor_absent": [
+    "modelscope"
+   ],
+   "download_url_upstream": "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml/ggml-small.en-q8_0.bin",
+   "english_only": true,
+   "family": "small",
+   "file": "ggml-small.en-q8_0.bin",
+   "fits": {
+    "16GB": null,
+    "4GB": null,
+    "8GB": null
+   },
+   "mem_bytes": null,
+   "mem_source": "量化档：上游只给未量化档的 Mem，量化档没有官方峰值内存数字",
+   "mem_text": null,
+   "multilingual": false,
+   "name": "small.en-q8_0",
+   "providers": [
+    "hf"
+   ],
+   "quant": "q8_0",
+   "recommended_for": {
+    "16GB": null,
+    "4GB": null,
+    "8GB": null
+   },
+   "sha256": "67a179f608ea6114bd3fdb9060e762b588a3fb3bd00c4387971be4d177958067",
+   "size": 264477561,
+   "status": "single",
+   "upstream_blob_sha1": null,
+   "upstream_disk_text": null,
+   "upstream_table_line": null,
+   "urls": [
+    "https://www.modelscope.cn/models/ggerganov/whisper.cpp/resolve/master/ggml-small.en-q8_0.bin",
+    "https://hf-mirror.com/ggerganov/whisper.cpp/resolve/main/ggml-small.en-q8_0.bin",
+    "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-small.en-q8_0.bin"
+   ],
+   "usable_before_download": false
+  },
+  {
+   "distributor_absent": [
+    "modelscope"
+   ],
+   "download_url_upstream": "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml/ggml-small.en.bin",
+   "english_only": true,
+   "family": "small",
+   "file": "ggml-small.en.bin",
+   "fits": {
+    "16GB": true,
+    "4GB": true,
+    "8GB": true
+   },
+   "mem_bytes": 852000000.0,
+   "mem_source": "上游 Memory usage 表（:142）",
+   "mem_text": "852 MB",
+   "multilingual": false,
+   "name": "small.en",
+   "providers": [
+    "hf"
+   ],
+   "quant": null,
+   "recommended_for": {
+    "16GB": true,
+    "4GB": true,
+    "8GB": true
+   },
+   "sha256": "c6138d6d58ecc8322097e0f987c32f1be8bb0a18532a3f88f734d1bbf9c41e5d",
+   "size": 487614201,
+   "status": "single",
+   "upstream_blob_sha1": "db8a495a91d927739e50b3fc1cc4c6b8f6c2d022",
+   "upstream_disk_text": "466 MiB",
+   "upstream_table_line": 51,
+   "urls": [
+    "https://www.modelscope.cn/models/ggerganov/whisper.cpp/resolve/master/ggml-small.en.bin",
+    "https://hf-mirror.com/ggerganov/whisper.cpp/resolve/main/ggml-small.en.bin",
+    "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-small.en.bin"
+   ],
+   "usable_before_download": false
+  },
+  {
+   "distributor_absent": [
+    "modelscope"
+   ],
+   "download_url_upstream": "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml/ggml-tiny-q5_1.bin",
+   "english_only": false,
+   "family": "tiny",
+   "file": "ggml-tiny-q5_1.bin",
+   "fits": {
+    "16GB": null,
+    "4GB": null,
+    "8GB": null
+   },
+   "mem_bytes": null,
+   "mem_source": "量化档：上游只给未量化档的 Mem，量化档没有官方峰值内存数字",
+   "mem_text": null,
+   "multilingual": true,
+   "name": "tiny-q5_1",
+   "providers": [
+    "hf"
+   ],
+   "quant": "q5_1",
+   "recommended_for": {
+    "16GB": null,
+    "4GB": null,
+    "8GB": null
+   },
+   "sha256": "818710568da3ca15689e31a743197b520007872ff9576237bda97bd1b469c3d7",
+   "size": 32152673,
+   "status": "single",
+   "upstream_blob_sha1": null,
+   "upstream_disk_text": null,
+   "upstream_table_line": null,
+   "urls": [
+    "https://www.modelscope.cn/models/ggerganov/whisper.cpp/resolve/master/ggml-tiny-q5_1.bin",
+    "https://hf-mirror.com/ggerganov/whisper.cpp/resolve/main/ggml-tiny-q5_1.bin",
+    "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-tiny-q5_1.bin"
+   ],
+   "usable_before_download": false
+  },
+  {
+   "distributor_absent": [
+    "modelscope"
+   ],
+   "download_url_upstream": "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml/ggml-tiny-q8_0.bin",
+   "english_only": false,
+   "family": "tiny",
+   "file": "ggml-tiny-q8_0.bin",
+   "fits": {
+    "16GB": null,
+    "4GB": null,
+    "8GB": null
+   },
+   "mem_bytes": null,
+   "mem_source": "量化档：上游只给未量化档的 Mem，量化档没有官方峰值内存数字",
+   "mem_text": null,
+   "multilingual": true,
+   "name": "tiny-q8_0",
+   "providers": [
+    "hf"
+   ],
+   "quant": "q8_0",
+   "recommended_for": {
+    "16GB": null,
+    "4GB": null,
+    "8GB": null
+   },
+   "sha256": "c2085835d3f50733e2ff6e4b41ae8a2b8d8110461e18821b09a15c40c42d1cca",
+   "size": 43537433,
+   "status": "single",
+   "upstream_blob_sha1": null,
+   "upstream_disk_text": null,
+   "upstream_table_line": null,
+   "urls": [
+    "https://www.modelscope.cn/models/ggerganov/whisper.cpp/resolve/master/ggml-tiny-q8_0.bin",
+    "https://hf-mirror.com/ggerganov/whisper.cpp/resolve/main/ggml-tiny-q8_0.bin",
+    "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-tiny-q8_0.bin"
+   ],
+   "usable_before_download": false
+  },
+  {
+   "distributor_absent": [
+    "modelscope"
+   ],
+   "download_url_upstream": "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml/ggml-tiny.bin",
+   "english_only": false,
+   "family": "tiny",
+   "file": "ggml-tiny.bin",
+   "fits": {
+    "16GB": true,
+    "4GB": true,
+    "8GB": true
+   },
+   "mem_bytes": 273000000.0,
+   "mem_source": "上游 Memory usage 表（:140）",
+   "mem_text": "273 MB",
+   "multilingual": true,
+   "name": "tiny",
+   "providers": [
+    "hf"
+   ],
+   "quant": null,
+   "recommended_for": {
+    "16GB": true,
+    "4GB": true,
+    "8GB": true
+   },
+   "sha256": "be07e048e1e599ad46341c8d2a135645097a538221678b7acdd1b1919c6e1b21",
+   "size": 77691713,
+   "status": "single",
+   "upstream_blob_sha1": "bd577a113a864445d4c299885e0cb97d4ba92b5f",
+   "upstream_disk_text": "75 MiB",
+   "upstream_table_line": 46,
+   "urls": [
+    "https://www.modelscope.cn/models/ggerganov/whisper.cpp/resolve/master/ggml-tiny.bin",
+    "https://hf-mirror.com/ggerganov/whisper.cpp/resolve/main/ggml-tiny.bin",
+    "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-tiny.bin"
+   ],
+   "usable_before_download": false
+  },
+  {
+   "distributor_absent": [
+    "modelscope"
+   ],
+   "download_url_upstream": "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml/ggml-tiny.en-q5_1.bin",
+   "english_only": true,
+   "family": "tiny",
+   "file": "ggml-tiny.en-q5_1.bin",
+   "fits": {
+    "16GB": null,
+    "4GB": null,
+    "8GB": null
+   },
+   "mem_bytes": null,
+   "mem_source": "量化档：上游只给未量化档的 Mem，量化档没有官方峰值内存数字",
+   "mem_text": null,
+   "multilingual": false,
+   "name": "tiny.en-q5_1",
+   "providers": [
+    "hf"
+   ],
+   "quant": "q5_1",
+   "recommended_for": {
+    "16GB": null,
+    "4GB": null,
+    "8GB": null
+   },
+   "sha256": "c77c5766f1cef09b6b7d47f21b546cbddd4157886b3b5d6d4f709e91e66c7c2b",
+   "size": 32166155,
+   "status": "single",
+   "upstream_blob_sha1": null,
+   "upstream_disk_text": null,
+   "upstream_table_line": null,
+   "urls": [
+    "https://www.modelscope.cn/models/ggerganov/whisper.cpp/resolve/master/ggml-tiny.en-q5_1.bin",
+    "https://hf-mirror.com/ggerganov/whisper.cpp/resolve/main/ggml-tiny.en-q5_1.bin",
+    "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-tiny.en-q5_1.bin"
+   ],
+   "usable_before_download": false
+  },
+  {
+   "distributor_absent": [
+    "modelscope"
+   ],
+   "download_url_upstream": "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml/ggml-tiny.en-q8_0.bin",
+   "english_only": true,
+   "family": "tiny",
+   "file": "ggml-tiny.en-q8_0.bin",
+   "fits": {
+    "16GB": null,
+    "4GB": null,
+    "8GB": null
+   },
+   "mem_bytes": null,
+   "mem_source": "量化档：上游只给未量化档的 Mem，量化档没有官方峰值内存数字",
+   "mem_text": null,
+   "multilingual": false,
+   "name": "tiny.en-q8_0",
+   "providers": [
+    "hf"
+   ],
+   "quant": "q8_0",
+   "recommended_for": {
+    "16GB": null,
+    "4GB": null,
+    "8GB": null
+   },
+   "sha256": "5bc2b3860aa151a4c6e7bb095e1fcce7cf12c7b020ca08dcec0c6d018bb7dd94",
+   "size": 43550795,
+   "status": "single",
+   "upstream_blob_sha1": null,
+   "upstream_disk_text": null,
+   "upstream_table_line": null,
+   "urls": [
+    "https://www.modelscope.cn/models/ggerganov/whisper.cpp/resolve/master/ggml-tiny.en-q8_0.bin",
+    "https://hf-mirror.com/ggerganov/whisper.cpp/resolve/main/ggml-tiny.en-q8_0.bin",
+    "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-tiny.en-q8_0.bin"
+   ],
+   "usable_before_download": false
+  },
+  {
+   "distributor_absent": [
+    "modelscope"
+   ],
+   "download_url_upstream": "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml/ggml-tiny.en.bin",
+   "english_only": true,
+   "family": "tiny",
+   "file": "ggml-tiny.en.bin",
+   "fits": {
+    "16GB": true,
+    "4GB": true,
+    "8GB": true
+   },
+   "mem_bytes": 273000000.0,
+   "mem_source": "上游 Memory usage 表（:140）",
+   "mem_text": "273 MB",
+   "multilingual": false,
+   "name": "tiny.en",
+   "providers": [
+    "hf"
+   ],
+   "quant": null,
+   "recommended_for": {
+    "16GB": true,
+    "4GB": true,
+    "8GB": true
+   },
+   "sha256": "921e4cf8686fdd993dcd081a5da5b6c365bfde1162e72b08d75ac75289920b1f",
+   "size": 77704715,
+   "status": "single",
+   "upstream_blob_sha1": "c78c86eb1a8faa21b369bcd33207cc90d64ae9df",
+   "upstream_disk_text": "75 MiB",
+   "upstream_table_line": 47,
+   "urls": [
+    "https://www.modelscope.cn/models/ggerganov/whisper.cpp/resolve/master/ggml-tiny.en.bin",
+    "https://hf-mirror.com/ggerganov/whisper.cpp/resolve/main/ggml-tiny.en.bin",
+    "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-tiny.en.bin"
+   ],
+   "usable_before_download": false
+  }
+ ],
+ "rule": {
+  "excluded": "for-tests- 前缀（上游明写是空壳）、非 .bin、无 oid",
+  "fits": "另给一列纯算术：Mem <= 档位，不带余量",
+  "hash": "tree.lfs.oid；ModelScope 不镜像该仓库 → 整轴 single，必须下载后自算",
+  "mem_join": "Mem 只按上游两张表的 Disk 原文精确相等来接；量化档与 turbo 没有官方 Mem → unknown",
+  "order": "多语言优先（上游明写 .en 只有英文），再按上游 Mem 从大到小",
+  "tier": "默认档要求 上游 Mem <= 档位 × 0.5（我们的余量规则，与对话表同一个数）"
+ },
+ "schema": 1,
+ "semantic_rule_lines": {
+  "for_tests": 67,
+  "multilingual": 63,
+  "tdrz": 63
+ },
+ "tiers": [
+  "4GB",
+  "8GB",
+  "16GB"
+ ],
+ "tiers_rows": {
+  "16GB": [
+   {
+    "file": "ggml-large-v1.bin",
+    "mem_text": "3.9 GB",
+    "multilingual": true,
+    "name": "large-v1",
+    "sha256": "7d99f41a10525d0206bddadd86760181fa920438b6b33237e3118ff6c83bb53d",
+    "size": 3094623691,
+    "usable_before_download": false
+   },
+   {
+    "file": "ggml-large-v2.bin",
+    "mem_text": "3.9 GB",
+    "multilingual": true,
+    "name": "large-v2",
+    "sha256": "9a423fe4d40c82774b6af34115b8b935f34152246eb19e80e376071d3f999487",
+    "size": 3094623691,
+    "usable_before_download": false
+   },
+   {
+    "file": "ggml-large-v3.bin",
+    "mem_text": "3.9 GB",
+    "multilingual": true,
+    "name": "large-v3",
+    "sha256": "64d182b440b98d5203c4f9bd541544d84c605196c4f7b845dfa11fb23594d1e2",
+    "size": 3095033483,
+    "usable_before_download": false
+   },
+   {
+    "file": "ggml-medium.bin",
+    "mem_text": "2.1 GB",
+    "multilingual": true,
+    "name": "medium",
+    "sha256": "6c14d5adee5f86394037b4e4e8b59f1673b6cee10e3cf0b11bbdbee79c156208",
+    "size": 1533763059,
+    "usable_before_download": false
+   },
+   {
+    "file": "ggml-small.bin",
+    "mem_text": "852 MB",
+    "multilingual": true,
+    "name": "small",
+    "sha256": "1be3a9b2063867b937e64e2ec7483364a79917e157fa98c5d94b5c1fffea987b",
+    "size": 487601967,
+    "usable_before_download": false
+   },
+   {
+    "file": "ggml-base.bin",
+    "mem_text": "388 MB",
+    "multilingual": true,
+    "name": "base",
+    "sha256": "60ed5bc3dd14eea856493d334349b405782ddcaf0028d4b5df4088345fba2efe",
+    "size": 147951465,
+    "usable_before_download": false
+   },
+   {
+    "file": "ggml-tiny.bin",
+    "mem_text": "273 MB",
+    "multilingual": true,
+    "name": "tiny",
+    "sha256": "be07e048e1e599ad46341c8d2a135645097a538221678b7acdd1b1919c6e1b21",
+    "size": 77691713,
+    "usable_before_download": false
+   },
+   {
+    "file": "ggml-medium.en.bin",
+    "mem_text": "2.1 GB",
+    "multilingual": false,
+    "name": "medium.en",
+    "sha256": "cc37e93478338ec7700281a7ac30a10128929eb8f427dda2e865faa8f6da4356",
+    "size": 1533774781,
+    "usable_before_download": false
+   },
+   {
+    "file": "ggml-small.en.bin",
+    "mem_text": "852 MB",
+    "multilingual": false,
+    "name": "small.en",
+    "sha256": "c6138d6d58ecc8322097e0f987c32f1be8bb0a18532a3f88f734d1bbf9c41e5d",
+    "size": 487614201,
+    "usable_before_download": false
+   },
+   {
+    "file": "ggml-base.en.bin",
+    "mem_text": "388 MB",
+    "multilingual": false,
+    "name": "base.en",
+    "sha256": "a03779c86df3323075f5e796cb2ce5029f00ec8869eee3fdfb897afe36c6d002",
+    "size": 147964211,
+    "usable_before_download": false
+   },
+   {
+    "file": "ggml-tiny.en.bin",
+    "mem_text": "273 MB",
+    "multilingual": false,
+    "name": "tiny.en",
+    "sha256": "921e4cf8686fdd993dcd081a5da5b6c365bfde1162e72b08d75ac75289920b1f",
+    "size": 77704715,
+    "usable_before_download": false
+   }
+  ],
+  "4GB": [
+   {
+    "file": "ggml-medium.bin",
+    "mem_text": "2.1 GB",
+    "multilingual": true,
+    "name": "medium",
+    "sha256": "6c14d5adee5f86394037b4e4e8b59f1673b6cee10e3cf0b11bbdbee79c156208",
+    "size": 1533763059,
+    "usable_before_download": false
+   },
+   {
+    "file": "ggml-small.bin",
+    "mem_text": "852 MB",
+    "multilingual": true,
+    "name": "small",
+    "sha256": "1be3a9b2063867b937e64e2ec7483364a79917e157fa98c5d94b5c1fffea987b",
+    "size": 487601967,
+    "usable_before_download": false
+   },
+   {
+    "file": "ggml-base.bin",
+    "mem_text": "388 MB",
+    "multilingual": true,
+    "name": "base",
+    "sha256": "60ed5bc3dd14eea856493d334349b405782ddcaf0028d4b5df4088345fba2efe",
+    "size": 147951465,
+    "usable_before_download": false
+   },
+   {
+    "file": "ggml-tiny.bin",
+    "mem_text": "273 MB",
+    "multilingual": true,
+    "name": "tiny",
+    "sha256": "be07e048e1e599ad46341c8d2a135645097a538221678b7acdd1b1919c6e1b21",
+    "size": 77691713,
+    "usable_before_download": false
+   },
+   {
+    "file": "ggml-medium.en.bin",
+    "mem_text": "2.1 GB",
+    "multilingual": false,
+    "name": "medium.en",
+    "sha256": "cc37e93478338ec7700281a7ac30a10128929eb8f427dda2e865faa8f6da4356",
+    "size": 1533774781,
+    "usable_before_download": false
+   },
+   {
+    "file": "ggml-small.en.bin",
+    "mem_text": "852 MB",
+    "multilingual": false,
+    "name": "small.en",
+    "sha256": "c6138d6d58ecc8322097e0f987c32f1be8bb0a18532a3f88f734d1bbf9c41e5d",
+    "size": 487614201,
+    "usable_before_download": false
+   },
+   {
+    "file": "ggml-base.en.bin",
+    "mem_text": "388 MB",
+    "multilingual": false,
+    "name": "base.en",
+    "sha256": "a03779c86df3323075f5e796cb2ce5029f00ec8869eee3fdfb897afe36c6d002",
+    "size": 147964211,
+    "usable_before_download": false
+   },
+   {
+    "file": "ggml-tiny.en.bin",
+    "mem_text": "273 MB",
+    "multilingual": false,
+    "name": "tiny.en",
+    "sha256": "921e4cf8686fdd993dcd081a5da5b6c365bfde1162e72b08d75ac75289920b1f",
+    "size": 77704715,
+    "usable_before_download": false
+   }
+  ],
+  "8GB": [
+   {
+    "file": "ggml-large-v1.bin",
+    "mem_text": "3.9 GB",
+    "multilingual": true,
+    "name": "large-v1",
+    "sha256": "7d99f41a10525d0206bddadd86760181fa920438b6b33237e3118ff6c83bb53d",
+    "size": 3094623691,
+    "usable_before_download": false
+   },
+   {
+    "file": "ggml-large-v2.bin",
+    "mem_text": "3.9 GB",
+    "multilingual": true,
+    "name": "large-v2",
+    "sha256": "9a423fe4d40c82774b6af34115b8b935f34152246eb19e80e376071d3f999487",
+    "size": 3094623691,
+    "usable_before_download": false
+   },
+   {
+    "file": "ggml-large-v3.bin",
+    "mem_text": "3.9 GB",
+    "multilingual": true,
+    "name": "large-v3",
+    "sha256": "64d182b440b98d5203c4f9bd541544d84c605196c4f7b845dfa11fb23594d1e2",
+    "size": 3095033483,
+    "usable_before_download": false
+   },
+   {
+    "file": "ggml-medium.bin",
+    "mem_text": "2.1 GB",
+    "multilingual": true,
+    "name": "medium",
+    "sha256": "6c14d5adee5f86394037b4e4e8b59f1673b6cee10e3cf0b11bbdbee79c156208",
+    "size": 1533763059,
+    "usable_before_download": false
+   },
+   {
+    "file": "ggml-small.bin",
+    "mem_text": "852 MB",
+    "multilingual": true,
+    "name": "small",
+    "sha256": "1be3a9b2063867b937e64e2ec7483364a79917e157fa98c5d94b5c1fffea987b",
+    "size": 487601967,
+    "usable_before_download": false
+   },
+   {
+    "file": "ggml-base.bin",
+    "mem_text": "388 MB",
+    "multilingual": true,
+    "name": "base",
+    "sha256": "60ed5bc3dd14eea856493d334349b405782ddcaf0028d4b5df4088345fba2efe",
+    "size": 147951465,
+    "usable_before_download": false
+   },
+   {
+    "file": "ggml-tiny.bin",
+    "mem_text": "273 MB",
+    "multilingual": true,
+    "name": "tiny",
+    "sha256": "be07e048e1e599ad46341c8d2a135645097a538221678b7acdd1b1919c6e1b21",
+    "size": 77691713,
+    "usable_before_download": false
+   },
+   {
+    "file": "ggml-medium.en.bin",
+    "mem_text": "2.1 GB",
+    "multilingual": false,
+    "name": "medium.en",
+    "sha256": "cc37e93478338ec7700281a7ac30a10128929eb8f427dda2e865faa8f6da4356",
+    "size": 1533774781,
+    "usable_before_download": false
+   },
+   {
+    "file": "ggml-small.en.bin",
+    "mem_text": "852 MB",
+    "multilingual": false,
+    "name": "small.en",
+    "sha256": "c6138d6d58ecc8322097e0f987c32f1be8bb0a18532a3f88f734d1bbf9c41e5d",
+    "size": 487614201,
+    "usable_before_download": false
+   },
+   {
+    "file": "ggml-base.en.bin",
+    "mem_text": "388 MB",
+    "multilingual": false,
+    "name": "base.en",
+    "sha256": "a03779c86df3323075f5e796cb2ce5029f00ec8869eee3fdfb897afe36c6d002",
+    "size": 147964211,
+    "usable_before_download": false
+   },
+   {
+    "file": "ggml-tiny.en.bin",
+    "mem_text": "273 MB",
+    "multilingual": false,
+    "name": "tiny.en",
+    "sha256": "921e4cf8686fdd993dcd081a5da5b6c365bfde1162e72b08d75ac75289920b1f",
+    "size": 77704715,
+    "usable_before_download": false
+   }
+  ]
+ },
+ "tiers_rows_fit_only": {
+  "16GB": [
+   {
+    "file": "ggml-large-v1.bin",
+    "mem_text": "3.9 GB",
+    "multilingual": true,
+    "name": "large-v1",
+    "sha256": "7d99f41a10525d0206bddadd86760181fa920438b6b33237e3118ff6c83bb53d",
+    "size": 3094623691,
+    "usable_before_download": false
+   },
+   {
+    "file": "ggml-large-v2.bin",
+    "mem_text": "3.9 GB",
+    "multilingual": true,
+    "name": "large-v2",
+    "sha256": "9a423fe4d40c82774b6af34115b8b935f34152246eb19e80e376071d3f999487",
+    "size": 3094623691,
+    "usable_before_download": false
+   },
+   {
+    "file": "ggml-large-v3.bin",
+    "mem_text": "3.9 GB",
+    "multilingual": true,
+    "name": "large-v3",
+    "sha256": "64d182b440b98d5203c4f9bd541544d84c605196c4f7b845dfa11fb23594d1e2",
+    "size": 3095033483,
+    "usable_before_download": false
+   },
+   {
+    "file": "ggml-medium.bin",
+    "mem_text": "2.1 GB",
+    "multilingual": true,
+    "name": "medium",
+    "sha256": "6c14d5adee5f86394037b4e4e8b59f1673b6cee10e3cf0b11bbdbee79c156208",
+    "size": 1533763059,
+    "usable_before_download": false
+   },
+   {
+    "file": "ggml-small.bin",
+    "mem_text": "852 MB",
+    "multilingual": true,
+    "name": "small",
+    "sha256": "1be3a9b2063867b937e64e2ec7483364a79917e157fa98c5d94b5c1fffea987b",
+    "size": 487601967,
+    "usable_before_download": false
+   },
+   {
+    "file": "ggml-base.bin",
+    "mem_text": "388 MB",
+    "multilingual": true,
+    "name": "base",
+    "sha256": "60ed5bc3dd14eea856493d334349b405782ddcaf0028d4b5df4088345fba2efe",
+    "size": 147951465,
+    "usable_before_download": false
+   },
+   {
+    "file": "ggml-tiny.bin",
+    "mem_text": "273 MB",
+    "multilingual": true,
+    "name": "tiny",
+    "sha256": "be07e048e1e599ad46341c8d2a135645097a538221678b7acdd1b1919c6e1b21",
+    "size": 77691713,
+    "usable_before_download": false
+   },
+   {
+    "file": "ggml-medium.en.bin",
+    "mem_text": "2.1 GB",
+    "multilingual": false,
+    "name": "medium.en",
+    "sha256": "cc37e93478338ec7700281a7ac30a10128929eb8f427dda2e865faa8f6da4356",
+    "size": 1533774781,
+    "usable_before_download": false
+   },
+   {
+    "file": "ggml-small.en.bin",
+    "mem_text": "852 MB",
+    "multilingual": false,
+    "name": "small.en",
+    "sha256": "c6138d6d58ecc8322097e0f987c32f1be8bb0a18532a3f88f734d1bbf9c41e5d",
+    "size": 487614201,
+    "usable_before_download": false
+   },
+   {
+    "file": "ggml-base.en.bin",
+    "mem_text": "388 MB",
+    "multilingual": false,
+    "name": "base.en",
+    "sha256": "a03779c86df3323075f5e796cb2ce5029f00ec8869eee3fdfb897afe36c6d002",
+    "size": 147964211,
+    "usable_before_download": false
+   },
+   {
+    "file": "ggml-tiny.en.bin",
+    "mem_text": "273 MB",
+    "multilingual": false,
+    "name": "tiny.en",
+    "sha256": "921e4cf8686fdd993dcd081a5da5b6c365bfde1162e72b08d75ac75289920b1f",
+    "size": 77704715,
+    "usable_before_download": false
+   }
+  ],
+  "4GB": [
+   {
+    "file": "ggml-large-v1.bin",
+    "mem_text": "3.9 GB",
+    "multilingual": true,
+    "name": "large-v1",
+    "sha256": "7d99f41a10525d0206bddadd86760181fa920438b6b33237e3118ff6c83bb53d",
+    "size": 3094623691,
+    "usable_before_download": false
+   },
+   {
+    "file": "ggml-large-v2.bin",
+    "mem_text": "3.9 GB",
+    "multilingual": true,
+    "name": "large-v2",
+    "sha256": "9a423fe4d40c82774b6af34115b8b935f34152246eb19e80e376071d3f999487",
+    "size": 3094623691,
+    "usable_before_download": false
+   },
+   {
+    "file": "ggml-large-v3.bin",
+    "mem_text": "3.9 GB",
+    "multilingual": true,
+    "name": "large-v3",
+    "sha256": "64d182b440b98d5203c4f9bd541544d84c605196c4f7b845dfa11fb23594d1e2",
+    "size": 3095033483,
+    "usable_before_download": false
+   },
+   {
+    "file": "ggml-medium.bin",
+    "mem_text": "2.1 GB",
+    "multilingual": true,
+    "name": "medium",
+    "sha256": "6c14d5adee5f86394037b4e4e8b59f1673b6cee10e3cf0b11bbdbee79c156208",
+    "size": 1533763059,
+    "usable_before_download": false
+   },
+   {
+    "file": "ggml-small.bin",
+    "mem_text": "852 MB",
+    "multilingual": true,
+    "name": "small",
+    "sha256": "1be3a9b2063867b937e64e2ec7483364a79917e157fa98c5d94b5c1fffea987b",
+    "size": 487601967,
+    "usable_before_download": false
+   },
+   {
+    "file": "ggml-base.bin",
+    "mem_text": "388 MB",
+    "multilingual": true,
+    "name": "base",
+    "sha256": "60ed5bc3dd14eea856493d334349b405782ddcaf0028d4b5df4088345fba2efe",
+    "size": 147951465,
+    "usable_before_download": false
+   },
+   {
+    "file": "ggml-tiny.bin",
+    "mem_text": "273 MB",
+    "multilingual": true,
+    "name": "tiny",
+    "sha256": "be07e048e1e599ad46341c8d2a135645097a538221678b7acdd1b1919c6e1b21",
+    "size": 77691713,
+    "usable_before_download": false
+   },
+   {
+    "file": "ggml-medium.en.bin",
+    "mem_text": "2.1 GB",
+    "multilingual": false,
+    "name": "medium.en",
+    "sha256": "cc37e93478338ec7700281a7ac30a10128929eb8f427dda2e865faa8f6da4356",
+    "size": 1533774781,
+    "usable_before_download": false
+   },
+   {
+    "file": "ggml-small.en.bin",
+    "mem_text": "852 MB",
+    "multilingual": false,
+    "name": "small.en",
+    "sha256": "c6138d6d58ecc8322097e0f987c32f1be8bb0a18532a3f88f734d1bbf9c41e5d",
+    "size": 487614201,
+    "usable_before_download": false
+   },
+   {
+    "file": "ggml-base.en.bin",
+    "mem_text": "388 MB",
+    "multilingual": false,
+    "name": "base.en",
+    "sha256": "a03779c86df3323075f5e796cb2ce5029f00ec8869eee3fdfb897afe36c6d002",
+    "size": 147964211,
+    "usable_before_download": false
+   },
+   {
+    "file": "ggml-tiny.en.bin",
+    "mem_text": "273 MB",
+    "multilingual": false,
+    "name": "tiny.en",
+    "sha256": "921e4cf8686fdd993dcd081a5da5b6c365bfde1162e72b08d75ac75289920b1f",
+    "size": 77704715,
+    "usable_before_download": false
+   }
+  ],
+  "8GB": [
+   {
+    "file": "ggml-large-v1.bin",
+    "mem_text": "3.9 GB",
+    "multilingual": true,
+    "name": "large-v1",
+    "sha256": "7d99f41a10525d0206bddadd86760181fa920438b6b33237e3118ff6c83bb53d",
+    "size": 3094623691,
+    "usable_before_download": false
+   },
+   {
+    "file": "ggml-large-v2.bin",
+    "mem_text": "3.9 GB",
+    "multilingual": true,
+    "name": "large-v2",
+    "sha256": "9a423fe4d40c82774b6af34115b8b935f34152246eb19e80e376071d3f999487",
+    "size": 3094623691,
+    "usable_before_download": false
+   },
+   {
+    "file": "ggml-large-v3.bin",
+    "mem_text": "3.9 GB",
+    "multilingual": true,
+    "name": "large-v3",
+    "sha256": "64d182b440b98d5203c4f9bd541544d84c605196c4f7b845dfa11fb23594d1e2",
+    "size": 3095033483,
+    "usable_before_download": false
+   },
+   {
+    "file": "ggml-medium.bin",
+    "mem_text": "2.1 GB",
+    "multilingual": true,
+    "name": "medium",
+    "sha256": "6c14d5adee5f86394037b4e4e8b59f1673b6cee10e3cf0b11bbdbee79c156208",
+    "size": 1533763059,
+    "usable_before_download": false
+   },
+   {
+    "file": "ggml-small.bin",
+    "mem_text": "852 MB",
+    "multilingual": true,
+    "name": "small",
+    "sha256": "1be3a9b2063867b937e64e2ec7483364a79917e157fa98c5d94b5c1fffea987b",
+    "size": 487601967,
+    "usable_before_download": false
+   },
+   {
+    "file": "ggml-base.bin",
+    "mem_text": "388 MB",
+    "multilingual": true,
+    "name": "base",
+    "sha256": "60ed5bc3dd14eea856493d334349b405782ddcaf0028d4b5df4088345fba2efe",
+    "size": 147951465,
+    "usable_before_download": false
+   },
+   {
+    "file": "ggml-tiny.bin",
+    "mem_text": "273 MB",
+    "multilingual": true,
+    "name": "tiny",
+    "sha256": "be07e048e1e599ad46341c8d2a135645097a538221678b7acdd1b1919c6e1b21",
+    "size": 77691713,
+    "usable_before_download": false
+   },
+   {
+    "file": "ggml-medium.en.bin",
+    "mem_text": "2.1 GB",
+    "multilingual": false,
+    "name": "medium.en",
+    "sha256": "cc37e93478338ec7700281a7ac30a10128929eb8f427dda2e865faa8f6da4356",
+    "size": 1533774781,
+    "usable_before_download": false
+   },
+   {
+    "file": "ggml-small.en.bin",
+    "mem_text": "852 MB",
+    "multilingual": false,
+    "name": "small.en",
+    "sha256": "c6138d6d58ecc8322097e0f987c32f1be8bb0a18532a3f88f734d1bbf9c41e5d",
+    "size": 487614201,
+    "usable_before_download": false
+   },
+   {
+    "file": "ggml-base.en.bin",
+    "mem_text": "388 MB",
+    "multilingual": false,
+    "name": "base.en",
+    "sha256": "a03779c86df3323075f5e796cb2ce5029f00ec8869eee3fdfb897afe36c6d002",
+    "size": 147964211,
+    "usable_before_download": false
+   },
+   {
+    "file": "ggml-tiny.en.bin",
+    "mem_text": "273 MB",
+    "multilingual": false,
+    "name": "tiny.en",
+    "sha256": "921e4cf8686fdd993dcd081a5da5b6c365bfde1162e72b08d75ac75289920b1f",
+    "size": 77704715,
+    "usable_before_download": false
+   }
+  ]
+ },
+ "upstream_deltas": {
+  "host_only": [
+   "base.en-q8_0",
+   "medium.en-q8_0",
+   "small.en-q8_0",
+   "tiny.en-q8_0"
+  ],
+  "whitelist_only": [
+   "small.en-tdrz"
+  ]
+ }
+}

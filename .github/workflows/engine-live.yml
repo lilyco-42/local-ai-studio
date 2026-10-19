@@ -14,6 +14,9 @@ on:
       - "tools/citation_check.py"
       - "tools/file_index.py"
       - "tools/recommend_models.py"
+      - "tools/recommend_subtitle.py"
+      - "catalog/subtitle-tiers.json"
+      - "tests/fixtures/whisper_*"
       - "catalog/recommendations.json"
       - "tests/fixtures/recommend_slice.json"
       - "tools/payload_plan.py"
@@ -559,6 +562,28 @@ jobs:
         run: python3 tools/recommend_models.py --fixtures tests/fixtures/recommend_slice.json --check
       - name: 真取两家元数据重算（上游漂了就红，包括某档凑不满）
         run: python3 tools/recommend_models.py --live --check
+
+  subtitle-tiers:
+    # 字幕这一档不能沿用对话那套：llmfit 的目录里 ASR 只有 5 条（OCR/生图 0 条，已实测），
+    # 所以"这台机器跑哪颗 whisper 模型"只能用 whisper.cpp 自己写的数字。
+    # 四张上游表互相咬：README 的 Memory usage、models/README 的 Model|Disk|SHA 与三条语义规则、
+    # download-ggml-model.sh 的白名单与下载源、宿主仓库的文件表（两家各一份）。
+    # 前两步不联网也要红 —— 车道至今 0 次执行，能离线证明的判据才真的算判据。
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: 判据本身（离线，含明知是错的必须认成错）
+        run: python3 tools/recommend_subtitle.py --selftest
+      - name: 判据单测（含与已钉 whisper pin 的跨产物一致性、语言表的静默少项回归）
+        run: python -m unittest tests.test_recommend_subtitle -v
+      - name: 用真捕获离线重算并与已提交那张比漂移
+        run: python3 tools/recommend_subtitle.py --fixtures tests/fixtures --check
+      - name: 真取四张表重算（上游改表、撤文件、档位凑不满都要红）
+        run: python3 tools/recommend_subtitle.py --live --check
 
   ocr-build-surface:
     # 四项能力里只有 OCR 要现场编译，而"钉 commit"对它**并不等于钉住构建输入**：
