@@ -79,14 +79,15 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
    `headless-inference` 在 CPU runner 上对话真抓到 `tokens per second > 0`；
    `subtitle-proof` 用钉好的引擎+权重+已知答案样本跑出一份**带时间戳且内容对得上**的 SRT。
 3. 目录可达性探针（`catalog_probe.py`）三条判据全过：泛词有结果、正向对照命中精确仓库、负向对照 0 条。
-4. **车道覆盖度**：四项能力现在有**三条**执行车道 —— 对话（`headless-inference` 抓 tokens/s）、
-   字幕（`subtitle-proof` 出带时间戳的 SRT）、文字识别（`ocr-proof`：CI 里 `cargo build` 出 `oar`，
-   用钉住的 tiny det/rec/dict 三件套认出一张自画合成图里的已知词）。
-   只缺**生图**一条。它的前两个障碍现在只剩一个：
-   pin 已经零下载立住了（ModelScope 元数据 `Sha256` == 其 CDN 内容寻址路径，总长 == HF `lfs.size`，
-   `b8944e9f…`、1,566,768,416 B），剩下的纯粹是**成本** —— 最小可用扩散权重 1,494.2 MiB
-   （SD-Turbo 反而 1,930.0 MiB 更大），CI 要 30 min 级 timeout 才装得下一次下载。
-   在它跑通之前不把"四项都验过"当成事实。
+4. **车道覆盖度**：四项能力**都有执行车道了** —— 对话（`headless-inference` 抓 tokens/s）、
+   字幕（`subtitle-proof` 出带时间戳且内容对得上的 SRT）、文字识别（`ocr-proof`：CI 里 `cargo build`
+   出 `oar`，用钉住的 tiny det/rec/dict 认出一张自画合成图里的已知词）、
+   生图（`image-proof`：引擎用 discover 实时发现的产物 + 上游 digest 复核，权重钉死
+   `b8944e9f…`/1,566,768,416 B，3 步 256x256 出合法 PNG，并**要求 `-v` 日志里的
+   `Steps: 3` 与 `Size: 256x256` 证明参数真被吃进去**，不是随便跑出一张图）。
+   生图这条刻意分工：引擎不钉（上游每天出 nightly，钉死等于天天红且测的是旧版），
+   权重钉死（1.5 GB，一次下载要 45 min 级 timeout）。
+   但覆盖度说的是**车道存在**，不是跑过 —— 跑过与否要看 Actions 的真实记录，目前为零。
 5. **车道里的 Python 片段要真编译**：`yaml_gate.py` 现在把两条 workflow 里的每段 `<<'PY'` 抽出来
    `compile()`（本轮覆盖 7 段），并验过它会红 —— 掺一段缩进错的 PY 进去，它按
    `文件:job#步骤 第N段` 报出语法错。这个能力是被我上一次写的车道逼出来的：

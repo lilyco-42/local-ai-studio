@@ -21,6 +21,10 @@ jobs:
     outputs:
       llama_url: ${{ steps.pick.outputs.llama_url }}
       llama_tag: ${{ steps.pick.outputs.llama_tag }}
+      sd_url: ${{ steps.pick.outputs.sd_url }}
+      sd_digest: ${{ steps.pick.outputs.sd_digest }}
+      sd_size: ${{ steps.pick.outputs.sd_size }}
+      sd_tag: ${{ steps.pick.outputs.sd_tag }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -35,10 +39,17 @@ jobs:
           python - <<'PY' >> "$GITHUB_OUTPUT"
           import json
           m = json.load(open("manifest.json"))["targets"]
-          v = m["llama-ubuntu-base-x64"]
-          print("llama_url=" + v["url"])
-          print("llama_tag=" + v["release"])
-          print("::notice::llama %s 产物 %s %.1fMB" % (v["release"], v["asset"], v["size"] / 1048576))
+          llama = m["llama-ubuntu-base-x64"]
+          sd = m["sd-ubuntu-base-x64"]
+          print("llama_url=" + llama["url"])
+          print("llama_tag=" + llama["release"])
+          print("sd_url=" + sd["url"])
+          print("sd_digest=" + sd["digest"].split(":", 1)[1])
+          print("sd_size=" + str(sd["size"]))
+          print("sd_tag=" + sd["release"])
+          print("::notice::llama %s 产物 %s %.1fMB" % (llama["release"], llama["asset"], llama["size"] / 1048576))
+          print("::notice::sd %s 产物 %s %.1fMB 上游digest=%s"
+                % (sd["release"], sd["asset"], sd["size"] / 1048576, sd["digest"][:18]))
           PY
       - uses: actions/upload-artifact@v4
         with:
@@ -307,6 +318,80 @@ jobs:
                   f"而是 tiny 档在这张合成图上的质量低于底线：实际输出={got[:120]!r}")
           PY
           echo "::notice::OCR 车道通过：tiny 档从自建图认出了 $WORD"
+
+  image-proof:
+    # 第四项能力（生图）。分工是刻意的：**引擎走 discover 实时发现的产物**（上游每天出 nightly，
+    # 钉死引擎就等于天天红，而且测的还是旧版），**权重钉死**（1,494.2 MiB，
+    # pin 由 ModelScope 元数据 Sha256 + 其 CDN 内容寻址路径 + 跨源总长三条一致立起来，零下载）。
+    # 旗标全部在 examples/common/common.cpp 与 examples/cli/main.cpp 的选项表里查到过：
+    #   -m/--model、--diffusion-model、--width/--height（默认 512）、--steps（默认 20）、
+    #   --cfg-scale、--sampling-method、-o/--output。仍按对话那条路的做法：先看 -h 再决定用哪个。
+    # 强判据：-v 的日志里会印 "Steps: N" 与 "Size: WxH"（common.cpp 的 parameter_string 拼的），
+    # 所以能证明"我们传的参数真被用上了"，而不是"随便跑出一张图"。
+    needs: discover
+    timeout-minutes: 45
+    runs-on: ubuntu-latest
+    env:
+      WEIGHT_FILE: stable-diffusion-v1-5-pruned-emaonly-Q4_0.gguf
+      WEIGHT_SIZE: "1566768416"
+      WEIGHT_SHA256: b8944e9fe0b69b36ae1b5bb0185b3a7b8ef14347fe0fa9af6c64c4829022261f
+    steps:
+      - name: 下载引擎（discover 实时给的，digest 由上游 release 提供）
+        run: |
+          curl -sSL --fail --max-time 600 -o engine.zip "${{ needs.discover.outputs.sd_url }}"
+          test "$(stat -c %s engine.zip)" = "${{ needs.discover.outputs.sd_size }}" || { echo "引擎体积不符"; exit 1; }
+          echo "${{ needs.discover.outputs.sd_digest }}  engine.zip" | sha256sum -c -
+          mkdir -p e && unzip -q engine.zip -d e
+          echo "=== 包内布局（实测 Linux 包平铺根目录、二进制无扩展名、带一整套 .so）==="
+          find e -maxdepth 2 | head -20
+          BIN=$(find e -type f -name sd-cli | head -1)
+          test -n "$BIN" || { echo "包里没有 sd-cli；同目录有："; ls -l "$(find e -type d | head -1)" | head -20; exit 1; }
+          chmod +x "$BIN"
+          echo "BIN=$BIN" >> "$GITHUB_ENV"
+          export LD_LIBRARY_PATH="$(dirname "$BIN"):$LD_LIBRARY_PATH"
+          echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH" >> "$GITHUB_ENV"
+          ldd "$BIN" | grep -i "not found" && { echo "动态库缺失"; exit 1; } || echo "动态库齐全"
+          "$BIN" -h > "$RUNNER_TEMP/help.txt" 2>&1 || true
+          grep -oE -- "--(diffusion-model|width|height|steps|output)\b" "$RUNNER_TEMP/help.txt" | sort -u
+      - name: 取权重并按钉住的 sha256 复核
+        run: |
+          ok=""
+          for u in "https://www.modelscope.cn/models/second-state/stable-diffusion-v1-5-GGUF/resolve/master/$WEIGHT_FILE" \
+                   "https://hf-mirror.com/second-state/stable-diffusion-v1-5-GGUF/resolve/main/$WEIGHT_FILE"; do
+            echo "试 $u"
+            if curl -sSL --fail --max-time 2400 -o sd.gguf "$u"; then ok=yes; break; fi
+          done
+          test -n "$ok" || { echo "两个源都没下到权重"; exit 1; }
+          test "$(stat -c %s sd.gguf)" = "$WEIGHT_SIZE" || { echo "权重体积不符"; exit 1; }
+          echo "$WEIGHT_SHA256  sd.gguf" | sha256sum -c -
+          head -c 4 sd.gguf | od -c | head -2 | sed 's/^/  文件头: /'
+      - name: 生成一张小图，并要求日志证明参数生效
+        run: |
+          MODEL_ARG=--diffusion-model
+          grep -q -- "--diffusion-model" "$RUNNER_TEMP/help.txt" || MODEL_ARG=-m
+          echo "用 $MODEL_ARG 传模型"
+          timeout 1800 "$BIN" "$MODEL_ARG" sd.gguf -p "a red cube on a table" \
+            --steps 3 --width 256 --height 256 -o out.png -v > gen.log 2>&1 \
+            || { echo "sd-cli 非零退出："; tail -30 gen.log; exit 1; }
+          ls -l out.png || { echo "没产出 out.png"; tail -20 gen.log; exit 1; }
+          python3 - <<'PY'
+          import re, sys
+          b = open("out.png", "rb").read()
+          print("PNG 头", b[:8].hex(), "字节数", len(b))
+          if b[:8] != bytes([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]):
+              sys.exit("产物不是合法 PNG（只查文件签名，不比像素——像素会因指令集/浮点差异而不同）")
+          if len(b) < 1024:
+              sys.exit("PNG 小得不正常，多半是空图")
+          log = open("gen.log", encoding="utf-8", errors="replace").read()
+          m = re.search(r"Steps:\s*(\d+)", log)
+          s = re.search(r"Size:\s*(\d+)x(\d+)", log)
+          print("日志里的 Steps =", m.group(1) if m else None, " Size =", s.group(0) if s else None)
+          if not m or int(m.group(1)) != 3:
+              sys.exit("日志没体现 --steps 3：参数可能压根没吃进去")
+          if not s or (s.group(1), s.group(2)) != ("256", "256"):
+              sys.exit("日志没体现 256x256：--width/--height 没生效")
+          PY
+          echo "::notice::生图车道通过：引擎 ${{ needs.discover.outputs.sd_tag }} + 钉住的 Q4_0 权重，3 步 256x256 出合法 PNG"
 
   headless-inference:
     needs: discover
