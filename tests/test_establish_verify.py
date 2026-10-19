@@ -156,33 +156,49 @@ class TestCrossMeta(unittest.TestCase):
                  "primary": "ModelScope repo/files 元数据",
                  "url": f"https://hf-mirror.com/Qwen/X-GGUF/resolve/main/{KEY}"}}
 
-    def stub(self, oids, rc=0):
-        def fake_get(url, rng=None):
+    def stub_sh(self, oids, eff=None, rc=0):
+        """替掉 sh()：返回 curl 的 (退出码, stdout, stderr)。stdout 尾部带 MARKER+真正回答的 URL，
+        因为"请求的主机名"和"实际提供方"可以不一样（hf-mirror 从某些出口会 308 回 HF）。"""
+        eff = eff or {}
+
+        def fake_sh(args):
+            url = args[-1]
             host = url.split("/")[2]
             oid = oids.get(host)
-            body = json.dumps([{"path": KEY, "lfs": {"oid": oid, "size": 415182688}}]).encode()
-            return rc, (body if rc == 0 else b""), "" if rc == 0 else "curl 22"
-        return fake_get
+            body = json.dumps([{"path": KEY, "lfs": {"oid": oid, "size": 415182688}}])
+            answered = eff.get(host, host)
+            return rc, (body + tb.MARKER + f"https://{answered}/api/x").encode(), "" if rc == 0 else "curl 22"
+        return fake_sh
 
-    def run_on(self, tmp, oids, rc=0):
-        real = tb.get
-        tb.get = self.stub(oids, rc)
+    def run_on(self, tmp, oids, eff=None, rc=0):
+        real = tb.sh
+        tb.sh = self.stub_sh(oids, eff, rc)
         path = os.path.join(tmp, "pins.json")
         with open(path, "w", encoding="utf-8") as fh:
             json.dump(copy.deepcopy(self.REC), fh)
         try:
             return tb.cross_meta(path), json.load(open(path, encoding="utf-8"))
         finally:
-            tb.get = real
+            tb.sh = real
 
     def test_both_hosts_agree(self) -> None:
         with tempfile.TemporaryDirectory() as d:
             rc, pins = self.run_on(d, {"huggingface.co": "a" * 64, "hf-mirror.com": "a" * 64})
             self.assertEqual(rc, 0)
-            self.assertEqual(pins[KEY]["meta_hashes"]["level"],
-                             "两家分发方元数据各给哈希且相等（仍不是真字节）")
-            self.assertEqual(sorted(pins[KEY]["meta_hashes"]["hosts"]),
-                             ["hf-mirror.com", "huggingface.co"])
+            mh = pins[KEY]["meta_hashes"]
+            self.assertEqual(mh["provider_count"], 2, mh)
+            self.assertIn("2 个提供方", mh["level"], mh["level"])
+
+    def test_two_entrypoints_one_provider_does_not_claim_independence(self) -> None:
+        """从某些出口 hf-mirror 会 308 回 huggingface.co：那还是同一家。
+        级别名不许把"两个主机名"写成"两个提供方"，否则整条阶梯会被这一行虚高一级。"""
+        with tempfile.TemporaryDirectory() as d:
+            rc, pins = self.run_on(d, {"huggingface.co": "a" * 64, "hf-mirror.com": "a" * 64},
+                                   eff={"hf-mirror.com": "huggingface.co"})
+            self.assertEqual(rc, 0)
+            mh = pins[KEY]["meta_hashes"]
+            self.assertEqual(mh["provider_count"], 1, mh)
+            self.assertIn("仍是同一分发方", mh["level"], mh["level"])
 
     def test_disagreeing_host_is_red_and_nothing_is_written(self) -> None:
         with tempfile.TemporaryDirectory() as d:
@@ -198,10 +214,15 @@ class TestCrossMeta(unittest.TestCase):
             self.assertNotIn("meta_hashes", pins[KEY])
 
     def test_size_mismatch_is_red(self) -> None:
-        real = tb.get
-        def fake_get(url, rng=None):
-            return 0, json.dumps([{"path": KEY, "lfs": {"oid": "a" * 64, "size": 1}}]).encode(), ""
-        tb.get = fake_get
+        real = tb.sh
+        tb.sh = self.stub_sh({"huggingface.co": "a" * 64, "hf-mirror.com": "a" * 64})
+        # 再把 size 改掉：复用 stub_sh 的返回，只换 size 字段
+        def fake_sh(args):
+            url = args[-1]
+            host = url.split("/")[2]
+            body = json.dumps([{"path": KEY, "lfs": {"oid": "a" * 64, "size": 1}}])
+            return 0, (body + tb.MARKER + f"https://{host}/api/x").encode(), ""
+        tb.sh = fake_sh
         try:
             with tempfile.TemporaryDirectory() as d:
                 path = os.path.join(d, "pins.json")
@@ -209,7 +230,13 @@ class TestCrossMeta(unittest.TestCase):
                     json.dump(copy.deepcopy(self.REC), fh)
                 self.assertEqual(tb.cross_meta(path), 1)
         finally:
-            tb.get = real
+            tb.sh = real
+
+    def test_marker_is_not_a_curl_file_reference(self) -> None:
+        """真 curl 把 `-w @x` 当成"从文件读格式"并退出 26；stub 永远发现不了这种错。
+        所以把 curl 的方言本身写成一条断言。"""
+        self.assertFalse(tb.MARKER.startswith("@"), tb.MARKER)
+        self.assertNotIn(chr(10), tb.MARKER)
 
     def test_repo_extraction_ignores_github_urls(self) -> None:
         self.assertEqual(tb.hf_repos_for({"url": f"https://hf-mirror.com/A/B/resolve/main/{KEY}"}),
@@ -226,7 +253,8 @@ class TestCrossMeta(unittest.TestCase):
         self.assertEqual(len(hf), 3, hf)
         for k in hf:
             self.assertEqual(pins[k]["meta_hashes"]["oid"], pins[k]["sha256"], k)
-            self.assertIn("仍不是真字节", pins[k]["meta_hashes"]["level"],
+            self.assertGreaterEqual(pins[k]["meta_hashes"]["provider_count"], 1, k)
+            self.assertIn("不是真字节", pins[k]["meta_hashes"]["level"],
                           "级别名不许把它冒充成真字节")
 
 

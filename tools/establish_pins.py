@@ -119,6 +119,11 @@ def via_modelscope(display, repo, path, rev):
                           "整包字节未经下载校验 —— 首次真正下载时仍要按此 pin 复核"}
 
 
+# curl 的 -w 分隔符。**不能以 @ 开头**：curl 把 `-w @name` 解释成"从文件读格式"，
+# 于是整条命令退出码 26（真 curl 才发现，stub 里一片绿）。也不带 \n，免得与 JSON 里的换行纠缠。
+MARKER = "|@@EFFECTIVE@@|"
+
+
 def sh(args):
     p = subprocess.run(args, capture_output=True)
     return p.returncode, p.stdout, p.stderr.decode("utf-8", "replace")[:130]
@@ -310,19 +315,27 @@ def hf_tree_entry(host: str, repo: str, name: str, rev: str = "main"):
     上一轮探针读错键，于是"HF 不给哈希"这句假结论进了五处文档。
     """
     try:
-        rc, body, err = get(f"https://{host}/api/models/{repo}/tree/{rev}")
+        # 带上 @@EFFECTIVE@@：请求的主机名 ≠ 真正回答的提供方。2026-10-20 实测：
+        # 同一台 hf-mirror，从本机去会 308 回 huggingface.co，从 CN 出口去是它自己答（200，无跳转）。
+        # 少这一步就会把"同一分发方的两个入口"记成"两家独立"。
+        rc, out, err = sh(["curl", "-sSL", "--max-time", "90", "-A", "establish-pins/1.0",
+                           "-w", MARKER + "%{url_effective}",
+                           f"https://{host}/api/models/{repo}/tree/{rev}"])
         if rc != 0:
-            return None, None, f"curl 退出码 {rc}：{str(err)[:80]}"
+            return None, None, None, f"curl 退出码 {rc}：{str(err)[:80]}"
+        body, _, tail = out.decode("utf-8", "replace").rpartition(MARKER)
+        answered = tail.strip().split("/")[2] if tail.strip().startswith("http") else host
         tree = json.loads(body)
     except Exception as e:      # noqa: BLE001  取不到要变成一行结论，不能抛死整轮
-        return None, None, f"{type(e).__name__}: {e}"
+        return None, None, None, f"{type(e).__name__}: {e}"
     if not isinstance(tree, list):
-        return None, None, f"返回不是列表（{str(tree)[:70]}）"
+        return None, None, None, f"返回不是列表（{str(tree)[:70]}）"
     hit = [e for e in tree if e.get("path") == name]
     if not hit:
-        return None, None, f"{host} 的树里没有 {name}（条目 {len(tree)} 个）"
+        return None, None, None, f"{host} 的树里没有 {name}（条目 {len(tree)} 个）"
     lfs = hit[0].get("lfs") or {}
-    return lfs.get("oid") or hit[0].get("oid"), lfs.get("size") or hit[0].get("size"), None
+    return (lfs.get("oid") or hit[0].get("oid"), lfs.get("size") or hit[0].get("size"),
+            answered, None)
 
 
 def hf_repos_for(rec: dict) -> set[str]:
@@ -354,12 +367,12 @@ def cross_meta(pins_path: str) -> int:
         repo = sorted(repos)[0]
         hashes = {}
         for host in ("huggingface.co", "hf-mirror.com"):
-            oid, size, err = hf_tree_entry(host, repo, name)
+            oid, size, answered, err = hf_tree_entry(host, repo, name)
             if err:
                 print(f"  ✗ {name}: {host} —— {err}")
                 rc = 1
                 continue
-            hashes[host] = {"oid": oid, "size": size}
+            hashes[host] = {"oid": oid, "size": size, "answered_by": answered}
             if oid != rec["sha256"]:
                 print(f"  ✗ {name}: {host} 给的 oid={str(oid)[:16]}… ≠ 钉的 {rec['sha256'][:16]}…")
                 rc = 1
@@ -367,9 +380,19 @@ def cross_meta(pins_path: str) -> int:
                 print(f"  ✗ {name}: {host} 给的 size={size} ≠ 钉的 {rec['size']}")
                 rc = 1
         if len(hashes) == 2 and all(h["oid"] == rec["sha256"] for h in hashes.values()):
-            rec["meta_hashes"] = {"repo": repo, "hosts": sorted(hashes), "oid": rec["sha256"],
-                                  "level": "两家分发方元数据各给哈希且相等（仍不是真字节）"}
-            print(f"  ✔ {name}: HF 两主机的 oid 都等于钉的哈希（仓库 {repo}）")
+            providers = sorted({h["answered_by"] for h in hashes.values()})
+            rec["meta_hashes"] = {
+                "repo": repo, "hosts": sorted(hashes), "answered_by": providers,
+                "per_host": hashes, "oid": rec["sha256"], "provider_count": len(providers),
+                # 级别名跟着"真正回答的提供方"变：同一个 HF 家族的两个入口不算两家独立，
+                # 独立的那一家是 ModelScope（pin 的原始依据），这里不重复主张。
+                "level": ("HF 系元数据给的哈希与钉值相等（"
+                          + (f"{len(providers)} 个提供方：{providers}" if len(providers) > 1
+                             else "仍是同一分发方，独立第二家只能是 ModelScope")
+                          + "）；元数据哈希不是真字节，别把它当 bytes_verified"),
+            }
+            print(f"  ✔ {name}: oid 等于钉的哈希；真正回答的主机 = {providers}"
+                  f"（{'两个入口其实是同一家' if len(providers) == 1 else '两家'}）")
         else:
             rc = 1
     if rc:

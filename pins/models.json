@@ -3,12 +3,28 @@
   "cross_checked_against": "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-tiny.bin",
   "git_blob_sha1": null,
   "meta_hashes": {
+   "answered_by": [
+    "huggingface.co"
+   ],
    "hosts": [
     "hf-mirror.com",
     "huggingface.co"
    ],
-   "level": "两家分发方元数据各给哈希且相等（仍不是真字节）",
+   "level": "HF 系元数据给的哈希与钉值相等（仍是同一分发方，独立第二家只能是 ModelScope）；元数据哈希不是真字节，别把它当 bytes_verified",
    "oid": "be07e048e1e599ad46341c8d2a135645097a538221678b7acdd1b1919c6e1b21",
+   "per_host": {
+    "hf-mirror.com": {
+     "answered_by": "huggingface.co",
+     "oid": "be07e048e1e599ad46341c8d2a135645097a538221678b7acdd1b1919c6e1b21",
+     "size": 77691713
+    },
+    "huggingface.co": {
+     "answered_by": "huggingface.co",
+     "oid": "be07e048e1e599ad46341c8d2a135645097a538221678b7acdd1b1919c6e1b21",
+     "size": 77691713
+    }
+   },
+   "provider_count": 1,
    "repo": "ggerganov/whisper.cpp"
   },
   "primary": "https://hf-mirror.com/ggerganov/whisper.cpp/resolve/main/ggml-tiny.bin",
@@ -28,12 +44,28 @@
   },
   "cross_checked_against": "同家 CDN lfs-objects 路径 + huggingface.co tree 总长",
   "meta_hashes": {
+   "answered_by": [
+    "huggingface.co"
+   ],
    "hosts": [
     "hf-mirror.com",
     "huggingface.co"
    ],
-   "level": "两家分发方元数据各给哈希且相等（仍不是真字节）",
+   "level": "HF 系元数据给的哈希与钉值相等（仍是同一分发方，独立第二家只能是 ModelScope）；元数据哈希不是真字节，别把它当 bytes_verified",
    "oid": "9ee36184e616dfc76df4f5dd66f908dbde6979524ae36e6cefb67f532f798cb8",
+   "per_host": {
+    "hf-mirror.com": {
+     "answered_by": "huggingface.co",
+     "oid": "9ee36184e616dfc76df4f5dd66f908dbde6979524ae36e6cefb67f532f798cb8",
+     "size": 415182688
+    },
+    "huggingface.co": {
+     "answered_by": "huggingface.co",
+     "oid": "9ee36184e616dfc76df4f5dd66f908dbde6979524ae36e6cefb67f532f798cb8",
+     "size": 415182688
+    }
+   },
+   "provider_count": 1,
    "repo": "Qwen/Qwen2.5-0.5B-Instruct-GGUF"
   },
   "primary": "ModelScope repo/files 元数据",
@@ -62,12 +94,28 @@
   },
   "cross_checked_against": "同家 CDN lfs-objects 路径 + huggingface.co tree 总长",
   "meta_hashes": {
+   "answered_by": [
+    "huggingface.co"
+   ],
    "hosts": [
     "hf-mirror.com",
     "huggingface.co"
    ],
-   "level": "两家分发方元数据各给哈希且相等（仍不是真字节）",
+   "level": "HF 系元数据给的哈希与钉值相等（仍是同一分发方，独立第二家只能是 ModelScope）；元数据哈希不是真字节，别把它当 bytes_verified",
    "oid": "b8944e9fe0b69b36ae1b5bb0185b3a7b8ef14347fe0fa9af6c64c4829022261f",
+   "per_host": {
+    "hf-mirror.com": {
+     "answered_by": "huggingface.co",
+     "oid": "b8944e9fe0b69b36ae1b5bb0185b3a7b8ef14347fe0fa9af6c64c4829022261f",
+     "size": 1566768416
+    },
+    "huggingface.co": {
+     "answered_by": "huggingface.co",
+     "oid": "b8944e9fe0b69b36ae1b5bb0185b3a7b8ef14347fe0fa9af6c64c4829022261f",
+     "size": 1566768416
+    }
+   },
+   "provider_count": 1,
    "repo": "second-state/stable-diffusion-v1-5-GGUF"
   },
   "primary": "ModelScope repo/files 元数据",
