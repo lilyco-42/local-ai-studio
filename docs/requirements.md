@@ -48,6 +48,10 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
 5. **生图按检测到的后端分层**：有 Vulkan/DirectML/CUDA 时正常默认；只有 CPU 时保留入口但
    明示"一张约 5–10 分钟"并默认降到量化 SD1.5 级。依据是第三方数字与产物表实测的
    sd.cpp 每 release 都发 vulkan/rocm 包（详见 ADR-0001）。
+   量完权重还要补一条：**最省的量化版也是 1,494 MiB**，按实测速率 25–30 分钟，
+   所以生图权重**不进首装默认队列**，必须显式触发 + 后台 + 可续传；
+   而 OCR（4.6+15.8 MiB）与字幕（181.3 MiB）是可以默认的。数字见
+   [model-catalog.md](model-catalog.md)。
 
 ## MVP / MVP+ 切分
 

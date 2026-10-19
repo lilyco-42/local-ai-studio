@@ -8,6 +8,7 @@ on:
       - "tools/engine_probe.py"
       - "tools/ocr_catalog_check.py"
       - "tools/catalog_probe.py"
+      - "tools/model_catalog_probe.py"
       - ".github/workflows/engine-live.yml"
 
 permissions:
@@ -119,6 +120,22 @@ jobs:
         with:
           name: catalog-probe
           path: catalog-probe.json
+
+  model-catalog:
+    # 目录侧的漂移闸门：仓库还在不在、大小对不对、上游给不给内容哈希。
+    # 最后一条是结论性的：HF 的 ETag 长得像 sha256 但不是，谁拿它当校验值谁就静默错位，
+    # 所以这条车道要在"ETag 忽然等于 sha256"或者"元数据开始给哈希"时告诉我们规则可以放宽。
+    # 它不 needs discover：上游一挂就会被标 skipped，结论看不见。
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: 权重目录与哈希可得性探针
+        run: python3 tools/model_catalog_probe.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: model-catalog
+          path: model-catalog.json
 
   headless-inference:
     needs: discover
