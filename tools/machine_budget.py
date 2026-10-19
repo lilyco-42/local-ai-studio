@@ -99,12 +99,14 @@ def weight_items(arts: dict, tier: str) -> tuple[list[dict], list[str], dict | N
     chat = one("catalog/recommendations.json", tier, "对话")
     if chat:
         items.append({"kind": "chat", "name": chat["name"], "file": chat["file"],
+                      "repo": chat.get("repo"), "sha256": chat.get("sha256"),
                       "bytes": int(chat["size"]), "hash_status": chat["status"],
                       "trusted_before_download": chat["usable_before_download"],
                       "from": "catalog/recommendations.json"})
     sub = one("catalog/subtitle-tiers.json", tier, "字幕")
     if sub:
         items.append({"kind": "subtitle", "name": sub["name"], "file": sub["file"],
+                      "repo": sub.get("repo"), "sha256": sub.get("sha256"),
                       "bytes": int(sub["size"]), "hash_status": "single",
                       "trusted_before_download": False,
                       "mem_text": sub.get("mem_text"),
@@ -113,6 +115,7 @@ def weight_items(arts: dict, tier: str) -> tuple[list[dict], list[str], dict | N
     if img:
         weights = {(r["repo"], r["file"]): r for r in arts["catalog/image-tiers.json"]["weights"]}
         items.append({"kind": "image", "name": img["repo"], "file": img["file"],
+                      "repo": img["repo"], "sha256": img.get("sha256"),
                       "bytes": int(img["size"]), "hash_status": img["status"],
                       "trusted_before_download": img["usable_before_download"],
                       "role": "unet", "from": "catalog/image-tiers.json"})
@@ -138,6 +141,7 @@ def weight_items(arts: dict, tier: str) -> tuple[list[dict], list[str], dict | N
         for key in sorted(groups):
             row = groups[key]
             items.append({"kind": "image", "name": img["repo"], "file": row["file"],
+                          "repo": row["repo"], "sha256": row.get("sha256"),
                           "bytes": int(row["size"]), "hash_status": row["status"],
                           "trusted_before_download": row["usable_before_download"],
                           "role": row["role"], "need_key": key, "companion_of": img["file"],
@@ -156,6 +160,10 @@ def weight_items(arts: dict, tier: str) -> tuple[list[dict], list[str], dict | N
         # 并据此决定这一档能不能当"装齐"：需要但仓库没有 = 下限；上游例子只给 -m = 不是下限。
         for k in ("state", "needs", "missing", "source", "citation"):
             companions[k] = comp.get(k)
+    # 每一项都得说自己该走哪条确认路线（首启队列按这个分流，不会把 GitHub release 那几颗
+    # 当成 HF 仓库去查，也不会把"没查"混成"查过"）
+    for i in items:
+        i.setdefault("resolve_via", "hf_metadata")
     return items, problems, companions
 
 
@@ -165,19 +173,29 @@ def ocr_items(arts: dict) -> list[dict]:
     for name, e in sorted(arts["catalog/defaults.json"]["entries"].items()):
         if not re.search(r"ocr|ppocr", name, re.I):
             continue
-        out.append({"kind": "ocr", "name": "默认档", "file": name, "bytes": int(e["size"]),
+        out.append({"kind": "ocr", "name": "默认档", "file": name,
+                    "repo": (e.get("meta_hashes") or {}).get("repo"),
+                    "sha256": e.get("sha256"), "bytes": int(e["size"]),
                     "hash_status": "agree" if "4.5" in (e.get("strength") or {}).get("rungs", [])
                     else "single",
                     "trusted_before_download": "4.5" in (e.get("strength") or {}).get("rungs", []),
+                    # OCR 默认档这三颗来自 GitHub release（不是 HF 仓库），所以它的确认路线
+                    # 与另外三项不同：release 的 asset digest。队列工具按这个字段分流，
+                    # 不许把"这条我没查"混进"这条查过了"。
+                    "resolve_via": "github_release_digest",
                     "from": "catalog/defaults.json"})
     agg = arts["pins/ocr-languages.json"]
     if "rec_dict_bytes" not in agg:
         agg = agg.get("aggregate") or {}
     if agg.get("rec_dict_bytes"):
         out.append({"kind": "ocr", "name": "全 14 种语言（rec+dict）", "file": "(合计)",
+                    "repo": None, "sha256": None,
                     "bytes": int(agg["rec_dict_bytes"]), "hash_status": "mixed",
                     "trusted_before_download": None, "from": "pins/ocr-languages.json",
-                    "note": "这是把默认档换成全语言时多出来的量，不是叠在默认档上"})
+                    "queueable": False, "resolve_via": "not_a_file",
+                    "note": "这是把默认档换成全语言时多出来的量，不是叠在默认档上；"
+                            "它不是一个文件，所以进不了首启队列（不等于没验过 —— "
+                            "逐条在 pins/ocr-languages.json 与 ocr-languages 车道）"})
     return out
 
 
@@ -270,9 +288,12 @@ def check(committed: dict, fresh: dict) -> list[str]:
         return bad
     for t in fresh["tiers"]:
         c, f = committed["per_tier"].get(t, {}), fresh["per_tier"][t]
-        if [i["file"] for i in c.get("items", [])] != [i["file"] for i in f["items"]]:
-            bad.append(f"{t}: 默认权重行变了 {[i['file'] for i in c.get('items', [])]} → "
-                       f"{[i['file'] for i in f['items']]}（档位表被重算过，预算要跟着重出）")
+        if [(i["file"], i.get("repo"), i.get("sha256")) for i in c.get("items", [])] != \
+                [(i["file"], i.get("repo"), i.get("sha256")) for i in f["items"]]:
+            bad.append(f"{t}: 默认权重行（文件名 / 仓库 / 钉的哈希）变了 "
+                       f"{[(i['file'], i.get('repo'), str(i.get('sha256'))[:8]) for i in c.get('items', [])]} → "
+                       f"{[(i['file'], i.get('repo'), str(i.get('sha256'))[:8]) for i in f['items']]}"
+                       "（档位表被重算过，预算与首启队列都要跟着重出）")
             continue
         if c.get("image_companions") != f["image_companions"]:
             bad.append(f"{t}: 生图默认行的配套件变了 {c.get('image_companions')} → "

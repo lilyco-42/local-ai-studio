@@ -13,11 +13,13 @@ import tempfile
 import unittest
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+ROOT = os.path.abspath(os.path.join(HERE, ".."))
 sys.path.insert(0, os.path.join(HERE, "..", "tools"))
 import file_index as fi  # noqa: E402
 
 SHA = "f" * 64
 OTHER = "a" * 64
+BUDGET = os.path.join(ROOT, "catalog", "machine-budget.json")
 
 
 def hf_tree(**entries):
@@ -194,6 +196,133 @@ class TestSelfCheck(unittest.TestCase):
             importlib.reload(r2_manifest)
         self.assertEqual(buf.getvalue(), "")
         self.assertTrue(r2_manifest.RATES_MIB_S)
+
+class TestFirstRunQueue(unittest.TestCase):
+    """首启队列：每一项都要说出走哪条确认路线，以及那条路线此刻有没有确认它。"""
+
+    def item(self, **kw):
+        base = {"kind": "chat", "repo": "A/B", "file": "m.gguf", "sha256": SHA,
+                "bytes": 7, "resolve_via": "hf_metadata", "tiers": ["4GB"]}
+        return dict(base, **kw)
+
+    def run_q(self, items, hf_ret, ms_ret, floor=1):
+        return fi.check_queue(items, fetch_hf=lambda r, rev="main": hf_ret,
+                              fetch_ms=lambda r, rev="master": ms_ret, floor_live=floor)
+
+    def test_agreeing_metadata_that_matches_the_pin_is_confirmed(self) -> None:
+        tree = {"m.gguf": {"sha256": SHA, "size": 7}}
+        rows, bad = self.run_q([self.item()], (tree, "huggingface.co", None),
+                                (tree, "www.modelscope.cn", None))
+        self.assertEqual(bad, [], rows[0])
+        self.assertTrue(rows[0]["checked"], rows[0])
+        self.assertEqual(rows[0]["status"], "agree")
+        self.assertIn("modelscope", rows[0]["candidate_sources"])
+
+    def test_pin_mismatch_is_red(self) -> None:
+        """只有一家声明、且与钉值不同：这条必须红（两家都给时另有 pin_conflict 那条管）。"""
+        hf = {"m.gguf": {"sha256": "0" * 64, "size": 7}}
+        rows, bad = self.run_q([self.item()], (hf, "huggingface.co", None), ({}, "x", None))
+        self.assertEqual(rows[0]["status"], "single", rows[0])
+        self.assertTrue(any("元数据哈希 ≠" in b for b in bad), (rows, bad))
+        self.assertFalse(rows[0]["checked"])
+
+    def test_agreeing_providers_that_disagree_with_the_pin_are_pin_conflict(self) -> None:
+        tree = {"m.gguf": {"sha256": "0" * 64, "size": 7}}
+        rows, bad = self.run_q([self.item()], (tree, "huggingface.co", None),
+                                (tree, "www.modelscope.cn", None))
+        self.assertEqual(rows[0]["status"], "pin_conflict", rows[0])
+        self.assertTrue(any("pin_conflict" in b for b in bad), bad)
+
+    def test_missing_file_is_red_not_shrugged(self) -> None:
+        rows, bad = self.run_q([self.item()], ({}, "huggingface.co", None),
+                                ({}, "www.modelscope.cn", None))
+        self.assertEqual(rows[0]["status"], "absent", rows[0])
+        self.assertTrue(any("对不上" in b for b in bad), bad)
+
+    def test_size_mismatch_is_red(self) -> None:
+        tree = {"m.gguf": {"sha256": SHA, "size": 8}}
+        rows, bad = self.run_q([self.item()], (tree, "huggingface.co", None), (tree, "x", None))
+        self.assertTrue(any("体积" in b for b in bad), (rows, bad))
+
+    def test_transport_failure_is_named_as_failure(self) -> None:
+        rows, bad = self.run_q([self.item()], ({}, "", "curl 退出码 28"), ({}, "", None))
+        self.assertTrue(any("取数失败" in b for b in bad), bad)
+        self.assertFalse(rows[0]["checked"])
+
+    def test_item_without_repo_or_pin_cannot_enter_the_queue(self) -> None:
+        for kw in ({"repo": None}, {"repo": "no-slash"}, {"sha256": None}):
+            rows, bad = self.run_q([self.item(**kw)], ({}, "h", None), ({}, "m", None))
+            self.assertTrue(any("进不了队列" in b for b in bad), (kw, bad))
+
+    def test_github_route_is_declared_not_confirmed(self) -> None:
+        """OCR 默认档那三颗走 GitHub release digest —— 这里不许把它们算进"查过了"。"""
+        rows, bad = self.run_q([self.item(resolve_via="github_release_digest")],
+                                ({}, "h", None), ({}, "m", None), floor=1)
+        self.assertFalse(rows[0]["checked"], rows[0])
+        self.assertIn("不在这条车道", rows[0]["note"])
+        self.assertTrue(any("地板" in b for b in bad), bad)
+
+    def test_aggregate_number_is_skipped_as_not_a_file(self) -> None:
+        rows, bad = self.run_q([self.item(resolve_via="not_a_file", repo=None, sha256=None,
+                                         note="合计，不是一个文件")],
+                                ({}, "h", None), ({}, "m", None), floor=0)
+        self.assertEqual(bad, [], rows)
+        self.assertFalse(rows[0]["checked"])
+        self.assertIn("不是一个文件", rows[0]["note"])
+
+    def test_negative_control_catches_a_rubber_stamp(self) -> None:
+        """把 classify 换成"永远 agree"，内置的假名字对照必须当场失效并报出来。"""
+        real = fi.classify
+        fi.classify = lambda name, hf, ms, hp, mp, want=None: {
+            "status": "agree", "providers": ["huggingface.co"], "sha256": SHA, "size": 7,
+            "usable_before_download": True, "matches_pin": True, "declared": {}}
+        try:
+            tree = {"m.gguf": {"sha256": SHA, "size": 7}}
+            rows, bad = self.run_q([self.item()], (tree, "h", None), (tree, "m", None))
+        finally:
+            fi.classify = real
+        self.assertTrue(any("负向对照失效" in b for b in bad), (rows, bad))
+
+    def test_cache_means_one_metadata_pair_per_repo(self) -> None:
+        calls = []
+
+        def hf(repo, rev="main"):
+            calls.append(repo)
+            return ({"m.gguf": {"sha256": SHA, "size": 7}}, "huggingface.co", None)
+
+        rows, bad = fi.check_queue([self.item(), self.item(file="m.gguf", tiers=["8GB"])],
+                                   fetch_hf=hf, fetch_ms=lambda r, rev="master": (
+                                       {"m.gguf": {"sha256": SHA, "size": 7}}, "m", None),
+                                   floor_live=1)
+        self.assertEqual(bad, [], rows)
+        self.assertEqual(calls, ["A/B"], "同一仓库被查了两次 —— 队列会拖慢 CI")
+
+    def test_queue_items_dedupe_and_keep_tiers(self) -> None:
+        budget = {"per_tier": {"4GB": {"items": [self.item()]},
+                               "8GB": {"items": [self.item(), self.item(file="other.gguf",
+                                                                        sha256="1" * 64)]}}}
+        out = fi.queue_items(budget)
+        self.assertEqual(len(out), 2, out)
+        self.assertEqual(out[0]["tiers"], ["4GB", "8GB"], out[0])
+
+    def test_committed_budget_gives_every_item_a_route(self) -> None:
+        """产物里每一项都要有路线；走 hf_metadata 的必须有仓库与钉住的哈希。"""
+        with open(BUDGET, encoding="utf-8") as fh:
+            budget = json.load(fh)
+        items = fi.queue_items(budget)
+        self.assertGreaterEqual(len(items), 12, items)
+        for it in items:
+            self.assertIn(it.get("resolve_via"),
+                          ("hf_metadata", "github_release_digest", "not_a_file"), it)
+            if it["resolve_via"] == "hf_metadata":
+                self.assertTrue(it.get("repo") and "/" in it["repo"], it)
+                self.assertTrue(it.get("sha256"), it)
+        hf_items = [i for i in items if i["resolve_via"] == "hf_metadata"]
+        self.assertTrue(all(i["kind"] in ("chat", "subtitle", "image") for i in hf_items),
+                        hf_items)
+        self.assertTrue(all(i["resolve_via"] == "github_release_digest" for i in items
+                            if i["kind"] == "ocr" and i["resolve_via"] != "not_a_file"),
+                        "OCR 默认档走 HF 是错的：它们来自 GitHub release")
 
 
 if __name__ == "__main__":

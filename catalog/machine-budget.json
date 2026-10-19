@@ -159,6 +159,9 @@
      "hash_status": "agree",
      "kind": "chat",
      "name": "Qwen/Qwen3-14B",
+     "repo": "ggml-org/Qwen3-14B-GGUF",
+     "resolve_via": "hf_metadata",
+     "sha256": "5ff1fe7a07aebc8d090682d01b17cf268a1b4680c6477050ce75a600aecb9efb",
      "trusted_before_download": true
     },
     {
@@ -168,7 +171,10 @@
      "hash_status": "agree",
      "kind": "image",
      "name": "second-state/FLUX.1-schnell-GGUF",
+     "repo": "second-state/FLUX.1-schnell-GGUF",
+     "resolve_via": "hf_metadata",
      "role": "unet",
+     "sha256": "7324362f5366f404fbf662357f321d6335a889e3f2030f1788270323eebd9116",
      "trusted_before_download": true
     },
     {
@@ -181,7 +187,10 @@
      "kind": "image",
      "name": "second-state/FLUX.1-schnell-GGUF",
      "need_key": "t5xxl",
+     "repo": "second-state/FLUX.1-schnell-GGUF",
+     "resolve_via": "hf_metadata",
      "role": "text_encoder",
+     "sha256": "4368e93e01946e930490d4ce9e8e406b611fa8872cb0077b7ec57f394f1fcb16",
      "trusted_before_download": true
     },
     {
@@ -194,7 +203,10 @@
      "kind": "image",
      "name": "second-state/FLUX.1-schnell-GGUF",
      "need_key": "VAE",
+     "repo": "second-state/FLUX.1-schnell-GGUF",
+     "resolve_via": "hf_metadata",
      "role": "vae",
+     "sha256": "1bed7b05318709e46a8cb9accc211168fc7f0b61ab594661860bbfe4d785cc46",
      "trusted_before_download": true
     },
     {
@@ -207,7 +219,10 @@
      "kind": "image",
      "name": "second-state/FLUX.1-schnell-GGUF",
      "need_key": "clip_l",
+     "repo": "second-state/FLUX.1-schnell-GGUF",
+     "resolve_via": "hf_metadata",
      "role": "text_encoder",
+     "sha256": "59cbe002c3e75d2b89d38787e81d12fb4e512fd76176884c470737ad87a1d309",
      "trusted_before_download": true
     },
     {
@@ -217,7 +232,11 @@
      "hash_status": "mixed",
      "kind": "ocr",
      "name": "全 14 种语言（rec+dict）",
-     "note": "这是把默认档换成全语言时多出来的量，不是叠在默认档上",
+     "note": "这是把默认档换成全语言时多出来的量，不是叠在默认档上；它不是一个文件，所以进不了首启队列（不等于没验过 —— 逐条在 pins/ocr-languages.json 与 ocr-languages 车道）",
+     "queueable": false,
+     "repo": null,
+     "resolve_via": "not_a_file",
+     "sha256": null,
      "trusted_before_download": null
     },
     {
@@ -227,6 +246,9 @@
      "hash_status": "agree",
      "kind": "ocr",
      "name": "默认档",
+     "repo": null,
+     "resolve_via": "github_release_digest",
+     "sha256": "9ef676d6ed3c88256a2d92c640c44f25b0c40947e111b14b8be8f594091563e6",
      "trusted_before_download": true
     },
     {
@@ -236,6 +258,9 @@
      "hash_status": "agree",
      "kind": "ocr",
      "name": "默认档",
+     "repo": null,
+     "resolve_via": "github_release_digest",
+     "sha256": "193bab7a04fca699a6c82e6abb5b81bdb28177f0abd4062552b04908dafb19f8",
      "trusted_before_download": true
     },
     {
@@ -245,6 +270,9 @@
      "hash_status": "agree",
      "kind": "ocr",
      "name": "默认档",
+     "repo": null,
+     "resolve_via": "github_release_digest",
+     "sha256": "c5cbe34ef40c29c4df07ed012bf96569cb69a2d2a01a07027e9f13cb832bd9cd",
      "trusted_before_download": true
     },
     {
@@ -255,6 +283,9 @@
      "kind": "subtitle",
      "mem_text": "3.9 GB",
      "name": "large-v1",
+     "repo": "ggerganov/whisper.cpp",
+     "resolve_via": "hf_metadata",
+     "sha256": "7d99f41a10525d0206bddadd86760181fa920438b6b33237e3118ff6c83bb53d",
      "trusted_before_download": false
     }
    ],
@@ -402,6 +433,9 @@
      "hash_status": "agree",
      "kind": "chat",
      "name": "Qwen/Qwen3-4B",
+     "repo": "unsloth/Qwen3-4B-GGUF",
+     "resolve_via": "hf_metadata",
+     "sha256": "f6f851777709861056efcdad3af01da38b31223a3ba26e61a4f8bf3a2195813a",
      "trusted_before_download": true
     },
     {
@@ -411,7 +445,10 @@
      "hash_status": "agree",
      "kind": "image",
      "name": "second-state/stable-diffusion-v1-5-GGUF",
+     "repo": "second-state/stable-diffusion-v1-5-GGUF",
+     "resolve_via": "hf_metadata",
      "role": "unet",
+     "sha256": "da017009aa86a3f46468857d95833435fe55e4a2856afab76ba7722ef8ee4d8b",
      "trusted_before_download": true
     },
     {
@@ -421,7 +458,11 @@
      "hash_status": "mixed",
      "kind": "ocr",
      "name": "全 14 种语言（rec+dict）",
-     "note": "这是把默认档换成全语言时多出来的量，不是叠在默认档上",
+     "note": "这是把默认档换成全语言时多出来的量，不是叠在默认档上；它不是一个文件，所以进不了首启队列（不等于没验过 —— 逐条在 pins/ocr-languages.json 与 ocr-languages 车道）",
+     "queueable": false,
+     "repo": null,
+     "resolve_via": "not_a_file",
+     "sha256": null,
      "trusted_before_download": null
     },
     {
@@ -431,6 +472,9 @@
      "hash_status": "agree",
      "kind": "ocr",
      "name": "默认档",
+     "repo": null,
+     "resolve_via": "github_release_digest",
+     "sha256": "9ef676d6ed3c88256a2d92c640c44f25b0c40947e111b14b8be8f594091563e6",
      "trusted_before_download": true
     },
     {
@@ -440,6 +484,9 @@
      "hash_status": "agree",
      "kind": "ocr",
      "name": "默认档",
+     "repo": null,
+     "resolve_via": "github_release_digest",
+     "sha256": "193bab7a04fca699a6c82e6abb5b81bdb28177f0abd4062552b04908dafb19f8",
      "trusted_before_download": true
     },
     {
@@ -449,6 +496,9 @@
      "hash_status": "agree",
      "kind": "ocr",
      "name": "默认档",
+     "repo": null,
+     "resolve_via": "github_release_digest",
+     "sha256": "c5cbe34ef40c29c4df07ed012bf96569cb69a2d2a01a07027e9f13cb832bd9cd",
      "trusted_before_download": true
     },
     {
@@ -459,6 +509,9 @@
      "kind": "subtitle",
      "mem_text": "2.1 GB",
      "name": "medium",
+     "repo": "ggerganov/whisper.cpp",
+     "resolve_via": "hf_metadata",
+     "sha256": "6c14d5adee5f86394037b4e4e8b59f1673b6cee10e3cf0b11bbdbee79c156208",
      "trusted_before_download": false
     }
    ],
@@ -606,6 +659,9 @@
      "hash_status": "agree",
      "kind": "chat",
      "name": "Qwen/Qwen3-8B",
+     "repo": "unsloth/Qwen3-8B-GGUF",
+     "resolve_via": "hf_metadata",
+     "sha256": "120307ba529eb2439d6c430d94104dabd578497bc7bfe7e322b5d9933b449bd4",
      "trusted_before_download": true
     },
     {
@@ -615,7 +671,10 @@
      "hash_status": "agree",
      "kind": "image",
      "name": "second-state/stable-diffusion-v1-5-GGUF",
+     "repo": "second-state/stable-diffusion-v1-5-GGUF",
+     "resolve_via": "hf_metadata",
      "role": "unet",
+     "sha256": "52c7ca39d8d48d6f44fa4ff2c44569f3c924d92311108cb38492958350d48ff8",
      "trusted_before_download": true
     },
     {
@@ -625,7 +684,11 @@
      "hash_status": "mixed",
      "kind": "ocr",
      "name": "全 14 种语言（rec+dict）",
-     "note": "这是把默认档换成全语言时多出来的量，不是叠在默认档上",
+     "note": "这是把默认档换成全语言时多出来的量，不是叠在默认档上；它不是一个文件，所以进不了首启队列（不等于没验过 —— 逐条在 pins/ocr-languages.json 与 ocr-languages 车道）",
+     "queueable": false,
+     "repo": null,
+     "resolve_via": "not_a_file",
+     "sha256": null,
      "trusted_before_download": null
     },
     {
@@ -635,6 +698,9 @@
      "hash_status": "agree",
      "kind": "ocr",
      "name": "默认档",
+     "repo": null,
+     "resolve_via": "github_release_digest",
+     "sha256": "9ef676d6ed3c88256a2d92c640c44f25b0c40947e111b14b8be8f594091563e6",
      "trusted_before_download": true
     },
     {
@@ -644,6 +710,9 @@
      "hash_status": "agree",
      "kind": "ocr",
      "name": "默认档",
+     "repo": null,
+     "resolve_via": "github_release_digest",
+     "sha256": "193bab7a04fca699a6c82e6abb5b81bdb28177f0abd4062552b04908dafb19f8",
      "trusted_before_download": true
     },
     {
@@ -653,6 +722,9 @@
      "hash_status": "agree",
      "kind": "ocr",
      "name": "默认档",
+     "repo": null,
+     "resolve_via": "github_release_digest",
+     "sha256": "c5cbe34ef40c29c4df07ed012bf96569cb69a2d2a01a07027e9f13cb832bd9cd",
      "trusted_before_download": true
     },
     {
@@ -663,6 +735,9 @@
      "kind": "subtitle",
      "mem_text": "3.9 GB",
      "name": "large-v1",
+     "repo": "ggerganov/whisper.cpp",
+     "resolve_via": "hf_metadata",
+     "sha256": "7d99f41a10525d0206bddadd86760181fa920438b6b33237e3118ff6c83bb53d",
      "trusted_before_download": false
     }
    ],

@@ -84,6 +84,15 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   同时读 HF `tree.lfs.oid` 与 ModelScope `repo/files` 的 `Sha256`，状态分 `agree / single / conflict /
   pin_conflict / absent`，**只有两家都给且相等才允许下载前就信**；两家不等时一个答案都不给。
   车道 `file-index` 跑离线对照（五种状态 + 顺序）与实跑对照（正向=已钉的 pin，负向=故意造的假文件名）。
+  `--queue catalog/machine-budget.json` 是**首启队列**：把三档默认权重行去重（跨档同一颗只排一次、
+  按仓库缓存元数据），逐项对表（钉值 == 声明哈希 == 体积 == 有候选源），并按 `resolve_via` 分流 ——
+  OCR 默认档那三颗来自 GitHub release，这里**如实标 `checked: false` 并写出路线**，
+  不混进"查过了"；覆盖度地板按 live 确认条数算（8）。实测 15 项去重 / live 确认 11 / BAD 0，
+  报告传成 artifact `first-run-queue` 给外壳实现当下载与校验输入。
+  同一轮修掉一处"嘴上读、手上写死"：`recommend_subtitle.py` 早已从
+  `download-ggml-model.sh` 读 `src=`/`pfx=`，可候选源与文件表仍传字面量 `ggerganov/whisper.cpp`；
+  现在宿主由 `host_for_inputs()` 从脚本前缀取，行里带 `repo`、`check()` 比对它，
+  并由一条 ast 测试扫全文（docstring 里可以解释，代码里的字符串常量不行）。
 - `tools/recommend_models.py` + `catalog/recommendations.json`：**给用户的**「我这台机器装哪个」表。
   `catalog/defaults.json` 那 6 条是车道最小样本（对话那颗 415 MB，只为跑通），不是推荐。
   四条规则都进产物、UI 要说得出为什么推荐它：半档 < `recommended_ram_gb` ≤ 档位（上游 llmfit 的数）、

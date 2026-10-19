@@ -76,15 +76,16 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
 
 ## 验收标准（在当前唯一可用验证手段 = GitHub Actions 下）
 
-1. `ci.yml`：486 个单测绿（重数：`python -W error::ResourceWarning -m unittest discover -s tests
+1. `ci.yml`：502 个单测绿（重数：`python -W error::ResourceWarning -m unittest discover -s tests
    -p "test_*.py"`；按文件数就 `python -m unittest tests.<模块名>`。2026-10-20 实测逐文件：
    `test_yaml_gate.py` 闸门自己 11、`test_toolbelt_pins.py` 工具带钉表 14、
    `test_catalog_snapshot.py` 目录快照与侧表 16、`test_citation_check.py` 出处闸门 20、
-   `test_ocr_build_surface.py` OCR 依赖面 15、`test_file_index.py` 下载层五种状态 20、
+   `test_ocr_build_surface.py` OCR 依赖面 15、`test_file_index.py` 下载层五种状态与首启队列 33、
    `test_payload_plan.py` 装机负载 11、`test_pack_engine.py` 出包逻辑 10、
    `test_establish_verify.py` 字节复核 16、`test_shell_vars.py` shell 变量判据 14、
    `test_r2_manifest.py` 镜像清单 6、`test_lane_assertions.py` + `test_image_proof_block.py`
-   车道判据 38 + 6 = 44、`test_recommend_image.py` 生图档位表 31、`test_machine_budget.py` 装机预算 18），
+   车道判据 38 + 6 = 44、`test_recommend_image.py` 生图档位表 31、`test_machine_budget.py` 装机预算 18、
+   `test_lane_replay_report.py` 给分段与预跑计数 3），
    `yaml_gate.py` 0 BAD、
    离线发现器解析出全部必需 target 且每个都带上游 sha256；单测在 `-W error::ResourceWarning` 下跑。
    闸门还把**车道 env 里每一条 64 位十六进制的值**反查出处（必须在 `pins/*.json` 或
@@ -379,6 +380,33 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     `python3 tools/machine_budget.py --check`、`python -m unittest tests.test_machine_budget -v`。
     那句"23 条全被抓"来自本轮一次性的临时扫描（`.cache/` 已 gitignore，不在仓库里），
     能长期复现的是它逼出来的那批用例，不是扫描本身。
+
+21. **首启队列：每一项都要说出"我是谁、从哪家来、走哪条路线被确认"**：预算给了总量，
+    外壳要的是**能下的清单**。`tools/file_index.py --queue catalog/machine-budget.json`
+    把三档的默认权重行去重（15 项，同一颗文件跨档只排一次，按仓库缓存元数据），逐项检查：
+    有仓库 id、有钉住的哈希、两家声明的哈希与钉值**逐字符相等**、体积与预算里一致、
+    至少有一个候选源；并按 `resolve_via` 分流 ——
+    `hf_metadata`（对话/字幕/生图）当场联网对表，`github_release_digest`（OCR 默认档三颗来自
+    GitHub release，不是 HF 仓库）**如实标 `checked: false` 并写出路线**，
+    `not_a_file`（全语言合计）跳过。**把"我没查"混进"查过了"是最容易骗过自己的一种错**，
+    所以覆盖度地板按 live 确认的条数算（8），不是按条目总数。
+    实测（本机一次）：**15 项去重、live 确认 11 项、其余 4 项标路线、BAD 0** ——
+    含这轮换成的 FLUX 配套件 clip_l / t5xxl / ae 三颗（都 `agree`）。
+    报告用 `--json queue-report.json` 落档并由车道传成 artifact `first-run-queue`，
+    外壳实现（#25）直接拿它当下载顺序与校验输入。
+    同一轮补的纪律：**"宿主从上游脚本里读"不能只写在 docstring 里**。
+    `recommend_subtitle.py` 的 `parse_script()` 早就从 `download-ggml-model.sh` 读 `src=`/`pfx=`，
+    可候选源与文件表那两处仍把 `ggerganov/whisper.cpp` 当字面量传进去 —— 上游换宿主时
+    表里的 URL 会跟着脚本变、而解析还在查旧仓库。现在宿主由 `host_for_inputs()` 从脚本前缀里取，
+    行里与 `tiers_rows` 都带 `repo`，`check()` 比对它，并且
+    `test_host_literal_never_appears_in_code` 用 ast 扫全文（docstring 允许解释、代码里的
+    字符串常量不允许）；`live_inputs()` 自己离线跑不到（要 curl），所以"读宿主"单独成函数，
+    才能拿真捕获的脚本直接验 —— 换成另一家 `src=` 就得跟着变。
+    重数：`python3 tools/file_index.py --queue catalog/machine-budget.json`、
+    `python -m unittest tests.test_file_index tests.test_recommend_subtitle -v`。
+    队列判据的一次性变异扫描 10 条全被抓（临时脚本，不在仓库里）：地板失效、
+    GitHub 路线算成本车道查过、体积不符不报、负向对照撤掉、未命中也标确认、
+    不去重、取数失败当空表、每文件重查元数据、状态不合格也算过、缺仓库/缺钉值也算能下。
 
 ## 车道判据的出处（全部按**钉住的那个 ref** 核过，不是按 HEAD 记的）
 

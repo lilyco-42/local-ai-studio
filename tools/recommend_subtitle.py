@@ -210,8 +210,19 @@ def split_variant(file: str) -> tuple[str, str, str | None, bool]:
     return fam or bare.split("-")[0], stem, quant, ".en" in bare
 
 
+def repo_from_prefix(url: str) -> str:
+    """从上游脚本给出的下载前缀里取出宿主仓库 id（`https://host/owner/repo/resolve/main`）。
+
+    为什么要这个：`parse_script` 的整条纪律就是"域名与宿主从脚本里读，不写死在我们代码里"，
+    可候选源那两处却把 `ggerganov/whisper.cpp` 当字面量传进去了 —— 上游换宿主仓库时，
+    表里的 URL 会跟着脚本变，而候选源与哈希解析还在查旧仓库，属于"看起来一致其实指错了地方"。
+    """
+    m = re.search(r"^https?://[^/]+/([^/]+/[^/]+)(?:/resolve\b|/tree\b|/repo\b|$)", url or "")
+    return m.group(1) if m else ""
+
+
 def inventory(tree: dict, mem: dict, upstream: dict, dl_prefix: str, ms_tree: dict,
-              whitelist: list[str]) -> tuple[list[dict], list[str], dict]:
+              whitelist: list[str], host_repo: str = "") -> tuple[list[dict], list[str], dict]:
     rows, problems = [], []
     files, errs = host_files(tree)
     for name, why in errs.items():
@@ -250,7 +261,9 @@ def inventory(tree: dict, mem: dict, upstream: dict, dl_prefix: str, ms_tree: di
         recommended = {label: (None if not mem_row else
                                mem_row["mem_bytes"] <= cap * UNIT["GiB"] * HEADROOM)
                        for label, cap in TIERS}
+        cands = file_index.candidates(host_repo, file) if host_repo else []
         rows.append({"file": file, "name": up_name, "family": fam, "quant": quant,
+                     "repo": host_repo,
                      "english_only": english, "multilingual": not english,
                      "size": size, "sha256": sha,
                      "status": cls["status"], "usable_before_download": cls["usable_before_download"],
@@ -264,11 +277,11 @@ def inventory(tree: dict, mem: dict, upstream: dict, dl_prefix: str, ms_tree: di
                      "fits": fits, "recommended_for": recommended,
                      # 候选源顺序按实测吞吐（ModelScope 第一），但这个仓库它**没有**（实测 0 个文件）。
                      # 所以如实标出来，让 UI 把这条候选灰掉而不是让用户对着一个必 404 的快源发呆。
-                     "distributor_absent": ([c["source"] for c in
-                                             file_index.candidates("ggerganov/whisper.cpp", file)
+                     # 仓库 id 用脚本里读到的宿主（host_repo），不再是本文件里的字面量。
+                     "distributor_absent": ([c["source"] for c in cands
                                              if not (ms_tree.get(file) or {}).get("sha256")
                                              and c["source"] == "modelscope"] or []),
-                     "urls": [c["url"] for c in file_index.candidates("ggerganov/whisper.cpp", file)],
+                     "urls": [c["url"] for c in cands],
                      "download_url_upstream": f"{dl_prefix}/{file}" if dl_prefix else None})
     return rows, problems, deltas
 
@@ -285,6 +298,7 @@ def pick_tiers(rows: list[dict], key: str = "recommended_for") -> dict[str, list
         fit.sort(key=lambda r: (not r["multilingual"], -(r["mem_bytes"] or 0), r["name"]))
         out[label] = [{"name": r["name"], "file": r["file"], "size": r["size"],
                        "mem_text": r["mem_text"], "multilingual": r["multilingual"],
+                       "repo": r["repo"],
                        "sha256": r["sha256"], "usable_before_download": r["usable_before_download"]}
                       for r in fit]
     return out
@@ -296,12 +310,16 @@ def build(tree: dict, ms_tree: dict, readme: str, models_readme: str, script: st
     mem, p1 = parse_mem_table(readme)
     upstream, p2 = parse_model_table(models_readme)
     prefix, whitelist, p3 = parse_script(script)
+    host_repo = repo_from_prefix(prefix)
     rules = rule_lines(models_readme)
     problems += p1 + p2 + p3
     if rules["missing"]:
         problems.append(f"上游 models/README.md 里读不到 {rules['missing']} 这三条语义规则的行 —— "
                         "多语言/量化/空壳的判据失去出处，不许凭记忆")
-    rows, p4, deltas = inventory(tree, mem, upstream, prefix, ms_tree, whitelist)
+    rows, p4, deltas = inventory(tree, mem, upstream, prefix, ms_tree, whitelist, host_repo)
+    if not host_repo and prefix:
+        problems.append(f"从脚本的下载前缀 {prefix!r} 里读不出宿主仓库 id —— "
+                        "候选源与哈希解析没地方可查，不许退回字面量")
     problems += p4
     if not langs:
         problems.append("没拿到 src/whisper.cpp 的语言表 —— 语言这一轴不能被静默丢掉")
@@ -322,7 +340,7 @@ def build(tree: dict, ms_tree: dict, readme: str, models_readme: str, script: st
                      "whisper.cpp models/README.md 的 Model|Disk|SHA 表与三条语义规则",
                      "whisper.cpp models/download-ggml-model.sh 的白名单与下载源",
                      "whisper.cpp src/whisper.cpp 的 g_lang 语言表",
-                     "宿主仓库 ggerganov/whisper.cpp 的 tree.lfs.oid（+ ModelScope 对照）"],
+                     f"宿主仓库 {host_repo} 的 tree.lfs.oid（+ ModelScope 对照）"],
             "rule": {"tier": "默认档要求 上游 Mem <= 档位 × %s（我们的余量规则，与对话表同一个数）"
                              % HEADROOM,
                      "fits": "另给一列纯算术：Mem <= 档位，不带余量",
@@ -363,8 +381,8 @@ def check(committed: dict, fresh: dict) -> list[str]:
         if b is None:
             bad.append(f"{k}: 这个文件现在取不到了（被撤或改名）")
             continue
-        for f in ("sha256", "size", "status", "mem_bytes"):
-            if a[f] != b[f]:
+        for f in ("sha256", "size", "status", "mem_bytes", "repo"):
+            if a.get(f) != b.get(f):
                 bad.append(f"{k}.{f}: {str(a[f])[:34]!r} → {str(b[f])[:34]!r}")
     if committed.get("upstream_deltas") != fresh.get("upstream_deltas"):
         bad.append("上游三张表之间的出入变了（白名单 vs 宿主文件）：%s → %s —— "
@@ -407,6 +425,15 @@ def load_fixtures(d: str) -> tuple[dict, dict, str, str, str, dict]:
          "base_line": langs["decl_line"] - 1, "decl_line": langs["decl_line"]}
 
 
+def host_for_inputs(script: str) -> str:
+    """live 模式该拿哪一家仓库去查文件表：从上游脚本的下载前缀里读，不在代码里写死。
+
+    单独成为函数是因为 `live_inputs()` 本身离线跑不到（它要 curl），把"读宿主"这一步抽出来
+    就能用真捕获的脚本直接验 —— 否则这条纪律只能靠散文保证。
+    """
+    return repo_from_prefix(parse_script(script)[0])
+
+
 def live_inputs() -> tuple[dict, dict, str, str, str, dict]:
     def raw(url: str) -> str:
         rc, out, err = file_index.sh(["curl", "-sSL", "--max-time", "90",
@@ -415,15 +442,22 @@ def live_inputs() -> tuple[dict, dict, str, str, str, dict]:
             raise SystemExit(f"取不到 {url}（curl rc={rc}）：{err}")
         return out
     base = f"https://raw.githubusercontent.com/{ENGINE_REPO}/{REF}"
-    tree, answered, err = file_index.hf_files("ggerganov/whisper.cpp")
+    src = raw(base + "/src/whisper.cpp")
+    script = raw(base + "/models/download-ggml-model.sh")
+    # 先读脚本、再从它给的下载前缀里拿宿主仓库 id，最后才去查那家仓库的文件表 ——
+    # 顺序反了就等于"声称域名不写死，其实文件表还是查的字面量那家"。
+    host = host_for_inputs(script)
+    if not host:
+        raise SystemExit("从 download-ggml-model.sh 的 src=/pfx= 里读不出宿主仓库 id —— "
+                         "候选源与哈希解析没有地方可查，不许退回字面量")
+    tree, answered, err = file_index.hf_files(host)
     if err:
         raise SystemExit(f"宿主仓库元数据取不到：{err} —— 这是取不到，不是没有模型")
-    ms, _mb, _e2 = file_index.ms_files("ggerganov/whisper.cpp")
-    src = raw(base + "/src/whisper.cpp")
-    print(f"宿主 answered_by={answered} 文件 {len(tree)}；ModelScope 返回 {len(ms)} 个文件；"
-          f"src/whisper.cpp {len(src)} 字节")
+    ms, _mb, _e2 = file_index.ms_files(host)
+    print(f"宿主={host} answered_by={answered} 文件 {len(tree)}；"
+          f"ModelScope 返回 {len(ms)} 个文件；src/whisper.cpp {len(src)} 字节")
     return tree, ms, raw(base + "/README.md"), raw(base + "/models/README.md"), \
-        raw(base + "/models/download-ggml-model.sh"), {"file": "src/whisper.cpp", "text": src}
+        script, {"file": "src/whisper.cpp", "text": src}
 
 
 def selftest() -> int:
@@ -442,7 +476,7 @@ def selftest() -> int:
                      + "Models are multilingual unless the model name includes `.en`. "
                        "-tdrz support local diarization\n"
                        "The model files prefixed with `for-tests-` are empty\n")
-    script = ('src="https://huggingface.co/ggerganov/whisper.cpp"\n'
+    script = ('src="https://huggingface.co/some/owner"\n'
               'pfx="resolve/main/ggml"\nmodels="tiny\ntiny.en\ntiny-q5_1\nbase\n"')
     tree = {"ggml-tiny.bin": {"sha256": "a" * 64, "size": 77691713},
             "ggml-base.bin": {"sha256": "d" * 64, "size": 147951465},
@@ -482,6 +516,22 @@ def selftest() -> int:
         bad.append(f"未量化档没接上 Mem：{f32['mem_text']} / {f32['fits']}")
     if parse_script('src="https://x"\n')[2] == []:
         bad.append("读不到 pfx= 还当正常")
+    if repo_from_prefix("https://huggingface.co/some/owner/resolve/main/ggml") != "some/owner":
+        bad.append("从脚本前缀读不出宿主仓库 id —— 候选源与哈希解析会指错地方")
+    if repo_from_prefix("https://x/resolve/main/ggml") != "":
+        bad.append("前缀形状不对（少一层 owner/repo）却编出了一个仓库 id")
+    # 宿主必须是**被读出来的**：换成另一家，行里的 repo 与 urls 都得跟着变。
+    # 这一条是给"parse_script 说域名不写死、可 candidates() 却查着字面量那家"这种自相矛盾写的。
+    alt = inventory(r1, mem, upstream, "https://example.com/some/other", r2,
+                    ["tiny"], "some/other")[0]
+    if {x["repo"] for x in alt} != {"some/other"}:
+        bad.append(f"传进来的宿主没落到行里（表里还是写死的那家）：{ {x['repo'] for x in alt} }")
+    if not all("some/other" in u for x in alt for u in x["urls"]):
+        bad.append("候选源没跟着读到的宿主走 —— 行里的 repo 对了，URL 却还是查字面量那家")
+    _b, bpr = build(r1, r2, readme, models_readme,
+                    'src="https://x"\npfx="resolve/main/ggml"\nmodels="tiny\n"')
+    if not any("读不出宿主仓库 id" in p for p in bpr):
+        bad.append(f"前缀读不出仓库时 build 没报，等于安静地退回字面量：{bpr}")
     if rule_lines("没有那三句话")["missing"] != ["multilingual", "tdrz", "for_tests"]:
         bad.append("语义规则行号丢了却不报")
     codes = ["en", "zh"] + ["x" + chr(97 + i // 26) + chr(97 + i % 26) for i in range(98)]
@@ -538,6 +588,10 @@ def selftest() -> int:
     mutated2["rows"][0]["sha256"] = "9" * 64
     if not check(built, mutated2):
         bad.append("哈希漂了，check 却不红")
+    mutated3 = json.loads(json.dumps(built))
+    mutated3["rows"][0]["repo"] = "someone/else"
+    if not any(".repo" in x for x in check(built, mutated3)):
+        bad.append("宿主仓库漂了 check 却不红 —— 换宿主等于所有 URL 与哈希来源都指错了地方")
     print("---- 结论 ----")
     for x in bad:
         print("  BAD:", x)

@@ -551,6 +551,18 @@ jobs:
         run: python3 tools/file_index.py --selfcheck
       - name: 按已钉的 pin 做正向与负向对照（覆盖度地板 2 条）
         run: python3 tools/file_index.py --control pins/models.json
+      # 首启队列：把装机预算里默认要下的**每一项**都拿去两家元数据对一遍（钉值 vs 声明哈希 vs 体积），
+      # 并按 resolve_via 分流 —— OCR 默认档那三颗来自 GitHub release，这里如实标"没在这条车道查"，
+      # 不把它们混进"确认过了"。地板 8 项：整批没解析成功不能算队列已验。
+      # 实测（2026-10-20 本机跑）：15 项去重、live 确认 11 项、其余 4 项如实标路线，BAD 0。
+      - name: 首启队列逐项确认（每一项都要有路线，HF/ModelScope 那批当场对哈希）
+        run: python3 tools/file_index.py --queue catalog/machine-budget.json
+             --json queue-report.json
+      - name: 队列报告落档（外壳实现直接拿它当下载顺序与校验输入）
+        uses: actions/upload-artifact@v4
+        with:
+          name: first-run-queue
+          path: queue-report.json
 
   recommendations:
     # 面向用户的那张"我这台机器该装哪个"表。出厂默认档（catalog/defaults.json）是车道最小样本，

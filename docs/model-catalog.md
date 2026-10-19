@@ -410,6 +410,22 @@ python3 tools/recommend_models.py --live --check                          # 真�
 车道 `machine-budget` 三步**全离线**（输入就是上面那五张已提交的表加吞吐表；
 联网重算属于三条档位车道，那边一漂这边就跟着红）：`--selftest` → 18 条单测 → `--check`。
 
+## 从"总量"到"能下的清单"：`file_index.py --queue`
+
+预算回答"多少、多久"，外壳要的是**下一项是什么、从哪家下、怎么确认**。
+`--queue catalog/machine-budget.json` 把三档默认权重行去重成 15 项（跨档同一颗只排一次），
+逐项检查"有仓库、有钉值、声明哈希 == 钉值、体积 == 预算、有候选源"，并按 `resolve_via` 分流：
+
+| 路线 | 是谁 | 这里查不查 |
+|---|---|---|
+| `hf_metadata` | 对话 / 字幕 / 生图（含 FLUX 的 clip_l、t5xxl、ae） | 查，两家的元数据哈希当场与钉值对表 |
+| `github_release_digest` | OCR 默认档三颗（来自 GitHub release，不是 HF 仓库） | **不查**，如实标 `checked: false` 并写出路线（live 由 `ocr-languages --check-pins --live`） |
+| `not_a_file` | 全 14 语言合计 | 跳过（它不是一个文件） |
+
+实测一次：**15 项去重、live 确认 11 项、其余 4 项标好路线、BAD 0**。覆盖度地板按 live 确认的
+条数算（8），不按条目总数 —— 把"我没查"混进"查过了"是最容易骗过自己的错。
+报告由车道传成 artifact `first-run-queue`，外壳（#25）拿它当下载顺序与校验输入。
+
 ## 还没证的
 
 - 上面所有"下载耗时"是从我们自己那台出口机的一次换算，不同城市/运营商必然不同，只能当量级。

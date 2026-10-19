@@ -5,6 +5,7 @@ README 的 Memory usage 表、models/README 的 Model|Disk|SHA 表与三条语�
 download-ggml-model.sh 的白名单与下载源，加上宿主仓库 `ggerganov/whisper.cpp` 的文件表
 （两家各一份）。所以这里断言的数字不是我抄的，工具重算一遍就能对上。
 """
+import ast
 import contextlib
 import io
 import json
@@ -377,6 +378,60 @@ class TestCli(unittest.TestCase):
             with contextlib.redirect_stderr(io.StringIO()):
                 rs.main([])
         self.assertEqual(e.exception.code, 2)
+
+
+class TestNoHardcodedHost(unittest.TestCase):
+    """这份工具的整条纪律是"宿主与域名从上游脚本里读"，那代码里就不该再有那家仓库的字面量。
+
+    用 ast 而不是 grep：docstring 里出现 `ggerganov/whisper.cpp` 是**解释**（该留），
+    代码里的字符串常量是**行为**（不该留）。上一版就是"嘴上读、手上还是查字面量那家"。
+    """
+
+    def test_host_literal_never_appears_in_code(self) -> None:
+        path = os.path.join(ROOT, "tools", "recommend_subtitle.py")
+        with open(path, encoding="utf-8") as fh:
+            src = fh.read()
+        offenders = []
+        for fn in [n for n in ast.walk(ast.parse(src))
+                   if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))]:
+            body = list(fn.body)
+            if (body and isinstance(body[0], ast.Expr)
+                    and isinstance(body[0].value, ast.Constant)
+                    and isinstance(body[0].value.value, str)):
+                body = body[1:]          # 函数 docstring 不算
+            for sub in ast.walk(ast.Module(body=body, type_ignores=[])):
+                if (isinstance(sub, ast.Constant) and isinstance(sub.value, str)
+                        and "ggerganov/whisper.cpp" in sub.value):
+                    offenders.append(f"{fn.name}:{sub.lineno}")
+        self.assertEqual(offenders, [],
+                         "代码里又出现了宿主仓库的字面量（应改为脚本里读到的 host_repo）："
+                         + ", ".join(offenders))
+
+    def test_repo_is_read_from_the_captured_script(self) -> None:
+        """正向对照：真捕获的脚本里读出的就是那家宿主 —— 不是我们背下来的。"""
+        with open(os.path.join(FIXDIR, "whisper_download_script_b5454.sh"),
+                  encoding="utf-8") as fh:
+            prefix, _names, problems = rs.parse_script(fh.read())
+        self.assertEqual(problems, [])
+        self.assertEqual(rs.repo_from_prefix(prefix), "ggerganov/whisper.cpp")
+        self.assertEqual(rs.repo_from_prefix("https://x/resolve/main/ggml"), "",
+                         "少一层 owner/repo 的前缀不该被编成仓库 id")
+
+    def test_host_follows_whichever_script_is_given(self) -> None:
+        """live 查的那家必须是脚本说的那家：换一份 src=，宿主就得跟着换。
+
+        这条是给 `host_for_inputs()` 用的 —— `live_inputs()` 自己离线跑不到（要 curl），
+        所以"读宿主"这一步单独成函数，才能这样直接验。
+        """
+        with open(os.path.join(FIXDIR, "whisper_download_script_b5454.sh"),
+                  encoding="utf-8") as fh:
+            real = fh.read()
+        self.assertEqual(rs.host_for_inputs(real), "ggerganov/whisper.cpp")
+        swapped = real.replace('src="https://huggingface.co/ggerganov/whisper.cpp"',
+                               'src="https://huggingface.co/some/other"')
+        self.assertNotEqual(swapped, real, "夹具里那句 src= 变了，正向对照失效")
+        self.assertEqual(rs.host_for_inputs(swapped), "some/other",
+                         "宿主没跟着脚本变 —— 又写回字面量了")
 
 
 if __name__ == "__main__":
