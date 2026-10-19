@@ -12,6 +12,7 @@ on:
       - "tools/toolbelt_pins.py"
       - "tools/catalog_snapshot.py"
       - "tools/citation_check.py"
+      - "tools/file_index.py"
       - "tools/ocr_build_surface.py"
       - "pins/ocr-build-surface.json"
       - "pins/citations.json"
@@ -339,6 +340,24 @@ jobs:
           tr 'A-Z' 'a-z' < "$SRT" | grep -qE 'country|ask not' || { echo "转写内容与已知样本对不上"; exit 1; }
           N=$(grep -c -- '-->' "$SRT")
           echo "::notice::字幕车道通过：$SRT 有 $N 条带时间戳的段，引擎与权重均按上游 sha256 校验"
+
+  file-index:
+    # 下载层的形状判据：两家分发方的元数据哈希**一致**才允许"下载前就信"；
+    # 只有一家 → single（必须下载后自算），两家不等 → conflict 且一个答案都不给。
+    # 正向对照 = 仓库里已钉的 pin；负向对照 = 一根故意造的假文件名 ——
+    # 它要也被判成"有哈希"，就说明这套比对对任何输入都有答案。
+    # 不 needs discover：被挂住的 job 会被标 skipped，结论看不见。
+    timeout-minutes: 8
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: 离线对照（五种状态 + 候选顺序，明知错的必须认成错）
+        run: python3 tools/file_index.py --selfcheck
+      - name: 按已钉的 pin 做正向与负向对照（覆盖度地板 2 条）
+        run: python3 tools/file_index.py --control pins/models.json
 
   ocr-build-surface:
     # 四项能力里只有 OCR 要现场编译，而"钉 commit"对它**并不等于钉住构建输入**：

@@ -167,7 +167,17 @@ python tools/catalog_snapshot.py --raw 整文件 --check  # 拿本地已下载�
   可复现的派生物，要改就改 `UPSTREAM` 坐标，不把 5.5 MiB bulk 提交进历史 ——
   而"bulk 不进仓库"不等于"仓库对它没有任何记载"。
 - 16% 有可下载仓库这件事说明**描述层不能当下载层用**：剩下 84% 想让用户点一下就下，
-  必须先经文件级解析（HF `tree` + ModelScope `repo/files`，两个端点都已实测过形状）。
+  必须先经文件级解析。这条路已经做成工具与车道（2026-10-20）：`tools/file_index.py`
+  按 `repo + 文件名` 同时读 HF `tree.lfs.oid` 与 ModelScope `repo/files` 的 `Sha256`，
+  五种状态 `agree / single / conflict / pin_conflict / absent`，
+  **只有两家都给且相等才 `usable_before_download=True`**；两家不等时不给任何一个哈希当答案，
+  只有一家时必须"下载后自算"；候选源按 lain42.top 那轮实测吞吐排
+  （ModelScope 4.2 → hf-mirror 0.25 → huggingface.co 记 0，因为它从 CN 实测是 0 字节）。
+  车道 `file-index` 跑 `--selfcheck`（五种状态 + 顺序的离线对照）与
+  `--control pins/models.json`（正向 = 已钉的三条；负向 = 一根故意造的假文件名，
+  它要是也被判成"有哈希"就说明这套比对对任何输入都有答案；覆盖度地板 = 2 条两家确认）。
+  实测结果：qwen 与 SD 两条是 `agree`（两家都确认且等于 pin），`ggml-tiny.bin` 是 `single`
+  （ModelScope 没镜像这个仓库，返回 200 + 0 个文件，不是取不到）。
 - 车道：`engine-live.yml` 的 `catalog-snapshot` 用 `--live --check` 同时盯两件事 —— 上游漂移
   （整文件哈希）与**目录形状漂移**（重导出 vs 侧表）；
   `ci.yml` 用真实切片夹具离线跑同一套规则。

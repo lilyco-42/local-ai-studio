@@ -71,12 +71,12 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
 
 ## 验收标准（在当前唯一可用验证手段 = GitHub Actions 下）
 
-1. `ci.yml`：150 个单测绿（含 `test_yaml_gate.py` 给闸门自己的 11 条、`test_toolbelt_pins.py` 给工具带
+1. `ci.yml`：178 个单测绿（含 `test_yaml_gate.py` 给闸门自己的 11 条、`test_toolbelt_pins.py` 给工具带
    钉表的 14 条、`test_catalog_snapshot.py` 给目录快照与其侧表的 16 条、`test_citation_check.py` 给出处闸门的 12 条、
-   `test_ocr_build_surface.py` 给 OCR 依赖面分类器与比对的 15 条、
-   `test_establish_verify.py` 给字节复核的 8 条、
+   `test_ocr_build_surface.py` 给 OCR 依赖面分类器与比对的 15 条、`test_file_index.py` 给下载层五种状态的 20 条、
+   `test_establish_verify.py` 给字节复核与哈希对照的 16 条、`test_shell_vars.py` 给 shell 变量判据的 10 条、
    `test_r2_manifest.py` 给镜像清单的 6 条、`test_lane_assertions.py` + `test_image_proof_block.py`
-   给车道判据的 27 条、`test_shell_vars.py` 给 shell 变量判据的 10 条），
+   给车道判据的 32 条），
    `yaml_gate.py` 0 BAD、
    离线发现器解析出全部必需 target 且每个都带上游 sha256；单测在 `-W error::ResourceWarning` 下跑。
    闸门还把**车道 env 里每一条 64 位十六进制的值**反查出处（必须在 `pins/*.json` 或
@@ -166,6 +166,15 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
    `pins/ocr-build-surface.json`（fingerprint + 锁文件状态），上游一旦开始发锁也会红（那就该改成取它的锁）。
    分类判据本身有 15 条离线单测，其中三条是给"曾经算错的样子"写的：`{ workspace = true }` 不是未钉、
    `[package]` 里的 `readme` 不是依赖、带 Range 的探测存在时回 206 而不是 200。
+12. **下载层的校验规矩只有一条：两家分发方一致才可信**（`tools/file_index.py` + 车道 `file-index`）：
+   按 `repo + 文件名` 同时读 HF `tree.lfs.oid` 与 ModelScope `repo/files` 的 `Sha256`，状态分五种，
+   `agree` 才允许"下载前就信"；`single` 必须下载后自算一遍；`conflict` / `pin_conflict`
+   **一个哈希都不许返回**（绝不"挑一个好看的"）。候选源按实测吞吐排序，
+   `huggingface.co` 记 0（CN 实测 0 字节），不许排第一。
+   正向对照 = 已钉的 pin；负向对照 = 故意造的假文件名 —— 它要是也被判成"有哈希"，
+   就说明这套比对对任何输入都有答案；另有"至少 2 条被两家确认"的覆盖度地板，
+   以及一条把"取数失败"与"这家没有这个仓库"分开的判据（前者必须红，后者是 `single`）。
+   实测：qwen 与 SD `agree`（都等于 pin），`ggml-tiny.bin` `single`（ModelScope 未镜像，200 + 0 文件）。
 
 ## 车道判据的出处（全部按**钉住的那个 ref** 核过，不是按 HEAD 记的）
 
