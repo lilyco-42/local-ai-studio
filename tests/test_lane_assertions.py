@@ -201,6 +201,99 @@ class TestServerLane(unittest.TestCase):
         self.assertIn("502 Bad Gateway", log)
 
 
+class TestResidentServiceLanes(unittest.TestCase):
+    """字幕与生图两条常驻服务步骤。判据本体在 tools/srt_proof.py / tools/png_proof.py，
+    各自有独立单测；这里只钉"车道有没有真的按契约去问服务" —— 那部分没有 heredoc PY 可回放。
+
+    每条都是"写法上的必然"，不是风格：少了 -fsS 就会把 503 加载态当成就绪；少了
+    "服务启动不给生成旗标"这一条，请求体里的参数有没有被吃掉就永远证明不了。"""
+
+    SUB = ("subtitle-proof", "常驻 whisper-server")
+    IMG = ("image-proof", "常驻 sd-server")
+
+    def test_positive_control_the_anchors_exist(self) -> None:
+        """先证明这两步真在车道里（find_index 命中数必须正好 1），后面的断言才不是空转。"""
+        for job, needle in (self.SUB, self.IMG):
+            self.assertTrue(lane_replay.body(job, needle).strip())
+
+    def test_every_step_that_calls_tools_has_a_checkout(self) -> None:
+        import os
+        import yaml
+        wf = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                          "..", ".github", "workflows", "engine-live.yml")
+        with open(wf, encoding="utf-8") as fh:
+            doc = yaml.safe_load(fh)
+        for job in ("subtitle-proof", "image-proof"):
+            steps = doc["jobs"][job]["steps"]
+            self.assertTrue(any("actions/checkout" in (s.get("uses") or "") for s in steps),
+                            f"{job} 调用了 tools/ 里的判据却没有 checkout，那条 python3 会死在找不到文件")
+
+    def test_whisper_readiness_cannot_pass_on_the_loading_state(self) -> None:
+        body = lane_replay.body(*self.SUB)
+        self.assertIn("-fsS", body)                      # 503（还在加载）必须让探测失败
+        self.assertIn('"ok"', body)                      # 200 但正文变了也不能算就绪
+        self.assertIn("/health", body)
+
+    def test_whisper_request_uses_the_measured_field_names(self) -> None:
+        body = lane_replay.body(*self.SUB)
+        for f in ("-F file=@jfk.wav", "-F response_format=srt", "-F language=en",
+                  "http://127.0.0.1:9009/inference"):
+            self.assertIn(f, body, f"multipart 字段名是 b5454 源码里查的（音频必须叫 file），写错就 400")
+
+    def test_whisper_server_is_started_without_output_flags(self) -> None:
+        """`-osrt/--output-srt` 是 CLI 的旗标；服务那条路是响应体，混用会得到一个空文件。"""
+        body = lane_replay.body(*self.SUB)
+        self.assertNotIn("-osrt", body)
+        self.assertNotIn("output-srt", body)
+
+    def test_whisper_step_still_kills_the_service(self) -> None:
+        self.assertIn("trap ", lane_replay.body(*self.SUB))
+
+    def test_ld_library_path_uses_the_guarded_form(self) -> None:
+        """裸 `:$LD_LIBRARY_PATH` 在 set -u 下会把步骤吹掉 —— 这条真踩过（shell_vars 也钉着）。"""
+        for job, needle in (self.SUB, self.IMG):
+            body = lane_replay.body(job, needle)
+            if "LD_LIBRARY_PATH" in body:
+                self.assertIn("${LD_LIBRARY_PATH:+", body)
+                self.assertNotIn('"):$LD_LIBRARY_PATH"', body)
+
+    def test_sd_server_started_without_generation_flags(self) -> None:
+        """最要紧的一条：上游默认是 20 步 / 512x512，所以只有"启动那一行不给旗标"，
+        产物里的 Steps: 3 / 256x256 才能证明参数是从请求体吃进去的。
+        只查启动那一行 —— 判据那一步自己也要传 --steps 3，全局查会把自己查红。"""
+        body = lane_replay.body(*self.IMG)
+        start = [l for l in body.split("\n") if '"$SRV" "$MODEL_ARG" sd.gguf' in l]
+        self.assertEqual(len(start), 1, body)
+        for f in ("--steps", "--width", "--height"):
+            self.assertNotIn(f, start[0],
+                             f"{f} 混进了服务启动参数，判据就退化成「CLI 默认值碰巧对了」")
+
+    def test_sd_submission_checks_the_measured_status_code(self) -> None:
+        body = lane_replay.body(*self.IMG)
+        self.assertIn("/sdcpp/v1/img_gen", body)
+        self.assertIn("202", body)
+
+    def test_sd_poll_uses_the_url_the_server_returned(self) -> None:
+        """poll_url 从响应里读、并原样拼到探测地址上 —— 自己拼 URL 即使对了，
+        也证明不了上游还按这个形状给。"""
+        body = lane_replay.body(*self.IMG)
+        self.assertIn('["poll_url"]', body)
+        self.assertIn('http://127.0.0.1:$PORT$POLL', body)
+
+    def test_sd_terminal_states_are_all_recognised(self) -> None:
+        """failed/cancelled 也要能跳出轮询，否则判据会一直等到 12 分钟后才红，
+        而红字看起来像"超时"，不像"任务失败了"。"""
+        body = lane_replay.body(*self.IMG)
+        self.assertIn("completed|failed|cancelled", body)
+        self.assertIn('test "$STATUS" = completed', body)
+
+    def test_sd_artifact_is_judged_by_the_shared_tool(self) -> None:
+        body = lane_replay.body(*self.IMG)
+        self.assertIn("--b64-from job.json", body)
+        self.assertIn("--steps 3", body)
+        self.assertIn("--size 256x256", body)
+
+
 class TestOcrLockShape(unittest.TestCase):
     """上游不发 Cargo.lock（实测 404，正向对照 Cargo.toml 206），所以 ocr 那条车道的依赖锁
     要么由仓库自己钉（pins/ocr-Cargo.lock + --locked），要么第一次跑生成后传回来。

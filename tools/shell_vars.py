@@ -9,6 +9,10 @@ shellcheck 不在这个仓库的依赖里，所以自己写一条纯文本判据
 `read X`/`declare X`）、job·step·workflow 的 `env:` 键、以及一份 GitHub runner
 一定给的内置变量白名单。`${X:-…}`、`${X:+…}` 是"作者已经知道它可能没有"的写法，
 整段先抹掉不查；`${X}` 与裸 `$X` 才是要报的。
+两类文本根本不展开，也要先洗掉，否则判据会骗人：整行 `#` 注释（写一句
+"不要用 :$LD_LIBRARY_PATH" 就报未定义，是把作者的正确写法当 bug）；以及
+**不在** heredoc 里的判断 —— heredoc 正文中的 `#` 不是注释，未加引号的
+`<<PY` 会照常展开 `$`，所以那段绝不能按注释洗（这条区分本身有单测守着）。
 """
 from __future__ import annotations
 
@@ -29,6 +33,8 @@ GUARD_RE = re.compile(r"\$\{([A-Za-z_]\w*):[-+][=]?")
 REF_RE = re.compile(r"\$\{?\s*([A-Za-z_]\w*)")
 SET_U_RE = re.compile(r"set\s+-[a-zA-Z]*u")
 LINEVAR_RE = re.compile(r"(?:^|[;&|]\s*)([A-Za-z_]\w*)=\S")
+# heredoc 起始行：`<<'PY'`、`<<"PY"`、`<<PY`、`<<-PY` 四种写法都要认出来
+HDOC_RE = re.compile(r"<<-?\s*(?:'([A-Za-z_]+)'|\"([A-Za-z_]+)\"|([A-Za-z_]\w*))")
 
 
 def _strip_guards(body: str) -> str:
@@ -97,13 +103,48 @@ def _strip_quoted_heredocs(body: str) -> str:
     return "\n".join(out)
 
 
+def _heredoc_spans(body: str) -> list[tuple[int, int]]:
+    """每个 heredoc 的**正文**行区间（不含起始行）。`<<-` 的制表符缩进靠 strip() 兜。"""
+    lines = body.split("\n")
+    spans, i = [], 0
+    while i < len(lines):
+        m = HDOC_RE.search(lines[i])
+        if m:
+            term = m.group(1) or m.group(2) or m.group(3)
+            j = i + 1
+            while j < len(lines) and lines[j].strip() != term:
+                j += 1
+            spans.append((i + 1, j))
+            i = j
+        i += 1
+    return spans
+
+
+def _strip_line_comments(body: str) -> str:
+    """整行 `#` 注释抹成空格（长度不变）。bash 里这种行根本不展开，
+    写句"不要用 :$LD_LIBRARY_PATH"就被判成未定义引用，是判据在骗人。
+
+    但 heredoc 正文里的 `#` **不是注释**（未加引号的 heredoc 会照常展开 `$`），
+    所以行区间要按 heredoc 排除掉 —— 否则就把真问题洗白了。
+    """
+    spans = _heredoc_spans(body)
+    lines = body.split("\n")
+    for n, ln in enumerate(lines):
+        if any(a <= n <= b for a, b in spans):
+            continue
+        if ln.lstrip().startswith("#"):
+            lines[n] = " " * len(ln)
+    return "\n".join(lines)
+
+
 def unbound_refs(body: str, env_keys=()) -> list[tuple[int, str]]:
     """返回 (行号, 变量名)；行号按原始文本数，方便直接在 CI 日志里定位。"""
     if not SET_U_RE.search(body):
         return []
-    positions = _assign_positions(body)
+    core = _strip_line_comments(_strip_quoted_heredocs(body))
+    positions = _assign_positions(core)
     static = set(env_keys) | set(BUILTINS)
-    shielded = _strip_guards(_strip_quoted_heredocs(body))
+    shielded = _strip_guards(core)
     hits = []
     for m in REF_RE.finditer(shielded):
         name = m.group(1)

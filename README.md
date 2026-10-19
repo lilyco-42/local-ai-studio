@@ -25,13 +25,24 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   名字里没写 OS 的（whisper 那两个）只**推断**成 win，并单列进 `manifest["inferred"]`。
 - `tools/zip_peek.py`：用 HTTP Range 只读 zip 中央目录，不下载整包、不解压、不运行，
   把上面那个推断换成条目级证据；带一正一负对照，见 ADR。
-- `tools/yaml_gate.py`：解析两条 workflow，核对 needs 链、step 输出引用、heredoc 闭合与**每段 PY 真编译**，
+- `tools/yaml_gate.py`：解析三条 workflow，核对 needs 链、step 输出引用、heredoc 闭合与**每段 PY 真编译**，
   以及车道里写死的 target 名确实存在于 manifest（已用假 target 验证它会红）。
   还会把车道 env 里每条 64 位十六进制的值（**按值形状认，不按键名**，否则 OCR 车道的
   `DET_SHA/REC_SHA/DICT_SHA` 会漏）反查出处（`pins/*.json` 或上游 digest 夹具），
   查不到、或体积抄错、或哈希没加引号被 YAML 读成数字，都算 BAD（已用假哈希与错体积验证它会红）。
   另一条判据来自 `tools/shell_vars.py`：`set -u` 的车道里引用了本步骤从未定义、也不在 `env:`
   或 runner 内置白名单里的 `$VAR` 就点名行号 —— 这类写法 `bash -n` 查不出，只会在真跑那天当场死。
+  它自己也被红过：注释里写一句"不要用 `:$LD_LIBRARY_PATH`"就把它惹红了，所以现在整行 `#` 注释
+  不查（但 heredoc 正文里的 `#` **照查** —— 未加引号的 `<<PY` 会真展开 `$`，两种情况各有单测）。
+- `tools/bash_gate.py`：把每一条 `run:` 写进临时文件跑 `bash -n`（只解析，绝不执行任何一行）。
+  来历是一个假结论：本机 PATH 上的 `bash` 是 WSL 占位程序，对任何文件都返回非 0，
+  第一遍跑出"42/42 步骤全部语法错"，看着像查得严其实一条真信息都没有。
+  所以现在每个候选 bash 必须先过双对照（坏文件非 0、好文件 0），过不了就换下一个，
+  全不过就报 `SKIP（unreliable/missing + 原因）` 而不是装成查过。2026-10-20 实测覆盖 53 段、0 问。
+- `tools/png_proof.py` / `tools/srt_proof.py`：两条常驻服务车道与 CLI 车道**共用**的产物判据。
+  前者读 PNG 的 IHDR 与 `tEXt/parameters`（也认 `result.images[0].b64_json` 那种塞在 JSON 里的图），
+  后者把 SRT 解析成块再逐块要编号连续、时间单调、正文非空 —— 而不是 `grep '-->'` 一发过。
+  语料里有别的工程留下的真 SRT 与 Pillow 写的真 PNG，判据不是在测自己拼的字节。
 - `tools/catalog_probe.py`：目录"能不能搜"的探针（文件能下 ≠ 能浏览目录，而浏览目录才是这类的招牌交互）。
   三条判据一起成立才算过：泛词有结果、按精确仓库名能搜到它、乱词必须 0 条。
 - `tools/establish_pins.py`：给权重立 pin，两条路子 —— `download`（整包算 sha256 + 第二主机头尾 4 MiB
@@ -41,7 +52,7 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
 - `tools/r2_manifest.py`：从 `pins/*.json` 推导"该镜像什么"，按源分组给实测吞吐换算，
   产出 `mirror/r2-intake.json`（只是清单，不含上传动作）。
 - `tools/citation_check.py` + `pins/citations.json`：把"上游某 ref 的某一行写着某件事"这类结论
-  变成能查的东西。25 条声明各记 `repo/ref/path/line/expect`（还多一种 `absent`：连「这份文件里没有 X」也要查），逐条取回上游**核对那一行仍然含那个子串**
+  变成能查的东西。49 条声明各记（2026-10-20 按 pin ref 实跑过一次，0 问题） `repo/ref/path/line/expect`（还多一种 `absent`：连「这份文件里没有 X」也要查），逐条取回上游**核对那一行仍然含那个子串**
   （只看文件在不在没用：默认值改了文件照样在），子串命中不就不唯一就不配进表。
   建表时已经按这两条筛过；车道 `citation-drift` 先跑 `--selftest`（明知错的必须认成错）再逐条核对。
   来历：本轮踩过六次"判据指向一个不存在的东西却照样跑完"（`llama-completions`、去 tag 里找 CLI、
@@ -57,7 +68,7 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   `--live --check` 每次都比对，`slim()` 少抄一个字段就会红。
 - `tools/ocr_build_surface.py` + `pins/ocr-build-surface.json`：量 OCR 那条**构建输入**钉没钉住。
   结论是"没钉"：上游 `.gitignore` 明写 `Cargo.lock`、pin 住的 commit 里也没有（404，正向对照 206），
-  40 个外部包里只有 `ort` 是 `=` 精确钉的，其余 37 个是 caret。处置写在 ADR 与 requirements 第 11 条：
+  40 个外部包里只有 `ort` 是 `=` 精确钉的，其余 37 个是 caret。处置写在 ADR 与 requirements 第 12 条：
   锁由我们自己出（第一次真跑生成 → 提交成 `pins/ocr-Cargo.lock` → 之后 `cargo build --locked`）。
 - `tools/file_index.py`：下载层的文件级解析 —— `repo + 文件名` → 期望 sha256 + 按实测吞吐排序的候选源。
   同时读 HF `tree.lfs.oid` 与 ModelScope `repo/files` 的 `Sha256`，状态分 `agree / single / conflict /

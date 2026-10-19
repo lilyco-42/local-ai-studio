@@ -104,8 +104,18 @@ class TestCommittedSpec(unittest.TestCase):
         """这一轮的结论是"默认无鉴权 + CORS *"，这几条不许哪天被顺手删掉。"""
         ids = {c["id"] for c in self.spec()}
         for must in ("llama-cors-star", "llama-apikeys-empty", "whisper-cors-star",
-                     "sd-reflect-origin", "llama-host-default", "sd-listen-default"):
+                     "sd-reflect-origin", "llama-host-default", "sd-listen-default",
+                     # 2026-10-20 新加的两条常驻服务车道所依赖的出处
+                     "ws-health-ok", "ws-health-loading", "ws-file-field", "ws-srt-mime",
+                     "sd-listen-ip", "sd-listen-after-load", "sd-imggen-202", "sd-job-images",
+                     "sd-embed-default", "sd-steps-key"):
             self.assertIn(must, ids)
+
+    def test_spec_clears_the_floor_the_code_enforces(self) -> None:
+        """地板写死在代码里，文档写"至少 20 条"：这条把两边钉成同一个数，
+        否则"表被删空了"与"文档改了个数字"这两种情况会长得一模一样。"""
+        self.assertGreaterEqual(len(self.spec()), cc.MIN_CITATIONS)
+        self.assertEqual(cc.MIN_CITATIONS, 20)
 
     def test_thin_spec_is_refused(self) -> None:
         """覆盖度地板是有承重的：拿一张 3 条的表跑，结论必须是红，不能"少查也算过"。"""

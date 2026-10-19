@@ -42,9 +42,14 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
    所以"导入本地已有 GGUF/ONNX"要进 MVP，且导入后仍按 sha256 认领/提示。
 3. **引擎按 runtime 打包、可替换**，与 ADR-0001 的"上游产物 + sha256 pin"一致，
    并且和 LM Studio 的 LM Runtimes 同形，便于后续对齐习惯。
-4. **四项能力都起常驻 server，而不是一次一进程**：上游包里就有
+4. **对话、字幕、生图三项起常驻 server，而不是一次一进程**：上游包里就有
    `llama-server` / `whisper-server` / `sd-server`（见 ADR-0001"包内到底有什么"）。
    400 MB 权重每次重载不可接受。`llama-bench` 也在包里，"这台机器多少 tok/s"不用自研。
+   **OCR 是例外**：2026-10-20 递归列过 oar-ocr 在钉住 ref 的 464 个成员，
+   只有 `oar-ocr-cli` / `oar-ocr-bench` / `examples`，没有任何 HTTP 服务面
+   （`oar-ocr-vl/src/api` 是库的 Rust API 模块，不是网络服务）——
+   上游只有 CLI，所以外壳对 OCR 只能按任务起进程，或在外面自己包一层常驻。
+   原来这里写"四项能力都起常驻 server"是把例外说漏了。
 5. **生图按检测到的后端分层**：有 Vulkan/DirectML/CUDA 时正常默认；只有 CPU 时保留入口但
    明示"一张约 5–10 分钟"并默认降到量化 SD1.5 级。依据是第三方数字与产物表实测的
    sd.cpp 每 release 都发 vulkan/rocm 包（详见 ADR-0001）。
@@ -105,9 +110,19 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
    `tEXt`/`parameters` 块**要求 `Steps: 3`、`Size: WxH` 与实际画布一致 —— 证明参数真被吃进去并写进产物，
    不是随便跑出一张图。判据读产物而非日志，是 2026-10-19 读上游源码定下的：
    `get_image_params()` 只 return，参数由 `stbi_write_png` 落成 tEXt，日志里根本没有那两行）。
-   这条判据本身还有 6 条离线回放单测（合成合法/缺元数据/步数错/尺寸不一致/画布不是 256/非 PNG）。
+   这条判据本身还有 6 条离线回放单测（合成合法/缺元数据/步数错/尺寸不一致/画布不是 256/非 PNG），
+   2026-10-20 又把同一段判据抽成 `tools/png_proof.py` 并加了 25 条单测（含"与车道那段内联判据
+   逐案同生同死"的一致性用例），因为常驻服务那条路要把 b64 解开再判，两处必须说同一句话。
    生图这条刻意分工：引擎不钉（上游每天出 nightly，钉死等于天天红且测的是旧版），
-   权重钉死（1.5 GB，一次下载要 45 min 级 timeout）。
+   权重钉死（1.5 GB，那一步的 curl 预算是 2,400 s，整条 job 现在是 60 min）。
+   **并且对话/字幕/生图三项各有"真起常驻服务再调 HTTP"的一步了**（2026-10-20）：
+   `headless-inference#4` 走 `/v1/chat/completions`，`subtitle-proof#5` 起 `whisper-server`
+   打 `POST /inference`（multipart，`response_format=srt`）并要求响应是 `x-subrip`，
+   `image-proof#4` 起 `sd-server` 走 `POST /sdcpp/v1/img_gen` → 轮询 `poll_url`
+   → 解 `result.images[0].b64_json` → 同一套 PNG 判据。
+   这三步的共同点是**服务启动时都不给生成旗标**（sd 那步尤其：上游默认 20 步/512x512，
+   产物里却是 `Steps: 3`/256x256，才能证明参数是从请求体吃进去的）。
+   OCR 没有服务形态可测（见"技术前提"第 4 条的例外说明）。
    但覆盖度说的是**车道存在**，不是跑过 —— 跑过与否要看 Actions 的真实记录，目前为零。
 5. **车道里的 Python 片段要真编译**：`yaml_gate.py` 现在把两条 workflow 里的每段 `<<'PY'` 抽出来
    `compile()`（本轮 14 段；`python tools/yaml_gate.py` 自己会打印这个数，别信文档里的静态值），
@@ -131,12 +146,25 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
    runner 内置白名单里的，就报 `文件:job#步骤 第 N 行`。来历是 2026-10-19 新加的 llama-server 步骤：
    原写 `export LD_LIBRARY_PATH="$(dirname "$SRV"):$LD_LIBRARY_PATH"`，而 runner 上这个变量根本不存在，
    步骤会在**起服务之前**死掉。`bash -n` 查不出（语法是对的），shellcheck 不在依赖里。
-   三条刻意的边界，都有对应单测：`${X:-…}`/`${X:+…}` 是作者自己承认"可能没有"的写法，整段抹掉不查；
-   `<<'PY'` 里是 Python 不是 shell，扫它会养出误报；`FOO=1 bar "$FOO"` **要报** —— 那个 FOO 只进 `bar`
+   四条刻意的边界，都有对应单测：`${X:-…}`/`${X:+…}` 是作者自己承认"可能没有"的写法，整段抹掉不查；
+   `<<'PY'` 里是 Python 不是 shell，扫它会养出误报；**整行 `#` 注释根本不展开**，把它扫了就是假红
+   （新加的 whisper-server 步骤在注释里写了一句"不要用 `:$LD_LIBRARY_PATH`"，闸门当场红了 ——
+   红在自己的注释上，说明判据会把正确写法当 bug，这种闸门没人会再信）；
+   但 **heredoc 正文里的 `#` 不是注释**：未加引号的 `<<PY` 会照常展开 `$`，所以洗注释必须先按
+   heredoc 区间排除，否则就把真问题洗白（这条区分本身有一条单测守着，另有一条"注释里的
+   `FOO=1` 不算 FOO 已定义"的反向对照）。
+   `FOO=1 bar "$FOO"` **要报** —— 那个 FOO 只进 `bar`
    的环境，同一行的 `"$FOO"` 由当前 shell 展开，`set -u` 下确实未定义（这条是写完判据才发现自己
    原来的"对照用例"预期错了，判据比对照对）。
    证过它承重：把守卫去掉（临时副本，不动工作树），闸门红在第 5 行点名 `$LD_LIBRARY_PATH`。
-9. **外壳必须是唯一的监听口，引擎端口不许直接给 UI**（出处是 2026-10-20 读三家 pin ref 的源码，
+9. **语法这一层交给真解析器，但先验证解析器本身**：`tools/bash_gate.py` 把三条 workflow 的每一段
+   `run:` 写进临时文件跑 `bash -n`（只解析，绝不执行）。2026-10-20 实测覆盖 53 段、0 问。
+   这条工具是被一个假结论逼出来的：本机 PATH 上的 `bash` 是 WSL 的占位程序，它对**任何**文件都返回
+   非 0 并吐一段 UTF-16 的"未安装"提示 —— 第一遍跑出的是"42/42 步骤全部语法错"，看着像查得很严，
+   其实一条真信息都没有。所以现在每个候选 bash 都要先过双对照（故意写坏的文件必须非 0、
+   故意写好的必须 0），过不了就换下一个，全都不过就报 `SKIP（unreliable/missing：原因）`
+   而不是装成查过了。单测把"永远非 0""永远 0""跑不起来"三种假 bash 都钉住了。
+10. **外壳必须是唯一的监听口，引擎端口不许直接给 UI**（出处是 2026-10-20 读三家 pin ref 的源码，
    见 [ADR-0001 的"三个 server 的接口与默认安全形状"](adr/0001-engines-from-upstream-binaries.md)）：
    三家默认都只绑 loopback（llama `common.h:648`、whisper `server.cpp:59/65`、sd `runtime.h:22-23`），
    这一条是安全的；但**鉴权与 CORS 不是** —— llama 有 `--api-key` 而默认为空（`arg.cpp:3513`）且
@@ -148,17 +176,20 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
    `--cors-origins` 收窄到应用来源；② whisper / sd **没有 key 可给**，只能按需起、用完停，或由外壳反代
    （外壳持有唯一端口并自己发 token）；③ UI 永不直连引擎端口。
    这一条现在只有源码级证据，实现与验证都还没做 —— 列在验收里是为了别等写外壳时才发现架构选错了。
-10. **每条 `file:line` 出处本身要能被查**：`pins/citations.json` 25 条声明（其中 1 条是 `absent`
+11. **每条 `file:line` 出处本身要能被查**：`pins/citations.json` 49 条声明（其中 1 条是 `absent`
     型缺席断言：runner 镜像 readme 里没有 `webkit2gtk`），每条记
    `repo/ref/path/line/expect/claim`；`tools/citation_check.py` 按 pin 住的 ref 取回那份文件，
    核对**那一行仍然含着 expect 的子串**（不是只看文件在不在 —— 上游把 `cors_origins` 默认值改掉
    而文件照在，才是我们要知道的事），子串在文件里命中不唯一就不配进这张表（建表时按此筛过）。
    车道 `citation-drift` 先跑 `--selftest`（明知是错的必须被认成错），再逐条核对并守住
-   "至少 20 条"的覆盖度地板。这一条是给第 9 条与整张判据出处表兜底的：本轮已经踩过六次
+   "至少 20 条"的覆盖度地板。这一条是给第 10 条与整张判据出处表兜底的：本轮已经踩过六次
    "判据指向一个不存在的东西却照样跑完"（`llama-completions`、去 tag 里找 CLI、`-of jfk.srt`、
    去日志里找 `Steps:`、grep `tokens per second`…）。
-   证过它承重：临时改一条 expect → 1 条红并打印上游实际那一行；行号整体 +1 → 21 条全红。
-11. **OCR 的依赖图要真的被钉住**（这条目前是**未达成**状态，写在这里是为了不让它被"车道绿了"蒙过去）：
+   证过它承重：临时改一条 expect → 1 条红并打印上游实际那一行；行号整体 +1 →
+   本机缓存里能核对的 **38 条全红**（49 条中其余 11 条的文件不在本机缓存里，得等 CI 去取），
+   也就是说这张表里没有一条"永远绿"的摆设。2026-10-20 全部 49 条按 pin ref 实跑过一次
+   （`python tools/citation_check.py`，0 问题），车道 `citation-drift` 那条本身仍是 0 次执行。
+12. **OCR 的依赖图要真的被钉住**（这条目前是**未达成**状态，写在这里是为了不让它被"车道绿了"蒙过去）：
    上游 oar-ocr 不发 `Cargo.lock`（实测 404，正向对照 206），而 40 个外部包里只有 `ort` 是 `=` 精确钉的、
    其余 37 个是 caret → `cargo build` 会在构建时重新解析。所以：
    ① `ocr-proof` 第一次真跑生成锁并把 `Cargo.lock` + sha256 传成 artifact；
@@ -168,7 +199,7 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
    `pins/ocr-build-surface.json`（fingerprint + 锁文件状态），上游一旦开始发锁也会红（那就该改成取它的锁）。
    分类判据本身有 15 条离线单测，其中三条是给"曾经算错的样子"写的：`{ workspace = true }` 不是未钉、
    `[package]` 里的 `readme` 不是依赖、带 Range 的探测存在时回 206 而不是 200。
-12. **下载层的校验规矩只有一条：两家分发方一致才可信**（`tools/file_index.py` + 车道 `file-index`）：
+13. **下载层的校验规矩只有一条：两家分发方一致才可信**（`tools/file_index.py` + 车道 `file-index`）：
    按 `repo + 文件名` 同时读 HF `tree.lfs.oid` 与 ModelScope `repo/files` 的 `Sha256`，状态分五种，
    `agree` 才允许"下载前就信"；`single` 必须下载后自算一遍；`conflict` / `pin_conflict`
    **一个哈希都不许返回**（绝不"挑一个好看的"）。候选源按实测吞吐排序，
@@ -177,7 +208,7 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
    就说明这套比对对任何输入都有答案；另有"至少 2 条被两家确认"的覆盖度地板，
    以及一条把"取数失败"与"这家没有这个仓库"分开的判据（前者必须红，后者是 `single`）。
    实测：qwen 与 SD `agree`（都等于 pin），`ggml-tiny.bin` `single`（ModelScope 未镜像，200 + 0 文件）。
-13. **装机负载必须先量出来再设计打包**（`tools/payload_plan.py` → `pins/payload-plan.json`，
+14. **装机负载必须先量出来再设计打包**（`tools/payload_plan.py` → `pins/payload-plan.json`，
     车道 `payload-plan`；Range 读 zip 中央目录，不解压、不下整包、不运行任何东西）：
     按"普通人默认档"（没 CUDA 的 x64 / Apple silicon）选产物，引擎净负载
     win-x64 **44.2 MiB**、linux-x64 **52.1**、macos-arm64 **46.5**（都还没算权重）。
@@ -189,8 +220,8 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     两个真实缺口写清楚而不是藏起来：
     ① **whisper.cpp 的 release 没有 macOS 产物** → 字幕在 Apple silicon 上只能自编译或不做（产品决定，已立任务）；
     ② llama/whisper 的 Linux 与 macOS 包是 **tar.gz**，中央目录读不了（格式决定），
-    那几行如实标 `needs_extract`，逐文件清单由出包车道解开作答（见第 14 条）。
-14. **出包车道已经有了，且它先校哈希再解包**（`tools/pack_engine.py` + `.github/workflows/package.yml`）：
+    那几行如实标 `needs_extract`，逐文件清单由出包车道解开作答（见第 15 条）。
+15. **出包车道已经有了，且它先校哈希再解包**（`tools/pack_engine.py` + `.github/workflows/package.yml`）：
     按 OS 矩阵（win-x64 / linux-x64 / macos-arm64）取 `payload-plan` 选中的产物 →
     **整包 sha256 必须等于上游 digest，对不上就停，不许"先解包再说"** →
     stdlib 解包（不调外部 unzip/tar）→ 按收集规则落成**扁平布局**
@@ -202,7 +233,7 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     离线对照 10 条（合成 zip + 合成 tar.gz，含 digest 不符与下载失败两条），
     闸门现在同时解析三条 workflow（15 段 heredoc PY）。
     车道仍 0 次执行，所以这一条给的是"出包这一步有路、有判据、有清单格式"，不是"包已经出出来"。
-15. **"只能靠 GitHub Actions 出包"这句本身要被验，不能当审美前提**：拆开四问，答案全部来自
+16. **"只能靠 GitHub Actions 出包"这句本身要被验，不能当审美前提**：拆开四问，答案全部来自
     pin 住的公共来源（已进 `pins/citations.json`，由 `citation-drift` 查），详见
     [docs/packaging.md](packaging.md)。要点：runner 镜像自带 Rust 1.99.1 与 Node 22.23.3
     （顺带解掉 OCR 的 `rust-version = 1.95` 那个未知）；**但 Linux 侧没有 `webkit2gtk`**
@@ -220,7 +251,9 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
 | `headless-inference` | 速率行 + 独立证明"真的吐了字"；关对话模式的真实拼法 | llama.cpp `b11727`：**库里** `src/llama-context.cpp:4657/4659` 会打 `%8.2f tokens per second`，但 **llama-cli 不调它** —— CLI 只在 `--show-timings`（`common/arg.cpp:1798`）下打 `[ Prompt: %.1f t/s | Generation: %.1f t/s ]`（`tools/cli/cli-context.cpp:655-660`）。判据因此两种写法都认，并另加一条与格式无关的证据：stdout 必须有非空白内容。抓不到速率时先怀疑格式（红字里顺带打 help 里的 timings/perf 开关），不再把结论写成"推理没跑起来"。关对话的真实拼法是 `-no-cnv`/`--no-conversation`（`arg.cpp:1907`），交互风险由 `< /dev/null` 兜死；`-t/-n/-ngl` 也都在 `common/arg.cpp`（**不在** `common/common.cpp`） |
 | `headless-inference`（常驻 server） | 路由名、响应字段名、**服务二进制与 CLI 是不是同一个文件** | llama.cpp `b11727`：`GET /health` = `tools/server/server.cpp:263`（返回带 `"status"`）、`POST /v1/chat/completions` = `274`、`choices[].message.content` = `tools/server/server-task.cpp:422/434`（老 `/completion` 用 `choices[].text`，判据两种都吃）、`usage.tokens_predicted` = `340`。二进制是 `llama-server` **和** `libllama-server-impl.so` 成对的（zip 条目表），所以这一步自己 `find llama-server` 并带 `LD_LIBRARY_PATH`，不复用上一步挑中的 CLI。`tokens_predicted` 缺失时**只跳过不断言**（这个键历史上叫过 `completion_tokens`，写死会养出一条永远红的车道），非空文本那条才是硬证据 |
 | `subtitle-proof` | `-osrt/--output-srt`、`-of/--output-file`、`-l`、`-m`、`-f`、`-t`；**产出文件叫什么** | whisper.cpp `b5454` 的 `examples/cli/cli.cpp:183/190/197/201/202/159`；不给 `-of` 时输出名从输入名推（同文件 `1136`）。**`-of` 要的是基名**：`fout_factory::open` 把扩展名直接拼在后面（`1165-1166`），写 `-of jfk.srt` 会得到 `jfk.srt.srt` —— 原车道就是这么写的，第一次跑必红且原因很怪。现在判据靠 `ls jfk*.srt` 发现真名，红字区分"命名变了"和"没产出字幕" |
+| `subtitle-proof`（常驻 server） | 服务二进制在不在包里、就绪态怎么认、multipart 字段名、SRT 由谁渲染 | whisper.cpp `b5454`：`whisper-server` **实测在** `whisper-bin-ubuntu-x64.tar.gz` 深度 1（2026-10-20 整包列条目，且整包 sha256 == 车道里钉的 `a72becf1…`）；`GET /health` 加载期回 **503** + `loading model`（`examples/server/server.cpp:1218-1224`），就绪回 `{"status":"ok"}`（`:1221`）—— 所以探测写成 `curl -fsS` **并且**要求正文含 `ok`，少一样都能把"还在加载"看成"服务不行/服务行了"；`POST /inference`（`:62/826`）的音频字段必须叫 `file`（`:831`，缺了直接 400），其余参数一律走 multipart 字段（`:482-622` 清一色 `has_file`）；`response_format=srt` 时服务端逐段拼 `序号/起 --> 止/正文` 并以 `application/x-subrip` 回吐（`:1037-1041`），编号是 `i+1+offset_n` 而请求不发 `offset_n`，所以判据要求从 1 连续。判据本体是 `tools/srt_proof.py`（20 条单测：本仓库拼的 spec 形状 + 另外两个项目留下的真 SRT 当独立生产者语料） |
 | `image-proof` | 参数写在**产物的 tEXt** 里而不是日志里 | sd.cpp `master-975-95b3090`：`examples/common/common.cpp:3239/3269` 拼 `Steps:`/`Size:` → `examples/common/media_io.cpp` 交给 `stbi_write_png(..., parameters)` → `thirdparty/stb_image_write.h:1210` 落成 `tEXt`、关键字 `parameters` |
+| `image-proof`（常驻 server） | 服务起不起得来、异步任务的状态机、图在响应的哪个字段、**请求体的参数有没有被吃进去** | sd.cpp `master-975-95b3090`：监听旗标是 `--listen-ip/--listen-port`（`examples/server/runtime.cpp:193/198`，默认 127.0.0.1:1234）；**模型先加载完才 `listen`**（`examples/server/main.cpp:92-98` 建上下文、`:152` 才 listen），所以与 whisper 相反——这里能答就是就绪，探测用 `GET /v1/models`（`routes_openai.cpp:253`）；`POST /sdcpp/v1/img_gen`（`routes_sdcpp.cpp:644`）成功回 **202**（`:695`）并给 `poll_url`（`:693`），车道**按服务端给的地址轮询**而不自己拼；状态名 `queued/generating/completed/failed/cancelled`（`async_jobs.cpp:73-88`），`failed/cancelled` 也要跳出轮询，否则红字看起来像超时而不像任务失败了；图在 `result.images[].b64_json`（`:190/192-194`，b64 由 `:284` 产出）。**这一步刻意不给 `sd-server` 任何生成旗标**：请求体是在 server 的 CLI 默认值之上覆盖的（`routes_sdcpp.cpp:417`），上游默认 20 步/512x512，产物元数据却是 `Steps: 3`、IHDR 是 256x256，才能证明参数从 HTTP 进去了。判据与 CLI 那条共用 `tools/png_proof.py`（25 条单测，含"两处判据逐案同生同死"的一致性用例），步数键是 `sample_params.sample_steps` 且逐键覆盖（`common.cpp:2204`）；元数据默认嵌进产物靠 `common.h:219` 的 `embed_image_metadata = true` |
 | `ocr-proof` | 包名 `oar-ocr-cli`、二进制名 `oar`、`--det/--rec/--dict` 必须一起给 | commit `84817f58…`（**不是** tag `v0.10.0` —— 那个 tag 里没有 CLI）：根 `Cargo.toml` members、`oar-ocr-cli/Cargo.toml` 的 `[[bin]] name = "oar"`、`src/args.rs` 的 `requires_all`/`conflicts_with_all` |
 | 引擎与权重输入 | 上游 `digest` 就是内容哈希 | 五个包整包下回实算相等（llama b11727、whisper b5454、sd 95b3090、qwen 415 MB、SD1.5 1.5 GB），见 `pins/models.json` 的 `bytes_verified` |
 
@@ -242,10 +275,11 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
 
 ## 第一次真跑要盯什么（车道至今 0 次执行，这些是静态审计之后剩下的未知）
 
-1. **timeout 够不够**：`image-proof` 是 45 min（1.5 GB 权重 + 3 步推理），`ocr-proof` 是 34 min
-   （2 核 runner 上 `cargo build --release` 要过 ort / onig / tokenizers 的编译），
-   `headless-inference` 2026-10-19 从 25 提到 35 min（同一步里多起一次常驻 server，权重要重新加载
-   + 最长 2 分钟就绪轮询）。这三个数都是估的，第一次跑就要按实际耗时改回来，别把"超时"读成"能力不行"。
+1. **timeout 够不够**：`image-proof` 2026-10-20 从 45 提到 60 min（1.5 GB 权重 + 一次 CLI 出图
+   + 一次常驻服务出图），`subtitle-proof` 从 20 提到 30 min（多起一次 whisper-server），
+   `ocr-proof` 是 34 min（2 核 runner 上 `cargo build --release` 要过 ort / onig / tokenizers 的编译），
+   `headless-inference` 是 35 min。这四个数全是估的，第一次跑就要按实际耗时改回来，
+   别把"超时"读成"能力不行"。
 2. **OCR 的源码 ref**：钉的是 main 的 `84817f58…`，因为 **v0.10.0 那个 tag 里没有 `oar-ocr-cli`**
    （成员表实测只有 4 项）。断言已按 raw 文件在本地核过（成员含 CLI、`[[bin]] name = "oar"`），
    剩下的未知是真编译 —— 上游若发新 tag，应该换成新 tag 而不是继续跟 main。
@@ -253,19 +287,33 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
    `libggml-cpu-*.so` 与带版本号软链名），车道已按 `find` 不限深度 + `LD_LIBRARY_PATH=$(dirname)` 处理；
    **还没证的是运行时能不能真把这套 `.so` 起来** —— 若报 `cannot open shared object`，先查 RPATH 再怀疑后端。
 4. **whisper 与 llama 的 Linux 包比 Windows 多一层同名目录**（`whisper-bin-ubuntu-x64/`、`llama-b11727/`），
-   条目与二进制名都已用整包下载核对（`whisper-cli`、`llama-server` 都在深度 1）；
-   整包 sha256 三个包都与上游 digest 相等。剩下的未知是它们跑出来的结果对不对。
+   条目与二进制名都已用整包下载核对（`whisper-cli`、`whisper-server`、`llama-server` 都在深度 1；
+   2026-10-20 又整包核过一次 whisper 那份，47 个条目里 `whisper-server` 确实在，整包 sha256
+   与车道钉的 `a72becf1…` 相等）；整包 sha256 三个包都与上游 digest 相等。
+   剩下的未知是它们跑出来的结果对不对。
 5. **runner 侧的 HF 直连**：`headless-inference` 从 `huggingface.co` 直接下权重。国内出口不可用
    这件事**不代表 GitHub runner 不可用**，两件事别混；但备选源该按 ADR 的新层级重排
    （ModelScope 首选、hf-mirror 备选，见 [model-catalog.md](model-catalog.md)）。
 6. **每条 pin 都会被车道自己再 `sha256sum -c` 一遍**。任何一条对不上都是"上游被换过或源在说谎"，
    要红着停下来，不许改成 warning 放行。
-7. **常驻 server 那条的未知集中在"起不起来"而不是"字段对不对"**：`/health` 轮询给的是 60 次 × 2 s
+7. **常驻 server 那三步的未知集中在"起不起来"而不是"字段对不对"**：`/health` 轮询给的是 60 次 × 2 s
    （≈2 分钟），2 核 runner 加载 415 MB 权重大概率够，但没测过；超时就先改这个预算，别改判据。
    `usage.tokens_predicted` 这个键名是按 `server-task.cpp:340` 核的，历史上它叫过 `completion_tokens`，
    所以判据写成"缺了就跳过、不硬要求"，硬证据是非空文本 —— 第一次跑要是 `/props` 有内容而
    `usage` 没有，那是键名换了，不是推理失败。`ldd` 那条只在**报 not found 时**才红（`grep` 找不到
    就退出 1，被 `||` 接住），所以它绿只说明"没缺失"，不说明库真的被加载了。
+   新加的两步各自还压着三个没测过的假设，红的时候先按这里查：
+   · **whisper** —— 就绪判据要求 `/health` 正文含 `ok`（`:1221`）。上游哪天把就绪体写成别的，
+     探测会一直 503/200-但没-ok 直到预算用完，红字是"没到就绪态"而不是"转写失败"；
+     multipart 里 `language=en` 是按 `:558` 的 `has_file("language")` 给的，哪天 cpp-httplib 不再把
+     普通表单字段放进 `files`，那这些参数会**静默不生效**（SRT 仍然出，只是按默认语言赌）。
+   · **sd** —— 请求体只给了 `sample_params.sample_steps`，靠的是 `common.cpp:2204` 那种
+     "逐键 contains 再覆盖"的写法；哪天改成整块替换，scheduler/sampler 会跟着变默认值，
+     红点仍然是 `Steps:` 或产物尺寸，不会告诉你"块被换了"。
+     就绪探测用 `GET /v1/models`（`:253`）并要求正文含 `data` —— 若上游把这个 OpenAI 端点改名，
+     表现为"90 次探测没响应"，那时先查端点表再查权重加载。
+   · **两条共同的**：`find … -name whisper-server` / `-name sd-server` 命中 0 就是上游改了产物名，
+     红字里已经带上整包条目表，不必再跑一次才知道少了什么。
 
 **CI 证明不了的**：GUI 是否真打开、集显/独显上的真实性能与兼容性、DirectML/Vulkan EP 是否真的加速。
 这几项必须留到设备矩阵，交付说明里要写清，不拿 CI 绿当"能用"。

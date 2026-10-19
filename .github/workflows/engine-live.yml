@@ -276,7 +276,9 @@ jobs:
     # 三个输入的 sha256 全部预先钉好（引擎那层来自上游 digest，HF 那两层由 tools/establish_pins.py
     # 跨主机对照立起来），跑出来必须是一份带时间戳、内容对得上的 SRT。
     needs: discover
-    timeout-minutes: 20
+    # 20 → 30：同一步里多起了一次常驻 whisper-server（权重重加载 + 最长 2 分钟就绪轮询 + 一次转写）。
+    # 这两个数都还是估的，第一次真跑要按实际耗时改回来。
+    timeout-minutes: 30
     runs-on: ubuntu-latest
     env:
       ENGINE_URL: https://github.com/ggml-org/whisper.cpp/releases/download/b5454/whisper-bin-ubuntu-x64.tar.gz
@@ -289,6 +291,8 @@ jobs:
       SAMPLE_SIZE: "352078"
       SAMPLE_SHA256: 59dfb9a4acb36fe2a2affc14bacbee2920ff435cb13cc314a08c13f66ba7860e
     steps:
+      - uses: actions/checkout@v4
+        # 常驻服务那一步要调 tools/srt_proof.py，判据抽成了工具就得让仓库在场。
       - name: 下载引擎并校上游 digest
         run: |
           curl -sSL --fail --max-time 300 -o engine.tar.gz "$ENGINE_URL"
@@ -343,6 +347,52 @@ jobs:
           tr 'A-Z' 'a-z' < "$SRT" | grep -qE 'country|ask not' || { echo "转写内容与已知样本对不上"; exit 1; }
           N=$(grep -c -- '-->' "$SRT")
           echo "::notice::字幕车道通过：$SRT 有 $N 条带时间戳的段，引擎与权重均按上游 sha256 校验"
+      - name: 起常驻 whisper-server，用 HTTP 再转一次同一段音频
+        # ADR 的实现约束第 1 条是"外壳起常驻服务，而不是每个任务起一次进程"。上面那条只是 one-shot CLI，
+        # 这条路（服务常驻 + multipart 上传 + 服务端渲染 SRT）一步都没跑过，所以它的"能出字幕"不能算作证过。
+        # 契约逐个在 b5454 源码里核过，不是照 README 猜的：
+        #   默认 127.0.0.1:8080（examples/server/server.cpp:59/65）、推理路径 /inference（:62）、路由注册 :826
+        #   GET /health 在加载期回 **503** + {"status":"loading model"}（:1218-1225），就绪才是 {"status":"ok"}
+        #   音频字段必须叫 file（:831），其余参数全部走 multipart 字段（:482-622 清一色 has_file）
+        #   response_format=srt 时正文以 application/x-subrip 回吐（:1023-1041）
+        # 二进制名 whisper-server 不是推测：2026-10-20 把上游 ubuntu 包整包（sha256 与 pin 相等）
+        # 列过条目，它就在 whisper-bin-ubuntu-x64/ 深度 1，与 whisper-cli 同目录。
+        run: |
+          set -euo pipefail
+          SRV=$(find w -type f -name whisper-server | head -1)
+          test -n "$SRV" || { echo "包里没找到 whisper-server，实际条目："; find w -maxdepth 2 -type f | head -40; exit 1; }
+          chmod +x "$SRV"
+          # 与 CLI 是两个文件，动态库在同一目录，所以这里自己带 LD_LIBRARY_PATH。
+          # 用 ${LD_LIBRARY_PATH:+…} 而不是 :$LD_LIBRARY_PATH：runner 上这个变量本来就没设，
+          # set -u 会直接把这一步吹掉（2026-10-19 在 llama-server 那一步就踩过一次）。
+          export LD_LIBRARY_PATH="$(dirname "$SRV")${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+          ldd "$SRV" | grep -i "not found" && { echo "whisper-server 动态库缺失"; exit 1; } || echo "动态库齐全"
+          "$SRV" -m model.bin --host 127.0.0.1 --port 9009 -t 2 > srv.log 2>&1 &
+          SRV_PID=$!
+          trap 'kill $SRV_PID 2>/dev/null || true' EXIT
+          ready=""
+          for i in $(seq 1 60); do
+            # curl -f 让 503（还在加载）自然失败并继续轮询；再要求正文含 "ok"，
+            # 免得哪天上游把就绪态也写成 {"status":"loading model"} 却回 200。
+            if curl -fsS --max-time 5 http://127.0.0.1:9009/health 2>/dev/null | grep -q '"ok"'; then
+              ready=yes; break
+            fi
+            sleep 2
+          done
+          test -n "$ready" || { echo "whisper-server 60 次探测（约 2 分钟）内没到就绪态"; tail -40 srv.log; exit 1; }
+          echo "::notice::whisper-server 第 $i 次探测就绪"
+          CODE=$(curl -sS -D srv.hdr -o srv.srt -w '%{http_code}' --max-time 300 \
+                 -F file=@jfk.wav -F response_format=srt -F language=en \
+                 http://127.0.0.1:9009/inference)
+          echo "POST /inference 返回 HTTP $CODE"
+          test "$CODE" = 200 || { echo "不是 200；响应体前 300 字节："; head -c 300 srv.srt; tail -30 srv.log; exit 1; }
+          CT=$(grep -i '^content-type:' srv.hdr | tr -d '\r' | cut -d' ' -f2- || true)
+          # 判据不在这里内联，走 tools/srt_proof.py：编号连续、时间戳单调、每块有正文、
+          # 已知答案命中、Content-Type 是 subrip —— 每条都有离线对照单测（CI 现在跑不起来，
+          # 只能靠"好样本必须过、坏样本必须红在对应那一句"来证明判据本身不是摆设）。
+          python3 tools/srt_proof.py --file srv.srt --min-blocks 4 \
+            --expect-any 'country|ask not' --content-type "$CT"
+          echo "::notice::字幕这条常驻服务路也通了（POST /inference → application/x-subrip）"
 
   payload-plan:
     # 出包前的最后一个空白：每个 OS 默认档到底取哪个产物、包里收哪些文件、下多少占多少。
@@ -582,13 +632,17 @@ jobs:
     # 并要求元数据里的尺寸与 IHDR 实际画布一致 —— 比看日志强：它同时证明参数被吃进去并被写进产物。
     # 所以能证明"我们传的参数真被用上了"，而不是"随便跑出一张图"。
     needs: discover
-    timeout-minutes: 45
+    # 45 → 60：多了一次常驻 sd-server 出图（模型再加载一遍 + 3 步 256x256 + 轮询）。
+    # 仍是估的，第一次真跑要按实际耗时改回来。
+    timeout-minutes: 60
     runs-on: ubuntu-latest
     env:
       WEIGHT_FILE: stable-diffusion-v1-5-pruned-emaonly-Q4_0.gguf
       WEIGHT_SIZE: "1566768416"
       WEIGHT_SHA256: b8944e9fe0b69b36ae1b5bb0185b3a7b8ef14347fe0fa9af6c64c4829022261f
     steps:
+      - uses: actions/checkout@v4
+        # 常驻服务那一步要调 tools/png_proof.py。
       - name: 下载引擎（discover 实时给的，digest 由上游 release 提供）
         run: |
           curl -sSL --fail --max-time 600 -o engine.zip "${{ needs.discover.outputs.sd_url }}"
@@ -674,6 +728,79 @@ jobs:
           print("元数据片段 =", params[:220].replace("\n", " | "))
           PY
           echo "::notice::生图车道通过：引擎 ${{ needs.discover.outputs.sd_tag }} + 钉住的 Q4_0 权重，3 步 256x256 出合法 PNG"
+      - name: 起常驻 sd-server，用异步任务接口再出一张图
+        # 上面那条是 one-shot CLI。外壳要的是常驻服务（ADR 实现约束第 1 条），
+        # 而 sd-server 这条路一次都没跑过 —— 尤其是"参数从 HTTP 请求体进去"这一节，
+        # CLI 那一步证明不了它。所以这一步**故意不给 server 任何生成旗标**：
+        # 上游默认是 20 步 / 512x512（examples/common/common.cpp 的选项表 + api.md 的
+        # defaults 表），请求体里写 3 步 / 256x256，产物元数据与 IHDR 就必须是 3 与 256，
+        # 否则红字直接说明"请求体没被吃掉"。
+        # 契约逐个在 95b3090 源码里核过：
+        #   监听旗标 --listen-ip / --listen-port（examples/server/runtime.cpp:193/198，默认 127.0.0.1:1234）
+        #   模型**先加载完才 listen**（main.cpp:92-98 建上下文，:152 才 listen）
+        #     —— 与 whisper-server 相反，那边是边加载边回 503，所以这里的探测不能照抄
+        #   GET /v1/models = routes_openai.cpp:253（用来确认服务真在响应且模型在册）
+        #   POST /sdcpp/v1/img_gen = routes_sdcpp.cpp:644，成功回 **202**（:695）+ poll_url（:693）
+        #   GET /sdcpp/v1/jobs/{id} = :768，状态名 queued/generating/completed/failed/cancelled
+        #     （async_jobs.cpp:73-88），完成时图在 result.images[].b64_json（:190/192-194）
+        #   b64 由 async_jobs.cpp:284 产出，元数据按 :269-273 嵌进 PNG 的 tEXt
+        run: |
+          set -euo pipefail
+          SRV=$(find e -type f -name sd-server | head -1)
+          test -n "$SRV" || { echo "包里没有 sd-server，包里有什么："; find e -maxdepth 2 -type f | head -40; exit 1; }
+          chmod +x "$SRV"
+          "$SRV" --help > srv_help.txt 2>&1 < /dev/null || true
+          # 模型旗标名在 CLI 与 server 之间可能不同，所以按 server 自己的 help 决定，不沿用上面算好的值。
+          MODEL_ARG=--diffusion-model
+          grep -q -- "--diffusion-model" srv_help.txt || MODEL_ARG=-m
+          echo "用 $MODEL_ARG 传模型给 sd-server"
+          PORT=1234
+          LARGS=()
+          if grep -q -- "--listen-port" srv_help.txt; then
+            LARGS=(--listen-ip 127.0.0.1 --listen-port "$PORT")
+          else
+            echo "help 里没有 --listen-port，改用上游默认 127.0.0.1:1234（examples/server/runtime.cpp:198）"
+          fi
+          "$SRV" "$MODEL_ARG" sd.gguf ${LARGS[@]+"${LARGS[@]}"} > srv.log 2>&1 &
+          SRV_PID=$!
+          trap 'kill $SRV_PID 2>/dev/null || true' EXIT
+          ready=""
+          for i in $(seq 1 90); do
+            if curl -fsS --max-time 10 "http://127.0.0.1:$PORT/v1/models" 2>/dev/null | grep -q '"data"'; then
+              ready=yes; break
+            fi
+            sleep 2
+          done
+          test -n "$ready" || { echo "sd-server 90 次探测（约 3 分钟）内没响应"; tail -40 srv.log; exit 1; }
+          echo "::notice::sd-server 第 $i 次探测就绪（模型是加载完才 listen 的，能答就说明真就绪）"
+          curl -fsS --max-time 30 http://127.0.0.1:$PORT/sdcpp/v1/capabilities > caps.json \
+            || { echo "GET /sdcpp/v1/capabilities 失败"; tail -20 srv.log; exit 1; }
+          python3 -c 'import json;d=json.load(open("caps.json",encoding="utf-8"));print("capabilities 顶层键 =",sorted(d)[:8])' \
+            || { echo "capabilities 不是可解析的 JSON："; head -c 300 caps.json; exit 1; }
+          CODE=$(curl -sS -o submit.json -w '%{http_code}' --max-time 60 \
+                 -H 'Content-Type: application/json' \
+                 -d '{"prompt":"a red cube on a table","width":256,"height":256,"seed":42,"sample_params":{"sample_steps":3}}' \
+                 "http://127.0.0.1:$PORT/sdcpp/v1/img_gen")
+          echo "提交任务返回 HTTP $CODE"
+          test "$CODE" = 202 || { echo "不是 202（routes_sdcpp.cpp:695 写的是 202 Accepted）；响应体："; head -c 400 submit.json; exit 1; }
+          POLL=$(python3 -c 'import json;print(json.load(open("submit.json",encoding="utf-8"))["poll_url"])')
+          echo "轮询地址 = $POLL"
+          STATUS=""
+          for i in $(seq 1 240); do
+            if curl -fsS --max-time 30 "http://127.0.0.1:$PORT$POLL" > job.json 2>/dev/null; then
+              STATUS=$(python3 -c 'import json;print(json.load(open("job.json",encoding="utf-8")).get("status") or "")')
+              case "$STATUS" in completed|failed|cancelled) break;; esac
+            fi
+            sleep 3
+          done
+          test "$STATUS" = completed || {
+            echo "任务最终停在 status=${STATUS:-（一次都没读到）}，不是 completed"
+            echo "最后一次响应："; head -c 400 job.json 2>/dev/null || true
+            tail -30 srv.log; exit 1; }
+          echo "任务在第 $i 次轮询完成"
+          # 判据与 CLI 那条共用 tools/png_proof.py（它认 --b64-from 的 result.images[0].b64_json 形状）。
+          python3 tools/png_proof.py --b64-from job.json --steps 3 --size 256x256
+          echo "::notice::生图这条常驻服务路也通了（异步任务 → result.images[0].b64_json → 合法 PNG）"
 
   citation-drift:
     # 本轮所有硬结论都写成"上游某个 ref 的某一行写着某件事"（默认绑 loopback、CORS 默认 *、

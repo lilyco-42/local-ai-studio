@@ -14,3 +14,8 @@ node_modules/
 # 但 catalog/describe.sha256 是要提交的：bulk 不在仓库里时，它是"出厂目录长什么样"的唯一记载。
 catalog/describe.json
 model-catalog.json
+
+# 本地抓来的上游源码与整包只用于核对行号/条目，不进仓库（10 MB 级）；
+# 要复现核对就重跑 tools/citation_check.py，它按 pin ref 自己去取。
+.cache/
+tests/fixtures/_tmp*

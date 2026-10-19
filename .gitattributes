@@ -1,3 +1,7 @@
 * text=auto eol=lf
 *.png binary
 *.ico binary
+
+# 这份 SRT 语料存在的唯一理由就是"行尾是 Windows 风格"：解析器要能剥掉回车。
+# 被 text=auto 归一成 LF，测试就变成拿 LF 文件测 CRLF 判据 —— 会绿，但测的是空。
+tests/fixtures/srt_foreign_crlf.srt -text

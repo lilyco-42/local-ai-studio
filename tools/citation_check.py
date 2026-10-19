@@ -22,6 +22,9 @@ import urllib.request
 ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 SPEC = os.path.join(ROOT, "pins", "citations.json")
 RAW = "https://raw.githubusercontent.com/{repo}/{ref}/{path}"
+# 覆盖度地板。文档里"至少 20 条"那句说的就是这个数，单测把它与两张表绑在一起查，
+# 免得代码是 10、文档写 20，而红字看起来像"表被删过"其实从来没被删过。
+MIN_CITATIONS = 20
 
 
 def url_of(c: dict) -> str:
@@ -107,8 +110,9 @@ def main(argv) -> int:
         return selftest()
     with open(args.spec, encoding="utf-8") as fh:
         spec = json.load(fh)
-    if len(spec) < 10:
-        print(f"BAD：夹具只有 {len(spec)} 条出处声明，这张表应该覆盖三家 server + 四条车道判据")
+    if len(spec) < MIN_CITATIONS:
+        print(f"BAD：夹具只有 {len(spec)} 条出处声明（地板 {MIN_CITATIONS}），"
+              f"这张表应该覆盖三家 server + 四条车道判据")
         return 1
     problems: list[str] = []
     rows = []

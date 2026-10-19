@@ -54,6 +54,14 @@ def find_index(job: str, needle: str) -> int:
     return hits[0]
 
 
+def body(job: str, needle: str) -> str:
+    """按步骤名取整段 shell 正文。判据抽成 tools/ 里的脚本之后，车道剩下的就是
+    "怎么起服务、怎么调工具"这部分 —— 它没有 heredoc PY 可回放，只能按文本钉住形状。"""
+    with open(WF, encoding="utf-8") as fh:
+        doc = yaml.safe_load(fh)
+    return doc["jobs"][job]["steps"][find_index(job, needle)].get("run") or ""
+
+
 def run(code: str, files: dict | None = None, env: dict | None = None) -> tuple[int, str]:
     """在临时目录里放好 files、设好 env，exec 这段判据。返回 (退出码, 合并输出)。
 

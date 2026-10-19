@@ -34,6 +34,30 @@ class TestRealAccident(unittest.TestCase):
         self.assertEqual(names(self.FIXED), [])
 
 
+class TestCommentsAndHeredocs(unittest.TestCase):
+    """注释与 heredoc 是两种相反的文本：前者根本不展开，后者（未加引号时）照旧展开。
+    搞混任何一边都会让闸门变成谎话 —— 一边是假红，一边是把真 bug 洗白。"""
+
+    def test_full_line_comment_is_not_a_reference(self) -> None:
+        body = ('set -euo pipefail\nSRV=x\n# 用 ${LD_LIBRARY_PATH:+…} 而不是 :$LD_LIBRARY_PATH\n'
+                'echo "$SRV"\n')
+        self.assertEqual(names(body), [])
+
+    def test_assignment_written_only_in_a_comment_does_not_count(self) -> None:
+        """反向对照：洗注释不能顺手把 `# FOO=1` 当成"FOO 定义过了"。"""
+        body = 'set -euo pipefail\n# FOO=1\necho "$FOO"\n'
+        self.assertEqual(names(body), ["FOO"])
+
+    def test_unquoted_heredoc_expands_even_on_a_hash_line(self) -> None:
+        body = 'set -u\ncat <<PY\n# $MISSING\nPY\n'
+        self.assertEqual(names(body), ["MISSING"])
+
+    def test_quoted_heredoc_is_inert(self) -> None:
+        """把上一条的 `<<PY` 加引号 —— 同一段文本就不再展开了。"""
+        body = "set -u\ncat <<'PY'\n# $MISSING\nPY\n"
+        self.assertEqual(names(body), [])
+
+
 class TestNotReported(unittest.TestCase):
     def test_assignment_earlier_on_same_line(self) -> None:
         self.assertEqual(names('set -euo pipefail\nd=$(dirname x); echo "$d"\n'), [])
