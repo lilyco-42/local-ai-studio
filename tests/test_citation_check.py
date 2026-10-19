@@ -1,16 +1,21 @@
 """`tools/citation_check.py` 与 `pins/citations.json` 的测试。
 
-这里全部离线：网络核对留给 CI 车道（`citation-drift`），单测只查两件 CI 查不到的事 ——
+这里全部离线：真联网核对留给 CI 车道（`citation-drift`），单测只查三件 CI 查不到的事 ——
 ① 判据函数自己会不会红（含工具自带的一组对照），② 提交进仓库的这张表**自不自洽**
-（行号上那一行真的含着 expect 吗、ref 是不是可不可变坐标、有没有人手写错一个数字）。
+（行号上那一行真的含着 expect 吗、ref 是不是可不可变坐标、有没有人手写错一个数字），
+③ `--cache` 模式不得把"缓存里没有原文"说成"查过且通过"（TestCacheMode）。
 """
+import contextlib
+import copy
 import importlib.util
+import io
 import json
 import os
 import sys
 import unittest
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+ROOT = os.path.abspath(os.path.join(HERE, ".."))
 sys.path.insert(0, os.path.join(HERE, "..", "tools"))
 import citation_check as cc  # noqa: E402
 
@@ -125,6 +130,94 @@ class TestCommittedSpec(unittest.TestCase):
             with open(p, "w", encoding="utf-8") as fh:
                 json.dump(self.spec()[:3], fh)
             self.assertEqual(cc.main(["--spec", p]), 1)
+
+
+class TestCacheMode(unittest.TestCase):
+    """`--cache` 是给"别拿网络当判据"用的：本机复算时从缓存读原文。
+    它最容易骗人的地方是"缓存里没有原文"被说成"查过了、没问题"。
+
+    这里不能拿一张只有一条的表跑：地板（`MIN_CITATIONS`）会先把它拒了，
+    于是三条用例全在测地板分支，缓存的跳过/命中/红一条都没碰过 ——
+    第一版就是这么写错的，红过之后才看出来。正向对照改用"把第一条复制 N 遍"：
+    这些行要的原文是同一个缓存文件、同一行、同一个子串，所以能一起满足。
+    """
+
+    @staticmethod
+    def spec():
+        with open(SPEC_PATH, encoding="utf-8") as fh:
+            return json.load(fh)
+
+    def run_cached(self, text, shift=0, rows=None):
+        import tempfile
+        full = copy.deepcopy(self.spec())
+        c = full[0]
+        if shift:
+            c["line"] += shift
+        spec = [copy.deepcopy(c) for _ in range(rows)] if rows else full
+        with tempfile.TemporaryDirectory() as d:
+            if text is not None:
+                with open(os.path.join(d, cc.cache_name(c)), "w", encoding="utf-8",
+                          newline="\n") as fh:
+                    fh.write(text)
+            p = os.path.join(d, "spec.json")
+            with open(p, "w", encoding="utf-8") as fh:
+                json.dump(spec, fh, ensure_ascii=False)
+            buf = io.StringIO()
+            with contextlib.redirect_stdout(buf):
+                rc = cc.main(["--spec", p, "--cache", d])
+            return rc, buf.getvalue(), len(spec)
+
+    def test_cache_name_has_no_path_separators(self) -> None:
+        """repo 本身带斜杠（ggml-org/llama.cpp）。第一版只换 path 的斜杠，
+        --fill 第一次写就 FileNotFoundError —— 名字必须是一个扁平文件名。"""
+        for c in self.spec()[:6]:
+            n = cc.cache_name(c)
+            self.assertNotIn("/", n)
+            self.assertNotIn("\\", n)
+
+    def test_empty_cache_says_it_checked_nothing(self) -> None:
+        rc, log, n = self.run_cached(None)
+        self.assertEqual(rc, 0, log)
+        self.assertIn("真查了 0 条，缓存里没有原文而跳过 %d 条" % n, log)
+        self.assertIn("不是通过，是没查", log)
+
+    def test_cached_line_verifies_and_reports_the_count(self) -> None:
+        c = self.spec()[0]
+        text = "\n" * (c["line"] - 1) + "x " + c["expect"] + " y\n"
+        rc, log, n = self.run_cached(text, rows=cc.MIN_CITATIONS)
+        self.assertEqual(rc, 0, log)
+        self.assertIn("核对 %d 条 file:line 出处，问题 0 条；真查了 %d 条" % (n, n), log)
+
+    def test_wrong_line_in_cache_is_red(self) -> None:
+        """行号挪一位就必须红 —— 这条是文档里那句"行号整体 +1 全红"的可复现版本。
+        两个方向都测：同一份原文，行号对得上就过、差一行就红，
+        否则很容易写出" mutate 没落到文件上"的假验证。"""
+        c = self.spec()[0]
+        text = ("\n" * (c["line"] - 1)) + c["expect"] + "\nnot what we want\n"
+        rc_ok, log_ok, _ = self.run_cached(text, rows=cc.MIN_CITATIONS)
+        self.assertEqual(rc_ok, 0, log_ok)
+        rc, log, _ = self.run_cached(text, shift=1, rows=cc.MIN_CITATIONS)
+        self.assertEqual(rc, 1, log)
+        self.assertIn("不含", log)
+        self.assertIn(c["id"], log)
+
+    def test_whole_table_checks_clean_from_a_full_cache(self) -> None:
+        """整表在缓存上必须 0 问题。缓存不在仓库里（.gitignore 的 .cache/refs），
+        所以这条只在有缓存的机器上跑，没有就明确 skip —— 不许把"没跑"报成"绿了"。"""
+        d = os.path.join(ROOT, ".cache", "refs")
+        need = {cc.cache_name(c) for c in self.spec()}
+        have = set(os.listdir(d)) if os.path.isdir(d) else set()
+        if not need <= have:
+            self.skipTest("缓存缺 %d 份原文（共需 %d），先跑 "
+                          "python tools/citation_check.py --cache .cache/refs --fill"
+                          % (len(need - have), len(need)))
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            rc = cc.main(["--cache", d])
+        log = buf.getvalue()
+        self.assertEqual(rc, 0, log)
+        self.assertIn("问题 0 条", log)
+        self.assertIn("真查了 %d 条" % len(self.spec()), log)
 
 
 if __name__ == "__main__":

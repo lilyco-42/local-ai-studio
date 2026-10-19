@@ -1,0 +1,30 @@
+{
+ "schema": 1,
+ "captured_at": "2026-10-20",
+ "ocr_release_assets.json": {
+  "from": "GET https://api.github.com/repos/GreatV/oar-ocr/releases?per_page=100 → 每个有产物的 release 再取 tags/{tag}",
+  "releases_with_assets": [
+   "v0.1.0",
+   "v0.3.0",
+   "v0.6.0",
+   "v0.7.0"
+  ],
+  "kept_fields": "tag / size / sha256（来自 asset 的 digest 字段，去掉 sha256: 前缀）",
+  "note": "112 个产物全部带 digest；其余 release 的 assets 数为 0"
+ },
+ "ocr_models_md.md": {
+  "from": "https://raw.githubusercontent.com/GreatV/oar-ocr/84817f58/docs/models.md",
+  "why": "字典与权重的配对只有这份表写着；v3 时代三个语言的字典不在 oar-ocr 的 release 里"
+ },
+ "ocr_registry.rs": {
+  "from": "https://raw.githubusercontent.com/GreatV/oar-ocr/84817f58/oar-ocr-core/src/core/download/registry.rs",
+  "why": "这是上游 auto-download 的期望哈希表（name → sha256 + size），也是 v3 语言权重的权威登记处"
+ },
+ "ocr_modelscope_files.json": {
+  "from": "GET https://www.modelscope.cn/api/v1/models/greatv/oar-ocr/repo/files?Revision=master&Root=.",
+  "answered_by": "www.modelscope.cn",
+  "kept_fields": "basename / Size / Sha256",
+  "note": "101 个文件；GitHub 的 112 个产物里 94 个在这边也有 —— 这是第二个分发方",
+  "captured_at": "2026-10-20"
+ }
+}

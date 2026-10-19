@@ -1,0 +1,506 @@
+{
+ "schema": 3,
+ "from_repo": "GreatV/oar-ocr",
+ "md_ref": "84817f58",
+ "ms_repo": "greatv/oar-ocr",
+ "registry_path": "oar-ocr-core/src/core/download/registry.rs",
+ "levels": {
+  "4.5": "GitHub release 的 digest == ModelScope 元数据 Sha256（两家分发方，零下载）；仍然是同一个作者，所以不是第 6 级",
+  "3": "只有一家给哈希（registry.rs 若在场也只是同一作者的第三个副本，不算独立来源）",
+  "自算 + 钉 commit": "两家都没有：按 commit 取 raw 整文件自算 sha256"
+ },
+ "lookup": "按 models.md 链接里的 tag 定位产物 —— 同名文件在不同 tag 可以是不同内容",
+ "pairing": "语言 key 取自 rec 文件名（rec 表与字典表的英文词序不一样）",
+ "languages": 14,
+ "level_counts": {
+  "4.5": 25,
+  "自算 + 钉 commit": 3
+ },
+ "rec_dict_bytes": 123297373,
+ "rec_dict_mib": 117.6,
+ "shared_det": {
+  "sha256": "1eb7b4f7ab657ebd1c66d5f79bca7497f29768a2e3c15e52daecbba1a8e4a039",
+  "size": 4826518,
+  "sources": [
+   "gh",
+   "ms",
+   "reg"
+  ],
+  "level": "4.5",
+  "note": "GitHub release 的 digest 与 ModelScope 元数据 Sha256 相等",
+  "file": "pp-ocrv5_mobile_det.onnx",
+  "url": "https://github.com/GreatV/oar-ocr/releases/download/v0.3.0/pp-ocrv5_mobile_det.onnx",
+  "release": "v0.3.0"
+ },
+ "entries": {
+  "arabic": {
+   "language": "Arabic",
+   "version": 5,
+   "rec": {
+    "sha256": "2768206d9a0ce48eba45b59619184e18161dde8f44115f029920ca17a9dc0384",
+    "size": 8026538,
+    "sources": [
+     "gh",
+     "ms",
+     "reg"
+    ],
+    "level": "4.5",
+    "note": "GitHub release 的 digest 与 ModelScope 元数据 Sha256 相等",
+    "file": "arabic_pp-ocrv5_mobile_rec.onnx",
+    "url": "https://github.com/GreatV/oar-ocr/releases/download/v0.3.0/arabic_pp-ocrv5_mobile_rec.onnx",
+    "release": "v0.3.0"
+   },
+   "det": "pp-ocrv5_mobile_det.onnx",
+   "dict": {
+    "sha256": "7f92f7dbb9b75a4787a83bfb4f6d14a8ab515525130c9d40a9036f61cf6999e9",
+    "size": 2369,
+    "sources": [
+     "gh",
+     "ms",
+     "reg"
+    ],
+    "level": "4.5",
+    "note": "GitHub release 的 digest 与 ModelScope 元数据 Sha256 相等",
+    "file": "ppocrv5_arabic_dict.txt",
+    "url": "https://github.com/GreatV/oar-ocr/releases/download/v0.3.0/ppocrv5_arabic_dict.txt",
+    "release": "v0.3.0"
+   }
+  },
+  "chinese_cht": {
+   "language": "Chinese Traditional",
+   "version": 3,
+   "rec": {
+    "sha256": "535ec8a5d0207f34b4cc6cca28c0903991df0ec6ecb8bd7eea2f16f4468afc2b",
+    "size": 11143425,
+    "sources": [
+     "gh",
+     "ms",
+     "reg"
+    ],
+    "level": "4.5",
+    "note": "GitHub release 的 digest 与 ModelScope 元数据 Sha256 相等",
+    "file": "chinese_cht_pp-ocrv3_mobile_rec.onnx",
+    "url": "https://github.com/GreatV/oar-ocr/releases/download/v0.3.0/chinese_cht_pp-ocrv3_mobile_rec.onnx",
+    "release": "v0.3.0"
+   },
+   "det": "pp-ocrv5_mobile_det.onnx",
+   "dict": {
+    "file": "chinese_cht_dict.txt",
+    "url": "https://github.com/PaddlePaddle/PaddleOCR/blob/main/ppocr/utils/dict/chinese_cht_dict.txt",
+    "sha256": "832551fee1f2fbc97508772d81ebdc8dba12c00de97a35c71c9ddf43ddac1a83",
+    "size": 33443,
+    "sources": [
+     "self-hash"
+    ],
+    "level": "自算 + 钉 commit",
+    "note": "两家都没有；models.md 明写不在 auto-download 注册表内，链接指着可变分支",
+    "pinned_commit": "dab3fe35379033fdcb2d0e9572fac0b36c9a9ebf",
+    "resolved_url": "https://raw.githubusercontent.com/PaddlePaddle/PaddleOCR/dab3fe35379033fdcb2d0e9572fac0b36c9a9ebf/ppocr/utils/dict/chinese_cht_dict.txt"
+   }
+  },
+  "cyrillic": {
+   "language": "Cyrillic",
+   "version": 5,
+   "rec": {
+    "sha256": "a18d96d7c8d73d90f2ed056549caa1de3a8e6cb744cccba16cd593ea8cd2d569",
+    "size": 8076390,
+    "sources": [
+     "gh",
+     "ms",
+     "reg"
+    ],
+    "level": "4.5",
+    "note": "GitHub release 的 digest 与 ModelScope 元数据 Sha256 相等",
+    "file": "cyrillic_pp-ocrv5_mobile_rec.onnx",
+    "url": "https://github.com/GreatV/oar-ocr/releases/download/v0.3.0/cyrillic_pp-ocrv5_mobile_rec.onnx",
+    "release": "v0.3.0"
+   },
+   "det": "pp-ocrv5_mobile_det.onnx",
+   "dict": {
+    "sha256": "db40aa52ceb112055be80c694afdf655d5d2c4f7873704524cc16a447ca913ba",
+    "size": 2781,
+    "sources": [
+     "gh",
+     "ms",
+     "reg"
+    ],
+    "level": "4.5",
+    "note": "GitHub release 的 digest 与 ModelScope 元数据 Sha256 相等",
+    "file": "ppocrv5_cyrillic_dict.txt",
+    "url": "https://github.com/GreatV/oar-ocr/releases/download/v0.3.0/ppocrv5_cyrillic_dict.txt",
+    "release": "v0.3.0"
+   }
+  },
+  "devanagari": {
+   "language": "Devanagari",
+   "version": 5,
+   "rec": {
+    "sha256": "b3d50774dfbec6ae02249ff79a925431a4381c8c6f86d342ff6e7b63e5fefa77",
+    "size": 7939902,
+    "sources": [
+     "gh",
+     "ms",
+     "reg"
+    ],
+    "level": "4.5",
+    "note": "GitHub release 的 digest 与 ModelScope 元数据 Sha256 相等",
+    "file": "devanagari_pp-ocrv5_mobile_rec.onnx",
+    "url": "https://github.com/GreatV/oar-ocr/releases/download/v0.3.0/devanagari_pp-ocrv5_mobile_rec.onnx",
+    "release": "v0.3.0"
+   },
+   "det": "pp-ocrv5_mobile_det.onnx",
+   "dict": {
+    "sha256": "09c7440bfc5477e5c41052304b6b185aff8c4a5e8b2b4c23c1c706f6fe1ee9fc",
+    "size": 1943,
+    "sources": [
+     "gh",
+     "ms",
+     "reg"
+    ],
+    "level": "4.5",
+    "note": "GitHub release 的 digest 与 ModelScope 元数据 Sha256 相等",
+    "file": "ppocrv5_devanagari_dict.txt",
+    "url": "https://github.com/GreatV/oar-ocr/releases/download/v0.3.0/ppocrv5_devanagari_dict.txt",
+    "release": "v0.3.0"
+   }
+  },
+  "el": {
+   "language": "Greek",
+   "version": 5,
+   "rec": {
+    "sha256": "5a4a020e48e8783e035e1af135423c2161a363acab9ef16e48238c3d181f0f71",
+    "size": 7836326,
+    "sources": [
+     "gh",
+     "ms",
+     "reg"
+    ],
+    "level": "4.5",
+    "note": "GitHub release 的 digest 与 ModelScope 元数据 Sha256 相等",
+    "file": "el_pp-ocrv5_mobile_rec.onnx",
+    "url": "https://github.com/GreatV/oar-ocr/releases/download/v0.3.0/el_pp-ocrv5_mobile_rec.onnx",
+    "release": "v0.3.0"
+   },
+   "det": "pp-ocrv5_mobile_det.onnx",
+   "dict": {
+    "sha256": "31defc62c0c3ad3674a82da6192226a2ba98ef4ff014a7045cb88d59f9c3de31",
+    "size": 1103,
+    "sources": [
+     "gh",
+     "ms",
+     "reg"
+    ],
+    "level": "4.5",
+    "note": "GitHub release 的 digest 与 ModelScope 元数据 Sha256 相等",
+    "file": "ppocrv5_el_dict.txt",
+    "url": "https://github.com/GreatV/oar-ocr/releases/download/v0.3.0/ppocrv5_el_dict.txt",
+    "release": "v0.3.0"
+   }
+  },
+  "en": {
+   "language": "English",
+   "version": 5,
+   "rec": {
+    "sha256": "8307465d3c9ef2ba4055c3bd0be55aafe11f518630212b7598b70ccb376028ac",
+    "size": 7876014,
+    "sources": [
+     "gh",
+     "ms",
+     "reg"
+    ],
+    "level": "4.5",
+    "note": "GitHub release 的 digest 与 ModelScope 元数据 Sha256 相等",
+    "file": "en_pp-ocrv5_mobile_rec.onnx",
+    "url": "https://github.com/GreatV/oar-ocr/releases/download/v0.3.0/en_pp-ocrv5_mobile_rec.onnx",
+    "release": "v0.3.0"
+   },
+   "det": "pp-ocrv5_mobile_det.onnx",
+   "dict": {
+    "sha256": "e025a66d31f327ba0c232e03f407ae8d105e1e709e7ccb3f408aa778c24e70d6",
+    "size": 1416,
+    "sources": [
+     "gh",
+     "ms",
+     "reg"
+    ],
+    "level": "4.5",
+    "note": "GitHub release 的 digest 与 ModelScope 元数据 Sha256 相等",
+    "file": "ppocrv5_en_dict.txt",
+    "url": "https://github.com/GreatV/oar-ocr/releases/download/v0.3.0/ppocrv5_en_dict.txt",
+    "release": "v0.3.0"
+   }
+  },
+  "eslav": {
+   "language": "Eastern Slavic",
+   "version": 5,
+   "rec": {
+    "sha256": "36a66a68097e88b103e0f60f489e88c7239d3ea79d96fbac2d80ac9d134944cd",
+    "size": 7915218,
+    "sources": [
+     "gh",
+     "ms",
+     "reg"
+    ],
+    "level": "4.5",
+    "note": "GitHub release 的 digest 与 ModelScope 元数据 Sha256 相等",
+    "file": "eslav_pp-ocrv5_mobile_rec.onnx",
+    "url": "https://github.com/GreatV/oar-ocr/releases/download/v0.3.0/eslav_pp-ocrv5_mobile_rec.onnx",
+    "release": "v0.3.0"
+   },
+   "det": "pp-ocrv5_mobile_det.onnx",
+   "dict": {
+    "sha256": "3e95f1581557162870cacdba5af91a4c6be2890710d395b0c3c7578e7ee5e6eb",
+    "size": 1663,
+    "sources": [
+     "gh",
+     "ms",
+     "reg"
+    ],
+    "level": "4.5",
+    "note": "GitHub release 的 digest 与 ModelScope 元数据 Sha256 相等",
+    "same_name_in_other_tags": {
+     "v0.1.0": "3e95f1581557162870cacdba5af91a4c6be2890710d395b0c3c7578e7ee5e6eb"
+    },
+    "file": "ppocrv5_eslav_dict.txt",
+    "url": "https://github.com/GreatV/oar-ocr/releases/download/v0.3.0/ppocrv5_eslav_dict.txt",
+    "release": "v0.3.0"
+   }
+  },
+  "japan": {
+   "language": "Japanese",
+   "version": 3,
+   "rec": {
+    "sha256": "da59d4dbb6786a92a3823c32b3f48179d18e29903d61462842aad9eb422a77a1",
+    "size": 10097703,
+    "sources": [
+     "gh",
+     "ms",
+     "reg"
+    ],
+    "level": "4.5",
+    "note": "GitHub release 的 digest 与 ModelScope 元数据 Sha256 相等",
+    "file": "japan_pp-ocrv3_mobile_rec.onnx",
+    "url": "https://github.com/GreatV/oar-ocr/releases/download/v0.3.0/japan_pp-ocrv3_mobile_rec.onnx",
+    "release": "v0.3.0"
+   },
+   "det": "pp-ocrv5_mobile_det.onnx",
+   "dict": {
+    "file": "japan_dict.txt",
+    "url": "https://github.com/PaddlePaddle/PaddleOCR/blob/main/ppocr/utils/dict/japan_dict.txt",
+    "sha256": "1dcfcb41eec90576a945b3084f22ade11ced506e24f14879245b071698f308e8",
+    "size": 17332,
+    "sources": [
+     "self-hash"
+    ],
+    "level": "自算 + 钉 commit",
+    "note": "两家都没有；models.md 明写不在 auto-download 注册表内，链接指着可变分支",
+    "pinned_commit": "dab3fe35379033fdcb2d0e9572fac0b36c9a9ebf",
+    "resolved_url": "https://raw.githubusercontent.com/PaddlePaddle/PaddleOCR/dab3fe35379033fdcb2d0e9572fac0b36c9a9ebf/ppocr/utils/dict/japan_dict.txt"
+   }
+  },
+  "ka": {
+   "language": "Georgian",
+   "version": 3,
+   "rec": {
+    "sha256": "e9592deee670c7ae3b21a7f6ad5d73f080628a30d8f00d26c668cfa3b493de04",
+    "size": 8993741,
+    "sources": [
+     "gh",
+     "ms",
+     "reg"
+    ],
+    "level": "4.5",
+    "note": "GitHub release 的 digest 与 ModelScope 元数据 Sha256 相等",
+    "file": "ka_pp-ocrv3_mobile_rec.onnx",
+    "url": "https://github.com/GreatV/oar-ocr/releases/download/v0.3.0/ka_pp-ocrv3_mobile_rec.onnx",
+    "release": "v0.3.0"
+   },
+   "det": "pp-ocrv5_mobile_det.onnx",
+   "dict": {
+    "file": "ka_dict.txt",
+    "url": "https://github.com/PaddlePaddle/PaddleOCR/blob/main/ppocr/utils/dict/ka_dict.txt",
+    "sha256": "fad3f765943275eec2134a6fbc9b52785426641104d4e7db3a159dc73f341dde",
+    "size": 452,
+    "sources": [
+     "self-hash"
+    ],
+    "level": "自算 + 钉 commit",
+    "note": "两家都没有；models.md 明写不在 auto-download 注册表内，链接指着可变分支",
+    "pinned_commit": "dab3fe35379033fdcb2d0e9572fac0b36c9a9ebf",
+    "resolved_url": "https://raw.githubusercontent.com/PaddlePaddle/PaddleOCR/dab3fe35379033fdcb2d0e9572fac0b36c9a9ebf/ppocr/utils/dict/ka_dict.txt"
+   }
+  },
+  "korean": {
+   "language": "Korean",
+   "version": 5,
+   "rec": {
+    "sha256": "2d7ed96308065a86103325d22af07a88c4d06afc009f21602a4882342c0cc054",
+    "size": 13446374,
+    "sources": [
+     "gh",
+     "ms",
+     "reg"
+    ],
+    "level": "4.5",
+    "note": "GitHub release 的 digest 与 ModelScope 元数据 Sha256 相等",
+    "file": "korean_pp-ocrv5_mobile_rec.onnx",
+    "url": "https://github.com/GreatV/oar-ocr/releases/download/v0.3.0/korean_pp-ocrv5_mobile_rec.onnx",
+    "release": "v0.3.0"
+   },
+   "det": "pp-ocrv5_mobile_det.onnx",
+   "dict": {
+    "sha256": "a88071c68c01707489baa79ebe0405b7beb5cca229f4fc94cc3ef992328802d7",
+    "size": 47451,
+    "sources": [
+     "gh",
+     "ms",
+     "reg"
+    ],
+    "level": "4.5",
+    "note": "GitHub release 的 digest 与 ModelScope 元数据 Sha256 相等",
+    "same_name_in_other_tags": {
+     "v0.1.0": "a88071c68c01707489baa79ebe0405b7beb5cca229f4fc94cc3ef992328802d7"
+    },
+    "file": "ppocrv5_korean_dict.txt",
+    "url": "https://github.com/GreatV/oar-ocr/releases/download/v0.3.0/ppocrv5_korean_dict.txt",
+    "release": "v0.3.0"
+   }
+  },
+  "latin": {
+   "language": "Latin",
+   "version": 5,
+   "rec": {
+    "sha256": "e3a6bfeea1c8a01d6fccfd480a0bd363fd907f8c65931e228bb2736f5c3e142f",
+    "size": 8069614,
+    "sources": [
+     "gh",
+     "ms",
+     "reg"
+    ],
+    "level": "4.5",
+    "note": "GitHub release 的 digest 与 ModelScope 元数据 Sha256 相等",
+    "file": "latin_pp-ocrv5_mobile_rec.onnx",
+    "url": "https://github.com/GreatV/oar-ocr/releases/download/v0.3.0/latin_pp-ocrv5_mobile_rec.onnx",
+    "release": "v0.3.0"
+   },
+   "det": "pp-ocrv5_mobile_det.onnx",
+   "dict": {
+    "sha256": "ccbcc45730b3fbbd9050c5bc74db6a99067141ef1035e3d14889a84a6b9b1aff",
+    "size": 2616,
+    "sources": [
+     "gh",
+     "ms",
+     "reg"
+    ],
+    "level": "4.5",
+    "note": "GitHub release 的 digest 与 ModelScope 元数据 Sha256 相等",
+    "same_name_in_other_tags": {
+     "v0.1.0": "3c0a8a79b612653c25f765271714f71281e4e955962c153e272b7b8c1d2b13ff"
+    },
+    "file": "ppocrv5_latin_dict.txt",
+    "url": "https://github.com/GreatV/oar-ocr/releases/download/v0.3.0/ppocrv5_latin_dict.txt",
+    "release": "v0.3.0"
+   }
+  },
+  "ta": {
+   "language": "Tamil",
+   "version": 5,
+   "rec": {
+    "sha256": "508d07ac0e1806a8b8857ebf20bd8837d68d962c3fdba030cf0022238ba819b8",
+    "size": 7913282,
+    "sources": [
+     "gh",
+     "ms",
+     "reg"
+    ],
+    "level": "4.5",
+    "note": "GitHub release 的 digest 与 ModelScope 元数据 Sha256 相等",
+    "file": "ta_pp-ocrv5_mobile_rec.onnx",
+    "url": "https://github.com/GreatV/oar-ocr/releases/download/v0.3.0/ta_pp-ocrv5_mobile_rec.onnx",
+    "release": "v0.3.0"
+   },
+   "det": "pp-ocrv5_mobile_det.onnx",
+   "dict": {
+    "sha256": "85b541352ae18dc6ba6d47152d8bf8adff6b0266e605d2eef2990c1bf466117b",
+    "size": 1723,
+    "sources": [
+     "gh",
+     "ms",
+     "reg"
+    ],
+    "level": "4.5",
+    "note": "GitHub release 的 digest 与 ModelScope 元数据 Sha256 相等",
+    "file": "ppocrv5_ta_dict.txt",
+    "url": "https://github.com/GreatV/oar-ocr/releases/download/v0.3.0/ppocrv5_ta_dict.txt",
+    "release": "v0.3.0"
+   }
+  },
+  "te": {
+   "language": "Telugu",
+   "version": 5,
+   "rec": {
+    "sha256": "0957fc03425324d30afcd4342a5708687fd0c885a5c0987cae418e96dd761a60",
+    "size": 7926350,
+    "sources": [
+     "gh",
+     "ms",
+     "reg"
+    ],
+    "level": "4.5",
+    "note": "GitHub release 的 digest 与 ModelScope 元数据 Sha256 相等",
+    "file": "te_pp-ocrv5_mobile_rec.onnx",
+    "url": "https://github.com/GreatV/oar-ocr/releases/download/v0.3.0/te_pp-ocrv5_mobile_rec.onnx",
+    "release": "v0.3.0"
+   },
+   "det": "pp-ocrv5_mobile_det.onnx",
+   "dict": {
+    "sha256": "42f83f5d3fdb50778e4fa5b66c58d99a59ab7792151c5e74f34b8ffd7b61c9d6",
+    "size": 1831,
+    "sources": [
+     "gh",
+     "ms",
+     "reg"
+    ],
+    "level": "4.5",
+    "note": "GitHub release 的 digest 与 ModelScope 元数据 Sha256 相等",
+    "file": "ppocrv5_te_dict.txt",
+    "url": "https://github.com/GreatV/oar-ocr/releases/download/v0.3.0/ppocrv5_te_dict.txt",
+    "release": "v0.3.0"
+   }
+  },
+  "th": {
+   "language": "Thai",
+   "version": 5,
+   "rec": {
+    "sha256": "5f6ee21242691681261fee01bc39867da9cc8ff9b889f2f048b3cb7f74380217",
+    "size": 7918606,
+    "sources": [
+     "gh",
+     "ms",
+     "reg"
+    ],
+    "level": "4.5",
+    "note": "GitHub release 的 digest 与 ModelScope 元数据 Sha256 相等",
+    "file": "th_pp-ocrv5_mobile_rec.onnx",
+    "url": "https://github.com/GreatV/oar-ocr/releases/download/v0.3.0/th_pp-ocrv5_mobile_rec.onnx",
+    "release": "v0.3.0"
+   },
+   "det": "pp-ocrv5_mobile_det.onnx",
+   "dict": {
+    "sha256": "57f5406f94bb6688fb7077f7be65f08bbd71cecf48c01ea26c522cb5c4836b7a",
+    "size": 1767,
+    "sources": [
+     "gh",
+     "ms",
+     "reg"
+    ],
+    "level": "4.5",
+    "note": "GitHub release 的 digest 与 ModelScope 元数据 Sha256 相等",
+    "file": "ppocrv5_th_dict.txt",
+    "url": "https://github.com/GreatV/oar-ocr/releases/download/v0.3.0/ppocrv5_th_dict.txt",
+    "release": "v0.3.0"
+   }
+  }
+ },
+ "with_det_mib": 122.2
+}

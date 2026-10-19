@@ -52,11 +52,17 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
 - `tools/r2_manifest.py`：从 `pins/*.json` 推导"该镜像什么"，按源分组给实测吞吐换算，
   产出 `mirror/r2-intake.json`（只是清单，不含上传动作）。
 - `tools/citation_check.py` + `pins/citations.json`：把"上游某 ref 的某一行写着某件事"这类结论
-  变成能查的东西。49 条声明各记（2026-10-20 按 pin ref 实跑过一次，0 问题） `repo/ref/path/line/expect`（还多一种 `absent`：连「这份文件里没有 X」也要查），逐条取回上游**核对那一行仍然含那个子串**
+  变成能查的东西。52 条声明各记（2026-10-20 按 pin ref 实跑过一次，0 问题；`--cache .cache/refs --fill` 抓一次原文之后可离线复算） `repo/ref/path/line/expect`（还多一种 `absent`：连「这份文件里没有 X」也要查），逐条取回上游**核对那一行仍然含那个子串**
   （只看文件在不在没用：默认值改了文件照样在），子串命中不就不唯一就不配进表。
   建表时已经按这两条筛过；车道 `citation-drift` 先跑 `--selftest`（明知错的必须认成错）再逐条核对。
   来历：本轮踩过六次"判据指向一个不存在的东西却照样跑完"（`llama-completions`、去 tag 里找 CLI、
   `-of jfk.srt`、去日志里找 `Steps:`、grep `tokens per second`…）。
+- `tools/ocr_language_pins.py` + `pins/ocr-languages.json`：OCR「识别能力」那一轴的 pin。
+  叠四张表（models.md 的两张字典表 + 语言权重表、GitHub 全部 release 产物、上游 ModelScope 镜像
+  `greatv/oar-ocr`、`registry.rs` 登记表），**在场来源必须给同一个 sha256 才立 pin**，
+  不一致就拒绝。结果：14 种语言、28 条 rec/dict 里 25 条两家一致（4.5 级），
+  3 条（繁中/日/格鲁吉亚的 v3 字典）两家都没有 → 按 PaddleOCR 的一个 commit 取 raw 自算。
+  查找按 models.md 链接里的 tag 定位 —— 同名文件在不同 tag 可以是不同内容。
 - `tools/toolbelt_pins.py` + `pins/toolbelt.json`：把工具带（llmfit / llama-swap / gguf-parser）
   按 ADR-0001 同一条规矩钉成"具体 release + sha256"。12 条 pin 里 8 条有 sidecar 与 API digest
   两套机制互相对照，4 条只有 API digest（如实记 `sidecar: null`，不和前者混成一类）。

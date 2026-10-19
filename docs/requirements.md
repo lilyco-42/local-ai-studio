@@ -137,8 +137,18 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
    **两家分发方各给哈希（ModelScope `Sha256` × HF `tree.lfs.oid`，零下载，`--cross-hf`）** →
    一家给哈希另一家给整包字节 → 两个独立发布方各下整包）
    与每级能说明什么，见 [model-catalog.md](model-catalog.md)。
+   **4.5 级不止对话/生图那两条权重**（2026-10-20）：OCR 的 14 种语言包也到了 ——
+   `tools/ocr_language_pins.py` 把 models.md、GitHub release 产物表、上游自己的
+   ModelScope 镜像（`greatv/oar-ocr`）与 `registry.rs` 四张表叠起来，
+   **28 条 rec/dict 里 25 条是"两家分发方给同一个 sha256"**，剩下 3 条（繁中/日/格鲁吉亚的
+   v3 字典）两家都没有，只能按 PaddleOCR 的一个 commit 取 raw 自算哈希。
+   合计 117.6 MiB（含字典）/ 122.2 MiB（含共享 det），落盘成 `pins/ocr-languages.json`。
+   这一轮还量出一个会坑死朴素实现的 fact：同一文件名在 `v0.1.0` 与 `v0.3.0` 里可以是
+   **两个不同文件**（`ppocrv5_latin_dict.txt` 1,634 B/`3c0a8a79…` vs 2,616 B/`ccbcc457…`），
+   所以查找必须按 models.md 那条链接里的 tag 定位 —— 第一版按名字找，`--live` 立刻报冲突。
    验收动作是 `python tools/establish_pins.py --verify pins/models.json` 与
-   `--verify pins/ocr.json`：字节与钉的哈希对不上就红；`catalog/defaults.json` 会把这条 pin 的
+   `--verify pins/ocr.json`，外加车道 `ocr-languages` 的三步（对照仓库快照 / 对照上游现状 /
+   现场重立一张逐字段比）：字节与钉的哈希对不上就红；`catalog/defaults.json` 会把这条 pin 的
    强度级一起带出去，UI 才有东西可显示。第 6 级目前**没有任何一条到达** ——
    whisper/SD 权重实测只有一家发布，这点在交付说明里要照实写。
 8. **车道里的 shell 也不能带 `set -u` 地雷**：`tools/shell_vars.py`（挂在 `yaml_gate.py` 里跑）把每条
@@ -176,7 +186,7 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
    `--cors-origins` 收窄到应用来源；② whisper / sd **没有 key 可给**，只能按需起、用完停，或由外壳反代
    （外壳持有唯一端口并自己发 token）；③ UI 永不直连引擎端口。
    这一条现在只有源码级证据，实现与验证都还没做 —— 列在验收里是为了别等写外壳时才发现架构选错了。
-11. **每条 `file:line` 出处本身要能被查**：`pins/citations.json` 49 条声明（其中 1 条是 `absent`
+11. **每条 `file:line` 出处本身要能被查**：`pins/citations.json` 52 条声明（其中 1 条是 `absent`
     型缺席断言：runner 镜像 readme 里没有 `webkit2gtk`），每条记
    `repo/ref/path/line/expect/claim`；`tools/citation_check.py` 按 pin 住的 ref 取回那份文件，
    核对**那一行仍然含着 expect 的子串**（不是只看文件在不在 —— 上游把 `cors_origins` 默认值改掉
@@ -186,9 +196,12 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
    "判据指向一个不存在的东西却照样跑完"（`llama-completions`、去 tag 里找 CLI、`-of jfk.srt`、
    去日志里找 `Steps:`、grep `tokens per second`…）。
    证过它承重：临时改一条 expect → 1 条红并打印上游实际那一行；行号整体 +1 →
-   本机缓存里能核对的 **38 条全红**（49 条中其余 11 条的文件不在本机缓存里，得等 CI 去取），
-   也就是说这张表里没有一条"永远绿"的摆设。2026-10-20 全部 49 条按 pin ref 实跑过一次
-   （`python tools/citation_check.py`，0 问题），车道 `citation-drift` 那条本身仍是 0 次执行。
+   行号整体 +1 → **51 条全红**（52 条里除 1 条 `absent` 型之外全部；那条本来就不看行号），
+   也就是说这张表里没有一条"永远绿"的摆设。这件事现在**不必联网也能重跑**：
+   `python tools/citation_check.py --cache .cache/refs --fill` 抓一次原文（21 份、828 KB，
+   目录已 .gitignore），之后 `--cache .cache/refs` 离线复算就是"52 条真查了、0 条跳过"；
+   跳过的那些会被点名说"不是通过，是没查"，这条本身有单测守着。
+   2026-10-20 全部 52 条按 pin ref 联网实跑过一次（0 问题），车道 `citation-drift` 本身仍是 0 次执行。
 12. **OCR 的依赖图要真的被钉住**（这条目前是**未达成**状态，写在这里是为了不让它被"车道绿了"蒙过去）：
    上游 oar-ocr 不发 `Cargo.lock`（实测 404，正向对照 206），而 40 个外部包里只有 `ort` 是 `=` 精确钉的、
    其余 37 个是 caret → `cargo build` 会在构建时重新解析。所以：
@@ -255,6 +268,7 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
 | `image-proof` | 参数写在**产物的 tEXt** 里而不是日志里 | sd.cpp `master-975-95b3090`：`examples/common/common.cpp:3239/3269` 拼 `Steps:`/`Size:` → `examples/common/media_io.cpp` 交给 `stbi_write_png(..., parameters)` → `thirdparty/stb_image_write.h:1210` 落成 `tEXt`、关键字 `parameters` |
 | `image-proof`（常驻 server） | 服务起不起得来、异步任务的状态机、图在响应的哪个字段、**请求体的参数有没有被吃进去** | sd.cpp `master-975-95b3090`：监听旗标是 `--listen-ip/--listen-port`（`examples/server/runtime.cpp:193/198`，默认 127.0.0.1:1234）；**模型先加载完才 `listen`**（`examples/server/main.cpp:92-98` 建上下文、`:152` 才 listen），所以与 whisper 相反——这里能答就是就绪，探测用 `GET /v1/models`（`routes_openai.cpp:253`）；`POST /sdcpp/v1/img_gen`（`routes_sdcpp.cpp:644`）成功回 **202**（`:695`）并给 `poll_url`（`:693`），车道**按服务端给的地址轮询**而不自己拼；状态名 `queued/generating/completed/failed/cancelled`（`async_jobs.cpp:73-88`），`failed/cancelled` 也要跳出轮询，否则红字看起来像超时而不像任务失败了；图在 `result.images[].b64_json`（`:190/192-194`，b64 由 `:284` 产出）。**这一步刻意不给 `sd-server` 任何生成旗标**：请求体是在 server 的 CLI 默认值之上覆盖的（`routes_sdcpp.cpp:417`），上游默认 20 步/512x512，产物元数据却是 `Steps: 3`、IHDR 是 256x256，才能证明参数从 HTTP 进去了。判据与 CLI 那条共用 `tools/png_proof.py`（25 条单测，含"两处判据逐案同生同死"的一致性用例），步数键是 `sample_params.sample_steps` 且逐键覆盖（`common.cpp:2204`）；元数据默认嵌进产物靠 `common.h:219` 的 `embed_image_metadata = true` |
 | `ocr-proof` | 包名 `oar-ocr-cli`、二进制名 `oar`、`--det/--rec/--dict` 必须一起给 | commit `84817f58…`（**不是** tag `v0.10.0` —— 那个 tag 里没有 CLI）：根 `Cargo.toml` members、`oar-ocr-cli/Cargo.toml` 的 `[[bin]] name = "oar"`、`src/args.rs` 的 `requires_all`/`conflicts_with_all` |
+| `ocr-languages` | OCR 的语言轴能不能「下载前就信」：产物在哪个 tag、两家分发方给不给同一个哈希、字典与权重是否成对 | oar-ocr `84817f58`：`oar-ocr-core/src/core/download/registry.rs:10` 写 `MODELSCOPE_REPO = "greatv/oar-ocr"`（第二个分发方就是上游自己的 ModelScope 镜像）、`:4` 声明条目按名字排序是为了二分查找（所以工具替上游守着这条排序，乱序当场抛）；`docs/models.md:116` 明写 v3 各语言字典**不在 auto-download 注册表内**，要另从 PaddleOCR 取 —— 那三份 pin 因此只能「按 commit 自算」。查找一律按 models.md 链接里的 **tag** 定位：`ppocrv5_latin_dict.txt` 在 v0.1.0 是 1,634 B / `3c0a8a79…`、在 v0.3.0 是 2,616 B / `ccbcc457…`，按名字找第一版就把拉丁语字典钉错了（`--live` 报「来源哈希不一致」才逼出来） |
 | 引擎与权重输入 | 上游 `digest` 就是内容哈希 | 五个包整包下回实算相等（llama b11727、whisper b5454、sd 95b3090、qwen 415 MB、SD1.5 1.5 GB），见 `pins/models.json` 的 `bytes_verified` |
 
 写这张表的理由：CI 现在一次都跑不了，而"日志里会出现某串"这类假设一旦错，

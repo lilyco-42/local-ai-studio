@@ -21,6 +21,16 @@ on:
       - "pins/citations.json"
       - "catalog/describe.sha256"
       - "pins/toolbelt.json"
+      # 判据抽成工具之后，改工具本身就得能触发对应用道（上一轮加 png_proof/srt_proof 时
+      # 只加了步骤、没加这几行，那条 push 什么都不会跑 —— 这本身就是个假绿的形状）
+      - "tools/png_proof.py"
+      - "tools/srt_proof.py"
+      - "tools/ocr_language_pins.py"
+      - "tools/establish_pins.py"
+      - "pins/ocr-languages.json"
+      - "pins/models.json"
+      - "pins/ocr.json"
+      - "tests/fixtures/ocr_*"
       - ".github/workflows/engine-live.yml"
 
 permissions:
@@ -154,6 +164,95 @@ jobs:
         with:
           name: ocr-catalog
           path: ocr-catalog.json
+
+  ocr-languages:
+    # i18n 的 A 轴：14 种语言的 rec+dict 到底能不能"下载前就信"。
+    # 这一步的结论是量出来的，不是概括来的：GitHub release 的 digest 与上游自己的
+    # ModelScope 镜像 greatv/oar-ocr 的元数据 Sha256 **逐字符相等**的那些条目才是 4.5 级；
+    # 只有一家给哈希的落回 3 级；繁中/日文/格鲁吉亚三个 v3 字典两家都没有，只能按 commit 自算。
+    # 三步各自查不同的事，缺一步就有一类漂移没人管：
+    #   ① --check --fixtures：仓库里已提交的 pin 与已提交的快照对不对得上（抓"手抄改过一个字段"）；
+    #   ② --check --live：上游四张表现在还认不认这些 pin（抓 release 被重打 / ModelScope 换文件）；
+    #   ③ 重新 --live 立一张，逐字段与提交的那张比（抓"整体结构或体积聚合漂了"）。
+    # ③ 有意忽略 pinned_commit / resolved_url 两个字段：PaddleOCR 的 main 一直在动，
+    #   那两条每次跑都不同，而它们**不是**结论；字典内容本身（sha256）照样要相等。
+    # 故意不 needs discover：discover 一挂会把这条标成 skipped，语言包的结论就看不见了
+    #（与 ocr-catalog 同一个理由）。
+    timeout-minutes: 15
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: 与仓库快照自洽（离线，上游今天心情不好也照样能红）
+        run: python3 tools/ocr_language_pins.py --check --fixtures
+      - name: 与上游四张表逐条复核（真漂移）
+        run: python3 tools/ocr_language_pins.py --check --live
+      - name: 重新立一张表，要求与已提交的那张逐字段相等
+        run: |
+          python3 tools/ocr_language_pins.py --live --pins-out fresh-ocr-languages.json
+          python3 - <<'PY'
+          import json
+
+          VOLATILE = {"pinned_commit", "resolved_url"}
+
+
+          def strip(x):
+              if isinstance(x, dict):
+                  return {k: strip(v) for k, v in x.items() if k not in VOLATILE}
+              if isinstance(x, list):
+                  return [strip(i) for i in x]
+              return x
+
+
+          def leaves(x, path=""):
+              out = {}
+              if isinstance(x, dict):
+                  for k, v in x.items():
+                      out.update(leaves(v, path + "." + str(k)))
+              elif isinstance(x, list):
+                  for i, v in enumerate(x):
+                      out.update(leaves(v, path + "[" + str(i) + "]"))
+              else:
+                  out[path] = x
+              return out
+
+
+          old = strip(json.load(open("pins/ocr-languages.json", encoding="utf-8")))
+          new = strip(json.load(open("fresh-ocr-languages.json", encoding="utf-8")))
+          a, b = leaves(old), leaves(new)
+          drift = []
+          for k in sorted(set(a) | set(b)):
+              if k not in b:
+                  drift.append(k + ": 已提交有、上游现在没有（" + repr(a[k]) + "）")
+              elif k not in a:
+                  drift.append(k + ": 上游多出来（" + repr(b[k]) + "）")
+              elif a[k] != b[k]:
+                  drift.append(k + ": " + repr(a[k]) + " → " + repr(b[k]))
+          print(f"逐字段比对 {len(a)} 个叶子值，漂移 {len(drift)} 条")
+          for d in drift[:40]:
+              print("  !", d)
+          if drift:
+              print("::error::上游四张表与仓库里这张 pin 已经不一致，要么显式重立，要么说明为什么不动")
+          raise SystemExit(1 if drift else 0)
+          PY
+      - name: 正向对照：这张表必须是"两家给同一个哈希"为主，而不是全 3 级
+        run: |
+          python3 - <<'PY'
+          import json
+          p = json.load(open("pins/ocr-languages.json", encoding="utf-8"))
+          lv = p["level_counts"]
+          print("层级分布 =", lv, "语言数 =", p["languages"])
+          # 聚合值不许是手抄的：这里重新逐条相加一次
+          per = sum(e["rec"]["size"] + (e["dict"].get("size") or 0)
+                    for e in p["entries"].values())
+          if per != p["rec_dict_bytes"]:
+              raise SystemExit(f"聚合值与逐条相加不符（表里 {p['rec_dict_bytes']}，逐条 {per}）")
+          if lv.get("4.5", 0) < 20:
+              raise SystemExit(f"两家一致（4.5 级）的条目掉到 {lv.get('4.5', 0)} 条 —— "
+                               f"上游 ModelScope 镜像大概不再同步了，语言包不能按这张表发货")
+          if p["languages"] != 14:
+              raise SystemExit(f"语言数从 14 变成 {p['languages']}，i18n 那篇文档要重写")
+          print("通过：14 种语言，4.5 级", lv.get("4.5", 0), "条，聚合值可复算")
+          PY
 
   catalog-probe:
     # 验的是"目录搜索的 API 形状和三条判据还成立"（泛词有结果 / 精确仓库能搜到 / 乱词必须 0 条），

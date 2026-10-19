@@ -565,5 +565,41 @@
   "absent": false,
   "as_of": "2026-10-20",
   "line_text": "request.gen_params = *runtime.default_gen_params;"
+ },
+ {
+  "id": "oar-registry-modelscope-repo",
+  "repo": "GreatV/oar-ocr",
+  "ref": "84817f58",
+  "path": "oar-ocr-core/src/core/download/registry.rs",
+  "line": 10,
+  "expect": "MODELSCOPE_REPO: &str = \"greatv/oar-ocr\"",
+  "claim": "上游 auto-download 的第二个分发方就是 ModelScope 的 greatv/oar-ocr （OCR 语言包能到 4.5 级靠的就是这一家）",
+  "absent": false,
+  "as_of": "2026-10-20",
+  "line_text": "pub const MODELSCOPE_REPO: &str = \"greatv/oar-ocr\";"
+ },
+ {
+  "id": "oar-registry-sorted-claim",
+  "repo": "GreatV/oar-ocr",
+  "ref": "84817f58",
+  "path": "oar-ocr-core/src/core/download/registry.rs",
+  "line": 4,
+  "expect": "entries are sorted by name to allow a binary search",
+  "claim": "登记表按名字排序是为了二分查找 —— 所以我们替上游守着这条排序，乱序就红",
+  "absent": false,
+  "as_of": "2026-10-20",
+  "line_text": "//! The entries are sorted by name to allow a binary search lookup."
+ },
+ {
+  "id": "oar-models-v3-dicts-external",
+  "repo": "GreatV/oar-ocr",
+  "ref": "84817f58",
+  "path": "docs/models.md",
+  "line": 116,
+  "expect": "are not part of the auto-download registry",
+  "claim": "v3 各语言的字典不在 auto-download 注册表里，要另从 PaddleOCR 取 —— 繁中/日/格鲁吉亚那三份 pin 只能自算哈希 + 钉 commit",
+  "absent": false,
+  "as_of": "2026-10-20",
+  "line_text": "The language-specific PP-OCRv3 dictionaries are different from the PP-OCRv5 dictionaries and are not part of the auto-download registry. Download them from PaddleOCR and pass the local path to the recognition builder. The PP-OCRv4 English checkpoint uses the same `en_dict.txt` file as PP-OCRv3 English."
  }
 ]

@@ -74,6 +74,33 @@ def fetch(c: dict, timeout: int = 40) -> str | None:
         return None
 
 
+def cache_name(c: dict) -> str:
+    """缓存文件名 = repo/ref/path 全把斜杠换掉。
+
+    `repo` 本身就带斜杠（`ggml-org/llama.cpp`），只换 path 的话文件名里还剩一层目录，
+    写的时候直接 FileNotFoundError —— 第一次 --fill 就撞上了。
+    同 path 在不同 repo/ref 下靠这段前缀区分，不会互相盖掉。
+    """
+    def flat(s: str) -> str:
+        return str(s).replace("/", "-").replace("\\", "-")
+
+    return f"{flat(c['repo'])}__{flat(c['ref'])}__" + c["path"].replace("/", "_")
+
+
+def read_cache(c: dict, d: str) -> str | None:
+    p = os.path.join(d, cache_name(c))
+    if not os.path.exists(p):
+        return None
+    with open(p, encoding="utf-8", errors="replace") as fh:
+        return fh.read()
+
+
+def write_cache(c: dict, d: str, text: str) -> None:
+    os.makedirs(d, exist_ok=True)
+    with open(os.path.join(d, cache_name(c)), "w", encoding="utf-8", newline="\n") as fh:
+        fh.write(text)
+
+
 def selftest() -> int:
     """离线对照：明知是错的必须被认成错，否则这套判据是装饰。"""
     text = 'line one\n  cors_origins = "*";\nline three'
@@ -105,6 +132,9 @@ def main(argv) -> int:
     ap.add_argument("--selftest", action="store_true")
     ap.add_argument("--spec", default=SPEC)
     ap.add_argument("--json", default="", help="把逐条结果写出去（给 CI 存 artifact）")
+    ap.add_argument("--cache", default="",
+                    help="在这个目录里放/取上游原文（本机复算用；文档里那句「N 条可离线核对」就靠它）")
+    ap.add_argument("--fill", action="store_true", help="配合 --cache：缺的原文先抓下来存进缓存")
     args = ap.parse_args(argv)
     if args.selftest:
         return selftest()
@@ -116,8 +146,23 @@ def main(argv) -> int:
         return 1
     problems: list[str] = []
     rows = []
+    skipped = []
     for c in spec:
-        text = fetch(c)
+        if args.cache:
+            text = read_cache(c, args.cache)
+            if text is None and args.fill:
+                text = fetch(c)
+                if text is not None:
+                    write_cache(c, args.cache, text)
+            if text is None:
+                # 缓存里没有 ≠ 出处不成立。这一类只报"没核到"，绝不当成通过，
+                # 也不能当成 BAD —— 否则换台机器跑就会红成一片假警报。
+                skipped.append(c["id"])
+                rows.append({"id": c["id"], "url": url_of(c), "line": c.get("line"),
+                             "expect": c["expect"], "ok": None, "problems": []})
+                continue
+        else:
+            text = fetch(c)
         bad = check_one(c, text)
         problems += bad
         rows.append({"id": c["id"], "url": url_of(c), "line": c.get("line"),
@@ -125,7 +170,12 @@ def main(argv) -> int:
     if args.json:
         with open(args.json, "w", encoding="utf-8", newline="\n") as fh:
             json.dump(rows, fh, ensure_ascii=False, indent=1)
-    print(f"核对 {len(spec)} 条 file:line 出处，问题 {len(problems)} 条")
+    print(f"核对 {len(spec)} 条 file:line 出处，问题 {len(problems)} 条"
+          + (f"；真查了 {len(spec) - len(skipped)} 条，缓存里没有原文而跳过 {len(skipped)} 条"
+             if args.cache else ""))
+    if skipped:
+        print("  跳过的 id（不是通过，是没查）：", ", ".join(skipped[:12])
+              + ("…" if len(skipped) > 12 else ""))
     for p in problems:
         print("  ✗", p)
     return 1 if problems else 0
