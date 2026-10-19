@@ -114,6 +114,33 @@ jobs:
       - uses: actions/checkout@v4
       - name: 文档链接的权重是否都还在 release 里
         run: python3 tools/ocr_catalog_check.py --json ocr-catalog.json
+      - name: 默认档的上游 digest 还是不是我们钉的那颗
+        # 只查"URL 还在不在"是不够的：上游可以重打同名 tag，文件名不变而字节变了。
+        # 那一刻车道里写死的 DET_SHA/REC_SHA/DICT_SHA 就是旧答案，必须在这里红。
+        run: |
+          python3 tools/ocr_catalog_check.py --pins-out fresh-ocr.json
+          python3 - <<'PY'
+          import json
+          old = json.load(open("pins/ocr.json", encoding="utf-8"))
+          new = json.load(open("fresh-ocr.json", encoding="utf-8"))
+          drift = []
+          for k, v in old.items():
+              got = new.get(k)
+              if not got:
+                  drift.append("%s: 上游不再给这条默认档的 digest" % k)
+                  continue
+              for f in ("sha256", "size"):
+                  if got[f] != v[f]:
+                      drift.append("%s: %s 钉的是 %r，上游现在是 %r" % (k, f, v[f], got[f]))
+          for k in new:
+              if k not in old:
+                  drift.append("%s: 上游多出一条同名默认档（要不要收进 pin 由人决定）" % k)
+          print("OCR 默认档漂移 %d 条（对照 pins/ocr.json）" % len(drift))
+          for d in drift:
+              print("  !", d)
+              print("::warning::" + d)
+          raise SystemExit(1 if drift else 0)
+          PY
       - uses: actions/upload-artifact@v4
         with:
           name: ocr-catalog

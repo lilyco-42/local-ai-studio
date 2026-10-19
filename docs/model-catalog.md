@@ -138,7 +138,7 @@ python tools/catalog_snapshot.py --live             # 重新生成 catalog/*.jso
 | `catalog/describe.json` 体积 | **5,808,032 B**，gzip-9 后 **474,976 B（8.2%）** |
 | 留下条目里有可下载仓库的 | **2,290 条（16%）** —— 其余只有描述，落到文件还得现查 |
 | `license` 归一为 `unknown` | **3,404 条**；含 `nc` 子串的 **376 条**（这条是子串启发式，只当统计不当闸门） |
-| `catalog/defaults.json` | **3 条**，字段直接抄 `pins/models.json`，另排除 1 条车道样本（`samples/jfk.wav` 不是给用户装的模型） |
+| `catalog/defaults.json` | **6 条**：`pins/models.json` 的 3 条权重 + `pins/ocr.json` 的 3 条 OCR 默认档；字段直接抄 pin 文件，不重打数字，另排除 1 条车道样本（`samples/jfk.wav` 不是给用户装的模型） |
 
 三个设计后果：
 - 内置目录快照的代价量级定了 —— **不到 500 KB 压缩**，比 ADR 原先担心的"要自带一个大目录"小得多，

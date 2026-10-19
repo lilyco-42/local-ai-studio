@@ -48,9 +48,19 @@ for f in FILES:
         if "steps." in str(job.get("outputs") or "") and "id:" not in raw:
             bad.append(f"{f}:{jn} 用了 steps.* 但没有 step 声明 id")
         jenv = job.get("env") or {}
+        # 按**值的形状**认，不按键名认。上一版只认 `*_SHA256`，而 OCR 车道写的是
+        # `DET_SHA / REC_SHA / DICT_SHA` —— 三条真 pin 就这样从覆盖度里漏掉，
+        # 闸门还照样报"5 条已寻源"，是个典型的"读了一半却报全绿"。
         for k, v in jenv.items():
-            if k.endswith("_SHA256"):
-                lane_pins.append((f, jn, k, str(v).strip(), jenv.get(k[: -len("_SHA256")] + "_SIZE")))
+            s = str(v).strip().strip('"')
+            if re.fullmatch(r"[0-9a-f]{64}", s):
+                prefix = re.sub(r"_SHA(256)?$", "", k)
+                lane_pins.append((f, jn, k, s, jenv.get(prefix + "_SIZE")))
+            elif re.search(r"SHA", k, re.I):
+                # YAML 会把"全是数字"的 64 位哈希解析成 int（测试里真踩到了），
+                # 那样上面这条就永远不命中，闸门又变成"读了一半却报全绿"。
+                bad.append(f"{f}:{jn} {k} 不像 64 位十六进制字符串（现在是 {type(v).__name__} "
+                           f"{str(v)[:12]}…）：哈希要加引号，别让它被当成数字")
         for i, st in enumerate(job["steps"]):
             body = st.get("run", "")
             if not body:

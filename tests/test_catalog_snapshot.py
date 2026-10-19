@@ -72,18 +72,20 @@ class TestSnapshot(unittest.TestCase):
         self.assertTrue(any("一条都没留下" in b for b in bad), bad)
 
     def test_defaults_layer_excludes_lane_samples(self) -> None:
-        """catalog/defaults.json 是给用户看的默认档；车道样本 jfk.wav 不许混进来。"""
-        pins = json.load(open(os.path.join(HERE, "..", "pins", "models.json"), encoding="utf-8"))
-        picks = cs.picks_of(pins)
+        """catalog/defaults.json 是给用户看的默认档；车道样本 jfk.wav 不许混进来，
+        但 OCR 那三件（来自 pins/ocr.json）必须在 —— 四项能力的默认档要在一个 artifact 里齐。"""
+        layers = cs.load_pin_layers()
+        picks = cs.picks_of(layers)
         self.assertNotIn("samples/jfk.wav", picks)
-        self.assertEqual(len(picks), len(pins) - 1)
+        self.assertEqual(len(picks), len(layers) - 1)
+        self.assertEqual(sum(1 for k in picks if k.endswith((".onnx", ".txt"))), 3, "OCR 默认档必须也在")
         path = os.path.join(HERE, "..", "catalog", "defaults.json")
         with open(path, encoding="utf-8") as fh:
             made = json.load(fh)
         self.assertEqual(sorted(made["entries"]), sorted(picks))
         for k, v in made["entries"].items():
-            self.assertEqual(v["sha256"], pins[k]["sha256"], k)
-            self.assertEqual(v["size"], pins[k]["size"], k)
+            self.assertEqual(v["sha256"], layers[k]["sha256"], k)
+            self.assertEqual(v["size"], layers[k]["size"], k)
 
     def test_kept_record_has_no_upstream_schema_leak(self) -> None:
         """只带 KEEP 里的字段：上游那 38 个字段（head_dim/moe_intermediate_size…）

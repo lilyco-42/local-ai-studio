@@ -248,7 +248,7 @@ spending limit needs to be increased"*。同账号的 public 仓库当天早些�
 
 二选一，由用户定：把仓库改 public（车道立刻能跑，但仓库名与 README/ADR 公开），
 或在 Settings→Billing 加付款方式 / 提高 Actions 支出上限。
-在此之前，"47 个 target / 57 个单测 / 93 个模型 URL 全部命中 / 47 个 target 都有上游 sha256 /
+在此之前，"47 个 target / 59 个单测 / 93 个模型 URL 全部命中 / 47 个 target 都有上游 sha256 /
 工具带 12 条 pin 其中 8 条有两套机制对照"都只是本机 python 证据。
 （这些数字每次改动都会漂，复核命令是同一条：`python tools/yaml_gate.py &&
 python -W error::ResourceWarning -m unittest discover -s tests -p "test_*.py"`。）

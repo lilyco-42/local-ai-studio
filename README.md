@@ -63,6 +63,7 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
 **已经定了的**：模型目录来源 —— 分两层，描述层用 llmfit 自带的 HF 快照（17,700 条，压缩后 850 KB），
 下载/校验层自建 `repo + 文件名 + sha256 + 多候选源`，因为那张表里一个内容哈希都没有。
 证据与复现见 [docs/model-catalog.md](docs/model-catalog.md)；四条已立住的权重 pin 在
-[pins/models.json](pins/models.json)，工具带 12 条在 [pins/toolbelt.json](pins/toolbelt.json)。
+[pins/models.json](pins/models.json)，OCR 默认档 3 条在 [pins/ocr.json](pins/ocr.json)，
+工具带 12 条在 [pins/toolbelt.json](pins/toolbelt.json)。
 i18n 已经按实测拆成"识别语言"与"界面语言"两条轴并给出默认包，见
 [docs/i18n.md](docs/i18n.md)。

@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 """OCR 权重目录完整性检查：oar-ocr 文档里链接的模型 URL，是否真的还能在 GitHub release 里找到。
 
-为什么要单独一条车道：OCR 的权重只能按 URL 钉（GitHub release 只给 size，**没有官方 sha256**，
-哈希必须我们自己算）。一旦上游挪了 tag 或删了产物，钉住的 URL 会变 404——
-这条车道要在 CI 里先红，而不是等用户装到一半报下载失败。
+为什么要单独一条车道：OCR 权重的 URL 会随上游挪 tag / 删产物而 404，
+这条要在 CI 里先红，而不是等用户装到一半报下载失败。
+（本文件早先写着"GitHub release 没有官方 sha256，哈希必须我们自己算"—— 那句已被 2026-10-19
+的实测推翻：每个产物都带 `digest = sha256:<64hex>`，且下载算过的与它逐字节相等。
+下面 `no_digest` 那条红就是按新事实写的：哪天某条不给了，宁可红也不退回"不校验"。）
 
 两道自我校验（缺任何一道，"0 缺失"这个结论本身就没意义）：
   · 文档里必须至少解析出 1 个链接、release 里必须至少读到 1 个产物，否则退出码 2；
@@ -64,13 +66,16 @@ def main(argv: list[str]) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--models-md", default="", help="已下载的 models.md（不给就用 gh 现取）")
     ap.add_argument("--json", default="", help="把报告写到文件")
+    ap.add_argument("--pins-out", default="",
+                    help="把 OCR 默认档（tiny det/rec/dict）的上游 digest 写成 pin 文件")
     args = ap.parse_args(argv)
 
     path = args.models_md
     if not path:
         blob = gh(f"repos/{REPO}/contents/docs/models.md")
         path = os.path.join(os.environ.get("RUNNER_TEMP", "/tmp"), "models.md")
-        open(path, "w", encoding="utf-8").write(base64.b64decode(blob["content"]).decode("utf-8"))
+        with open(path, "w", encoding="utf-8") as fh:
+            fh.write(base64.b64decode(blob["content"]).decode("utf-8"))
 
     linked = documented_urls(path)
     assets = release_assets()
@@ -105,7 +110,8 @@ def main(argv: list[str]) -> int:
         "documented_without_digest": doc_no_digest,
     }
     if args.json:
-        json.dump(report, open(args.json, "w", encoding="utf-8"), ensure_ascii=False, indent=1, sort_keys=True)
+        with open(args.json, "w", encoding="utf-8") as fh:
+            json.dump(report, fh, ensure_ascii=False, indent=1, sort_keys=True)
     print(f"文档链接 {report['documented']} 个，release 产物 {report['assets']} 个，"
           f"缺失 {len(missing)} 个；onnx {report['onnx_count']} 个共 {report['onnx_total_mib']} MiB")
     for u in missing[:20]:
@@ -119,6 +125,26 @@ def main(argv: list[str]) -> int:
         print("NOT RESOLVED：上游 sha256 缺失，目录不能降级成不校验", file=sys.stderr)
         return 1
     print("OK：全部文档链接的权重都在 release 里，且每条都有上游给的 sha256")
+    if args.pins_out:
+        # OCR 的默认档只有三件，但它是四项能力里唯一"权重来自 GitHub 而非 HF"的，
+        # 所以 pin 单独一个文件，让 yaml_gate 的寻源检查能覆盖车道里那三个 *_SHA。
+        trio = ["pp-ocrv6_tiny_det.onnx", "pp-ocrv6_tiny_rec.onnx", "ppocrv6_tiny_dict.txt"]
+        pins = {}
+        # 用未归一的原始 URL 当 primary：assets_n 的键被 norm() 换成 OWNER/ 占位了，
+        # 那种键只适合比对，写进 pin 文件就是给下游一个取不到的地址。
+        for url, (sz, name, dg) in assets.items():
+            if name in trio and dg and dg.startswith("sha256:") and len(dg) == 71:
+                pins[name] = {"sha256": dg.split(":", 1)[1], "size": sz, "primary": url,
+                              "provenance": "上游 release 的 digest（GitHub 给的内容哈希）；"
+                                            "本工具不整包下载，车道真下载时按这颗 pin 复核"}
+        absent = [n for n in trio if n not in pins]
+        if absent:
+            print(f"NOT RESOLVED：默认档 {absent} 拿不到上游 digest → 不写 pin", file=sys.stderr)
+            return 1
+        os.makedirs(os.path.dirname(args.pins_out) or ".", exist_ok=True)
+        with open(args.pins_out, "w", encoding="utf-8") as fh:
+            json.dump(pins, fh, ensure_ascii=False, indent=1, sort_keys=True)
+        print(f"  写入 {args.pins_out}：默认档 {len(pins)} 条（哈希来自上游 digest）")
     return 0
 
 

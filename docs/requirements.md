@@ -71,13 +71,14 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
 
 ## 验收标准（在当前唯一可用验证手段 = GitHub Actions 下）
 
-1. `ci.yml`：57 个单测绿（含 `test_yaml_gate.py` 给闸门自己的 9 条、`test_toolbelt_pins.py` 给工具带
+1. `ci.yml`：59 个单测绿（含 `test_yaml_gate.py` 给闸门自己的 11 条、`test_toolbelt_pins.py` 给工具带
    钉表的 14 条、`test_catalog_snapshot.py` 给目录快照的 8 条，其中负向对照合计 10+ 条）、
    `yaml_gate.py` 0 BAD、
    离线发现器解析出全部必需 target 且每个都带上游 sha256；单测在 `-W error::ResourceWarning` 下跑。
-   闸门还把**车道 env 里写死的每一条 `*_SHA256` 反查出处**（必须在 `pins/models.json` /
-   `pins/toolbelt.json` 或上游 release digest 夹具里），查不到就红、体积抄错也红 ——
-   这条是今天补的：那颗 415 MB 对话权重的哈希一直只写在 yaml 里，从没被任何工具复现过。
+   闸门还把**车道 env 里每一条 64 位十六进制的值**反查出处（必须在 `pins/*.json` 或
+   上游 release digest 夹具里），查不到就红、体积抄错也红、哈希没加引号被 YAML 读成数字也红 ——
+   这条是今天补的：那颗 415 MB 对话权重的哈希一直只写在 yaml 里，从没被任何工具复现过；
+   而只按 `*_SHA256` 键名认又会漏掉 OCR 车道的 `DET_SHA/REC_SHA/DICT_SHA`（现在按值形状认，8 条全覆盖）。
 2. `engine-live.yml`：`discover` 用真实 API 出 manifest（每个 target 都带上游 sha256）；`os-inference-proof` 对
    `manifest["inferred"]` 每一个产物解压要求 PE；`ocr-catalog` 93 条模型 URL 0 缺失且每条都有上游 digest；
    `model-catalog` 盯权重目录与"上游给不给哈希"的漂移；

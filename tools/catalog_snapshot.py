@@ -136,6 +136,19 @@ def load_bytes(args) -> tuple[bytes, str, str]:
         return r.read(), "上游 raw.githubusercontent", UPSTREAM["sha256"]
 
 
+def load_pin_layers() -> dict:
+    """默认档 = 权重层 (pins/models.json) + OCR 层 (pins/ocr.json)，都存在就合。
+    OCR 的权重来自 GitHub release 而不是 HF，所以是另一个文件、另一条来源，
+    但对用户而言都是"出厂默认档"，分成两个 artifact 只会让外壳多写一遍分支。"""
+    out = {}
+    for name in ("models.json", "ocr.json"):
+        p = os.path.join(ROOT, "pins", name)
+        if os.path.exists(p):
+            with open(p, encoding="utf-8") as fh:
+                out.update(json.load(fh))
+    return out
+
+
 def main(argv) -> int:
     ap = argparse.ArgumentParser()
     g = ap.add_mutually_exclusive_group(required=True)
@@ -143,10 +156,15 @@ def main(argv) -> int:
     g.add_argument("--fixtures", default="")
     ap.add_argument("--check", action="store_true", help="只校验，不写 catalog/*.json")
     args = ap.parse_args(argv)
+    if not args.live:
+        # 夹具是上游文件的一个切片，拿它写盘会产出一份"source 声称是整文件那版"的假目录。
+        # 离线只允许 --check（验规则还认得上游形状），生成必须走 --live。
+        if not args.check:
+            print("--fixtures 只能配 --check 用；生成快照要 --live")
+            return 2
 
     raw, src, expect_sha = load_bytes(args)
-    with open(os.path.join(ROOT, "pins", "models.json"), encoding="utf-8") as fh:
-        defaults = json.load(fh)
+    defaults = load_pin_layers()
     snap, stats, bad = build(raw, expect_sha)
     print(f"来源：{src}  字节 {len(raw):,}")
     for k, v in stats.items():
@@ -167,7 +185,7 @@ def main(argv) -> int:
     # 默认档不重打数字：直接从 pins/models.json 抄记录本体，出处跟着走。
     picks = picks_of(defaults)
     dpp = os.path.join(ROOT, "catalog", "defaults.json")
-    m = emit(dpp, {"schema": 1, "from": "pins/models.json",
+    m = emit(dpp, {"schema": 1, "from": ["pins/models.json", "pins/ocr.json"],
                    "entries": {k: {f: v[f] for f in ("sha256", "size", "primary", "provenance")
                                    if f in v} for k, v in picks.items()}})
     print(f"  写入 {dpp}：{m:,} B，默认档 {len(picks)} 条（哈希与出处都来自 pins/models.json，"

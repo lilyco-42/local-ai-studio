@@ -94,17 +94,32 @@ class TestGate(unittest.TestCase):
         self.assertIn("编译了 1 段", r.stdout)
 
     def test_lane_hashes_are_actually_sourced(self) -> None:
-        """正向对照之二：真实车道的写死哈希确实被寻到源，数量要打印出来才算覆盖。"""
+        """正向对照之二：真实车道的写死哈希确实被寻到源，数量要打印出来才算覆盖。
+        上一版按 `*_SHA256` 键名认，OCR 车道用的是 `DET_SHA/REC_SHA/DICT_SHA`，
+        三条真 pin 就这么漏在覆盖度外面而闸门照样报绿 —— 所以现在按"值是 64 位十六进制"认。"""
         out = run_gate(WORKFLOWS).stdout
         n = int(out.split("哈希 ")[1].split(" 条")[0])
-        self.assertGreaterEqual(n, 5, f"只寻到 {n} 条，说明 env 里的哈希大面积没被覆盖")
+        self.assertGreaterEqual(n, 8, f"只寻到 {n} 条，说明 env 里的哈希大面积没被覆盖")
         self.assertIn("models.json:qwen2.5-0.5b-instruct-q2_k.gguf", out)
+        self.assertIn("ocr.json:pp-ocrv6_tiny_det.onnx", out)
+
+    def test_differently_named_lane_hash_is_still_checked(self) -> None:
+        """换个键名（*_SHA 而不是 *_SHA256）不能绕开寻源检查。"""
+        wf = ("name: t\non:\n  push:\njobs:\n  j:\n    runs-on: ubuntu-latest\n"
+              "    env:\n      DET_SHA: " + "f" * 64 + "\n    steps:\n      - name: s\n        run: echo hi\n")
+        with tempfile.TemporaryDirectory() as d:
+            p = os.path.join(d, "sha_name.yml")
+            with open(p, "w", encoding="utf-8") as fh:
+                fh.write(wf)
+            r = run_gate([p])
+        self.assertEqual(r.returncode, 1, f"*_SHA 命名的假哈希绕过了闸门：{r.stdout[-400:]}")
+        self.assertIn("没有任何出处", r.stdout)
 
     def test_lane_hash_without_provenance_is_caught(self) -> None:
         """车道里一个来路不明的哈希必须红。今天就是靠这件事查出 415 MB 那颗对话权重
         只写在 yaml 里、从没被任何工具复现过 —— 写下来不等于钉住。"""
         wf = ("name: t\non:\n  push:\njobs:\n  j:\n    runs-on: ubuntu-latest\n"
-              "    env:\n      MODEL_SHA256: " + "0" * 64 + "\n      MODEL_SIZE: \"1\"\n"
+              "    env:\n      MODEL_SHA256: " + "a" * 64 + "\n      MODEL_SIZE: \"1\"\n"
               "    steps:\n      - name: s\n        run: echo hi\n")
         with tempfile.TemporaryDirectory() as d:
             p = os.path.join(d, "ghosthash.yml")
@@ -113,6 +128,20 @@ class TestGate(unittest.TestCase):
             r = run_gate([p])
         self.assertEqual(r.returncode, 1, f"来路不明的哈希没被拦：{r.stdout[-400:]}")
         self.assertIn("没有任何出处", r.stdout)
+
+    def test_all_digit_hash_needing_quotes_is_caught(self) -> None:
+        """全是数字的 64 位哈希不加引号会被 YAML 读成 int —— 上一版闸门因此"寻源 0 条"却报绿。
+        现在这条必须红，而且要指出是没加引号。"""
+        wf = ("name: t\non:\n  push:\njobs:\n  j:\n    runs-on: ubuntu-latest\n"
+              "    env:\n      MODEL_SHA256: " + "0" * 64 + "\n"
+              "    steps:\n      - name: s\n        run: echo hi\n")
+        with tempfile.TemporaryDirectory() as d:
+            p = os.path.join(d, "numeric.yml")
+            with open(p, "w", encoding="utf-8") as fh:
+                fh.write(wf)
+            r = run_gate([p])
+        self.assertEqual(r.returncode, 1, f"被当成数字的哈希没被拦：{r.stdout[-400:]}")
+        self.assertIn("别让它被当成数字", r.stdout)
 
     def test_lane_size_mismatch_against_pin_is_caught(self) -> None:
         """哈希对得上但体积抄错也要红 —— pin 正确、旁边的数字漂了是同一类事故。"""
