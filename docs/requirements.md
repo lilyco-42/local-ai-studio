@@ -76,17 +76,18 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
 
 ## 验收标准（在当前唯一可用验证手段 = GitHub Actions 下）
 
-1. `ci.yml`：516 个单测绿（重数：`python -W error::ResourceWarning -m unittest discover -s tests
+1. `ci.yml`：565 个单测绿（重数：`python -W error::ResourceWarning -m unittest discover -s tests
    -p "test_*.py"`；按文件数就 `python -m unittest tests.<模块名>`。2026-10-20 实测逐文件：
    `test_yaml_gate.py` 闸门自己 11、`test_toolbelt_pins.py` 工具带钉表 14、
-   `test_catalog_snapshot.py` 目录快照与侧表 16、`test_citation_check.py` 出处闸门 20、
+   `test_catalog_snapshot.py` 目录快照与侧表 16、`test_citation_check.py` 出处闸门 22、
    `test_ocr_build_surface.py` OCR 依赖面 15、`test_file_index.py` 下载层五种状态与首启队列 33、
    `test_payload_plan.py` 装机负载（含 tar 成员表与缺口点名）19、`test_pack_engine.py` 出包逻辑 10、
    `test_establish_verify.py` 字节复核 16、`test_shell_vars.py` shell 变量判据 14、
    `test_r2_manifest.py` 镜像清单 6、`test_lane_assertions.py` + `test_image_proof_block.py`
    车道判据 38 + 6 = 44、`test_recommend_image.py` 生图档位表 31、`test_machine_budget.py` 装机预算 20、
-   `test_lane_replay_report.py` 给分段与预跑计数 3、`test_engine_probe.py` 产物名解析与 skipped 点名 30、
-   `test_recommend_subtitle.py` 字幕四表对账 44、`test_recommend_models.py` 对话档位表 46），
+   `test_lane_replay_report.py` 给分段、预跑与 job 数计数 4、`test_engine_probe.py` 产物名解析与 skipped 点名 30、
+   `test_recommend_subtitle.py` 字幕四表对账 44、`test_recommend_models.py` 对话档位表 46、
+   `test_launch_plan.py` 启动计划（含 10 条源码变异体全部被抓）46），
    `yaml_gate.py` 0 BAD、
    离线发现器解析出全部必需 target 且每个都带上游 sha256；单测在 `-W error::ResourceWarning` 下跑。
    闸门还把**车道 env 里每一条 64 位十六进制的值**反查出处（必须在 `pins/*.json` 或
@@ -198,20 +199,29 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
    `--cors-origins` 收窄到应用来源；② whisper / sd **没有 key 可给**，只能按需起、用完停，或由外壳反代
    （外壳持有唯一端口并自己发 token）；③ UI 永不直连引擎端口。
    这一条现在只有源码级证据，实现与验证都还没做 —— 列在验收里是为了别等写外壳时才发现架构选错了。
-11. **每条 `file:line` 出处本身要能被查**：`pins/citations.json` 65 条声明（其中 1 条是 `absent`
+11. **每条 `file:line` 出处本身要能被查**：`pins/citations.json` 78 条声明（其中 1 条是 `absent`
     型缺席断言：runner 镜像 readme 里没有 `webkit2gtk`），每条记
    `repo/ref/path/line/expect/claim`；`tools/citation_check.py` 按 pin 住的 ref 取回那份文件，
    核对**那一行仍然含着 expect 的子串**（不是只看文件在不在 —— 上游把 `cors_origins` 默认值改掉
-   而文件照在，才是我们要知道的事），子串在文件里命中不唯一就不配进这张表（建表时按此筛过）。
-   车道 `citation-drift` 先跑 `--selftest`（明知是错的必须被认成错），再逐条核对并守住
-   "至少 20 条"的覆盖度地板。这一条是给第 10 条与整张判据出处表兜底的：本轮已经踩过六次
-   "判据指向一个不存在的东西却照样跑完"（`llama-completions`、去 tag 里找 CLI、`-of jfk.srt`、
-   去日志里找 `Steps:`、grep `tokens per second`…）。
-   证过它承重：临时改一条 expect → 1 条红并打印上游实际那一行；
-   行号整体 +1 → **64 条全红**（65 条里除 1 条 `absent` 型之外全部；那条本来就不看行号），
+   而文件照在，才是我们要知道的事）。
+   2026-10-20 又加了一条硬判据：**相邻行不许也含同一个子串**。这张表以前只写"命中不唯一就不配进表"，
+   而那句从来没有闸门守着 —— 实测 77 条行号型声明里有 7 条整文件命中不止一次（相隔很远，那些不破坏
+   灵敏度），真正会出事的是相邻重复：本轮给 `llama-health-is-public` 定行号时，263 与 264 两行的
+   注释一模一样，"行号整体 +1"复算时**它是唯一没红的一条**。现在 `check_one` 直接拦这个形状，
+   并把那一条的 expect 加长到只命中 263 行（`ctx_http.get ("/health"` —— `/v1/health` 那行不含它）。
+   其余 7 条相隔很远的重复**照旧允许**：它们不会因为挪一格而变绿，一并拦掉反而会把上游正常的
+   重复代码行当成漂移。
+   车道 `citation-drift` 先跑 `--selftest`（明知是错的必须被认成错，含"相邻重复必须红 /
+   相隔两行以上的重复不拦"这一对正反对照），再逐条核对并守住"至少 20 条"的覆盖度地板；
+   单测同时把总数钉成 78（加一条要一起改，删一条当场红）。这一条是给第 10 条与整张判据出处表兜底的：
+   本轮已经踩过七次"判据指向一个不存在的东西却照样跑完"（`llama-completions`、去 tag 里找 CLI、
+   `-of jfk.srt`、去日志里找 `Steps:`、grep `tokens per second`、启动计划里两个表上没有的 cite id、
+   以及这条相邻重复）。
+   证过它承重：临时改一条 expect → **1 条红**并打印上游实际那一行；
+   行号整体 +1 → **77 条红**（78 条里除 1 条 `absent` 型之外全部，那条本来就不看行号），
    也就是说这张表里没有一条"永远绿"的摆设。这件事现在**不必联网也能重跑**：
-   `python tools/citation_check.py --cache .cache/refs --fill` 抓一次原文（28 份、1,195 KB，
-   目录已 .gitignore），之后 `--cache .cache/refs` 离线复算就是"65 条真查了、0 条跳过"；
+   `python tools/citation_check.py --cache .cache/refs --fill` 抓一次原文（30 份、1,236 KB，
+   目录已 .gitignore），之后 `--cache .cache/refs` 离线复算就是"78 条真查了、0 条跳过"；
    跳过的那些会被点名说"不是通过，是没查"，这条本身有单测守着。
    重数这三句：`python tools/citation_check.py --cache .cache/refs`（计数行）与
    「把每条 line 加一再核对」那段（`tests/test_citation_check.py` 里有同形状的用例）。
@@ -415,6 +425,47 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     GitHub 路线算成本车道查过、体积不符不报、负向对照撤掉、未命中也标确认、
     不去重、取数失败当空表、每文件重查元数据、状态不合格也算过、缺仓库/缺钉值也算能下。
 
+
+22. **外壳该敲哪一行，也要有出处**：验收第 10 条那三句（外壳持有唯一监听口、自己发 token、
+    UI 永不直连引擎端口）能不能成立，取决于**引擎自己支持什么开关**，这不是设计偏好而是事实。
+    `tools/launch_plan.py` 把这四件事按钉住的 ref 读上游源码量清楚了，并落成 `pins/launch-plan.json`：
+
+    | 能力 | 起法 | 引擎自己有没有鉴权 | 上游出处 |
+    |---|---|---|---|
+    | 对话 | `llama-server -m … --host 127.0.0.1 --port … --api-key …` | **有** `--api-key` | `common/arg.cpp:3513`；`/health` 那行明写 "public endpoint (no API key check)"（`tools/server/server.cpp:263`），所以带着钥匙也能探活 |
+    | 字幕 | `whisper-server -m … --host 127.0.0.1 --port …` | **没有**（整份 server.cpp 里 `--api-key` 与 `api_key` 都查不到） | `examples/server/server.cpp:251/252`；默认就绑 127.0.0.1（`:59`） |
+    | 生图 | `sd-server --diffusion-model … --clip_l … --t5xxl … --vae … --listen-ip 127.0.0.1 --listen-port …` | **没有** | `examples/server/runtime.cpp:193/198`；四份额外权重的旗标逐个在 `examples/common/common.cpp:407/411/421/471` 查到 |
+    | 文字识别 | `oar ocr --det … --rec … --dict … --device … --format json --output <目录> <图片…>` | 没有服务形态，一次任务一个进程 | `oar-ocr-cli/src/args.rs:10/49/59/84/90`（这份文件里没有 `--port/--listen/--api-key`） |
+
+    两条不显眼但要命的上游事实：① OCR 的 `--det/--rec/--dict` 是 `requires_all`，**三颗必须一起给**，
+    而默认档 `--size` 与它们 `conflicts_with_all` —— 我们传自己钉住的权重，就一个 `--size` 都不能带
+    （`build()` 里真有这条拦截：把 `--size` 塞进模板会当场红）；② whisper 在 Apple 侧**没有可执行产物**
+    （只有 xcframework），所以 `by_tier` 里根本没有 mac 那一行 —— #29 那三种选择就是这个数据事实的形状。
+
+    **生图那行的编码器不是手打的**：`--clip_l/--t5xxl/--vae` 从 `catalog/machine-budget.json` 里
+    真算进预算的那几颗配套件读出来，主体文件名则与 `catalog/image-tiers.json` 的默认行**交叉核对** ——
+    两张表对不上就报"下的与用的不是同一批文件"，绝不挑一张用。模板里写的是**文件名**
+    （`{flux1-schnell-Q5_0.gguf}`）而不是一个谁都能填的 `{model}`，这样"起的正是下的那一颗"才可核对。
+
+    判据的承重证明留在仓库里（不是又一次性扫描）：`tests/test_launch_plan.py` 的
+    `TestSourceMutants` 把工具源码改坏 **10 个变异体**，每个都必须让四条探针（离线对照 /
+    重算漂移 / 出处 id 闸门 / 缺席声明照扫）至少一条不再"在位"，并同时跑一条正向对照
+    （不改坏时四条全绿）。它当场抓出两个真 bug：`build()` 把 SPEC 里的 dict **直接塞进产物**
+    （改产物就是改规格，现已 `deepcopy`），以及 `verify_spec` 里 `seen_absent` 初始化成了 list
+    （第一跑就 `TypeError`）。输出还会自报家门：
+    `核对 28 条 needle / 8 条缺席声明，取自 8 份上游原文（缓存 N / 现抓 M）`，
+    加 `--skip-provenance` 时打 NOTE 并报 0 —— 「没查」不能长得像「查过了」。
+    这一轮也踩了一次**引用不存在的出处**：SPEC 里原先写 `headless-server-chat-completions`
+    与 `subtitle-server-inference-field`，两个 id 在 `pins/citations.json` 里根本没有，
+    而"引用了出处"这件事看起来与"核对过出处"一模一样。现在 `build()` 会逐个 id 对表，
+    单测 `TestCiteIdsExist` 同时守正向（每条 id 都在表里）与负向（塞一个假 id 必须报）。
+    重数：`python3 tools/launch_plan.py --selftest`、`python -m unittest tests.test_launch_plan -v`、
+    `python3 tools/launch_plan.py --check --skip-provenance`（离线那层）、
+    `python3 tools/launch_plan.py --check --fill --cache .cache/refs`（联网按 pin 查）。
+    **仍然没有的部分**：这些是按上游源码与文档拼出来的模板，本机一台都没起过 ——
+    argv 真能被引擎接受，属于 #25 实现之后在 CI 里跑的那一轮
+    （而这条仓库现在还没有 runner，见 #19）。
+
 ## 车道判据的出处（全部按**钉住的那个 ref** 核过，不是按 HEAD 记的）
 
 | 车道 | 判据依赖的东西 | 出处 |
@@ -431,6 +482,7 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
 | `subtitle-tiers` | 字幕档位表的四个来源与"哪一条不许我们替上游补数字" | whisper.cpp `b5454`：`README.md:138-144` 是 `Model \| Disk \| Mem` 表（`Mem` 列 tiny `~273 MB` → large `~3.9 GB`，`:140` 已进 `pins/citations.json`）；`models/README.md:63` 明写 **Models are multilingual unless the model name includes `.en`**（顺序按这条排）、同一文件 `:67` 明写 **`for-tests-` 前缀的模型文件是空的**（收集清单按名字排掉）；`models/download-ggml-model.sh:9` 写死宿主 `src="https://huggingface.co/ggerganov/whisper.cpp"`（下载源从脚本读出来，不硬编码在我们代码里）。哈希只有一家给：同一次捕获里 HF `tree.lfs.oid` 有 47 条、ModelScope 对该仓库 **0 条** → 整轴 `single`，`ggml-tiny.bin` 的 oid 与 `pins/models.json` 那颗 pin 逐字节相同（正向对照）。上游自己不一致的两处也记进产物 `upstream_deltas`：白名单有 `small.en-tdrz` 而宿主无此文件；宿主有 4 个 `.en-q8_0` 而白名单没列 |
 | `image-tiers` | 生图这一档**为什么只能给算术下限、不能给内存承诺**，以及三条来源各自的位置 | sd.cpp `95b3090`：`docs/performance.md:143` 分段执行的容量检查留 `128 MiB of headroom`、`:145` 保住 `512 MiB device` 底线、`:102` 的 `--offload-to-cpu`（那一行 `--offload-to-cpu` 在文件里命中 6 次，所以进表的是 "saving VRAM without reducing generation speed" —— 子串不唯一就不配进这张表）、`README.md:157` 把内存/显存这件事推到这份文档（**上游给的是运行时策略，不是一张静态表**）；`docs/sd.md:5` 明写 SD1.5 的出处是 `huggingface.co/stable-diffusion-v1-5/stable-diffusion-v1-5` 的 **safetensors** —— GGUF 量化全在社区仓库，所以候选池只能由上游搜索推导。文件级哈希与字幕那行同一套机制（HF `tree.lfs.oid` × ModelScope `Sha256`），实测这次 338 行里 191 行两家一致 |
 | `machine-budget` | 这一条几乎不依赖上游 file:line —— 它的输入是**已提交那五张表的数字**加一张实测吞吐表；唯一的外部依据是「每个家族在主体之外还要不要外挂权重」 | sd.cpp `95b3090`：`docs/sd.md` 的 txt2img 例子五行 —— `:13` SD1.5 只给 `-m`（`sd-example-sd15-only-model`）、`:14` SDXL 要 `--vae`（`sd-example-sdxl-needs-vae`）、`:15` sd3_medium 那颗文件名自带 clips/t5xxl（`sd-example-sd3-medium-selfcontained`）、`:16` flux 要 `--vae --clip_l --t5xxl`（`sd-flux-needs-companions`）、`:17` sd3.5_large 要 `--clip_l --clip_g --t5xxl`（`sd-sd35-needs-encoders`），五条都由 `citation-drift` 逐行查；吞吐 `4.2 / 0.25 MiB/s` 不是上游声明，是 `tools/r2_manifest.py` 里那次 lain42.top 实测，所以产物里 `measured_at_exit` 写明是哪台机器量的 |
+| `launch-plan` | 外壳起每一项能力该敲哪些旗标、引擎自己有没有鉴权 | llama.cpp `b11727`：`--api-key` = `common/arg.cpp:3513`，`/health` 那行注释 `public endpoint (no API key check)` = `tools/server/server.cpp:263`（相邻的 `/v1/health` :264 注释一模一样，所以 expect 加长到只命中 263）。whisper.cpp `b5454`：只有 `--host`/`--port`（`examples/server/server.cpp:252/251`），默认绑 127.0.0.1（`:59`），整份文件查不到 `--api-key`/`api_key` —— 缺席也是一条被扫出来的判据。stable-diffusion.cpp `95b3090`：`--listen-ip`/`--listen-port` = `examples/server/runtime.cpp:193/198`，四份编码器旗标 = `examples/common/common.cpp:407/411/421/471`。oar-ocr `84817f5`：`name = "oar"` `oar-ocr-cli/src/args.rs:10`、子命令 `Ocr(Ocr),` `:49`、`requires_all = ["rec", "dict"]` `:59`、`conflicts_with_all = ["det", "rec", "dict"]` `:84`、位置参数 `INPUTS` `:90` —— 这份文件里没有 `--port`/`--listen`/`--api-key`。以上九条都进了 `pins/citations.json`（现 78 条），并由 `tools/launch_plan.py` 的 28 条 needle 与 8 条缺席声明在车道里逐条现查 |
 | 引擎与权重输入 | 上游 `digest` 就是内容哈希 | 五个包整包下回实算相等（llama b11727、whisper b5454、sd 95b3090、qwen 415 MB、SD1.5 1.5 GB），见 `pins/models.json` 的 `bytes_verified` |
 
 写这张表的理由：CI 现在一次都跑不了，而"日志里会出现某串"这类假设一旦错，

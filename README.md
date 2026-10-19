@@ -56,11 +56,15 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
 - `tools/r2_manifest.py`：从 `pins/*.json` 推导"该镜像什么"，按源分组给实测吞吐换算，
   产出 `mirror/r2-intake.json`（只是清单，不含上传动作）。
 - `tools/citation_check.py` + `pins/citations.json`：把"上游某 ref 的某一行写着某件事"这类结论
-  变成能查的东西。65 条声明各记（2026-10-20 按 pin ref 实跑过一次，0 问题；`--cache .cache/refs --fill` 抓一次原文之后可离线复算） `repo/ref/path/line/expect`（还多一种 `absent`：连「这份文件里没有 X」也要查），逐条取回上游**核对那一行仍然含那个子串**
-  （只看文件在不在没用：默认值改了文件照样在），子串命中不唯一就不配进表。
-  建表时已经按这两条筛过；车道 `citation-drift` 先跑 `--selftest`（明知错的必须认成错）再逐条核对。
-  来历：本轮踩过六次"判据指向一个不存在的东西却照样跑完"（`llama-completions`、去 tag 里找 CLI、
-  `-of jfk.srt`、去日志里找 `Steps:`、grep `tokens per second`…）。
+  变成能查的东西。78 条声明各记（2026-10-20 按 pin ref 实跑过一次，0 问题；`--cache .cache/refs --fill` 抓一次原文之后可离线复算） `repo/ref/path/line/expect`（还多一种 `absent`：连「这份文件里没有 X」也要查），逐条取回上游**核对那一行仍然含那个子串**
+  （只看文件在不在没用：默认值改了文件照样在）。
+  2026-10-20 加了一条硬判据：**相邻行也含同一子串 → 这条不会红**（行号漂一格就撞上隔壁那行，
+  `/health` 与 `/v1/health` 两行注释一模一样，实测"行号 +1"复算时它是唯一没红的）。
+  相隔很远的重复不拦，它不破坏灵敏度。总数由单测钉成字面量，所以"78"这个数改表时必须一起改。
+  车道 `citation-drift` 先跑 `--selftest`（明知错的必须认成错）再逐条核对。
+  来历：本轮踩过七次"判据指向一个不存在的东西却照样跑完"（`llama-completions`、去 tag 里找 CLI、
+  `-of jfk.srt`、去日志里找 `Steps:`、grep `tokens per second`、启动计划引用了两个表里不存在的出处 id、
+  以及这条相邻重复）。
 - `tools/ocr_language_pins.py` + `pins/ocr-languages.json`：OCR「识别能力」那一轴的 pin。
   叠四张表（models.md 的两张字典表 + 语言权重表、GitHub 全部 release 产物、上游 ModelScope 镜像
   `greatv/oar-ocr`、`registry.rs` 登记表），**在场来源必须给同一个 sha256 才立 pin**，
@@ -165,7 +169,22 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   而档位表这时候还写着 `complete`（这一版就错过一次）→ 现在两张表不一致会直接报问题。
   同一个键下面的十几个量化才是备选，取最小那颗，其余记 `group_alternates`。
   车道 `machine-budget` 三步全离线（它的输入就是那五张已提交的表加吞吐表）：`--selftest` →
-  18 条单测 → `--check`。
+  20 条单测 → `--check`（重数：`python -m unittest tests.test_machine_budget`）。
+- `tools/launch_plan.py` + `pins/launch-plan.json`：**外壳该敲哪一行**，按钉住的 ref 读上游源码查。
+  验收第 10 条（外壳持有唯一监听口、自己发 token、UI 永不直连引擎端口）能不能成立，取决于引擎
+  自己支持什么开关，这是事实不是设计选择。量清楚的四件事：`llama-server` **有** `--api-key`
+  （`common/arg.cpp:3513`）且 `/health` 明写不查钥匙（`server.cpp:263`）；`whisper-server` 只有
+  `--host/--port`（`:251/252`），整份文件查不到 `--api-key`/`api_key`；`sd-server` 只有
+  `--listen-ip/--listen-port`（`runtime.cpp:193/198`）；`oar` 根本没有服务形态，而且必须带子命令
+  `oar ocr`，`--det/--rec/--dict` 是 `requires_all`（三颗一起给），默认档 `--size` 与它们
+  `conflicts_with_all`（带了就被 clap 拒）。**所以那两项的隔离只能靠绑 127.0.0.1，不能指望引擎自带门禁。**
+  生图那行的编码器从 `machine-budget` 真算进预算的配套件里读，并与 `image-tiers` 的默认行交叉核对 ——
+  两张表对不上就报"下的与用的不是同一批文件"；模板里写的是文件名（`{flux1-schnell-Q5_0.gguf}`），
+  所以"起的正是下的那一颗"可核对。车道 `launch-plan` 前三步离线（判据自测 / 46 条单测 / 与已提交那张
+  比漂移），第四步才联网按 pin 现查 28 条 needle 与 8 条缺席声明；输出会自报"缓存 N / 现抓 M"，
+  `--skip-provenance` 时报 0 ——「没查」不能长得像「查过了」。
+  变异扫描留在仓库里：`tests/test_launch_plan.py::TestSourceMutants` 改坏源码 10 处，
+  四处探针（离线对照 / 重算漂移 / 出处 id 闸门 / 缺席声明照扫）每条至少被抓一次，并带一条正向对照。
 - `tools/payload_plan.py` + `pins/payload-plan.json`：装机负载计划（出包前必须先有的数字）。
   按"没 CUDA 的 x64 / Apple silicon"选默认产物，zip 用 Range 读中央目录、tar.gz 读成员表
   （都只读名字与大小，不解包、不执行）拿逐文件大小：引擎净负载 win 44.2 / linux 52.1 /

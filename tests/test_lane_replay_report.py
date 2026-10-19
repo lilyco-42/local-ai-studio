@@ -35,6 +35,9 @@ EXPECTED_REPLAYED = {
     ("toolbelt-pins", "--json"),
 }
 REPLAY_FILES = ("tests/test_lane_assertions.py", "tests/test_image_proof_block.py")
+# 每张 workflow 的 job 数（2026-10-20 实测；docs/toolbelt.md 那句"其余 20 条 job 一次都没跑过"
+# 就靠这个数与它绑在一起）：加一条 job 必须同时改文档里那句
+EXPECTED_JOBS = {"engine-live.yml": 21, "ci.yml": 1, "package.yml": 1}
 
 
 def blocks():
@@ -73,6 +76,15 @@ class TestCounts(unittest.TestCase):
                         "全成了断言段不可能：取数/打印段本来就不含判据")
         print(f"车道 heredoc {len(all_blocks)} 段（断言 {n_assert} / 取数打印 "
               f"{len(all_blocks) - n_assert}）；本地预跑引用 {len(replayed_pairs())} 个 (job, 步骤名) 组合")
+
+    def test_job_counts_match_the_documented_numbers(self) -> None:
+        got = {}
+        for path in sorted(glob.glob(os.path.join(ROOT, ".github", "workflows", "*.yml"))):
+            with open(path, encoding="utf-8") as fh:
+                doc = yaml.safe_load(fh)
+            got[os.path.basename(path)] = len(doc.get("jobs") or {})
+        self.assertEqual(got, EXPECTED_JOBS,
+                         "job 数变了：docs/toolbelt.md 那句「其余 N 条一次都没跑过」要一起改")
 
     def test_replayed_set_is_the_documented_one(self) -> None:
         got = replayed_pairs()

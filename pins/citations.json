@@ -783,5 +783,115 @@
   "expect": "sd3_medium_incl_clips_t5xxlfp16",
   "claim": "sd3_medium 例子那颗文件自带 clips 与 t5xxl（单文件形态，不需要外挂编码权重）",
   "line_text": "# ./bin/sd-cli -m ../models/sd3_medium_incl_clips_t5xxlfp16.safetensors -H 1024 -W 1024 -p 'a lovely cat holding a sign says \\\"Stable Diffusion CPP\\\"' --cfg-scale 4.5 --sampling-method euler -v --clip-on-cpu"
+ },
+ {
+  "id": "oar-clap-name-oar",
+  "repo": "GreatV/oar-ocr",
+  "ref": "84817f58",
+  "path": "oar-ocr-cli/src/args.rs",
+  "line": 10,
+  "expect": "name = \"oar\"",
+  "claim": "oar-ocr 的 clap 命令名就是 oar（不是 oar-ocr / oar-cli）—— 外壳按这个名字找二进制",
+  "as_of": "2026-10-20",
+  "line_text": "name = \"oar\","
+ },
+ {
+  "id": "oar-subcommand-ocr",
+  "repo": "GreatV/oar-ocr",
+  "ref": "84817f58",
+  "path": "oar-ocr-cli/src/args.rs",
+  "line": 49,
+  "expect": "Ocr(Ocr),",
+  "claim": "oar 必须带子命令：识别走 `oar ocr <图片…>`，没有裸跑这条路",
+  "as_of": "2026-10-20",
+  "line_text": "Ocr(Ocr),"
+ },
+ {
+  "id": "oar-det-requires-rec-dict",
+  "repo": "GreatV/oar-ocr",
+  "ref": "84817f58",
+  "path": "oar-ocr-cli/src/args.rs",
+  "line": 59,
+  "expect": "requires_all = [\"rec\", \"dict\"]",
+  "claim": "--det 要求 --rec 与 --dict 一起给（三颗是一个整体，少一颗 clap 直接拒）",
+  "as_of": "2026-10-20",
+  "line_text": "#[arg(long, requires_all = [\"rec\", \"dict\"])]"
+ },
+ {
+  "id": "oar-size-conflicts-models",
+  "repo": "GreatV/oar-ocr",
+  "ref": "84817f58",
+  "path": "oar-ocr-cli/src/args.rs",
+  "line": 84,
+  "expect": "conflicts_with_all = [\"det\", \"rec\", \"dict\"]",
+  "claim": "--size 与 --det/--rec/--dict 互斥：用我们钉住的权重时就绝对不能带 --size",
+  "as_of": "2026-10-20",
+  "line_text": "#[arg(long, value_enum, default_value = \"tiny\", conflicts_with_all = [\"det\", \"rec\", \"dict\"])]"
+ },
+ {
+  "id": "oar-images-positional-required",
+  "repo": "GreatV/oar-ocr",
+  "ref": "84817f58",
+  "path": "oar-ocr-cli/src/args.rs",
+  "line": 90,
+  "expect": "#[arg(required = true, value_name = \"INPUTS\", num_args = 1..)]",
+  "claim": "oar ocr 的输入是位置参数（required，1 个以上），不是 --input 旗标",
+  "as_of": "2026-10-20",
+  "line_text": "#[arg(required = true, value_name = \"INPUTS\", num_args = 1..)]"
+ },
+ {
+  "id": "oar-output-is-dir",
+  "repo": "GreatV/oar-ocr",
+  "ref": "84817f58",
+  "path": "oar-ocr-cli/src/args.rs",
+  "line": 36,
+  "expect": "short, long, global = true, value_name = \"DIR\"",
+  "claim": "--output(-o，全局) 是目录：每张图/PDF 页写一个 .md 或 .json",
+  "as_of": "2026-10-20",
+  "line_text": "#[arg(short, long, global = true, value_name = \"DIR\")]"
+ },
+ {
+  "id": "oar-device-default-auto",
+  "repo": "GreatV/oar-ocr",
+  "ref": "84817f58",
+  "path": "oar-ocr-cli/src/args.rs",
+  "line": 31,
+  "expect": "default_value = \"auto\",",
+  "claim": "--device 默认 auto（可写 cpu / cuda:N / metal，或逗号列表）—— 外壳按档位显式给",
+  "as_of": "2026-10-20",
+  "line_text": "default_value = \"auto\","
+ },
+ {
+  "id": "llama-health-is-public",
+  "repo": "ggml-org/llama.cpp",
+  "ref": "b11727",
+  "path": "tools/server/server.cpp",
+  "line": 263,
+  "expect": "ctx_http.get (\"/health\"",
+  "claim": "llama-server 的 /health 不查 api-key —— 所以外壳带着钥匙也能探活",
+  "as_of": "2026-10-20",
+  "line_text": "ctx_http.get (\"/health\",                   ex_wrapper(routes.get_health)); // public endpoint (no API key check)"
+ },
+ {
+  "id": "whisper-default-host-loopback",
+  "repo": "ggml-org/whisper.cpp",
+  "ref": "b5454",
+  "path": "examples/server/server.cpp",
+  "line": 59,
+  "expect": "hostname       = \"127.0.0.1\"",
+  "claim": "whisper-server 默认就绑 127.0.0.1（但我们仍显式传 --host，不靠默认）",
+  "as_of": "2026-10-20",
+  "line_text": "std::string hostname       = \"127.0.0.1\";"
+ },
+ {
+  "id": "llama-chat-completions-route",
+  "repo": "ggml-org/llama.cpp",
+  "ref": "b11727",
+  "path": "tools/server/server.cpp",
+  "line": 274,
+  "expect": "ctx_http.post(\"/v1/chat/completions\"",
+  "claim": "对话主入口是 POST /v1/chat/completions（外壳按这条转发生成请求）",
+  "as_of": "2026-10-20",
+  "line_text": "ctx_http.post(\"/v1/chat/completions\",      ex_wrapper(routes.post_chat_completions));"
  }
 ]

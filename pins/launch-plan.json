@@ -1,0 +1,609 @@
+{
+ "bind_address": "127.0.0.1",
+ "capabilities": {
+  "字幕": {
+   "binaries": {
+    "linux-x64": "whisper-server",
+    "macos-arm64": null,
+    "win-x64": "whisper-server.exe"
+   },
+   "bind": [
+    "--host",
+    "127.0.0.1",
+    "--port",
+    "{port}"
+   ],
+   "by_tier": {
+    "16GB/linux-x64": [
+     "{bin}",
+     "-m",
+     "{model}",
+     "--host",
+     "127.0.0.1",
+     "--port",
+     "{port}"
+    ],
+    "16GB/win-x64": [
+     "{bin}",
+     "-m",
+     "{model}",
+     "--host",
+     "127.0.0.1",
+     "--port",
+     "{port}"
+    ],
+    "4GB/linux-x64": [
+     "{bin}",
+     "-m",
+     "{model}",
+     "--host",
+     "127.0.0.1",
+     "--port",
+     "{port}"
+    ],
+    "4GB/win-x64": [
+     "{bin}",
+     "-m",
+     "{model}",
+     "--host",
+     "127.0.0.1",
+     "--port",
+     "{port}"
+    ],
+    "8GB/linux-x64": [
+     "{bin}",
+     "-m",
+     "{model}",
+     "--host",
+     "127.0.0.1",
+     "--port",
+     "{port}"
+    ],
+    "8GB/win-x64": [
+     "{bin}",
+     "-m",
+     "{model}",
+     "--host",
+     "127.0.0.1",
+     "--port",
+     "{port}"
+    ]
+   },
+   "cites": [
+    "whisper-inference-route",
+    "ws-file-field",
+    "ws-health-loading",
+    "ws-health-ok"
+   ],
+   "companion_flags": null,
+   "engine": "whisper",
+   "engine_auth": {
+    "argv": [],
+    "engine_supports_api_key": false,
+    "note": "whisper-server 没有任何鉴权旗标 —— 绑 127.0.0.1 是唯一防线"
+   },
+   "flags_absent": [
+    "--api-key",
+    "api_key"
+   ],
+   "flags_verified": [
+    {
+     "needle": "arg == \"--host\"",
+     "path": "examples/server/server.cpp"
+    },
+    {
+     "needle": "arg == \"--port\"",
+     "path": "examples/server/server.cpp"
+    },
+    {
+     "needle": "arg == \"-m\"",
+     "path": "examples/server/server.cpp"
+    },
+    {
+     "needle": "\"/health\"",
+     "path": "examples/server/server.cpp"
+    }
+   ],
+   "macos_note": "上游 Apple 侧只有 xcframework（无 whisper-cli 可执行文件）：要么 CI 自己编，要么这台机器不做字幕（#29）",
+   "mode": "server",
+   "omit": [],
+   "readiness": {
+    "cite": [
+     "ws-health-loading",
+     "ws-health-ok"
+    ],
+    "expect_status": 200,
+    "method": "GET",
+    "note": "加载期回 503 + loading model，就绪体才是 {\"status\":\"ok\"}",
+    "path": "/health"
+   },
+   "repo": "ggml-org/whisper.cpp@b5454",
+   "request": {
+    "cite": [
+     "whisper-inference-route",
+     "ws-file-field"
+    ],
+    "method": "POST",
+    "multipart_field": "file",
+    "path": "/inference"
+   },
+   "subcommand": null
+  },
+  "对话": {
+   "binaries": {
+    "linux-x64": "llama-server",
+    "macos-arm64": "llama-server",
+    "win-x64": "llama-server.exe"
+   },
+   "bind": [
+    "--host",
+    "127.0.0.1",
+    "--port",
+    "{port}"
+   ],
+   "by_tier": {
+    "16GB/linux-x64": [
+     "{bin}",
+     "-m",
+     "{model}",
+     "--host",
+     "127.0.0.1",
+     "--port",
+     "{port}",
+     "--api-key",
+     "{token}"
+    ],
+    "16GB/macos-arm64": [
+     "{bin}",
+     "-m",
+     "{model}",
+     "--host",
+     "127.0.0.1",
+     "--port",
+     "{port}",
+     "--api-key",
+     "{token}"
+    ],
+    "16GB/win-x64": [
+     "{bin}",
+     "-m",
+     "{model}",
+     "--host",
+     "127.0.0.1",
+     "--port",
+     "{port}",
+     "--api-key",
+     "{token}"
+    ],
+    "4GB/linux-x64": [
+     "{bin}",
+     "-m",
+     "{model}",
+     "--host",
+     "127.0.0.1",
+     "--port",
+     "{port}",
+     "--api-key",
+     "{token}"
+    ],
+    "4GB/macos-arm64": [
+     "{bin}",
+     "-m",
+     "{model}",
+     "--host",
+     "127.0.0.1",
+     "--port",
+     "{port}",
+     "--api-key",
+     "{token}"
+    ],
+    "4GB/win-x64": [
+     "{bin}",
+     "-m",
+     "{model}",
+     "--host",
+     "127.0.0.1",
+     "--port",
+     "{port}",
+     "--api-key",
+     "{token}"
+    ],
+    "8GB/linux-x64": [
+     "{bin}",
+     "-m",
+     "{model}",
+     "--host",
+     "127.0.0.1",
+     "--port",
+     "{port}",
+     "--api-key",
+     "{token}"
+    ],
+    "8GB/macos-arm64": [
+     "{bin}",
+     "-m",
+     "{model}",
+     "--host",
+     "127.0.0.1",
+     "--port",
+     "{port}",
+     "--api-key",
+     "{token}"
+    ],
+    "8GB/win-x64": [
+     "{bin}",
+     "-m",
+     "{model}",
+     "--host",
+     "127.0.0.1",
+     "--port",
+     "{port}",
+     "--api-key",
+     "{token}"
+    ]
+   },
+   "cites": [
+    "llama-chat-completions-route",
+    "llama-health-is-public"
+   ],
+   "companion_flags": null,
+   "engine": "llama",
+   "engine_auth": {
+    "argv": [
+     "--api-key",
+     "{token}"
+    ],
+    "engine_supports_api_key": true,
+    "note": "llama 有 --api-key；即便这样外壳仍是唯一监听口"
+   },
+   "flags_absent": [],
+   "flags_verified": [
+    {
+     "needle": "--api-key",
+     "path": "common/arg.cpp"
+    },
+    {
+     "needle": "{\"-m\", \"--model\"}",
+     "path": "common/arg.cpp"
+    },
+    {
+     "needle": "--port",
+     "path": "common/arg.cpp"
+    },
+    {
+     "needle": "\"/health\"",
+     "path": "tools/server/server.cpp"
+    }
+   ],
+   "mode": "server",
+   "omit": [],
+   "readiness": {
+    "cite": "llama-health-is-public",
+    "expect_status": 200,
+    "method": "GET",
+    "note": "上游明写这是 public endpoint（不查 api-key），所以带钥匙也能探活",
+    "path": "/health"
+   },
+   "repo": "ggml-org/llama.cpp@b11727",
+   "request": {
+    "cite": "llama-chat-completions-route",
+    "method": "POST",
+    "path": "/v1/chat/completions"
+   },
+   "subcommand": null
+  },
+  "文字识别": {
+   "argv_template": [
+    "{bin}",
+    "ocr",
+    "--det",
+    "{det}",
+    "--rec",
+    "{rec}",
+    "--dict",
+    "{dict}",
+    "--device",
+    "{device}",
+    "--format",
+    "json",
+    "--output",
+    "{out_dir}",
+    "{image}"
+   ],
+   "binaries": {
+    "linux-x64": "oar",
+    "macos-arm64": "oar",
+    "win-x64": "oar.exe"
+   },
+   "bind": [],
+   "cites": [
+    "oar-device-default-auto",
+    "oar-images-positional-required",
+    "oar-output-is-dir",
+    "oar-subcommand-ocr"
+   ],
+   "companion_flags": null,
+   "engine": "oar-ocr",
+   "engine_auth": {
+    "argv": [],
+    "engine_supports_api_key": false,
+    "note": "没有服务形态：一次任务一个进程，所以既没有端口也没有鉴权问题"
+   },
+   "flags_absent": [
+    "--api-key",
+    "api_key",
+    "--listen",
+    "--port",
+    "--host"
+   ],
+   "flags_verified": [
+    {
+     "needle": "name = \"oar\"",
+     "path": "oar-ocr-cli/src/args.rs"
+    },
+    {
+     "needle": "pub(crate) command: Command",
+     "path": "oar-ocr-cli/src/args.rs"
+    },
+    {
+     "needle": "Ocr(Ocr),",
+     "path": "oar-ocr-cli/src/args.rs"
+    },
+    {
+     "needle": "pub(crate) det: Option<PathBuf>",
+     "path": "oar-ocr-cli/src/args.rs"
+    },
+    {
+     "needle": "pub(crate) rec: Option<PathBuf>",
+     "path": "oar-ocr-cli/src/args.rs"
+    },
+    {
+     "needle": "pub(crate) dict: Option<PathBuf>",
+     "path": "oar-ocr-cli/src/args.rs"
+    },
+    {
+     "needle": "requires_all = [\"rec\", \"dict\"]",
+     "path": "oar-ocr-cli/src/args.rs"
+    },
+    {
+     "needle": "conflicts_with_all = [\"det\", \"rec\", \"dict\"]",
+     "path": "oar-ocr-cli/src/args.rs"
+    },
+    {
+     "needle": "value_name = \"INPUTS\"",
+     "path": "oar-ocr-cli/src/args.rs"
+    },
+    {
+     "needle": "value_name = \"DIR\"",
+     "path": "oar-ocr-cli/src/args.rs"
+    },
+    {
+     "needle": "--format",
+     "path": "oar-ocr-cli/src/args.rs"
+    }
+   ],
+   "mode": "subprocess",
+   "omit": [
+    "--size"
+   ],
+   "readiness": null,
+   "repo": "GreatV/oar-ocr@84817f58",
+   "request": {
+    "argv": [
+     "--device",
+     "{device}",
+     "--format",
+     "json",
+     "--output",
+     "{out_dir}",
+     "{image}"
+    ],
+    "cite": [
+     "oar-images-positional-required",
+     "oar-output-is-dir",
+     "oar-device-default-auto",
+     "oar-subcommand-ocr"
+    ],
+    "note": "位置参数是图片/PDF（num_args=1..，可多张）；--output 是目录，每张写一个 .md/.json；不给才打到 stdout"
+   },
+   "subcommand": "ocr"
+  },
+  "生图": {
+   "binaries": {
+    "linux-x64": "sd-server",
+    "macos-arm64": "sd-server",
+    "win-x64": "sd-server.exe"
+   },
+   "bind": [
+    "--listen-ip",
+    "127.0.0.1",
+    "--listen-port",
+    "{port}"
+   ],
+   "by_tier": {
+    "16GB/linux-x64": [
+     "{bin}",
+     "--diffusion-model",
+     "{flux1-schnell-Q5_0.gguf}",
+     "--clip_l",
+     "{clip_l-Q8_0.gguf}",
+     "--t5xxl",
+     "{t5xxl-Q2_K.gguf}",
+     "--vae",
+     "{ae-f16.gguf}",
+     "--listen-ip",
+     "127.0.0.1",
+     "--listen-port",
+     "{port}"
+    ],
+    "16GB/macos-arm64": [
+     "{bin}",
+     "--diffusion-model",
+     "{flux1-schnell-Q5_0.gguf}",
+     "--clip_l",
+     "{clip_l-Q8_0.gguf}",
+     "--t5xxl",
+     "{t5xxl-Q2_K.gguf}",
+     "--vae",
+     "{ae-f16.gguf}",
+     "--listen-ip",
+     "127.0.0.1",
+     "--listen-port",
+     "{port}"
+    ],
+    "16GB/win-x64": [
+     "{bin}",
+     "--diffusion-model",
+     "{flux1-schnell-Q5_0.gguf}",
+     "--clip_l",
+     "{clip_l-Q8_0.gguf}",
+     "--t5xxl",
+     "{t5xxl-Q2_K.gguf}",
+     "--vae",
+     "{ae-f16.gguf}",
+     "--listen-ip",
+     "127.0.0.1",
+     "--listen-port",
+     "{port}"
+    ],
+    "4GB/linux-x64": [
+     "{bin}",
+     "-m",
+     "{stable-diffusion-v1-5-pruned-emaonly-f16.gguf}",
+     "--listen-ip",
+     "127.0.0.1",
+     "--listen-port",
+     "{port}"
+    ],
+    "4GB/macos-arm64": [
+     "{bin}",
+     "-m",
+     "{stable-diffusion-v1-5-pruned-emaonly-f16.gguf}",
+     "--listen-ip",
+     "127.0.0.1",
+     "--listen-port",
+     "{port}"
+    ],
+    "4GB/win-x64": [
+     "{bin}",
+     "-m",
+     "{stable-diffusion-v1-5-pruned-emaonly-f16.gguf}",
+     "--listen-ip",
+     "127.0.0.1",
+     "--listen-port",
+     "{port}"
+    ],
+    "8GB/linux-x64": [
+     "{bin}",
+     "-m",
+     "{stable-diffusion-v1-5-pruned-emaonly-f32.gguf}",
+     "--listen-ip",
+     "127.0.0.1",
+     "--listen-port",
+     "{port}"
+    ],
+    "8GB/macos-arm64": [
+     "{bin}",
+     "-m",
+     "{stable-diffusion-v1-5-pruned-emaonly-f32.gguf}",
+     "--listen-ip",
+     "127.0.0.1",
+     "--listen-port",
+     "{port}"
+    ],
+    "8GB/win-x64": [
+     "{bin}",
+     "-m",
+     "{stable-diffusion-v1-5-pruned-emaonly-f32.gguf}",
+     "--listen-ip",
+     "127.0.0.1",
+     "--listen-port",
+     "{port}"
+    ]
+   },
+   "cites": [
+    "sd-imggen-202",
+    "sd-listen-after-load"
+   ],
+   "companion_flags": {
+    "VAE": "--vae",
+    "clip_g": "--clip_g",
+    "clip_l": "--clip_l",
+    "t5xxl": "--t5xxl",
+    "unet": "--diffusion-model"
+   },
+   "engine": "sd",
+   "engine_auth": {
+    "argv": [],
+    "engine_supports_api_key": false,
+    "note": "sd-server 只有 --listen-ip/--listen-port，没有鉴权"
+   },
+   "flags_absent": [
+    "--api-key"
+   ],
+   "flags_verified": [
+    {
+     "needle": "\"--listen-ip\"",
+     "path": "examples/server/runtime.cpp"
+    },
+    {
+     "needle": "\"--listen-port\"",
+     "path": "examples/server/runtime.cpp"
+    },
+    {
+     "needle": "\"/v1/models\"",
+     "path": "examples/server/routes_openai.cpp"
+    },
+    {
+     "needle": "\"--diffusion-model\"",
+     "path": "examples/common/common.cpp"
+    },
+    {
+     "needle": "\"--vae\"",
+     "path": "examples/common/common.cpp"
+    },
+    {
+     "needle": "\"--clip_l\"",
+     "path": "examples/common/common.cpp"
+    },
+    {
+     "needle": "\"--clip_g\"",
+     "path": "examples/common/common.cpp"
+    },
+    {
+     "needle": "\"--t5xxl\"",
+     "path": "examples/common/common.cpp"
+    },
+    {
+     "needle": "\"-m\"",
+     "path": "examples/common/common.cpp"
+    }
+   ],
+   "mode": "server",
+   "omit": [],
+   "readiness": {
+    "cite": "sd-listen-after-load",
+    "expect_status": 200,
+    "method": "GET",
+    "note": "与 whisper 相反：模型先加载完才 listen，能答就是就绪",
+    "path": "/v1/models"
+   },
+   "repo": "leejet/stable-diffusion.cpp@95b3090664d019fcf8fa032a44d1d4793ba244b8",
+   "request": {
+    "cite": "sd-imggen-202",
+    "expect_status": 202,
+    "method": "POST",
+    "path": "/sdcpp/v1/img_gen",
+    "poll": "poll_url"
+   },
+   "subcommand": null
+  }
+ },
+ "rule": {
+  "auth": "engine_auth 是上游事实：只有 llama 有 --api-key，whisper/sd 没有，所以那两项的隔离只能靠绑地址，不能指望引擎自带门禁",
+  "image_model_args": "生图给主体还是主体+编码器，两处一起读：image-tiers 的 completeness.needs 说这一族要几份，machine-budget 的 items 说预算里真算进了哪几颗；两张表对不上就报，不选一边。模板里写的是文件名（{flux1-schnell-Q5_0.gguf}），所以「起的正是下的那一颗」是可核对的",
+  "listener": "每一项能力都只绑 127.0.0.1；外壳是唯一监听口，UI 只连外壳",
+  "provenance": "每个 needle 都按钉住的 ref 现查（absent 也要查不到才算数）"
+ },
+ "schema": 1
+}

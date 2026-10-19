@@ -32,6 +32,18 @@ class TestMatcher(unittest.TestCase):
     def test_matching_line_is_not_a_problem(self) -> None:
         self.assertEqual(cc.check_one(GOOD, TEXT), [])
 
+    def test_adjacent_duplicate_needle_is_red(self) -> None:
+        """相邻行也含同一子串 → 上游整段挪一格时这条照旧绿，等于没钉住。
+        本轮实测撞上的就是这一形状（`/health` 与 `/v1/health` 两行注释一模一样）。"""
+        bad = cc.check_one(GOOD, 'line one\n  cors_origins = "*";\n  cors_origins = "*";')
+        self.assertEqual(len(bad), 1, bad)
+        self.assertIn("相邻行", bad[0])
+
+    def test_far_duplicate_needle_is_not_red(self) -> None:
+        """正向对照：相隔几行的重复不破坏灵敏度，不能顺手把它也拦了。"""
+        self.assertEqual(cc.check_one(
+            GOOD, 'line one\n  cors_origins = "*";\nthree\nfour\n  cors_origins = "*";'), [])
+
     def test_changed_default_is_reported_with_the_real_line(self) -> None:
         """红字必须带上游那一行实际写了什么，否则"红了"没有信息量。"""
         bad = cc.check_one(dict(GOOD, expect='cors_origins = "none"'), TEXT)
@@ -64,6 +76,10 @@ class TestCommittedSpec(unittest.TestCase):
     def test_covers_the_three_servers_and_the_lane_flags(self) -> None:
         s = self.spec()
         self.assertGreaterEqual(len(s), 20, f"只有 {len(s)} 条，这张表的意义就是覆盖度")
+        # 总数也立成字面量（2026-10-20 实测 78：`python -c "import json;print(len(json.load(
+        # open('pins/citations.json',encoding='utf-8'))))"`）。文档里"78 条"那句与这张表
+        # 就此绑在一起：加一条要同时改这里，删一条会当场红。
+        self.assertEqual(len(s), 78, f"表里现在是 {len(s)} 条，散文里的数字要一起改")
         repos = {c["repo"] for c in s}
         self.assertEqual(repos, {"ggml-org/llama.cpp", "ggml-org/whisper.cpp",
                                  "leejet/stable-diffusion.cpp", "GreatV/oar-ocr",
@@ -113,7 +129,13 @@ class TestCommittedSpec(unittest.TestCase):
                      # 2026-10-20 新加的两条常驻服务车道所依赖的出处
                      "ws-health-ok", "ws-health-loading", "ws-file-field", "ws-srt-mime",
                      "sd-listen-ip", "sd-listen-after-load", "sd-imggen-202", "sd-job-images",
-                     "sd-embed-default", "sd-steps-key"):
+                     "sd-embed-default", "sd-steps-key",
+                     # 启动计划（launch_plan.py）依赖的出处：CLI 形状与"没有鉴权"这两类结论
+                     "oar-clap-name-oar", "oar-subcommand-ocr", "oar-det-requires-rec-dict",
+                     "oar-size-conflicts-models", "oar-images-positional-required",
+                     "oar-output-is-dir", "oar-device-default-auto",
+                     "llama-health-is-public", "llama-chat-completions-route",
+                     "whisper-default-host-loopback"):
             self.assertIn(must, ids)
 
     def test_spec_clears_the_floor_the_code_enforces(self) -> None:

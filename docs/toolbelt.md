@@ -119,7 +119,9 @@ python tools/toolbelt_pins.py --fixtures tests/fixtures           # 离线回放
 - 车道 `engine-live.yml` 的 `toolbelt-pins` 除了逐字段比对，还会**真下载**钉住的 llmfit 跑 `--help`
   与 `recommend --json`：哈希只证明字节没变，不证明文档里记的旗标还在。
   退出码不作判据（runner 上一个模型都没有），判据是 stdout 必须能解析成 JSON、help 里必须有 `--json`。
-- 仍未证的是执行：这条车道和其余九条一样，一次都没跑过（private 仓库分不到 runner）。
+- 仍未证的是执行：这条车道和 `engine-live.yml` 里其余 20 条 job 一样，一次都没跑过
+  （private 仓库分不到 runner）。重数：
+  `python -c "import yaml;print(len(yaml.safe_load(open('.github/workflows/engine-live.yml',encoding='utf-8'))['jobs']))"` → 21。
 
 ## 国内出口能不能把这些二进制拉下来（2026-10-19 实测）
 

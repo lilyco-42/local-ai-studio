@@ -60,6 +60,15 @@ def check_one(c: dict, text: str | None) -> list[str]:
     if want not in got:
         return [f"{c['id']}: 第 {ln} 行不含 {want!r}，实际是 {got.strip()[:90]!r}"
                 f"（声明：{c['claim']}）"]
+    # 表自己那条"命中不唯一就不配进表"的口径，此前只在建表时人工筛过（本轮实测：77 条行号型
+    # 声明里有 7 条整文件命中不止一次），而真正会让声明失效的只有一种形状：**相邻行也命中**。
+    # 那种情况下上游整段挪一格，这条照旧绿 —— 本轮的 llama `/health` 就是这样（263 与 264 的
+    # 注释一模一样，行号 +1 复算时它是唯一没红的一条）。相隔很远的重复不破坏灵敏度，只报不拦。
+    hits = [i + 1 for i, l in enumerate(lines) if want in l]
+    near = [h for h in hits if h != ln and abs(h - ln) <= 1]
+    if near:
+        return [f"{c['id']}: 第 {ln} 行含 {want!r}，但相邻行 {near} 也含它 —— "
+                "上游整段挪一格时这条不会红，把 expect 加长到只在这一行命中"]
     return []
 
 
@@ -112,6 +121,11 @@ def selftest() -> int:
         ("行号超出必须红", check_one(dict(good, line=99), text), True),
         ("行号 0 必须红", check_one(dict(good, line=0), text), True),
         ("取不到文件必须红", check_one(good, None), True),
+        # 相邻行也命中 = 行号漂一格不会被发现（本轮真的踩过：/health 与 /v1/health 同注释）
+        ("相邻行同样命中必须红", check_one(
+            good, '  cors_origins = "*";\n  cors_origins = "*";\nline three'), True),
+        ("正向对照：相隔两行以上的重复不拦", check_one(
+            good, 'line one\n  cors_origins = "*";\nline three\n  cors_origins = "*";'), False),
     ]
     rc = 0
     for name, got, want_problem in cases:

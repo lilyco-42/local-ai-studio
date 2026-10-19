@@ -30,6 +30,10 @@ on:
       - "tools/r2_manifest.py"
       - "tools/payload_plan.py"
       - "tools/zip_peek.py"
+      # 启动计划的输入是三张档位表 + machine-budget + 上游源码：任何一张表重算过，
+      # 这一条都得重跑（它给的是"外壳该敲哪一行"，不是给人看的说明）。
+      - "tools/launch_plan.py"
+      - "pins/launch-plan.json"
       - "pins/payload-plan.json"
       - "catalog/defaults.json"
       - "tools/ocr_build_surface.py"
@@ -656,6 +660,37 @@ jobs:
         run: python -m unittest tests.test_machine_budget -v
       - name: 用已提交那五张表重算并与预算比漂移（字节/分钟/缺失能力都要对得上）
         run: python3 tools/machine_budget.py --check
+
+  launch-plan:
+    # 外壳该用哪一条命令行起每一项能力。这一轮的四个事实全部按钉住的 ref 现查：
+    # llama 有 --api-key（common/arg.cpp:3513）且 /health 明写不查钥匙（server.cpp:263）；
+    # whisper 与 sd 只有 host/port，**没有任何鉴权旗标**，所以验收第 10 条那"唯一监听口"
+    # 对它们只能靠绑 127.0.0.1；oar 没有服务形态，且 --det/--rec/--dict 必须一起给
+    # （args.rs:59 requires_all）、--size 与它们互斥（args.rs:84 conflicts_with_all）。
+    # 生图那一行的编码器不是手打的：从 machine-budget 真算进预算的那几颗配套件读出来，
+    # 并与 image-tiers 的默认行交叉核对 —— 两张表对不上就红，绝不挑一张用。
+    # 前三步离线（判据自身 + 单测 + 与已提交那张比漂移），第四步才真联网按 pin 查旗标。
+    timeout-minutes: 8
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: 判据本身（缺席判据要能认缺席、生图旗标必须来自那张表而不是代码里另写一份）
+        run: python3 tools/launch_plan.py --selftest
+      - name: 判据单测（两张表不一致 / 缺配套件 / 出处 id 不存在 / 产物与 SPEC 别名）
+        run: python -m unittest tests.test_launch_plan -v
+      - name: 离线重算并与已提交那张比漂移（这一层不联网）
+        run: python3 tools/launch_plan.py --check --skip-provenance
+      - name: 按钉住的 ref 逐条核对 needle 与缺席声明（上游改了命令行就红）
+        run: python3 tools/launch_plan.py --check --fill --cache .cache/refs
+      - name: 核对用过的那几份上游原文留档
+        uses: actions/upload-artifact@v4
+        with:
+          name: launch-plan-refs
+          path: .cache/refs
+          if-no-files-found: error
 
   ocr-build-surface:
     # 四项能力里只有 OCR 要现场编译，而"钉 commit"对它**并不等于钉住构建输入**：
