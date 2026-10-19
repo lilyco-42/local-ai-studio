@@ -252,7 +252,8 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     （留着就等于把二次解包推给用户首启）。同名不同目录的成员**不许静默覆盖**，
     要点名进排除表 —— 覆盖会让"装进去的文件"与"清单里的文件"不是同一份。
     离线对照 10 条（合成 zip + 合成 tar.gz，含 digest 不符与下载失败两条），
-    闸门现在同时解析三条 workflow（15 段 heredoc PY）。
+    闸门现在同时解析三条 workflow（17 段 heredoc PY；重数：`python3 tools/yaml_gate.py` 的
+    "编译了 N 段"那行）。
     车道仍 0 次执行，所以这一条给的是"出包这一步有路、有判据、有清单格式"，不是"包已经出出来"。
 16. **"只能靠 GitHub Actions 出包"这句本身要被验，不能当审美前提**：拆开四问，答案全部来自
     pin 住的公共来源（已进 `pins/citations.json`，由 `citation-drift` 查），详见
@@ -264,6 +265,23 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     release **没有产物**，所以它只能按 commit SHA 钉，工具带那套 digest sha256 对它不适用。
     最后是算术：**引擎落地就有 115.6 MiB（win-x64）**，再加 415 MB/1,566 MB 权重就不是安装包 ——
     所以"壳装好、引擎与权重首启按下载层契约拉"是决定，不是妥协（LM Studio 同形态）。
+17. **给用户看的对话档 ≠ 车道最小样本，而这张表也是重算出来的，不是手挑的**：
+    `catalog/defaults.json` 那颗 `qwen2.5-0.5b-instruct-q2_k`（415 MB）只为在 2 核无 GPU 的
+    runner 上把引擎拉起来跑通一次；用户第一句问的是"我这台机器该装哪个"，那件事由
+    `tools/recommend_models.py` → `catalog/recommendations.json` 负责，四条规则都进产物 `rule` 字段：
+    **半档 < `recommended_ram_gb` ≤ 档位**（只用上游 llmfit 的拟合值；只写 `≤ 档位` 时 8GB/16GB 档的
+    前两行和 4GB 完全一样，都是 0.6B 与 gpt2）、窗口内按上游 `hf_downloads` 排、仓库**依次**试
+    `ggml-org → unsloth → mradermacher`（只取偏好第一名会拿到 `ggml-org/Qwen3-8B-GGUF` 的 Q8_0，
+    8,709,518,656 字节 > 8 GB 机器的总内存）、文件要整只且塞得进本档（排除 `-of-` 分片与
+    `dflash-*` 这类草稿模型 —— 后者 1.12 GB，按大小它最先合档，所以形状判据必须排在大小判据前面）。
+    验收要看四件事：**每行文件大小 < 档位 × 1 GiB**、`single` 行必须标"下完自算"（那 7 行全在
+    mradermacher 仓库上，ModelScope 对它们返回 0 条 `.gguf`，第二家根本不镜像重打包方）、
+    某档凑不满 `per_tier` 要**报问题而不是自动放宽窗口**（放宽是人的决定）、
+    解不出的候选进 `dropped` 而不是把车道判红（上游天天在漂，红要有意义）。
+    重算路径与其余工具同构：`--fixtures` 用**同一次 `--live` 录下的真元数据切片**离线重算并比对，
+    `--live --check` 盯上游漂移；而 `--fixtures` 那条路**永远不许落盘**（本轮被自己咬过：
+    一次没带 `--check` 的 `--fixtures` 把整张产品表覆盖成切片算出的那张，行数照样 15，
+    只有 `candidate_pool` 从 1,283 掉到 45 —— 现在闸门看的就是这个计数）。
 
 ## 车道判据的出处（全部按**钉住的那个 ref** 核过，不是按 HEAD 记的）
 
@@ -277,6 +295,7 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
 | `image-proof`（常驻 server） | 服务起不起得来、异步任务的状态机、图在响应的哪个字段、**请求体的参数有没有被吃进去** | sd.cpp `master-975-95b3090`：监听旗标是 `--listen-ip/--listen-port`（`examples/server/runtime.cpp:193/198`，默认 127.0.0.1:1234）；**模型先加载完才 `listen`**（`examples/server/main.cpp:92-98` 建上下文、`:152` 才 listen），所以与 whisper 相反——这里能答就是就绪，探测用 `GET /v1/models`（`routes_openai.cpp:253`）；`POST /sdcpp/v1/img_gen`（`routes_sdcpp.cpp:644`）成功回 **202**（`:695`）并给 `poll_url`（`:693`），车道**按服务端给的地址轮询**而不自己拼；状态名 `queued/generating/completed/failed/cancelled`（`async_jobs.cpp:73-88`），`failed/cancelled` 也要跳出轮询，否则红字看起来像超时而不像任务失败了；图在 `result.images[].b64_json`（`:190/192-194`，b64 由 `:284` 产出）。**这一步刻意不给 `sd-server` 任何生成旗标**：请求体是在 server 的 CLI 默认值之上覆盖的（`routes_sdcpp.cpp:417`），上游默认 20 步/512x512，产物元数据却是 `Steps: 3`、IHDR 是 256x256，才能证明参数从 HTTP 进去了。判据与 CLI 那条共用 `tools/png_proof.py`（25 条单测，含"两处判据逐案同生同死"的一致性用例），步数键是 `sample_params.sample_steps` 且逐键覆盖（`common.cpp:2204`）；元数据默认嵌进产物靠 `common.h:219` 的 `embed_image_metadata = true` |
 | `ocr-proof` | 包名 `oar-ocr-cli`、二进制名 `oar`、`--det/--rec/--dict` 必须一起给 | commit `84817f58…`（**不是** tag `v0.10.0` —— 那个 tag 里没有 CLI）：根 `Cargo.toml` members、`oar-ocr-cli/Cargo.toml` 的 `[[bin]] name = "oar"`、`src/args.rs` 的 `requires_all`/`conflicts_with_all` |
 | `ocr-languages` | OCR 的语言轴能不能「下载前就信」：产物在哪个 tag、两家分发方给不给同一个哈希、字典与权重是否成对 | oar-ocr `84817f58`：`oar-ocr-core/src/core/download/registry.rs:10` 写 `MODELSCOPE_REPO = "greatv/oar-ocr"`（第二个分发方就是上游自己的 ModelScope 镜像）、`:4` 声明条目按名字排序是为了二分查找（所以工具替上游守着这条排序，乱序当场抛）；`docs/models.md:116` 明写 v3 各语言字典**不在 auto-download 注册表内**，要另从 PaddleOCR 取 —— 那三份 pin 因此只能「按 commit 自算」。查找一律按 models.md 链接里的 **tag** 定位：`ppocrv5_latin_dict.txt` 在 v0.1.0 是 1,634 B / `3c0a8a79…`、在 v0.3.0 是 2,616 B / `ccbcc457…`，按名字找第一版就把拉丁语字典钉错了（`--live` 报「来源哈希不一致」才逼出来） |
+| `recommendations` | 「文件要整只、要塞得进本档」这两条判据的依据不是 file:line，而是**同一次运行里两家给回来的文件清单本身**（切片入库，`--live --check` 每次都重测） | `ggml-org/Qwen3-8B-GGUF` 的 6 条 `.gguf` 只有 BF16（16,388,044,096 B）、Q8_0（8,709,518,656 B > 8 GB 机器总内存）和 `dflash-*`/`dspark-*` 草稿（1,120,250,336 B —— 按大小它反而最先合档，所以形状判据必须排在大小判据**前面**）；同一次捕获里 ModelScope 对 7 个 `mradermacher/*` 仓库各返回 **0** 条 `.gguf`，而对 unsloth 给 7–26 条，所以那 7 行只能是 `single`（第二家不镜像重打包方），UI 必须说"下完自己算" |
 | 引擎与权重输入 | 上游 `digest` 就是内容哈希 | 五个包整包下回实算相等（llama b11727、whisper b5454、sd 95b3090、qwen 415 MB、SD1.5 1.5 GB），见 `pins/models.json` 的 `bytes_verified` |
 
 写这张表的理由：CI 现在一次都跑不了，而"日志里会出现某串"这类假设一旦错，

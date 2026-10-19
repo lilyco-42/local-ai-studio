@@ -1,0 +1,466 @@
+{
+ "candidate_pool": {
+  "16GB": 158,
+  "4GB": 133,
+  "8GB": 334,
+  "chat": 1283
+ },
+ "dropped": [],
+ "from": [
+  "catalog/describe.json",
+  "file_index 两家元数据"
+ ],
+ "per_tier": 5,
+ "rows": 15,
+ "rule": {
+  "file": "量化偏好顺序 + 排除分片（名字含 -of-）+ 大小 < 档位 × 1 GiB",
+  "hash": "HF tree.lfs.oid × ModelScope 元数据 Sha256；两家一致才 usable",
+  "order": "窗口内按上游 hf_downloads 从多到少，同名忽略大小写只留第一条",
+  "quant": "Q4_K_M/Q4_K_S/Q5_K_M/Q3_K_M/Q2_K/Q4_0/IQ4_XS/Q8_0",
+  "repo": "依次尝试 ggml-org > unsloth > mradermacher（引擎同方优先），直到某个仓库能给出符合下面两条的文件；都不符合就报问题而不是硬选一个",
+  "tier": "半档 < recommended_ram_gb <= 档位（FIT_FRACTION=0.5，两个数都用上游 llmfit 的拟合值）"
+ },
+ "schema": 1,
+ "tiers": [
+  "4GB",
+  "8GB",
+  "16GB"
+ ],
+ "tiers_rows": {
+  "16GB": [
+   {
+    "context_length": 40960,
+    "file": "Qwen3-14B-Q4_K_M.gguf",
+    "file_reason": "量化偏好命中 Q4_K_M（9,001,753,376 字节 < 16 GiB）",
+    "hf_downloads": 5776369,
+    "license": "apache-2.0",
+    "license_flag": "ok",
+    "min_ram_gb": 8.3,
+    "name": "Qwen/Qwen3-14B",
+    "parameter_count": "14.8B",
+    "provider_reason": "provider=ggml-org",
+    "providers": [
+     "huggingface.co",
+     "www.modelscope.cn"
+    ],
+    "recommended_ram_gb": 13.8,
+    "repo": "ggml-org/Qwen3-14B-GGUF",
+    "repos_tried": 1,
+    "sha256": "5ff1fe7a07aebc8d090682d01b17cf268a1b4680c6477050ce75a600aecb9efb",
+    "size": 9001753376,
+    "status": "agree",
+    "urls": [
+     "https://www.modelscope.cn/models/ggml-org/Qwen3-14B-GGUF/resolve/master/Qwen3-14B-Q4_K_M.gguf",
+     "https://hf-mirror.com/ggml-org/Qwen3-14B-GGUF/resolve/main/Qwen3-14B-Q4_K_M.gguf",
+     "https://huggingface.co/ggml-org/Qwen3-14B-GGUF/resolve/main/Qwen3-14B-Q4_K_M.gguf"
+    ],
+    "usable_before_download": true,
+    "use_case": "General purpose text generation"
+   },
+   {
+    "context_length": 32768,
+    "file": "Qwen2.5-Coder-14B-Instruct-Q4_K_M.gguf",
+    "file_reason": "量化偏好命中 Q4_K_M（8,988,110,240 字节 < 16 GiB）",
+    "hf_downloads": 1648998,
+    "license": "apache-2.0",
+    "license_flag": "ok",
+    "min_ram_gb": 8.3,
+    "name": "Qwen/Qwen2.5-Coder-14B-Instruct",
+    "parameter_count": "14.8B",
+    "provider_reason": "provider=unsloth",
+    "providers": [
+     "huggingface.co",
+     "www.modelscope.cn"
+    ],
+    "recommended_ram_gb": 13.8,
+    "repo": "unsloth/Qwen2.5-Coder-14B-Instruct-GGUF",
+    "repos_tried": 1,
+    "sha256": "13dec282d3ac9a87896248d5f69187102fad7c56315c553d2fab5403121702fe",
+    "size": 8988110240,
+    "status": "agree",
+    "urls": [
+     "https://www.modelscope.cn/models/unsloth/Qwen2.5-Coder-14B-Instruct-GGUF/resolve/master/Qwen2.5-Coder-14B-Instruct-Q4_K_M.gguf",
+     "https://hf-mirror.com/unsloth/Qwen2.5-Coder-14B-Instruct-GGUF/resolve/main/Qwen2.5-Coder-14B-Instruct-Q4_K_M.gguf",
+     "https://huggingface.co/unsloth/Qwen2.5-Coder-14B-Instruct-GGUF/resolve/main/Qwen2.5-Coder-14B-Instruct-Q4_K_M.gguf"
+    ],
+    "usable_before_download": true,
+    "use_case": "Code generation and completion"
+   },
+   {
+    "context_length": 32768,
+    "file": "Qwen2.5-14B-Instruct.Q4_K_M.gguf",
+    "file_reason": "量化偏好命中 Q4_K_M（8,988,111,136 字节 < 16 GiB）",
+    "hf_downloads": 1192472,
+    "license": "apache-2.0",
+    "license_flag": "ok",
+    "min_ram_gb": 8.3,
+    "name": "Qwen/Qwen2.5-14B-Instruct",
+    "parameter_count": "14.8B",
+    "provider_reason": "provider=mradermacher",
+    "providers": [
+     "huggingface.co"
+    ],
+    "recommended_ram_gb": 13.8,
+    "repo": "mradermacher/Qwen2.5-14B-Instruct-GGUF",
+    "repos_tried": 1,
+    "sha256": "15a38a19cae606bbb5ded7ded38026ef7880e3cfb080b03440c0a5e2a335dbcb",
+    "size": 8988111136,
+    "status": "single",
+    "urls": [
+     "https://www.modelscope.cn/models/mradermacher/Qwen2.5-14B-Instruct-GGUF/resolve/master/Qwen2.5-14B-Instruct.Q4_K_M.gguf",
+     "https://hf-mirror.com/mradermacher/Qwen2.5-14B-Instruct-GGUF/resolve/main/Qwen2.5-14B-Instruct.Q4_K_M.gguf",
+     "https://huggingface.co/mradermacher/Qwen2.5-14B-Instruct-GGUF/resolve/main/Qwen2.5-14B-Instruct.Q4_K_M.gguf"
+    ],
+    "usable_before_download": false,
+    "use_case": "Instruction following, chat"
+   },
+   {
+    "context_length": 4096,
+    "file": "gemma-2-9b-it.Q4_K_M.gguf",
+    "file_reason": "量化偏好命中 Q4_K_M（5,761,058,880 字节 < 16 GiB）",
+    "hf_downloads": 899531,
+    "license": "gemma",
+    "license_flag": "ok",
+    "min_ram_gb": 5.2,
+    "name": "google/gemma-2-9b-it",
+    "parameter_count": "9.2B",
+    "provider_reason": "provider=mradermacher",
+    "providers": [
+     "huggingface.co"
+    ],
+    "recommended_ram_gb": 8.6,
+    "repo": "mradermacher/gemma-2-9b-it-GGUF",
+    "repos_tried": 1,
+    "sha256": "4da1d1ada7f64adea359bc4a572cb6faa6e4fc26993f621a3fec7ed614ca337e",
+    "size": 5761058880,
+    "status": "single",
+    "urls": [
+     "https://www.modelscope.cn/models/mradermacher/gemma-2-9b-it-GGUF/resolve/master/gemma-2-9b-it.Q4_K_M.gguf",
+     "https://hf-mirror.com/mradermacher/gemma-2-9b-it-GGUF/resolve/main/gemma-2-9b-it.Q4_K_M.gguf",
+     "https://huggingface.co/mradermacher/gemma-2-9b-it-GGUF/resolve/main/gemma-2-9b-it.Q4_K_M.gguf"
+    ],
+    "usable_before_download": false,
+    "use_case": "General purpose text generation"
+   },
+   {
+    "context_length": 131072,
+    "file": "JiRackUltra_14b.Q4_K_M.gguf",
+    "file_reason": "量化偏好命中 Q4_K_M（8,988,110,976 字节 < 16 GiB）",
+    "hf_downloads": 849854,
+    "license": "mit",
+    "license_flag": "ok",
+    "min_ram_gb": 8.3,
+    "name": "CMSManhattan/JiRackUltra_14b",
+    "parameter_count": "14.8B",
+    "provider_reason": "provider=mradermacher",
+    "providers": [
+     "huggingface.co"
+    ],
+    "recommended_ram_gb": 13.8,
+    "repo": "mradermacher/JiRackUltra_14b-GGUF",
+    "repos_tried": 1,
+    "sha256": "42d1e968a1851060a31ecdd60d5e18eb0f02ac197534c5e34712fb01c068fadd",
+    "size": 8988110976,
+    "status": "single",
+    "urls": [
+     "https://www.modelscope.cn/models/mradermacher/JiRackUltra_14b-GGUF/resolve/master/JiRackUltra_14b.Q4_K_M.gguf",
+     "https://hf-mirror.com/mradermacher/JiRackUltra_14b-GGUF/resolve/main/JiRackUltra_14b.Q4_K_M.gguf",
+     "https://huggingface.co/mradermacher/JiRackUltra_14b-GGUF/resolve/main/JiRackUltra_14b.Q4_K_M.gguf"
+    ],
+    "usable_before_download": false,
+    "use_case": "General purpose text generation"
+   }
+  ],
+  "4GB": [
+   {
+    "context_length": 40960,
+    "file": "Qwen3-4B-Q4_K_M.gguf",
+    "file_reason": "量化偏好命中 Q4_K_M（2,497,281,312 字节 < 4 GiB）",
+    "hf_downloads": 12177404,
+    "license": "apache-2.0",
+    "license_flag": "ok",
+    "min_ram_gb": 2.2,
+    "name": "Qwen/Qwen3-4B",
+    "parameter_count": "4.0B",
+    "provider_reason": "provider=unsloth",
+    "providers": [
+     "huggingface.co",
+     "www.modelscope.cn"
+    ],
+    "recommended_ram_gb": 3.7,
+    "repo": "unsloth/Qwen3-4B-GGUF",
+    "repos_tried": 1,
+    "sha256": "f6f851777709861056efcdad3af01da38b31223a3ba26e61a4f8bf3a2195813a",
+    "size": 2497281312,
+    "status": "agree",
+    "urls": [
+     "https://www.modelscope.cn/models/unsloth/Qwen3-4B-GGUF/resolve/master/Qwen3-4B-Q4_K_M.gguf",
+     "https://hf-mirror.com/unsloth/Qwen3-4B-GGUF/resolve/main/Qwen3-4B-Q4_K_M.gguf",
+     "https://huggingface.co/unsloth/Qwen3-4B-GGUF/resolve/main/Qwen3-4B-Q4_K_M.gguf"
+    ],
+    "usable_before_download": true,
+    "use_case": "General purpose text generation"
+   },
+   {
+    "context_length": 32768,
+    "file": "Qwen2.5-3B-Instruct.Q4_K_M.gguf",
+    "file_reason": "量化偏好命中 Q4_K_M（1,929,903,456 字节 < 4 GiB）",
+    "hf_downloads": 4270090,
+    "license": "qwen-research",
+    "license_flag": "ok",
+    "min_ram_gb": 1.7,
+    "name": "Qwen/Qwen2.5-3B-Instruct",
+    "parameter_count": "3.1B",
+    "provider_reason": "provider=mradermacher",
+    "providers": [
+     "huggingface.co"
+    ],
+    "recommended_ram_gb": 2.9,
+    "repo": "mradermacher/Qwen2.5-3B-Instruct-GGUF",
+    "repos_tried": 1,
+    "sha256": "1387ded94cc8b627ad985e0b7c4d05eeaef90e7b58934690af9ed402eb9dda89",
+    "size": 1929903456,
+    "status": "single",
+    "urls": [
+     "https://www.modelscope.cn/models/mradermacher/Qwen2.5-3B-Instruct-GGUF/resolve/master/Qwen2.5-3B-Instruct.Q4_K_M.gguf",
+     "https://hf-mirror.com/mradermacher/Qwen2.5-3B-Instruct-GGUF/resolve/main/Qwen2.5-3B-Instruct.Q4_K_M.gguf",
+     "https://huggingface.co/mradermacher/Qwen2.5-3B-Instruct-GGUF/resolve/main/Qwen2.5-3B-Instruct.Q4_K_M.gguf"
+    ],
+    "usable_before_download": false,
+    "use_case": "Instruction following, chat"
+   },
+   {
+    "context_length": 262144,
+    "file": "Qwen3-4B-Instruct-2507-Q4_K_M.gguf",
+    "file_reason": "量化偏好命中 Q4_K_M（2,497,281,120 字节 < 4 GiB）",
+    "hf_downloads": 3548400,
+    "license": "apache-2.0",
+    "license_flag": "ok",
+    "min_ram_gb": 2.2,
+    "name": "Qwen/Qwen3-4B-Instruct-2507",
+    "parameter_count": "4.0B",
+    "provider_reason": "provider=unsloth",
+    "providers": [
+     "huggingface.co",
+     "www.modelscope.cn"
+    ],
+    "recommended_ram_gb": 3.7,
+    "repo": "unsloth/Qwen3-4B-Instruct-2507-GGUF",
+    "repos_tried": 1,
+    "sha256": "3605803b982cb64aead44f6c1b2ae36e3acdb41d8e46c8a94c6533bc4c67e597",
+    "size": 2497281120,
+    "status": "agree",
+    "urls": [
+     "https://www.modelscope.cn/models/unsloth/Qwen3-4B-Instruct-2507-GGUF/resolve/master/Qwen3-4B-Instruct-2507-Q4_K_M.gguf",
+     "https://hf-mirror.com/unsloth/Qwen3-4B-Instruct-2507-GGUF/resolve/main/Qwen3-4B-Instruct-2507-Q4_K_M.gguf",
+     "https://huggingface.co/unsloth/Qwen3-4B-Instruct-2507-GGUF/resolve/main/Qwen3-4B-Instruct-2507-Q4_K_M.gguf"
+    ],
+    "usable_before_download": true,
+    "use_case": "Instruction following, chat"
+   },
+   {
+    "context_length": 262144,
+    "file": "Rio-3.0-Open-Mini.Q4_K_M.gguf",
+    "file_reason": "量化偏好命中 Q4_K_M（2,497,281,088 字节 < 4 GiB）",
+    "hf_downloads": 1840449,
+    "license": "mit",
+    "license_flag": "ok",
+    "min_ram_gb": 2.2,
+    "name": "prefeitura-rio/Rio-3.0-Open-Mini",
+    "parameter_count": "4.0B",
+    "provider_reason": "provider=mradermacher",
+    "providers": [
+     "huggingface.co"
+    ],
+    "recommended_ram_gb": 3.7,
+    "repo": "mradermacher/Rio-3.0-Open-Mini-GGUF",
+    "repos_tried": 1,
+    "sha256": "f70c3bf3fd7ec61ffde742be5dc9d0aac6b71f116bba37f5dceb0cf587cbb4d2",
+    "size": 2497281088,
+    "status": "single",
+    "urls": [
+     "https://www.modelscope.cn/models/mradermacher/Rio-3.0-Open-Mini-GGUF/resolve/master/Rio-3.0-Open-Mini.Q4_K_M.gguf",
+     "https://hf-mirror.com/mradermacher/Rio-3.0-Open-Mini-GGUF/resolve/main/Rio-3.0-Open-Mini.Q4_K_M.gguf",
+     "https://huggingface.co/mradermacher/Rio-3.0-Open-Mini-GGUF/resolve/main/Rio-3.0-Open-Mini.Q4_K_M.gguf"
+    ],
+    "usable_before_download": false,
+    "use_case": "Lightweight, edge deployment"
+   },
+   {
+    "context_length": 262144,
+    "file": "NVIDIA-Nemotron-3-Nano-4B-BF16.Q4_K_M.gguf",
+    "file_reason": "量化偏好命中 Q4_K_M（2,837,077,280 字节 < 4 GiB）",
+    "hf_downloads": 1565039,
+    "license": "nvidia-nemotron-open-model-license",
+    "license_flag": "ok",
+    "min_ram_gb": 2.2,
+    "name": "nvidia/NVIDIA-Nemotron-3-Nano-4B-BF16",
+    "parameter_count": "4.0B",
+    "provider_reason": "provider=mradermacher",
+    "providers": [
+     "huggingface.co"
+    ],
+    "recommended_ram_gb": 3.7,
+    "repo": "mradermacher/NVIDIA-Nemotron-3-Nano-4B-BF16-GGUF",
+    "repos_tried": 1,
+    "sha256": "21fc5d6f9047f8484765368bd5945883de140913a534f15c690beaa8ff18e6f6",
+    "size": 2837077280,
+    "status": "single",
+    "urls": [
+     "https://www.modelscope.cn/models/mradermacher/NVIDIA-Nemotron-3-Nano-4B-BF16-GGUF/resolve/master/NVIDIA-Nemotron-3-Nano-4B-BF16.Q4_K_M.gguf",
+     "https://hf-mirror.com/mradermacher/NVIDIA-Nemotron-3-Nano-4B-BF16-GGUF/resolve/main/NVIDIA-Nemotron-3-Nano-4B-BF16.Q4_K_M.gguf",
+     "https://huggingface.co/mradermacher/NVIDIA-Nemotron-3-Nano-4B-BF16-GGUF/resolve/main/NVIDIA-Nemotron-3-Nano-4B-BF16.Q4_K_M.gguf"
+    ],
+    "usable_before_download": false,
+    "use_case": "General purpose text generation"
+   }
+  ],
+  "8GB": [
+   {
+    "context_length": 40960,
+    "file": "Qwen3-8B-Q4_K_M.gguf",
+    "file_reason": "量化偏好命中 Q4_K_M（5,027,784,512 字节 < 8 GiB）",
+    "hf_downloads": 9650573,
+    "license": "apache-2.0",
+    "license_flag": "ok",
+    "min_ram_gb": 4.6,
+    "name": "Qwen/Qwen3-8B",
+    "parameter_count": "8.2B",
+    "provider_reason": "provider=unsloth",
+    "providers": [
+     "huggingface.co",
+     "www.modelscope.cn"
+    ],
+    "recommended_ram_gb": 7.6,
+    "repo": "unsloth/Qwen3-8B-GGUF",
+    "repos_tried": 2,
+    "sha256": "120307ba529eb2439d6c430d94104dabd578497bc7bfe7e322b5d9933b449bd4",
+    "size": 5027784512,
+    "status": "agree",
+    "urls": [
+     "https://www.modelscope.cn/models/unsloth/Qwen3-8B-GGUF/resolve/master/Qwen3-8B-Q4_K_M.gguf",
+     "https://hf-mirror.com/unsloth/Qwen3-8B-GGUF/resolve/main/Qwen3-8B-Q4_K_M.gguf",
+     "https://huggingface.co/unsloth/Qwen3-8B-GGUF/resolve/main/Qwen3-8B-Q4_K_M.gguf"
+    ],
+    "usable_before_download": true,
+    "use_case": "General purpose text generation"
+   },
+   {
+    "context_length": 32768,
+    "file": "Qwen2.5-7B-Instruct.Q4_K_M.gguf",
+    "file_reason": "量化偏好命中 Q4_K_M（4,683,074,400 字节 < 8 GiB）",
+    "hf_downloads": 7753092,
+    "license": "apache-2.0",
+    "license_flag": "ok",
+    "min_ram_gb": 4.3,
+    "name": "Qwen/Qwen2.5-7B-Instruct",
+    "parameter_count": "7.6B",
+    "provider_reason": "provider=mradermacher",
+    "providers": [
+     "huggingface.co"
+    ],
+    "recommended_ram_gb": 7.1,
+    "repo": "mradermacher/Qwen2.5-7B-Instruct-GGUF",
+    "repos_tried": 1,
+    "sha256": "b5fe74b613436747acf83405e896a338ded690037ab77581d1177829dc19f680",
+    "size": 4683074400,
+    "status": "single",
+    "urls": [
+     "https://www.modelscope.cn/models/mradermacher/Qwen2.5-7B-Instruct-GGUF/resolve/master/Qwen2.5-7B-Instruct.Q4_K_M.gguf",
+     "https://hf-mirror.com/mradermacher/Qwen2.5-7B-Instruct-GGUF/resolve/main/Qwen2.5-7B-Instruct.Q4_K_M.gguf",
+     "https://huggingface.co/mradermacher/Qwen2.5-7B-Instruct-GGUF/resolve/main/Qwen2.5-7B-Instruct.Q4_K_M.gguf"
+    ],
+    "usable_before_download": false,
+    "use_case": "Instruction following, chat"
+   },
+   {
+    "context_length": 4096,
+    "file": "Llama-3.1-8B-Instruct-Q4_K_M.gguf",
+    "file_reason": "量化偏好命中 Q4_K_M（4,920,739,200 字节 < 8 GiB）",
+    "hf_downloads": 5926413,
+    "license": "llama3.1",
+    "license_flag": "ok",
+    "min_ram_gb": 4.5,
+    "name": "meta-llama/Llama-3.1-8B-Instruct",
+    "parameter_count": "8.0B",
+    "provider_reason": "provider=unsloth",
+    "providers": [
+     "huggingface.co",
+     "www.modelscope.cn"
+    ],
+    "recommended_ram_gb": 7.5,
+    "repo": "unsloth/Llama-3.1-8B-Instruct-GGUF",
+    "repos_tried": 1,
+    "sha256": "b3bdbf23b47d7e6bb791c99b206deb169cd5a96362a9e3399028df2faacdc506",
+    "size": 4920739200,
+    "status": "agree",
+    "urls": [
+     "https://www.modelscope.cn/models/unsloth/Llama-3.1-8B-Instruct-GGUF/resolve/master/Llama-3.1-8B-Instruct-Q4_K_M.gguf",
+     "https://hf-mirror.com/unsloth/Llama-3.1-8B-Instruct-GGUF/resolve/main/Llama-3.1-8B-Instruct-Q4_K_M.gguf",
+     "https://huggingface.co/unsloth/Llama-3.1-8B-Instruct-GGUF/resolve/main/Llama-3.1-8B-Instruct-Q4_K_M.gguf"
+    ],
+    "usable_before_download": true,
+    "use_case": "Instruction following, chat"
+   },
+   {
+    "context_length": 262144,
+    "file": "Ornith-1.0-9B-Q4_K_M.gguf",
+    "file_reason": "量化偏好命中 Q4_K_M（5,701,067,872 字节 < 8 GiB）",
+    "hf_downloads": 2325290,
+    "license": "mit",
+    "license_flag": "ok",
+    "min_ram_gb": 4.6,
+    "name": "deepreinforce-ai/Ornith-1.0-9B",
+    "parameter_count": "8.2B",
+    "provider_reason": "provider=unsloth",
+    "providers": [
+     "huggingface.co",
+     "www.modelscope.cn"
+    ],
+    "recommended_ram_gb": 7.6,
+    "repo": "unsloth/Ornith-1.0-9B-GGUF",
+    "repos_tried": 1,
+    "sha256": "641675b356a4463677a02a0d703f7b571b39f0b747fbd270b379c848edc29e84",
+    "size": 5701067872,
+    "status": "agree",
+    "urls": [
+     "https://www.modelscope.cn/models/unsloth/Ornith-1.0-9B-GGUF/resolve/master/Ornith-1.0-9B-Q4_K_M.gguf",
+     "https://hf-mirror.com/unsloth/Ornith-1.0-9B-GGUF/resolve/main/Ornith-1.0-9B-Q4_K_M.gguf",
+     "https://huggingface.co/unsloth/Ornith-1.0-9B-GGUF/resolve/main/Ornith-1.0-9B-Q4_K_M.gguf"
+    ],
+    "usable_before_download": true,
+    "use_case": "General purpose text generation"
+   },
+   {
+    "context_length": 32768,
+    "file": "Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf",
+    "file_reason": "量化偏好命中 Q4_K_M（4,683,073,504 字节 < 8 GiB）",
+    "hf_downloads": 1784907,
+    "license": "apache-2.0",
+    "license_flag": "ok",
+    "min_ram_gb": 4.3,
+    "name": "Qwen/Qwen2.5-Coder-7B-Instruct",
+    "parameter_count": "7.6B",
+    "provider_reason": "provider=unsloth",
+    "providers": [
+     "huggingface.co",
+     "www.modelscope.cn"
+    ],
+    "recommended_ram_gb": 7.1,
+    "repo": "unsloth/Qwen2.5-Coder-7B-Instruct-GGUF",
+    "repos_tried": 1,
+    "sha256": "9a961bb225cb2b9fd84b2297df0d53089895c049d7d9dc5f5f8aebbcd3247872",
+    "size": 4683073504,
+    "status": "agree",
+    "urls": [
+     "https://www.modelscope.cn/models/unsloth/Qwen2.5-Coder-7B-Instruct-GGUF/resolve/master/Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf",
+     "https://hf-mirror.com/unsloth/Qwen2.5-Coder-7B-Instruct-GGUF/resolve/main/Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf",
+     "https://huggingface.co/unsloth/Qwen2.5-Coder-7B-Instruct-GGUF/resolve/main/Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf"
+    ],
+    "usable_before_download": true,
+    "use_case": "Code generation and completion"
+   }
+  ]
+ },
+ "usable_before_download": 8
+}

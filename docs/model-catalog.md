@@ -250,6 +250,52 @@ GitHub release 那侧（工具带 + OCR，合计 154.2 MiB，实测 0.014 MiB/s 
 含每条的候选源与按源分组的结论），一个数字都不手打。前提是先有上面的第 5 级：
 **正因为字节与哈希跨提供方对得上，才敢把更快的那家列为首选。**
 
+## 给用户的那张推荐表（`tools/recommend_models.py` → `catalog/recommendations.json`）
+
+上面那张 `defaults.json` 是**车道的最小集合**：对话那颗 `qwen2.5-0.5b-instruct-q2_k`（415 MB）
+存在的意义是"能在 2 核无 GPU 的 runner 上把引擎拉起来跑通一次"，不是"建议你装这个"。
+用户打开应用问的第一句是**「我这台机器该装哪个」**，所以这张表才是 UI 对话档的来源。
+
+四条规则，每条都写进产物的 `rule` 字段（UI 要说得出为什么推荐它），而且每条都有反例在测试里：
+
+| 规则 | 为什么是这个而不是别的 |
+|---|---|
+| 半档 < `recommended_ram_gb` ≤ 档位 | 只写 `≤ 档位` 时，8GB 与 16GB 档的前两行和 4GB **一模一样**：`Qwen/Qwen3-0.6B`（30,575,964 次下载）和 `openai-community/gpt2`（15,559,744 次），两条拟合值都是 2.0。"我这台 16G 装哪个"回答 0.6B 等于没回答 |
+| 窗口内按上游 `hf_downloads` 从多到少 | 下载量是上游给的**可核对**事实，不是我觉得哪个模型好。同档内先出 Qwen3 系与 Llama-3.1-8B，再出冷门微调，顺序不需要我表态 |
+| 仓库**依次**试 `ggml-org → unsloth → mradermacher` | 第一条是"引擎与权重同源"：ggml-org 就是随包发的 llama.cpp 的维护方。但只取偏好第一名会坏在下一条上 |
+| 文件要整只、要塞得进本档 | 实测 `ggml-org/Qwen3-8B-GGUF` 只给得出 BF16（16,388,044,096 B）与 **Q8_0（8,709,518,656 B）**——8 GB 的机器载不进比总内存还大的文件，这是算术。同时那份清单里有 `dflash-Qwen3-8B-Q8_0.gguf`（1,120,250,336 B，投机解码的草稿模型）：**按大小它最先合档**，所以形状判据必须排在大小判据前面 |
+
+一次真跑的产物（2026-10-20，`--live`）：候选池 chat 1,283 条，窗口 4GB/8GB/16GB 各 133/334/158 条，
+表 15 行、**其中 8 行是"两家分发方给同一个哈希"**。剩下 7 行全是 `single`，而且原因只有一个：
+这 7 行落在 `mradermacher` 的仓库上，而 ModelScope 对这些仓库返回的 `.gguf` 条目数是 **0**
+（同一次捕获里 ggml-org 是 3/6 条、unsloth 是 7–26 条）—— 也就是**第二家分发方不镜像重打包方的仓库**，
+所以只有 HF 一家给哈希。UI 对这 7 行必须说"下完自己算一遍"，不许把它们当已校验。
+每行都带 `license` 原值 + `license_flag`、`use_case` 原值、`min_ram_gb`/`recommended_ram_gb`、
+两个文件级数字（`sha256`/`size`）与按实测吞吐排好的候选 URL。
+
+两处目录数据本身会咬人的地方，也都钉成了判据：
+- **同名两条**：`microsoft/Phi-3-mini-4k-instruct` 与 `microsoft/phi-3-mini-4k-instruct` 是独立记录、
+  下载量分毫不差（各 370,784），不去重就会在同一档出现两次同一个模型 → 去重按 `name.casefold()`；
+- **命名不统一**：ggml-org/unsloth 用 `X-Q4_K_M.gguf`，mradermacher 用 `X.Q4_K_M.gguf` →
+  标准形状同时接受 `-` 与 `.` 两种分隔符，否则 mradermacher 那一整批会被判成"没有可用文件"。
+
+`use_case` 这个字段**只透传不过滤**（我试过按它筛 chat）：上游把 Qwen3-8B（9,650,573 次下载）标成
+"General purpose text generation"，按它筛会把最强的那颗踢掉、放进 `meta-llama/Llama-2-13b-chat`
+（2023 年，195,992 次）。这个值该由 UI 说给用户，不该由我在选模型时代替上游判断。
+
+重算路径与其余工具同构，`recommendations` 车道三步都必须在**没有网**的时候也能红：
+```
+python3 -m unittest tests.test_recommend_models -v                        # 判据本身
+python3 tools/recommend_models.py --fixtures tests/fixtures/recommend_slice.json --check
+python3 tools/recommend_models.py --live --check                          # 真漂移
+```
+`tests/fixtures/recommend_slice.json` 是**同一次 `--live` 运行里录下来的真元数据**
+（45 条候选 × 16 个仓库，只留 `.gguf` 条目），不是我照着记忆补的形状 —— 单测里有一条
+"用切片重算，`tiers_rows` 必须逐行等于已提交那张表"，切片和产品表因此互相咬着。
+落盘有一条闸门：`--fixtures` 永远不许写产品表。这条是被自己咬出来的 —— 某次跑 `--fixtures`
+没带 `--check`，把整张表覆盖成了切片算出的那张：行数还是 15、看着一切正常，
+只有 `candidate_pool` 从 1,283 掉到 45。现在闸门看的就是这个计数。
+
 ## 还没证的
 
 - 上面所有"下载耗时"是从我们自己那台出口机的一次换算，不同城市/运营商必然不同，只能当量级。

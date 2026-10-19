@@ -1,0 +1,3606 @@
+{
+ "captured": "真元数据切片：只留 .gguf 条目；用 models+files 离线重算，tiers_rows 必须与 table 逐行相同（单测 gate）",
+ "files": {
+  "ggml-org/Qwen3-14B-GGUF": {
+   "hf": {
+    "Qwen3-14B-Q4_K_M.gguf": {
+     "sha256": "5ff1fe7a07aebc8d090682d01b17cf268a1b4680c6477050ce75a600aecb9efb",
+     "size": 9001753376
+    },
+    "Qwen3-14B-Q8_0.gguf": {
+     "sha256": "d28bbc6cc485c1bf7e5de1f3089f10bede85fb931f434239124635b4c40fc43f",
+     "size": 15698534112
+    },
+    "Qwen3-14B-f16.gguf": {
+     "sha256": "038bee2eb16bd0a9c4fe40be49f77092981e9cf0dca366434c62b7177d92dab5",
+     "size": 29543423712
+    }
+   },
+   "hf_by": "huggingface.co",
+   "ms": {
+    "Qwen3-14B-Q4_K_M.gguf": {
+     "sha256": "5ff1fe7a07aebc8d090682d01b17cf268a1b4680c6477050ce75a600aecb9efb",
+     "size": 9001753376
+    },
+    "Qwen3-14B-Q8_0.gguf": {
+     "sha256": "d28bbc6cc485c1bf7e5de1f3089f10bede85fb931f434239124635b4c40fc43f",
+     "size": 15698534112
+    },
+    "Qwen3-14B-f16.gguf": {
+     "sha256": "038bee2eb16bd0a9c4fe40be49f77092981e9cf0dca366434c62b7177d92dab5",
+     "size": 29543423712
+    }
+   },
+   "ms_by": "www.modelscope.cn"
+  },
+  "ggml-org/Qwen3-8B-GGUF": {
+   "hf": {
+    "Qwen3-8B-BF16.gguf": {
+     "sha256": "38e40ea3a4b944a34f15ce902ba2daae353efeeea54096e9912c47b7e2523732",
+     "size": 16388044096
+    },
+    "Qwen3-8B-Q8_0.gguf": {
+     "sha256": "2f98cff159bcdf01431829406d43363ccacb76ed6b76d18bd9d6ab20976792c0",
+     "size": 8709518656
+    },
+    "dflash-Qwen3-8B-BF16.gguf": {
+     "sha256": "049b75d57a0f54b92784c56da7c0de045ff45f2497eb10f62501efe3e17fbd37",
+     "size": 2103290336
+    },
+    "dflash-Qwen3-8B-Q8_0.gguf": {
+     "sha256": "89a3d462b8e945c602599a91ab2329aa387f677d88383d0e23253b9f0082e502",
+     "size": 1120250336
+    },
+    "dspark-Qwen3-8B-BF16.gguf": {
+     "sha256": "75ff5ecc1b8148e95a2cd7f062a8ce94c4d283ce26d24f691e4d97ab27b1d540",
+     "size": 2258881504
+    },
+    "dspark-Qwen3-8B-Q8_0.gguf": {
+     "sha256": "441880f9a7f10021c2f50702d845702ce39fab95753d2264f27011f32e649252",
+     "size": 1202912192
+    }
+   },
+   "hf_by": "huggingface.co",
+   "ms": {
+    "Qwen3-8B-BF16.gguf": {
+     "sha256": "38e40ea3a4b944a34f15ce902ba2daae353efeeea54096e9912c47b7e2523732",
+     "size": 16388044096
+    },
+    "Qwen3-8B-Q8_0.gguf": {
+     "sha256": "2f98cff159bcdf01431829406d43363ccacb76ed6b76d18bd9d6ab20976792c0",
+     "size": 8709518656
+    },
+    "dflash-Qwen3-8B-BF16.gguf": {
+     "sha256": "049b75d57a0f54b92784c56da7c0de045ff45f2497eb10f62501efe3e17fbd37",
+     "size": 2103290336
+    },
+    "dflash-Qwen3-8B-Q8_0.gguf": {
+     "sha256": "89a3d462b8e945c602599a91ab2329aa387f677d88383d0e23253b9f0082e502",
+     "size": 1120250336
+    },
+    "dspark-Qwen3-8B-BF16.gguf": {
+     "sha256": "75ff5ecc1b8148e95a2cd7f062a8ce94c4d283ce26d24f691e4d97ab27b1d540",
+     "size": 2258881504
+    },
+    "dspark-Qwen3-8B-Q8_0.gguf": {
+     "sha256": "441880f9a7f10021c2f50702d845702ce39fab95753d2264f27011f32e649252",
+     "size": 1202912192
+    }
+   },
+   "ms_by": "www.modelscope.cn"
+  },
+  "mradermacher/JiRackUltra_14b-GGUF": {
+   "hf": {
+    "JiRackUltra_14b.IQ4_XS.gguf": {
+     "sha256": "7702e874c958c0d59af7b28e41b7c4e3d85bc2a90dd9ad33429658d9cf2eed89",
+     "size": 8186196096
+    },
+    "JiRackUltra_14b.Q2_K.gguf": {
+     "sha256": "6092cc1e98327c855da8886ee127712ea4a4956169c030cf92f2f92f4ee3222f",
+     "size": 5770498176
+    },
+    "JiRackUltra_14b.Q3_K_L.gguf": {
+     "sha256": "d9e41f6f144183ee058c599ef72568ce672816ffdb4e85452b77a34fe60c07f7",
+     "size": 7924768896
+    },
+    "JiRackUltra_14b.Q3_K_M.gguf": {
+     "sha256": "28765f069f8fb3a36132b996f6e852d837abacdf43d22a92756754fbd6cf9ed7",
+     "size": 7339204736
+    },
+    "JiRackUltra_14b.Q3_K_S.gguf": {
+     "sha256": "3fe5754cc5e8bdea27adee4b870564094a70fc9d606a2e5b9ba3cb0c73781d9e",
+     "size": 6659596416
+    },
+    "JiRackUltra_14b.Q4_K_M.gguf": {
+     "sha256": "42d1e968a1851060a31ecdd60d5e18eb0f02ac197534c5e34712fb01c068fadd",
+     "size": 8988110976
+    },
+    "JiRackUltra_14b.Q4_K_S.gguf": {
+     "sha256": "7b2f92dafd8e0fe2f2b912772dbbaa6419cf5d79ce73f128d341ec89e9309d6f",
+     "size": 8573431936
+    },
+    "JiRackUltra_14b.Q5_K_M.gguf": {
+     "sha256": "1405cab8fb947b29a9b479fe982497acf3cc761c93df06bafe70163870aaed24",
+     "size": 10508873856
+    },
+    "JiRackUltra_14b.Q5_K_S.gguf": {
+     "sha256": "7089d9abba34210e06df7546d8c25482a82a3c978d4e2506c52c60354db7c207",
+     "size": 10266554496
+    },
+    "JiRackUltra_14b.Q6_K.gguf": {
+     "sha256": "df38406485d80b2196342bb934832d8fa9f5a15fe8f345a04a842ec7ecbd9c9f",
+     "size": 12124684416
+    },
+    "JiRackUltra_14b.Q8_0.gguf": {
+     "sha256": "f1d4d4b59e14f2299c73c6c931027991f447aa00b02dbb01c0ddd7842c4c57ff",
+     "size": 15701598336
+    }
+   },
+   "hf_by": "huggingface.co",
+   "ms": {},
+   "ms_by": "www.modelscope.cn"
+  },
+  "mradermacher/NVIDIA-Nemotron-3-Nano-4B-BF16-GGUF": {
+   "hf": {
+    "NVIDIA-Nemotron-3-Nano-4B-BF16.IQ4_XS.gguf": {
+     "sha256": "044a312c53cf3b326993986262d0a50e33f4aba8ba9fd83352d4a7e5879e2ca7",
+     "size": 2445108640
+    },
+    "NVIDIA-Nemotron-3-Nano-4B-BF16.Q2_K.gguf": {
+     "sha256": "670779344a102982ad8f265b5453d2c373c13868eaeb455ba3913240e70d8ef6",
+     "size": 2237198112
+    },
+    "NVIDIA-Nemotron-3-Nano-4B-BF16.Q3_K_L.gguf": {
+     "sha256": "3b9c025dab210a14060730ccc618c658bbafa6623e047b85c52c3cfade9a09d1",
+     "size": 2479943328
+    },
+    "NVIDIA-Nemotron-3-Nano-4B-BF16.Q3_K_M.gguf": {
+     "sha256": "9dde17a26334b51d9eb6b4f70cbdecb2ec904bafb3e98a2f93850e64663f9463",
+     "size": 2397755040
+    },
+    "NVIDIA-Nemotron-3-Nano-4B-BF16.Q3_K_S.gguf": {
+     "sha256": "7ccb79d2cc10855b45a4646e3cb501df9bc6a38a0555eae3c1df0c50fceb66c7",
+     "size": 2288565792
+    },
+    "NVIDIA-Nemotron-3-Nano-4B-BF16.Q4_K_M.gguf": {
+     "sha256": "21fc5d6f9047f8484765368bd5945883de140913a534f15c690beaa8ff18e6f6",
+     "size": 2837077280
+    },
+    "NVIDIA-Nemotron-3-Nano-4B-BF16.Q4_K_S.gguf": {
+     "sha256": "d6bb819d1fcafe6581a15447fccbe49a9679111ca5daf3011e62ccef5191a2c8",
+     "size": 2768781472
+    },
+    "NVIDIA-Nemotron-3-Nano-4B-BF16.Q5_K_M.gguf": {
+     "sha256": "298bbef91c0b2a34658a0e878816afdd6e749155c4c6f5934212061c1fb3bc29",
+     "size": 3092416672
+    },
+    "NVIDIA-Nemotron-3-Nano-4B-BF16.Q5_K_S.gguf": {
+     "sha256": "ce80488867efcdeccdadcc556b7e55c5f137af88c0a1c785ac9f4ebc0041c3b7",
+     "size": 3043388448
+    },
+    "NVIDIA-Nemotron-3-Nano-4B-BF16.Q6_K.gguf": {
+     "sha256": "9d44b738bd52d4bf1a406236f90fb57129a82e1fa4c6ca13f7682f1335c395cd",
+     "size": 3933673760
+    },
+    "NVIDIA-Nemotron-3-Nano-4B-BF16.Q8_0.gguf": {
+     "sha256": "f5de125991307ec3e3657a3dba67ec6e9c84d4c5a4d02155a1e750552745951a",
+     "size": 4233682336
+    },
+    "NVIDIA-Nemotron-3-Nano-4B-BF16.f16.gguf": {
+     "sha256": "878bbbde8ce09dfb35fcc9cda6215c42c37d63b7b01e06f209ba93e8425553af",
+     "size": 7957650976
+    }
+   },
+   "hf_by": "huggingface.co",
+   "ms": {},
+   "ms_by": "www.modelscope.cn"
+  },
+  "mradermacher/Qwen2.5-14B-Instruct-GGUF": {
+   "hf": {
+    "Qwen2.5-14B-Instruct.IQ3_M.gguf": {
+     "sha256": "23dee76e1e68f7ad54e9183cd792bb2638631bfd86636990eab765e681e6102b",
+     "size": 6916538656
+    },
+    "Qwen2.5-14B-Instruct.IQ3_S.gguf": {
+     "sha256": "c37a98cca859db25c8782321ae9898a694c4b8c2154dc8c25aa9476bcf943748",
+     "size": 6693019936
+    },
+    "Qwen2.5-14B-Instruct.IQ3_XS.gguf": {
+     "sha256": "be74dab45abd81b84f58c55cce5ebf0dfb696f6286bb403e4fbaa456822d7acf",
+     "size": 6383362336
+    },
+    "Qwen2.5-14B-Instruct.IQ4_NL.gguf": {
+     "sha256": "9feef1d69ee3c57482d5b0e8530b04c27a253ad64d1c409db429257346f09bbd",
+     "size": 8602267936
+    },
+    "Qwen2.5-14B-Instruct.IQ4_XS.gguf": {
+     "sha256": "69638dfdb73e3c4a1ba7bd4bcd32b09538ef64ff305273c993dc81cb3c3e2a0d",
+     "size": 8186196256
+    },
+    "Qwen2.5-14B-Instruct.Q2_K.gguf": {
+     "sha256": "bf4a407fcacb5b530c8c0f43829f060cc7c6d3411f775a32be254fb1a9791082",
+     "size": 5770498336
+    },
+    "Qwen2.5-14B-Instruct.Q3_K_L.gguf": {
+     "sha256": "b98d2669fda896065711d42b4a2ab9a28f215b646992a6c6b543231403b5c987",
+     "size": 7924769056
+    },
+    "Qwen2.5-14B-Instruct.Q3_K_M.gguf": {
+     "sha256": "5889363946a7f3fd2cf35b466e45e44af22f4b14baeb946bd55b960dc2c9fdb6",
+     "size": 7339204896
+    },
+    "Qwen2.5-14B-Instruct.Q3_K_S.gguf": {
+     "sha256": "23e2884e4ac7225ae890363992244f731182f9509085bf8abe494ef71d0e6db0",
+     "size": 6659596576
+    },
+    "Qwen2.5-14B-Instruct.Q4_0.gguf": {
+     "sha256": "2e90f32e20b3f1cb26140e479b08e462fb25c64312a89e5063d76b0c33be1583",
+     "size": 8517726496
+    },
+    "Qwen2.5-14B-Instruct.Q4_0_4_4.gguf": {
+     "sha256": "9cb5246308be6de1d877fbcbb645d301c8b88d7f25a085dfc5ed708b0693040a",
+     "size": 8517726496
+    },
+    "Qwen2.5-14B-Instruct.Q4_0_4_8.gguf": {
+     "sha256": "e4d4d97917a146d01f98b8087a5202a7e9be0d1c0c587d86ecb123521088c57c",
+     "size": 8517726496
+    },
+    "Qwen2.5-14B-Instruct.Q4_0_8_8.gguf": {
+     "sha256": "9e115d9b12aac2b27ff3cfec157f7c2dc49e803ca070c63466eafb3c82261c14",
+     "size": 8517726496
+    },
+    "Qwen2.5-14B-Instruct.Q4_1.gguf": {
+     "sha256": "472616b398bb324e584530c807c9b37c55a75e0497b9ec5fb28c7a2610ab878e",
+     "size": 9392140576
+    },
+    "Qwen2.5-14B-Instruct.Q4_K_M.gguf": {
+     "sha256": "15a38a19cae606bbb5ded7ded38026ef7880e3cfb080b03440c0a5e2a335dbcb",
+     "size": 8988111136
+    },
+    "Qwen2.5-14B-Instruct.Q4_K_S.gguf": {
+     "sha256": "657e7e82aa14300d02dc8a8d5f5611fa8e7d7145b2b8ff305ad48d360a1f7af9",
+     "size": 8573432096
+    },
+    "Qwen2.5-14B-Instruct.Q5_0.gguf": {
+     "sha256": "545b947f23f60dd5090c077e47f53baf3e421ebd3a6a9638e1380a72c283b411",
+     "size": 10266554656
+    },
+    "Qwen2.5-14B-Instruct.Q5_1.gguf": {
+     "sha256": "6741ab4d460a32bd4cd9fff90a9d91b07afa84532c65d5c8d86157f2c287c369",
+     "size": 11140968736
+    },
+    "Qwen2.5-14B-Instruct.Q5_K_M.gguf": {
+     "sha256": "7a68baf8ed287b643db61fb758784e4ff06050d922e1671ba5fa9b227cd8be88",
+     "size": 10508874016
+    },
+    "Qwen2.5-14B-Instruct.Q5_K_S.gguf": {
+     "sha256": "1729f760d6a9c4ba995cf48c8696acb8413c39b001960f555e7c76769091391b",
+     "size": 10266554656
+    },
+    "Qwen2.5-14B-Instruct.Q6_K.gguf": {
+     "sha256": "17c0b0e8e375faab554d729012477697742d156611b825182fa271ba27e44a72",
+     "size": 12124684576
+    },
+    "Qwen2.5-14B-Instruct.Q8_0.gguf": {
+     "sha256": "3056c333ffa82479bd8b0b7a18d6300c53d1cc246508335f9263800b79954ced",
+     "size": 15701598496
+    },
+    "Qwen2.5-14B-Instruct.SOURCE.gguf": {
+     "sha256": "0811262438ff013dd1421b7b4c6cbd526f0a392a5deec0f7ba7ba6722f49d83b",
+     "size": 29547716448
+    }
+   },
+   "hf_by": "huggingface.co",
+   "ms": {},
+   "ms_by": "www.modelscope.cn"
+  },
+  "mradermacher/Qwen2.5-3B-Instruct-GGUF": {
+   "hf": {
+    "Qwen2.5-3B-Instruct.IQ3_M.gguf": {
+     "sha256": "2b37f1fcf5d51f075e7c3488607854f2409c726fd3e422d38d1df7cce04aa9d8",
+     "size": 1488895328
+    },
+    "Qwen2.5-3B-Instruct.IQ3_S.gguf": {
+     "sha256": "b55069f6aaa2cc620c6eb823d58a50588264eacc933b29329ac944227e67b01f",
+     "size": 1456864608
+    },
+    "Qwen2.5-3B-Instruct.IQ3_XS.gguf": {
+     "sha256": "bbea277fab03ddefd6a43a768d8960d8a30a8ca05b86aa1ecc2377f3b692de7e",
+     "size": 1391836512
+    },
+    "Qwen2.5-3B-Instruct.IQ4_NL.gguf": {
+     "sha256": "2f33543c9efcb5e09acb2dfe3b5d7d7228ef02f54c58e9ff9fd6340f4baa1ed0",
+     "size": 1836481888
+    },
+    "Qwen2.5-3B-Instruct.IQ4_XS.gguf": {
+     "sha256": "4d6162a3a3d476c4849e46734097b4d63e1b8d36497e523d6367dffbc79cc817",
+     "size": 1753185632
+    },
+    "Qwen2.5-3B-Instruct.Q2_K.gguf": {
+     "sha256": "98795007c216a6d0d9dc60fa0e5fbb869ce3b39ed792e6041023b9857f45bc6f",
+     "size": 1274756448
+    },
+    "Qwen2.5-3B-Instruct.Q3_K_L.gguf": {
+     "sha256": "542a83a2d341ceb4f63e8cee3ba9f4bf985175ce56be35e9c847f1dc4c193972",
+     "size": 1707392352
+    },
+    "Qwen2.5-3B-Instruct.Q3_K_M.gguf": {
+     "sha256": "234312afcaafe811ccec6c6ed740fe43a401d61ee6d933e4f7c74232331aecc4",
+     "size": 1590476128
+    },
+    "Qwen2.5-3B-Instruct.Q3_K_S.gguf": {
+     "sha256": "d7945c344f04e1ed9d08eb7404ad17c39cdbdc641fbc0461756efb0d82deef39",
+     "size": 1454357856
+    },
+    "Qwen2.5-3B-Instruct.Q4_0.gguf": {
+     "sha256": "9d22754b367391bbdc77e55d2caeb2e2d63e9ccc3e1a4e3de07fbb5a2894d04c",
+     "size": 1822850400
+    },
+    "Qwen2.5-3B-Instruct.Q4_0_4_4.gguf": {
+     "sha256": "2a133d9b3ea4d5a3e7271adaeb687c09f82f198a4042c572b7eb4290e688ccd4",
+     "size": 1822850400
+    },
+    "Qwen2.5-3B-Instruct.Q4_0_4_8.gguf": {
+     "sha256": "996957fb750637d800cf8505c86c1b9c3e755219d7ede11bff8e3688902b6838",
+     "size": 1822850400
+    },
+    "Qwen2.5-3B-Instruct.Q4_0_8_8.gguf": {
+     "sha256": "0aad4baed78adf4084d58b6ae2be35add268fc2e62100b071d8c388bb0d508d8",
+     "size": 1822850400
+    },
+    "Qwen2.5-3B-Instruct.Q4_1.gguf": {
+     "sha256": "b9b5e3a6029aa21749fb33aa2f51f7766f64598f88193f6c57a0056d097a8dc4",
+     "size": 1996258656
+    },
+    "Qwen2.5-3B-Instruct.Q4_K_M.gguf": {
+     "sha256": "1387ded94cc8b627ad985e0b7c4d05eeaef90e7b58934690af9ed402eb9dda89",
+     "size": 1929903456
+    },
+    "Qwen2.5-3B-Instruct.Q4_K_S.gguf": {
+     "sha256": "b3ec889b640111b3349077f1d68dfc1be068b66eacf0abfac5ee3943282fd63e",
+     "size": 1834384736
+    },
+    "Qwen2.5-3B-Instruct.Q5_0.gguf": {
+     "sha256": "bdce67a1433be2adad8f49e2c56ea17f0622af57a350ae45ab358dc94ba86fe3",
+     "size": 2169666912
+    },
+    "Qwen2.5-3B-Instruct.Q5_1.gguf": {
+     "sha256": "c22ba9ba27d482adabb3376cfe357fdf2fc4d37efdf9ea9d1aaf29c8bdd435f8",
+     "size": 2343075168
+    },
+    "Qwen2.5-3B-Instruct.Q5_K_M.gguf": {
+     "sha256": "fbca494fcadc8516ae559ade4afae6c4b63362292eee7ad893762b94af0e70a7",
+     "size": 2224815456
+    },
+    "Qwen2.5-3B-Instruct.Q5_K_S.gguf": {
+     "sha256": "fb2f4dcf835a0547cdd03c53791dfff8c201f8a8eae7f31888cd159a6d3803be",
+     "size": 2169666912
+    },
+    "Qwen2.5-3B-Instruct.Q6_K.gguf": {
+     "sha256": "7d9c5ed3c96d9983ea77a8ce880f5aa6ab2411ef9ffed03826806c5e09fff1a3",
+     "size": 2538159456
+    },
+    "Qwen2.5-3B-Instruct.Q8_0.gguf": {
+     "sha256": "8b3bd75789b50aea32f8d0bf3f8cc031f201cde7e4a9728db84a70932ff4a522",
+     "size": 3285476704
+    },
+    "Qwen2.5-3B-Instruct.SOURCE.gguf": {
+     "sha256": "25908e409af8c952a17c8fda44b90e699565a90436431574f44c25d140aa5032",
+     "size": 6178317216
+    },
+    "Qwen2.5-3B-Instruct.f16.gguf": {
+     "sha256": "c3ccbd3def14f9395c5f6772213fafec9ae265fedd8628c257a6be16e50e62cf",
+     "size": 6178317664
+    }
+   },
+   "hf_by": "huggingface.co",
+   "ms": {},
+   "ms_by": "www.modelscope.cn"
+  },
+  "mradermacher/Qwen2.5-7B-Instruct-GGUF": {
+   "hf": {
+    "Qwen2.5-7B-Instruct.IQ3_M.gguf": {
+     "sha256": "41a11db0d087b157ea8aedb5ff016e9d275550f158c010664219b64694b4bdee",
+     "size": 3574012768
+    },
+    "Qwen2.5-7B-Instruct.IQ3_S.gguf": {
+     "sha256": "16d7fe482b4e6521d177b02eca312efe32a85c384d32cea96f0d099b411fe7b6",
+     "size": 3499193184
+    },
+    "Qwen2.5-7B-Instruct.IQ3_XS.gguf": {
+     "sha256": "8365ae51b4b2b42cd84b35656bdd3cfc8d103e256536d5ab011a3c5f26f32419",
+     "size": 3346256736
+    },
+    "Qwen2.5-7B-Instruct.IQ4_NL.gguf": {
+     "sha256": "1952c85b240a244d0f4661d065ee3b252c42c2da244efcff34e3fdc658352e9a",
+     "size": 4463274848
+    },
+    "Qwen2.5-7B-Instruct.IQ4_XS.gguf": {
+     "sha256": "c2b9e386207aea7ed76e9cfdb7ed600c5b509d032f6680c96abdc9e1c29096a2",
+     "size": 4250299232
+    },
+    "Qwen2.5-7B-Instruct.Q2_K.gguf": {
+     "sha256": "af395221258cce7585bfdc6647eae76c2739e4177c42b9fdd589b6f6eb0674a6",
+     "size": 3015940960
+    },
+    "Qwen2.5-7B-Instruct.Q3_K_L.gguf": {
+     "sha256": "2a0bb864aa96d5ba844b9cf20e8841bca7f4e58547feb58a3502cca7b09b7a23",
+     "size": 4088460128
+    },
+    "Qwen2.5-7B-Instruct.Q3_K_M.gguf": {
+     "sha256": "1781067d3fcc5f0e8895311a03ef008e75e20e0e98baad0b4bda5c4d12047708",
+     "size": 3808392032
+    },
+    "Qwen2.5-7B-Instruct.Q3_K_S.gguf": {
+     "sha256": "d9ce5f1eaa278da8367e6ea62d226ed36c573752644584f63d828f03ea3fec3f",
+     "size": 3492369248
+    },
+    "Qwen2.5-7B-Instruct.Q4_0.gguf": {
+     "sha256": "b82b31a1d1b9a5aadac7c4f09e3cd52e2760453c3750a9bda6362cb94c18d185",
+     "size": 4431391584
+    },
+    "Qwen2.5-7B-Instruct.Q4_0_4_4.gguf": {
+     "sha256": "3040ddadbfd95dba3104d29344b8c08f9058ba0ebf8c896f9b57d1c291c3d50f",
+     "size": 4431391584
+    },
+    "Qwen2.5-7B-Instruct.Q4_0_4_8.gguf": {
+     "sha256": "91d572f07b36615bff880093d2804639687b3db7ffe2b9ea8afede50639615a0",
+     "size": 4431391584
+    },
+    "Qwen2.5-7B-Instruct.Q4_0_8_8.gguf": {
+     "sha256": "18ddc1bbcb78f8e11fe448ac696a0e904550a6616c30ddeaf0dd4c6b15d60c3e",
+     "size": 4431391584
+    },
+    "Qwen2.5-7B-Instruct.Q4_1.gguf": {
+     "sha256": "587e9dc05d9b39bfea9a2b2746f8a4013f8a5676c315db1512a30eee0a6dd06c",
+     "size": 4873284448
+    },
+    "Qwen2.5-7B-Instruct.Q4_K_M.gguf": {
+     "sha256": "b5fe74b613436747acf83405e896a338ded690037ab77581d1177829dc19f680",
+     "size": 4683074400
+    },
+    "Qwen2.5-7B-Instruct.Q4_K_S.gguf": {
+     "sha256": "504429527bc6722ba2e31ea9237a8b8885e766348457c50d86dc3a5593096590",
+     "size": 4457769824
+    },
+    "Qwen2.5-7B-Instruct.Q5_0.gguf": {
+     "sha256": "b4c23d3b2a5f68f313414fe96b78ebd560a082d3fc865ee382121414b726c641",
+     "size": 5315177312
+    },
+    "Qwen2.5-7B-Instruct.Q5_1.gguf": {
+     "sha256": "e0c5c446b936283ede4b4eb855da9fab29f5d661794cb348076b0c7e4ea9c850",
+     "size": 5757070176
+    },
+    "Qwen2.5-7B-Instruct.Q5_K_M.gguf": {
+     "sha256": "c4ef1d429c75430756f403b22e109a18ce484c562e54d867838e71bebd5d6465",
+     "size": 5444832096
+    },
+    "Qwen2.5-7B-Instruct.Q5_K_S.gguf": {
+     "sha256": "fc56d594ce1a609d9b1ac7c54c460dc238d7663280574c96c52778c4f8accb1f",
+     "size": 5315177312
+    },
+    "Qwen2.5-7B-Instruct.Q6_K.gguf": {
+     "sha256": "be62dfe1ff7d1449717c84dffb0515bfc26fef169fe1bdc50dac38adb0dd09c9",
+     "size": 6254199648
+    },
+    "Qwen2.5-7B-Instruct.Q8_0.gguf": {
+     "sha256": "7eb28373e45a9e9f0fe2837099656de4f731d5f1866551393227c0cce8dc3cec",
+     "size": 8098526048
+    },
+    "Qwen2.5-7B-Instruct.SOURCE.gguf": {
+     "sha256": "863c978275bca3fdacdde06cbfc1a65f2bd65210bb7ecfd9ded3b24219d81b54",
+     "size": 15237853600
+    },
+    "Qwen2.5-7B-Instruct.f16.gguf": {
+     "sha256": "13f988e9262358fe2ffd1d7f61732dd48ee4f41c3888d44e292b096e11530e52",
+     "size": 15237854048
+    }
+   },
+   "hf_by": "huggingface.co",
+   "ms": {},
+   "ms_by": "www.modelscope.cn"
+  },
+  "mradermacher/Rio-3.0-Open-Mini-GGUF": {
+   "hf": {
+    "Rio-3.0-Open-Mini.IQ4_XS.gguf": {
+     "sha256": "6d7243d54798a40dd35b0058316c397fa376ed412c80779d4e2799e1292819f4",
+     "size": 2286316608
+    },
+    "Rio-3.0-Open-Mini.Q2_K.gguf": {
+     "sha256": "fb266d9a8ccb2b429489623c7356b2aeb44a2d5101cf36a1d115067a73abe251",
+     "size": 1669499968
+    },
+    "Rio-3.0-Open-Mini.Q3_K_L.gguf": {
+     "sha256": "ddf96ded6d0b401f8021b92243bb84c69fa446ae29abec74e0323ead0db2f601",
+     "size": 2239786048
+    },
+    "Rio-3.0-Open-Mini.Q3_K_M.gguf": {
+     "sha256": "3623b8f871f7e9213d9bb9cf1ccea89777e681c687ba00669bc3b484c18672ac",
+     "size": 2075618368
+    },
+    "Rio-3.0-Open-Mini.Q3_K_S.gguf": {
+     "sha256": "57861440157a9d63e365de9db7547715a3b563ff34b06b157607965b7e45d6d6",
+     "size": 1886997568
+    },
+    "Rio-3.0-Open-Mini.Q4_K_M.gguf": {
+     "sha256": "f70c3bf3fd7ec61ffde742be5dc9d0aac6b71f116bba37f5dceb0cf587cbb4d2",
+     "size": 2497281088
+    },
+    "Rio-3.0-Open-Mini.Q4_K_S.gguf": {
+     "sha256": "550da0e2e875dfd4b639533e6a61b37394cedf7c082c5aeac1de810db6358e45",
+     "size": 2383309888
+    },
+    "Rio-3.0-Open-Mini.Q5_K_M.gguf": {
+     "sha256": "1032d1658f414f55c9e0c9d673217a9eb38a1256daec14cf1dcdae2e5ba612c6",
+     "size": 2889514048
+    },
+    "Rio-3.0-Open-Mini.Q5_K_S.gguf": {
+     "sha256": "27e87220ce6da278060852bce35c983436ef51dd50d7ac860dfd62b31d13f994",
+     "size": 2823711808
+    },
+    "Rio-3.0-Open-Mini.Q6_K.gguf": {
+     "sha256": "01ef01ee7bd433de477eebd523cd520767d5a85d13b0725dcab66a793633a56e",
+     "size": 3306261568
+    },
+    "Rio-3.0-Open-Mini.Q8_0.gguf": {
+     "sha256": "9729a23396e38cf7d72d5e82ec5b93c4867753551314934fee9aa55fb27e13b1",
+     "size": 4280405568
+    },
+    "Rio-3.0-Open-Mini.f16.gguf": {
+     "sha256": "c378024bddc4f69d1bde7e6fa986f08446ee760dba4c46fd930e77f6e7beb277",
+     "size": 8051285568
+    }
+   },
+   "hf_by": "huggingface.co",
+   "ms": {},
+   "ms_by": "www.modelscope.cn"
+  },
+  "mradermacher/gemma-2-9b-it-GGUF": {
+   "hf": {
+    "gemma-2-9b-it.IQ3_M.gguf": {
+     "sha256": "394ed120c32d2c07ba4879b46bb485fe0907520a2e21a8003713133df6f6e971",
+     "size": 4494616640
+    },
+    "gemma-2-9b-it.IQ3_S.gguf": {
+     "sha256": "2456ba800746f1cf3ccfaca4b61be57e2394a8f9baba172854ba580e8211e905",
+     "size": 4337666112
+    },
+    "gemma-2-9b-it.IQ3_XS.gguf": {
+     "sha256": "38a13f15500acd2515f9babd6d59adbb40e636cb81fc8c127d1edc17803f46fd",
+     "size": 4144990272
+    },
+    "gemma-2-9b-it.IQ4_XS.gguf": {
+     "sha256": "2b3175251e00b27f350e24ce1961d3d829c5d51a946e89162a0b54ea7c5a5c94",
+     "size": 5223172160
+    },
+    "gemma-2-9b-it.Q2_K.gguf": {
+     "sha256": "abfd8126401722824b77d8a2f80936d490ee77698d9083ce841932085bb8d040",
+     "size": 3805399104
+    },
+    "gemma-2-9b-it.Q3_K_L.gguf": {
+     "sha256": "aa88ebc6e2db1738f48b51b7111dc942fe30ba6aaca3fbdbfced995cb1861035",
+     "size": 5132453952
+    },
+    "gemma-2-9b-it.Q3_K_M.gguf": {
+     "sha256": "ca35094512e5e6aa55b700924bed5e0a6355a99857241e592cb4e279bf5169e1",
+     "size": 4761782336
+    },
+    "gemma-2-9b-it.Q3_K_S.gguf": {
+     "sha256": "629a63382bc967d6868717ea35d489b19af3306f4684e2f9172294c56a73e4d3",
+     "size": 4337666112
+    },
+    "gemma-2-9b-it.Q4_K_M.gguf": {
+     "sha256": "4da1d1ada7f64adea359bc4a572cb6faa6e4fc26993f621a3fec7ed614ca337e",
+     "size": 5761058880
+    },
+    "gemma-2-9b-it.Q4_K_S.gguf": {
+     "sha256": "a62330173ccfe6d9e10c2b129d0c12855c1a214106b8a8b525ccc897c942ca09",
+     "size": 5478926400
+    },
+    "gemma-2-9b-it.Q5_K_M.gguf": {
+     "sha256": "c353c3d2400f95d6d8a3ef30d25038ef1b04a52964ed33438a1926c854fac4e8",
+     "size": 6647367744
+    },
+    "gemma-2-9b-it.Q5_K_S.gguf": {
+     "sha256": "9362b1a89e08af57d1e698e5035c2e708f50155791a34bcbfe71c19fc4711cd8",
+     "size": 6483593280
+    },
+    "gemma-2-9b-it.Q6_K.gguf": {
+     "sha256": "ec1b9ed754b63a0798eb6dcf2a5c76c39c4ba99c47fb34901b9c30217b7ef0ff",
+     "size": 7589070912
+    },
+    "gemma-2-9b-it.Q8_0.gguf": {
+     "sha256": "f3bea65d24a267e86b3a9a706d920f53d667fbd6531e97099649cfae2e4219ad",
+     "size": 9827149888
+    },
+    "gemma-2-9b-it.f16.gguf": {
+     "sha256": "1c5cffe22cd10610540e93e36e43a95543a7069848cfdbda0cc5189e863f75fd",
+     "size": 18490681408
+    }
+   },
+   "hf_by": "huggingface.co",
+   "ms": {},
+   "ms_by": "www.modelscope.cn"
+  },
+  "unsloth/Llama-3.1-8B-Instruct-GGUF": {
+   "hf": {
+    "Llama-3.1-8B-Instruct-BF16.gguf": {
+     "sha256": "00bea1d086a0bffd8a37e0730124036739d27ac05c455933beb5714771e34a63",
+     "size": 16068895872
+    },
+    "Llama-3.1-8B-Instruct-IQ4_NL.gguf": {
+     "sha256": "c76ecbe29adfdb074fc04abf582cd53463c62d6b5f21a36f045616b2cf0b96d1",
+     "size": 4677993856
+    },
+    "Llama-3.1-8B-Instruct-IQ4_XS.gguf": {
+     "sha256": "0bfbfeac3e1e589193da037e682ffb76730a30e787278d30a846bddcd194913f",
+     "size": 4464084352
+    },
+    "Llama-3.1-8B-Instruct-Q2_K.gguf": {
+     "sha256": "f2e27796f3f8268cc7e79806e69298d29a31104b6428f806e55d9c14a49ae17a",
+     "size": 3179136384
+    },
+    "Llama-3.1-8B-Instruct-Q2_K_L.gguf": {
+     "sha256": "327717f89ea7210c87ebedab3eb35ae3b1181fbe9bd4cb5bb31832609987fe7a",
+     "size": 3302262144
+    },
+    "Llama-3.1-8B-Instruct-Q3_K_M.gguf": {
+     "sha256": "71daf40611ec04009c25d81764dc242abcc2d991c801a60f58c19ad856c500fd",
+     "size": 4018922880
+    },
+    "Llama-3.1-8B-Instruct-Q3_K_S.gguf": {
+     "sha256": "b38d222dee6a0df52f3a0dbea33cd6993005ff0b74255147053473ecc56374c1",
+     "size": 3664504192
+    },
+    "Llama-3.1-8B-Instruct-Q4_0.gguf": {
+     "sha256": "88e2c6002459f892d77c7e5e219868ef08a57c4e92354c7271aaf64f47ab0eaa",
+     "size": 4675896704
+    },
+    "Llama-3.1-8B-Instruct-Q4_1.gguf": {
+     "sha256": "50ebdab3bc5a529daf03b6755ac480042519eb2c3b14b2c4e9901665c8e889a0",
+     "size": 5130257792
+    },
+    "Llama-3.1-8B-Instruct-Q4_K_M.gguf": {
+     "sha256": "b3bdbf23b47d7e6bb791c99b206deb169cd5a96362a9e3399028df2faacdc506",
+     "size": 4920739200
+    },
+    "Llama-3.1-8B-Instruct-Q4_K_S.gguf": {
+     "sha256": "7cd71fbe98af3c5bac978c7b8f8639080cbfada96ef12b6205029208855cfecb",
+     "size": 4692673920
+    },
+    "Llama-3.1-8B-Instruct-Q5_K_M.gguf": {
+     "sha256": "bc945542131dc588ba0b896701311add406a229104125f7ee2786d95a21df949",
+     "size": 5732992384
+    },
+    "Llama-3.1-8B-Instruct-Q5_K_S.gguf": {
+     "sha256": "48b6031f4760ede34f930305dd57c69e02a90e5d682f4f930a9fc5af5a2d0e27",
+     "size": 5599298944
+    },
+    "Llama-3.1-8B-Instruct-Q6_K.gguf": {
+     "sha256": "61feef661e081cbe00f1c8cc0d5565d0884c651491a908bdc1124f580eb9ae41",
+     "size": 6596011392
+    },
+    "Llama-3.1-8B-Instruct-UD-IQ1_M.gguf": {
+     "sha256": "d8c907b73676d40c9e65dad4d6d33f12834ed6ddacab9974c64179c866bb12e2",
+     "size": 2292204928
+    },
+    "Llama-3.1-8B-Instruct-UD-IQ1_S.gguf": {
+     "sha256": "9221fc4ea1cec0fd8903833990fdab0d3cf3c8f2ebefb57bc42da76eabdb9d42",
+     "size": 2164671872
+    },
+    "Llama-3.1-8B-Instruct-UD-IQ2_M.gguf": {
+     "sha256": "aac0d1aedd31a6ed2c3d4f5811c4a6a1e0b3715bcd400360809a3bf9082deed2",
+     "size": 3003270528
+    },
+    "Llama-3.1-8B-Instruct-UD-IQ2_XXS.gguf": {
+     "sha256": "4379835c6b78dae3f61c881ce7f7f8bc2a846108c30571f8aeb6441536a3d25e",
+     "size": 2504869248
+    },
+    "Llama-3.1-8B-Instruct-UD-IQ3_XXS.gguf": {
+     "sha256": "41b7486ae04cd483b26a4f0a8f460efac49bd5b2d1d8164980a262613ae2d1f8",
+     "size": 3321775488
+    },
+    "Llama-3.1-8B-Instruct-UD-Q2_K_XL.gguf": {
+     "sha256": "3918c4c8d42d9391d78a8aa63bbbd4647926f5bbf907d16aedd6bc0266b335c1",
+     "size": 3388769664
+    },
+    "Llama-3.1-8B-Instruct-UD-Q3_K_XL.gguf": {
+     "sha256": "38cbb27fbc7a49bccf8becf72b9fd7a1476a316bbb85d82783b49b9a89aec609",
+     "size": 4199613824
+    },
+    "Llama-3.1-8B-Instruct-UD-Q4_K_XL.gguf": {
+     "sha256": "5685babde6e53e95764f4f56ec0a0bbde574c1b4987b6170ee346bdf22fac2e1",
+     "size": 4994205056
+    },
+    "Llama-3.1-8B-Instruct-UD-Q5_K_XL.gguf": {
+     "sha256": "526557bb0fea410882e526542a706539649d200c776404f8f7e69087a2297faa",
+     "size": 5738136960
+    },
+    "Llama-3.1-8B-Instruct-UD-Q6_K_XL.gguf": {
+     "sha256": "54217d8e02c46ce8ca13cda2ccbcefc0a4d6165ac9f61aa580f54044d8303a87",
+     "size": 7329932672
+    },
+    "Llama-3.1-8B-Instruct-UD-Q8_K_XL.gguf": {
+     "sha256": "956fe7ae28b1f406e6418d82e57b7de9710f6a719eb402f9b13a58e0176f6768",
+     "size": 10575668608
+    }
+   },
+   "hf_by": "huggingface.co",
+   "ms": {
+    "Llama-3.1-8B-Instruct-BF16.gguf": {
+     "sha256": "00bea1d086a0bffd8a37e0730124036739d27ac05c455933beb5714771e34a63",
+     "size": 16068895872
+    },
+    "Llama-3.1-8B-Instruct-IQ4_NL.gguf": {
+     "sha256": "c76ecbe29adfdb074fc04abf582cd53463c62d6b5f21a36f045616b2cf0b96d1",
+     "size": 4677993856
+    },
+    "Llama-3.1-8B-Instruct-IQ4_XS.gguf": {
+     "sha256": "0bfbfeac3e1e589193da037e682ffb76730a30e787278d30a846bddcd194913f",
+     "size": 4464084352
+    },
+    "Llama-3.1-8B-Instruct-Q2_K.gguf": {
+     "sha256": "f2e27796f3f8268cc7e79806e69298d29a31104b6428f806e55d9c14a49ae17a",
+     "size": 3179136384
+    },
+    "Llama-3.1-8B-Instruct-Q2_K_L.gguf": {
+     "sha256": "327717f89ea7210c87ebedab3eb35ae3b1181fbe9bd4cb5bb31832609987fe7a",
+     "size": 3302262144
+    },
+    "Llama-3.1-8B-Instruct-Q3_K_M.gguf": {
+     "sha256": "71daf40611ec04009c25d81764dc242abcc2d991c801a60f58c19ad856c500fd",
+     "size": 4018922880
+    },
+    "Llama-3.1-8B-Instruct-Q3_K_S.gguf": {
+     "sha256": "b38d222dee6a0df52f3a0dbea33cd6993005ff0b74255147053473ecc56374c1",
+     "size": 3664504192
+    },
+    "Llama-3.1-8B-Instruct-Q4_0.gguf": {
+     "sha256": "88e2c6002459f892d77c7e5e219868ef08a57c4e92354c7271aaf64f47ab0eaa",
+     "size": 4675896704
+    },
+    "Llama-3.1-8B-Instruct-Q4_1.gguf": {
+     "sha256": "50ebdab3bc5a529daf03b6755ac480042519eb2c3b14b2c4e9901665c8e889a0",
+     "size": 5130257792
+    },
+    "Llama-3.1-8B-Instruct-Q4_K_M.gguf": {
+     "sha256": "b3bdbf23b47d7e6bb791c99b206deb169cd5a96362a9e3399028df2faacdc506",
+     "size": 4920739200
+    },
+    "Llama-3.1-8B-Instruct-Q4_K_S.gguf": {
+     "sha256": "7cd71fbe98af3c5bac978c7b8f8639080cbfada96ef12b6205029208855cfecb",
+     "size": 4692673920
+    },
+    "Llama-3.1-8B-Instruct-Q5_K_M.gguf": {
+     "sha256": "bc945542131dc588ba0b896701311add406a229104125f7ee2786d95a21df949",
+     "size": 5732992384
+    },
+    "Llama-3.1-8B-Instruct-Q5_K_S.gguf": {
+     "sha256": "48b6031f4760ede34f930305dd57c69e02a90e5d682f4f930a9fc5af5a2d0e27",
+     "size": 5599298944
+    },
+    "Llama-3.1-8B-Instruct-Q6_K.gguf": {
+     "sha256": "61feef661e081cbe00f1c8cc0d5565d0884c651491a908bdc1124f580eb9ae41",
+     "size": 6596011392
+    },
+    "Llama-3.1-8B-Instruct-UD-IQ1_M.gguf": {
+     "sha256": "d8c907b73676d40c9e65dad4d6d33f12834ed6ddacab9974c64179c866bb12e2",
+     "size": 2292204928
+    },
+    "Llama-3.1-8B-Instruct-UD-IQ1_S.gguf": {
+     "sha256": "9221fc4ea1cec0fd8903833990fdab0d3cf3c8f2ebefb57bc42da76eabdb9d42",
+     "size": 2164671872
+    },
+    "Llama-3.1-8B-Instruct-UD-IQ2_M.gguf": {
+     "sha256": "aac0d1aedd31a6ed2c3d4f5811c4a6a1e0b3715bcd400360809a3bf9082deed2",
+     "size": 3003270528
+    },
+    "Llama-3.1-8B-Instruct-UD-IQ2_XXS.gguf": {
+     "sha256": "4379835c6b78dae3f61c881ce7f7f8bc2a846108c30571f8aeb6441536a3d25e",
+     "size": 2504869248
+    },
+    "Llama-3.1-8B-Instruct-UD-IQ3_XXS.gguf": {
+     "sha256": "41b7486ae04cd483b26a4f0a8f460efac49bd5b2d1d8164980a262613ae2d1f8",
+     "size": 3321775488
+    },
+    "Llama-3.1-8B-Instruct-UD-Q2_K_XL.gguf": {
+     "sha256": "3918c4c8d42d9391d78a8aa63bbbd4647926f5bbf907d16aedd6bc0266b335c1",
+     "size": 3388769664
+    },
+    "Llama-3.1-8B-Instruct-UD-Q3_K_XL.gguf": {
+     "sha256": "38cbb27fbc7a49bccf8becf72b9fd7a1476a316bbb85d82783b49b9a89aec609",
+     "size": 4199613824
+    },
+    "Llama-3.1-8B-Instruct-UD-Q4_K_XL.gguf": {
+     "sha256": "5685babde6e53e95764f4f56ec0a0bbde574c1b4987b6170ee346bdf22fac2e1",
+     "size": 4994205056
+    },
+    "Llama-3.1-8B-Instruct-UD-Q5_K_XL.gguf": {
+     "sha256": "526557bb0fea410882e526542a706539649d200c776404f8f7e69087a2297faa",
+     "size": 5738136960
+    },
+    "Llama-3.1-8B-Instruct-UD-Q6_K_XL.gguf": {
+     "sha256": "54217d8e02c46ce8ca13cda2ccbcefc0a4d6165ac9f61aa580f54044d8303a87",
+     "size": 7329932672
+    },
+    "Llama-3.1-8B-Instruct-UD-Q8_K_XL.gguf": {
+     "sha256": "956fe7ae28b1f406e6418d82e57b7de9710f6a719eb402f9b13a58e0176f6768",
+     "size": 10575668608
+    }
+   },
+   "ms_by": "www.modelscope.cn"
+  },
+  "unsloth/Ornith-1.0-9B-GGUF": {
+   "hf": {
+    "Ornith-1.0-9B-BF16.gguf": {
+     "sha256": "bad8843952c8558a936e261f25a3201d01b1749a970d33ce2a9a73f8d12dc171",
+     "size": 17920697184
+    },
+    "Ornith-1.0-9B-IQ4_NL.gguf": {
+     "sha256": "0d1a4dfdebf30461a32adb192a0189e1746ae77ba4e4d3a57c63384f6ea1613c",
+     "size": 5490173024
+    },
+    "Ornith-1.0-9B-IQ4_XS.gguf": {
+     "sha256": "0032d73f235213134c656eb155dd5e1fe7d05ae2f2d96a526c3273fd3cc09aec",
+     "size": 5312963680
+    },
+    "Ornith-1.0-9B-Q3_K_M.gguf": {
+     "sha256": "b7d61e407d39fc002d922d2282af180e0618d3ead8367a5d63a451c911a97659",
+     "size": 4699464800
+    },
+    "Ornith-1.0-9B-Q3_K_S.gguf": {
+     "sha256": "afab777ee752cdaa05bf71b140fa9f9f68e5bdd162e9da4c64564d1cea661f92",
+     "size": 4335346784
+    },
+    "Ornith-1.0-9B-Q4_0.gguf": {
+     "sha256": "5248daff54191bb4aae4a846e875595a538cc86177dd2f94a4a8682623591e53",
+     "size": 5397898336
+    },
+    "Ornith-1.0-9B-Q4_1.gguf": {
+     "sha256": "32bc79604802a1e9cc1d73bd6b97effeeedc5b5bdc875ab89c1d01095c0b65fa",
+     "size": 5855732832
+    },
+    "Ornith-1.0-9B-Q4_K_M.gguf": {
+     "sha256": "641675b356a4463677a02a0d703f7b571b39f0b747fbd270b379c848edc29e84",
+     "size": 5701067872
+    },
+    "Ornith-1.0-9B-Q4_K_S.gguf": {
+     "sha256": "3c75301fca20807e088ab874010f09d46f8f909a5f943d9e60be18084b2c5154",
+     "size": 5423588448
+    },
+    "Ornith-1.0-9B-Q5_K_M.gguf": {
+     "sha256": "edddf3898706262cebb5f84618ff0777e9159bfc0ba411b3116970524ea5d21e",
+     "size": 6542287968
+    },
+    "Ornith-1.0-9B-Q5_K_S.gguf": {
+     "sha256": "a9571f11b8d42a6a0b0619a03504f5c404414919ef58c3beccfd2457f588df17",
+     "size": 6379627616
+    },
+    "Ornith-1.0-9B-Q6_K.gguf": {
+     "sha256": "a455e9534495d1bf52fcf31a8c173025725a0f31760dfbf31e8bd44545591a11",
+     "size": 7476782176
+    },
+    "Ornith-1.0-9B-Q8_0.gguf": {
+     "sha256": "4d469c15b1ef0e494c4a756acc8b2eec9eabcc6572986e9cb89efa87444c2d72",
+     "size": 9527501920
+    },
+    "Ornith-1.0-9B-UD-IQ2_M.gguf": {
+     "sha256": "4e57a366e0b7bf2adae2de17b3253adf43892a2237db707fd582d84c2f416e96",
+     "size": 3862881376
+    },
+    "Ornith-1.0-9B-UD-IQ3_XXS.gguf": {
+     "sha256": "8e8c5eaccbd450c79bb294efe67a6c5d8c77e74606069a2c09b57cb81389f590",
+     "size": 4173522016
+    },
+    "Ornith-1.0-9B-UD-Q2_K_XL.gguf": {
+     "sha256": "b1f859ffc9dd88a6999450e6083730446347e5e9137eae8d319e108b8261942f",
+     "size": 4329006176
+    },
+    "Ornith-1.0-9B-UD-Q3_K_XL.gguf": {
+     "sha256": "e6cb7341f87ed2229c31a33f8c2a6648aaaa66bd09f70f09937a6b324cdab3fb",
+     "size": 5105476704
+    },
+    "Ornith-1.0-9B-UD-Q4_K_XL.gguf": {
+     "sha256": "3e865c778cf254af1b5d0fd3e9d4876718279df543c3ef801039c4ff7010edb0",
+     "size": 5980251232
+    },
+    "Ornith-1.0-9B-UD-Q5_K_XL.gguf": {
+     "sha256": "5989ebf5da84cd5d970e04e8fc3b530497e606e9cd37298dcf46fc9fe3120356",
+     "size": 6693872736
+    },
+    "Ornith-1.0-9B-UD-Q6_K_XL.gguf": {
+     "sha256": "65d8cfb3b9b0063432408bbd9acef3a43b408aaf58beb8e08181015442507737",
+     "size": 8769512544
+    },
+    "Ornith-1.0-9B-UD-Q8_K_XL.gguf": {
+     "sha256": "132837bf0696fa00bdc31bd1544ed7ee7b2c8421014b154be32aa2be246c7511",
+     "size": 12986623072
+    },
+    "mmproj-BF16.gguf": {
+     "sha256": "ab8cf32e92fd8f73c270605f9c67267a94e8806c9cee8fb7ed63f532e14f5c5c",
+     "size": 921705088
+    },
+    "mmproj-F16.gguf": {
+     "sha256": "013638437d619467b92412e6efa281f706132f05ba6d0f4733e50f812c7e32fa",
+     "size": 918166144
+    },
+    "mmproj-F32.gguf": {
+     "sha256": "3d9d3da16f48a0284e7b7b2ca9d4085a1943b1d36dffc65effd2ba7c248f2624",
+     "size": 1824062080
+    }
+   },
+   "hf_by": "huggingface.co",
+   "ms": {
+    "Ornith-1.0-9B-BF16.gguf": {
+     "sha256": "bad8843952c8558a936e261f25a3201d01b1749a970d33ce2a9a73f8d12dc171",
+     "size": 17920697184
+    },
+    "Ornith-1.0-9B-IQ4_NL.gguf": {
+     "sha256": "0d1a4dfdebf30461a32adb192a0189e1746ae77ba4e4d3a57c63384f6ea1613c",
+     "size": 5490173024
+    },
+    "Ornith-1.0-9B-IQ4_XS.gguf": {
+     "sha256": "0032d73f235213134c656eb155dd5e1fe7d05ae2f2d96a526c3273fd3cc09aec",
+     "size": 5312963680
+    },
+    "Ornith-1.0-9B-Q3_K_M.gguf": {
+     "sha256": "b7d61e407d39fc002d922d2282af180e0618d3ead8367a5d63a451c911a97659",
+     "size": 4699464800
+    },
+    "Ornith-1.0-9B-Q3_K_S.gguf": {
+     "sha256": "afab777ee752cdaa05bf71b140fa9f9f68e5bdd162e9da4c64564d1cea661f92",
+     "size": 4335346784
+    },
+    "Ornith-1.0-9B-Q4_0.gguf": {
+     "sha256": "5248daff54191bb4aae4a846e875595a538cc86177dd2f94a4a8682623591e53",
+     "size": 5397898336
+    },
+    "Ornith-1.0-9B-Q4_1.gguf": {
+     "sha256": "32bc79604802a1e9cc1d73bd6b97effeeedc5b5bdc875ab89c1d01095c0b65fa",
+     "size": 5855732832
+    },
+    "Ornith-1.0-9B-Q4_K_M.gguf": {
+     "sha256": "641675b356a4463677a02a0d703f7b571b39f0b747fbd270b379c848edc29e84",
+     "size": 5701067872
+    },
+    "Ornith-1.0-9B-Q4_K_S.gguf": {
+     "sha256": "3c75301fca20807e088ab874010f09d46f8f909a5f943d9e60be18084b2c5154",
+     "size": 5423588448
+    },
+    "Ornith-1.0-9B-Q5_K_M.gguf": {
+     "sha256": "edddf3898706262cebb5f84618ff0777e9159bfc0ba411b3116970524ea5d21e",
+     "size": 6542287968
+    },
+    "Ornith-1.0-9B-Q5_K_S.gguf": {
+     "sha256": "a9571f11b8d42a6a0b0619a03504f5c404414919ef58c3beccfd2457f588df17",
+     "size": 6379627616
+    },
+    "Ornith-1.0-9B-Q6_K.gguf": {
+     "sha256": "a455e9534495d1bf52fcf31a8c173025725a0f31760dfbf31e8bd44545591a11",
+     "size": 7476782176
+    },
+    "Ornith-1.0-9B-Q8_0.gguf": {
+     "sha256": "4d469c15b1ef0e494c4a756acc8b2eec9eabcc6572986e9cb89efa87444c2d72",
+     "size": 9527501920
+    },
+    "Ornith-1.0-9B-UD-IQ2_M.gguf": {
+     "sha256": "4e57a366e0b7bf2adae2de17b3253adf43892a2237db707fd582d84c2f416e96",
+     "size": 3862881376
+    },
+    "Ornith-1.0-9B-UD-IQ3_XXS.gguf": {
+     "sha256": "8e8c5eaccbd450c79bb294efe67a6c5d8c77e74606069a2c09b57cb81389f590",
+     "size": 4173522016
+    },
+    "Ornith-1.0-9B-UD-Q2_K_XL.gguf": {
+     "sha256": "b1f859ffc9dd88a6999450e6083730446347e5e9137eae8d319e108b8261942f",
+     "size": 4329006176
+    },
+    "Ornith-1.0-9B-UD-Q3_K_XL.gguf": {
+     "sha256": "e6cb7341f87ed2229c31a33f8c2a6648aaaa66bd09f70f09937a6b324cdab3fb",
+     "size": 5105476704
+    },
+    "Ornith-1.0-9B-UD-Q4_K_XL.gguf": {
+     "sha256": "3e865c778cf254af1b5d0fd3e9d4876718279df543c3ef801039c4ff7010edb0",
+     "size": 5980251232
+    },
+    "Ornith-1.0-9B-UD-Q5_K_XL.gguf": {
+     "sha256": "5989ebf5da84cd5d970e04e8fc3b530497e606e9cd37298dcf46fc9fe3120356",
+     "size": 6693872736
+    },
+    "Ornith-1.0-9B-UD-Q6_K_XL.gguf": {
+     "sha256": "65d8cfb3b9b0063432408bbd9acef3a43b408aaf58beb8e08181015442507737",
+     "size": 8769512544
+    },
+    "Ornith-1.0-9B-UD-Q8_K_XL.gguf": {
+     "sha256": "132837bf0696fa00bdc31bd1544ed7ee7b2c8421014b154be32aa2be246c7511",
+     "size": 12986623072
+    },
+    "mmproj-BF16.gguf": {
+     "sha256": "ab8cf32e92fd8f73c270605f9c67267a94e8806c9cee8fb7ed63f532e14f5c5c",
+     "size": 921705088
+    },
+    "mmproj-F16.gguf": {
+     "sha256": "013638437d619467b92412e6efa281f706132f05ba6d0f4733e50f812c7e32fa",
+     "size": 918166144
+    },
+    "mmproj-F32.gguf": {
+     "sha256": "3d9d3da16f48a0284e7b7b2ca9d4085a1943b1d36dffc65effd2ba7c248f2624",
+     "size": 1824062080
+    }
+   },
+   "ms_by": "www.modelscope.cn"
+  },
+  "unsloth/Qwen2.5-Coder-14B-Instruct-GGUF": {
+   "hf": {
+    "Qwen2.5-Coder-14B-Instruct-F16.gguf": {
+     "sha256": "3a4bc98b54132142549191c91d941235f3403e3c23041be975ea7b39d01725ca",
+     "size": 29547716000
+    },
+    "Qwen2.5-Coder-14B-Instruct-Q2_K.gguf": {
+     "sha256": "e2ab275728e597163002333f4d7499bc36dcd753c0bcbcce24048fbfb8af5e2e",
+     "size": 5770497440
+    },
+    "Qwen2.5-Coder-14B-Instruct-Q3_K_M.gguf": {
+     "sha256": "b6469809fa476619822216f01fed4bad83c9d4e1ee75e1b00a77fbb519e4af7a",
+     "size": 7339204000
+    },
+    "Qwen2.5-Coder-14B-Instruct-Q4_K_M.gguf": {
+     "sha256": "13dec282d3ac9a87896248d5f69187102fad7c56315c553d2fab5403121702fe",
+     "size": 8988110240
+    },
+    "Qwen2.5-Coder-14B-Instruct-Q5_K_M.gguf": {
+     "sha256": "70ef39373ce052a895f6d7c2f2337f353ec6ddfe9bb14ed0d395832dae3686c2",
+     "size": 10508873120
+    },
+    "Qwen2.5-Coder-14B-Instruct-Q6_K.gguf": {
+     "sha256": "9650b0290e60aee15f79112acd3c5db00df14fc4a4d2a934d9b00ed59eda7c3c",
+     "size": 12124683680
+    },
+    "Qwen2.5-Coder-14B-Instruct-Q8_0.gguf": {
+     "sha256": "63347586768ee56033675ba87e1cb3321e51101f412117cbece02b59c184d2b1",
+     "size": 15701597600
+    }
+   },
+   "hf_by": "huggingface.co",
+   "ms": {
+    "Qwen2.5-Coder-14B-Instruct-F16.gguf": {
+     "sha256": "3a4bc98b54132142549191c91d941235f3403e3c23041be975ea7b39d01725ca",
+     "size": 29547716000
+    },
+    "Qwen2.5-Coder-14B-Instruct-Q2_K.gguf": {
+     "sha256": "e2ab275728e597163002333f4d7499bc36dcd753c0bcbcce24048fbfb8af5e2e",
+     "size": 5770497440
+    },
+    "Qwen2.5-Coder-14B-Instruct-Q3_K_M.gguf": {
+     "sha256": "b6469809fa476619822216f01fed4bad83c9d4e1ee75e1b00a77fbb519e4af7a",
+     "size": 7339204000
+    },
+    "Qwen2.5-Coder-14B-Instruct-Q4_K_M.gguf": {
+     "sha256": "13dec282d3ac9a87896248d5f69187102fad7c56315c553d2fab5403121702fe",
+     "size": 8988110240
+    },
+    "Qwen2.5-Coder-14B-Instruct-Q5_K_M.gguf": {
+     "sha256": "70ef39373ce052a895f6d7c2f2337f353ec6ddfe9bb14ed0d395832dae3686c2",
+     "size": 10508873120
+    },
+    "Qwen2.5-Coder-14B-Instruct-Q6_K.gguf": {
+     "sha256": "9650b0290e60aee15f79112acd3c5db00df14fc4a4d2a934d9b00ed59eda7c3c",
+     "size": 12124683680
+    },
+    "Qwen2.5-Coder-14B-Instruct-Q8_0.gguf": {
+     "sha256": "63347586768ee56033675ba87e1cb3321e51101f412117cbece02b59c184d2b1",
+     "size": 15701597600
+    }
+   },
+   "ms_by": "www.modelscope.cn"
+  },
+  "unsloth/Qwen2.5-Coder-7B-Instruct-GGUF": {
+   "hf": {
+    "Qwen2.5-Coder-7B-Instruct-F16.gguf": {
+     "sha256": "70f3b9429729498b4ce55beb99c27531a67fcaa80c30fa75322ecd51d850127a",
+     "size": 15237853152
+    },
+    "Qwen2.5-Coder-7B-Instruct-Q2_K.gguf": {
+     "sha256": "006b45a345de6a3a05ca3217b24f397bd168758601f6440317cf15f5b09c15c7",
+     "size": 3015940064
+    },
+    "Qwen2.5-Coder-7B-Instruct-Q3_K_M.gguf": {
+     "sha256": "b8d7b3a86dce436290afbf346ca4a05ca76298cc6abfa7f9b2aec2c60f1a4b7f",
+     "size": 3808391136
+    },
+    "Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf": {
+     "sha256": "9a961bb225cb2b9fd84b2297df0d53089895c049d7d9dc5f5f8aebbcd3247872",
+     "size": 4683073504
+    },
+    "Qwen2.5-Coder-7B-Instruct-Q5_K_M.gguf": {
+     "sha256": "8a025f8bae85617ac95209d9211cbfb2a7142b129a201fa2c2c140ed34661113",
+     "size": 5444831200
+    },
+    "Qwen2.5-Coder-7B-Instruct-Q6_K.gguf": {
+     "sha256": "724b2b241230aad689f5b43fe8f22d452755bf98677fbcfaa36d2a1b6a89c140",
+     "size": 6254198752
+    },
+    "Qwen2.5-Coder-7B-Instruct-Q8_0.gguf": {
+     "sha256": "3b879bf3c429aeb01ae5edec57eb2e787b24eb317991dfe491d69357c7f02735",
+     "size": 8098525152
+    }
+   },
+   "hf_by": "huggingface.co",
+   "ms": {
+    "Qwen2.5-Coder-7B-Instruct-F16.gguf": {
+     "sha256": "70f3b9429729498b4ce55beb99c27531a67fcaa80c30fa75322ecd51d850127a",
+     "size": 15237853152
+    },
+    "Qwen2.5-Coder-7B-Instruct-Q2_K.gguf": {
+     "sha256": "006b45a345de6a3a05ca3217b24f397bd168758601f6440317cf15f5b09c15c7",
+     "size": 3015940064
+    },
+    "Qwen2.5-Coder-7B-Instruct-Q3_K_M.gguf": {
+     "sha256": "b8d7b3a86dce436290afbf346ca4a05ca76298cc6abfa7f9b2aec2c60f1a4b7f",
+     "size": 3808391136
+    },
+    "Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf": {
+     "sha256": "9a961bb225cb2b9fd84b2297df0d53089895c049d7d9dc5f5f8aebbcd3247872",
+     "size": 4683073504
+    },
+    "Qwen2.5-Coder-7B-Instruct-Q5_K_M.gguf": {
+     "sha256": "8a025f8bae85617ac95209d9211cbfb2a7142b129a201fa2c2c140ed34661113",
+     "size": 5444831200
+    },
+    "Qwen2.5-Coder-7B-Instruct-Q6_K.gguf": {
+     "sha256": "724b2b241230aad689f5b43fe8f22d452755bf98677fbcfaa36d2a1b6a89c140",
+     "size": 6254198752
+    },
+    "Qwen2.5-Coder-7B-Instruct-Q8_0.gguf": {
+     "sha256": "3b879bf3c429aeb01ae5edec57eb2e787b24eb317991dfe491d69357c7f02735",
+     "size": 8098525152
+    }
+   },
+   "ms_by": "www.modelscope.cn"
+  },
+  "unsloth/Qwen3-4B-GGUF": {
+   "hf": {
+    "Qwen3-4B-BF16.gguf": {
+     "sha256": "f59dbdf0a0131f4bafe257e5eaf25137a88c89c7a009e9418b0e447accda58a8",
+     "size": 8051285536
+    },
+    "Qwen3-4B-IQ4_NL.gguf": {
+     "sha256": "51fa8380d1c9a7dd47876dbed6c963fffeceec54a0065feeb6a8f3c113e1a562",
+     "size": 2381344032
+    },
+    "Qwen3-4B-IQ4_XS.gguf": {
+     "sha256": "82aa8394fd5b43eea0c287c88ae932b22f90e192e1288cff94bc39e2d5a97c01",
+     "size": 2270752032
+    },
+    "Qwen3-4B-Q2_K.gguf": {
+     "sha256": "a5f2398927fa06fe12074aa39086004300185b82de53a1d2623b0f015e3881b0",
+     "size": 1669500192
+    },
+    "Qwen3-4B-Q2_K_L.gguf": {
+     "sha256": "a5f2398927fa06fe12074aa39086004300185b82de53a1d2623b0f015e3881b0",
+     "size": 1669500192
+    },
+    "Qwen3-4B-Q3_K_M.gguf": {
+     "sha256": "e78ff54a67f3b3f57e637fbf0770d5b73c1e215ea7c0153980f1e8140c2b2486",
+     "size": 2075618592
+    },
+    "Qwen3-4B-Q3_K_S.gguf": {
+     "sha256": "0f16e5ebc31514dbdb0e0c736ed6d28c2b086de689afb0f1ab1f7a2ad2eff43e",
+     "size": 1886997792
+    },
+    "Qwen3-4B-Q4_0.gguf": {
+     "sha256": "92f4a83cdfe691b216a949f915e47f35f0ed85b833aa03490c719160ac5cdf7a",
+     "size": 2375773472
+    },
+    "Qwen3-4B-Q4_1.gguf": {
+     "sha256": "deb1db47d2e12a719e3473a1b48d6474a48dc05c097650eab292058180be765a",
+     "size": 2596629792
+    },
+    "Qwen3-4B-Q4_K_M.gguf": {
+     "sha256": "f6f851777709861056efcdad3af01da38b31223a3ba26e61a4f8bf3a2195813a",
+     "size": 2497281312
+    },
+    "Qwen3-4B-Q4_K_S.gguf": {
+     "sha256": "78cea0ccfd5fd7af5761f7dfdeebd2ec8f04328be0f1e6f70e2213a6f1309bc9",
+     "size": 2383310112
+    },
+    "Qwen3-4B-Q5_K_M.gguf": {
+     "sha256": "37edbd37f5b7a4d4e7a766400c57def1f790e809de03513b86bf11bb06979695",
+     "size": 2889514272
+    },
+    "Qwen3-4B-Q5_K_S.gguf": {
+     "sha256": "7bc3b33f8439ef774adc4665f61c8c31132056a8616db6227a6664397a42563a",
+     "size": 2823712032
+    },
+    "Qwen3-4B-Q6_K.gguf": {
+     "sha256": "002b8b61c298976afc2c9c3ca65f9dbb28deba22c4b6381853dfaa92b5690022",
+     "size": 3306261792
+    },
+    "Qwen3-4B-Q8_0.gguf": {
+     "sha256": "eed555233267a33c7e8ee31682762cc7751b3f6d224039086e0e846f05fffa5d",
+     "size": 4280405792
+    },
+    "Qwen3-4B-UD-IQ1_M.gguf": {
+     "sha256": "be85300f9bee244206991b46631eb937ff46917a241ad5e396fcb8beee4fc55b",
+     "size": 1143484192
+    },
+    "Qwen3-4B-UD-IQ1_S.gguf": {
+     "sha256": "bdc1138cb754d50dd4cc226597d307dd1f011710a8ddf8c68bb25e7fd215e470",
+     "size": 1083150112
+    },
+    "Qwen3-4B-UD-IQ2_M.gguf": {
+     "sha256": "c9ae27462f4edf0fdce39d41f6c129be7907d1c4ebe26c1298b30bc1bbac6c9f",
+     "size": 1532931872
+    },
+    "Qwen3-4B-UD-IQ2_XXS.gguf": {
+     "sha256": "2c41173a2bcd7a5c1f53524cb0efef1f5ee647523d8c1988be71a943d9a70e5c",
+     "size": 1255345952
+    },
+    "Qwen3-4B-UD-IQ3_XXS.gguf": {
+     "sha256": "f288d0748fca57526304df6e4648b126f7e900ef48b4adbea4ac553063593306",
+     "size": 1674376992
+    },
+    "Qwen3-4B-UD-Q2_K_XL.gguf": {
+     "sha256": "a09c9695db755e5f3896b20323f16eb79554be6ad4637ef9787245bc212b53d7",
+     "size": 1695724832
+    },
+    "Qwen3-4B-UD-Q3_K_XL.gguf": {
+     "sha256": "fd11f2a0741a8bad10d6892bac438326460844c09d8eaeb27419fb89360c8f55",
+     "size": 2131692832
+    },
+    "Qwen3-4B-UD-Q4_K_XL.gguf": {
+     "sha256": "f6e3fb6c2cdc869d16e66c719e94f2c02095d195967230e759a2d77fe814c71f",
+     "size": 2546341152
+    },
+    "Qwen3-4B-UD-Q5_K_XL.gguf": {
+     "sha256": "bf8683da9e517b872859fdc8a0704a599021305380f5c08780c209b07ba26fe6",
+     "size": 2905253152
+    },
+    "Qwen3-4B-UD-Q6_K_XL.gguf": {
+     "sha256": "ac0767b5e9c9f16efe57ce422253a33747970c166c3131c4d4d59d20511f07e1",
+     "size": 3658223392
+    },
+    "Qwen3-4B-UD-Q8_K_XL.gguf": {
+     "sha256": "93bc18247eac98a8265c80c78b1322a96cc9c83218351f5a6922fb9e6f8fb242",
+     "size": 5056700192
+    }
+   },
+   "hf_by": "huggingface.co",
+   "ms": {
+    "Qwen3-4B-BF16.gguf": {
+     "sha256": "f59dbdf0a0131f4bafe257e5eaf25137a88c89c7a009e9418b0e447accda58a8",
+     "size": 8051285536
+    },
+    "Qwen3-4B-IQ4_NL.gguf": {
+     "sha256": "51fa8380d1c9a7dd47876dbed6c963fffeceec54a0065feeb6a8f3c113e1a562",
+     "size": 2381344032
+    },
+    "Qwen3-4B-IQ4_XS.gguf": {
+     "sha256": "82aa8394fd5b43eea0c287c88ae932b22f90e192e1288cff94bc39e2d5a97c01",
+     "size": 2270752032
+    },
+    "Qwen3-4B-Q2_K.gguf": {
+     "sha256": "a5f2398927fa06fe12074aa39086004300185b82de53a1d2623b0f015e3881b0",
+     "size": 1669500192
+    },
+    "Qwen3-4B-Q2_K_L.gguf": {
+     "sha256": "a5f2398927fa06fe12074aa39086004300185b82de53a1d2623b0f015e3881b0",
+     "size": 1669500192
+    },
+    "Qwen3-4B-Q3_K_M.gguf": {
+     "sha256": "e78ff54a67f3b3f57e637fbf0770d5b73c1e215ea7c0153980f1e8140c2b2486",
+     "size": 2075618592
+    },
+    "Qwen3-4B-Q3_K_S.gguf": {
+     "sha256": "0f16e5ebc31514dbdb0e0c736ed6d28c2b086de689afb0f1ab1f7a2ad2eff43e",
+     "size": 1886997792
+    },
+    "Qwen3-4B-Q4_0.gguf": {
+     "sha256": "92f4a83cdfe691b216a949f915e47f35f0ed85b833aa03490c719160ac5cdf7a",
+     "size": 2375773472
+    },
+    "Qwen3-4B-Q4_1.gguf": {
+     "sha256": "deb1db47d2e12a719e3473a1b48d6474a48dc05c097650eab292058180be765a",
+     "size": 2596629792
+    },
+    "Qwen3-4B-Q4_K_M.gguf": {
+     "sha256": "f6f851777709861056efcdad3af01da38b31223a3ba26e61a4f8bf3a2195813a",
+     "size": 2497281312
+    },
+    "Qwen3-4B-Q4_K_S.gguf": {
+     "sha256": "78cea0ccfd5fd7af5761f7dfdeebd2ec8f04328be0f1e6f70e2213a6f1309bc9",
+     "size": 2383310112
+    },
+    "Qwen3-4B-Q5_K_M.gguf": {
+     "sha256": "37edbd37f5b7a4d4e7a766400c57def1f790e809de03513b86bf11bb06979695",
+     "size": 2889514272
+    },
+    "Qwen3-4B-Q5_K_S.gguf": {
+     "sha256": "7bc3b33f8439ef774adc4665f61c8c31132056a8616db6227a6664397a42563a",
+     "size": 2823712032
+    },
+    "Qwen3-4B-Q6_K.gguf": {
+     "sha256": "002b8b61c298976afc2c9c3ca65f9dbb28deba22c4b6381853dfaa92b5690022",
+     "size": 3306261792
+    },
+    "Qwen3-4B-Q8_0.gguf": {
+     "sha256": "eed555233267a33c7e8ee31682762cc7751b3f6d224039086e0e846f05fffa5d",
+     "size": 4280405792
+    },
+    "Qwen3-4B-UD-IQ1_M.gguf": {
+     "sha256": "be85300f9bee244206991b46631eb937ff46917a241ad5e396fcb8beee4fc55b",
+     "size": 1143484192
+    },
+    "Qwen3-4B-UD-IQ1_S.gguf": {
+     "sha256": "bdc1138cb754d50dd4cc226597d307dd1f011710a8ddf8c68bb25e7fd215e470",
+     "size": 1083150112
+    },
+    "Qwen3-4B-UD-IQ2_M.gguf": {
+     "sha256": "c9ae27462f4edf0fdce39d41f6c129be7907d1c4ebe26c1298b30bc1bbac6c9f",
+     "size": 1532931872
+    },
+    "Qwen3-4B-UD-IQ2_XXS.gguf": {
+     "sha256": "2c41173a2bcd7a5c1f53524cb0efef1f5ee647523d8c1988be71a943d9a70e5c",
+     "size": 1255345952
+    },
+    "Qwen3-4B-UD-IQ3_XXS.gguf": {
+     "sha256": "f288d0748fca57526304df6e4648b126f7e900ef48b4adbea4ac553063593306",
+     "size": 1674376992
+    },
+    "Qwen3-4B-UD-Q2_K_XL.gguf": {
+     "sha256": "a09c9695db755e5f3896b20323f16eb79554be6ad4637ef9787245bc212b53d7",
+     "size": 1695724832
+    },
+    "Qwen3-4B-UD-Q3_K_XL.gguf": {
+     "sha256": "fd11f2a0741a8bad10d6892bac438326460844c09d8eaeb27419fb89360c8f55",
+     "size": 2131692832
+    },
+    "Qwen3-4B-UD-Q4_K_XL.gguf": {
+     "sha256": "f6e3fb6c2cdc869d16e66c719e94f2c02095d195967230e759a2d77fe814c71f",
+     "size": 2546341152
+    },
+    "Qwen3-4B-UD-Q5_K_XL.gguf": {
+     "sha256": "bf8683da9e517b872859fdc8a0704a599021305380f5c08780c209b07ba26fe6",
+     "size": 2905253152
+    },
+    "Qwen3-4B-UD-Q6_K_XL.gguf": {
+     "sha256": "ac0767b5e9c9f16efe57ce422253a33747970c166c3131c4d4d59d20511f07e1",
+     "size": 3658223392
+    },
+    "Qwen3-4B-UD-Q8_K_XL.gguf": {
+     "sha256": "93bc18247eac98a8265c80c78b1322a96cc9c83218351f5a6922fb9e6f8fb242",
+     "size": 5056700192
+    }
+   },
+   "ms_by": "www.modelscope.cn"
+  },
+  "unsloth/Qwen3-4B-Instruct-2507-GGUF": {
+   "hf": {
+    "Qwen3-4B-Instruct-2507-F16.gguf": {
+     "sha256": "336228a2810f17724ecd6e9e2e40e8381eee81e886316fee311ade2899c31030",
+     "size": 8051285344
+    },
+    "Qwen3-4B-Instruct-2507-IQ4_NL.gguf": {
+     "sha256": "89bf2f9ba70b4a5ee8411244ae89dcd012ed59e386124bb096287feb09f4f25e",
+     "size": 2381343840
+    },
+    "Qwen3-4B-Instruct-2507-IQ4_XS.gguf": {
+     "sha256": "cfd15a69e4801abfa16f0263b77ffbf97cbb8af67782a70cc95cf627b3dfa27d",
+     "size": 2270751840
+    },
+    "Qwen3-4B-Instruct-2507-Q2_K.gguf": {
+     "sha256": "f7ed2f57713ad29e1a4ec093be0cdf3d7fd31e137e8fd4fc3edcfd04a5267862",
+     "size": 1669500000
+    },
+    "Qwen3-4B-Instruct-2507-Q2_K_L.gguf": {
+     "sha256": "f7ed2f57713ad29e1a4ec093be0cdf3d7fd31e137e8fd4fc3edcfd04a5267862",
+     "size": 1669500000
+    },
+    "Qwen3-4B-Instruct-2507-Q3_K_M.gguf": {
+     "sha256": "9c6e0763577125a994a9bea0bbd7a737ac4498b8a6a4e0f788727553af1806c9",
+     "size": 2075618400
+    },
+    "Qwen3-4B-Instruct-2507-Q3_K_S.gguf": {
+     "sha256": "0ce20058cc0ed6b6c9213bb383589327e458c12ffce0842fc96867042d669c75",
+     "size": 1886997600
+    },
+    "Qwen3-4B-Instruct-2507-Q4_0.gguf": {
+     "sha256": "e0ba675d86ab277c61701c6793659b2ae801d95e3be791464c321e6fbf613be2",
+     "size": 2375773280
+    },
+    "Qwen3-4B-Instruct-2507-Q4_1.gguf": {
+     "sha256": "6e37bc9a4533bae81deefd9081fda514171e8485bbbef86d63ec7407e756eb3f",
+     "size": 2596629600
+    },
+    "Qwen3-4B-Instruct-2507-Q4_K_M.gguf": {
+     "sha256": "3605803b982cb64aead44f6c1b2ae36e3acdb41d8e46c8a94c6533bc4c67e597",
+     "size": 2497281120
+    },
+    "Qwen3-4B-Instruct-2507-Q4_K_S.gguf": {
+     "sha256": "90bc7227557ed8a417696b6ed8a94b2c351ad1d94de39bf2889ad8778366c68a",
+     "size": 2383309920
+    },
+    "Qwen3-4B-Instruct-2507-Q5_K_M.gguf": {
+     "sha256": "5bde5e9d883622acb02bf77fe7dcbc56a8b9a9ad4be78a72ca23a532658b4ecb",
+     "size": 2889514080
+    },
+    "Qwen3-4B-Instruct-2507-Q5_K_S.gguf": {
+     "sha256": "e252a2bb39e90c163ba83524ea833ee73d36f9c5e50d157651c82995e7e72e60",
+     "size": 2823711840
+    },
+    "Qwen3-4B-Instruct-2507-Q6_K.gguf": {
+     "sha256": "cd7b21b38b3e71400587c184b6a9b04d3beb4d13fdae6464d4075dee4f1bc5ad",
+     "size": 3306261600
+    },
+    "Qwen3-4B-Instruct-2507-Q8_0.gguf": {
+     "sha256": "391c1e410fd9f4cf2de2b510273b56a84c19ce18f4fa3bfb3774031dac4ef068",
+     "size": 4280405600
+    },
+    "Qwen3-4B-Instruct-2507-UD-IQ1_M.gguf": {
+     "sha256": "415ed538d93b9f00f7d2cacdf8cf427bc1b05f20ae30e5a3f015fd6b04ba09d1",
+     "size": 1143484000
+    },
+    "Qwen3-4B-Instruct-2507-UD-IQ1_S.gguf": {
+     "sha256": "48e00f29635f0eb1db72d3a3c65ff1a9552676dc15f810b7074be690fbcea59e",
+     "size": 1083149920
+    },
+    "Qwen3-4B-Instruct-2507-UD-IQ2_M.gguf": {
+     "sha256": "6711372517e0e2d6dd1c008a22203299d1ba5d44f894a95fdc40a136815d4fe3",
+     "size": 1530402400
+    },
+    "Qwen3-4B-Instruct-2507-UD-IQ2_XXS.gguf": {
+     "sha256": "b4fb089163ef6c0e32f5edb3e6ef5ca860da23e8fc2c7b8fd53da5a3ce25a17d",
+     "size": 1255345760
+    },
+    "Qwen3-4B-Instruct-2507-UD-IQ3_XXS.gguf": {
+     "sha256": "c886effc2f09e63bbf9419a8136fab49dba22a578c24885f63c5f483de75ad3e",
+     "size": 1674376800
+    },
+    "Qwen3-4B-Instruct-2507-UD-Q2_K_XL.gguf": {
+     "sha256": "b7675a5b61a3e7fec4c2f138ba50504ede76c737c478029ea30510e1ee09976c",
+     "size": 1695724640
+    },
+    "Qwen3-4B-Instruct-2507-UD-Q3_K_XL.gguf": {
+     "sha256": "6aa5c26f5624cf8820f6f0207479445da5a33c4db73a2e097cf6f91f9ce0550e",
+     "size": 2128385120
+    },
+    "Qwen3-4B-Instruct-2507-UD-Q4_K_XL.gguf": {
+     "sha256": "4bbe1f2f8ebe69fad3be8e15d69f220b06448a9dd26f82d7d81cce88ebfc39fd",
+     "size": 2546340960
+    },
+    "Qwen3-4B-Instruct-2507-UD-Q5_K_XL.gguf": {
+     "sha256": "7040e21aa2b43d56735b0e4f9c89210ad21b8282f668d6897f5d1dadf71aa9f2",
+     "size": 2899221600
+    },
+    "Qwen3-4B-Instruct-2507-UD-Q6_K_XL.gguf": {
+     "sha256": "8d5b9304db7e2c419d05f5f3cbb04890b8fa0dd434a72bc3ef448b564ba8b88e",
+     "size": 3658223200
+    },
+    "Qwen3-4B-Instruct-2507-UD-Q8_K_XL.gguf": {
+     "sha256": "0aae4ff27faba8903685f3e3aad97e2004ac6e21f15eeb806e20dec90bb480be",
+     "size": 5056700000
+    }
+   },
+   "hf_by": "huggingface.co",
+   "ms": {
+    "Qwen3-4B-Instruct-2507-F16.gguf": {
+     "sha256": "336228a2810f17724ecd6e9e2e40e8381eee81e886316fee311ade2899c31030",
+     "size": 8051285344
+    },
+    "Qwen3-4B-Instruct-2507-IQ4_NL.gguf": {
+     "sha256": "89bf2f9ba70b4a5ee8411244ae89dcd012ed59e386124bb096287feb09f4f25e",
+     "size": 2381343840
+    },
+    "Qwen3-4B-Instruct-2507-IQ4_XS.gguf": {
+     "sha256": "cfd15a69e4801abfa16f0263b77ffbf97cbb8af67782a70cc95cf627b3dfa27d",
+     "size": 2270751840
+    },
+    "Qwen3-4B-Instruct-2507-Q2_K.gguf": {
+     "sha256": "f7ed2f57713ad29e1a4ec093be0cdf3d7fd31e137e8fd4fc3edcfd04a5267862",
+     "size": 1669500000
+    },
+    "Qwen3-4B-Instruct-2507-Q2_K_L.gguf": {
+     "sha256": "f7ed2f57713ad29e1a4ec093be0cdf3d7fd31e137e8fd4fc3edcfd04a5267862",
+     "size": 1669500000
+    },
+    "Qwen3-4B-Instruct-2507-Q3_K_M.gguf": {
+     "sha256": "9c6e0763577125a994a9bea0bbd7a737ac4498b8a6a4e0f788727553af1806c9",
+     "size": 2075618400
+    },
+    "Qwen3-4B-Instruct-2507-Q3_K_S.gguf": {
+     "sha256": "0ce20058cc0ed6b6c9213bb383589327e458c12ffce0842fc96867042d669c75",
+     "size": 1886997600
+    },
+    "Qwen3-4B-Instruct-2507-Q4_0.gguf": {
+     "sha256": "e0ba675d86ab277c61701c6793659b2ae801d95e3be791464c321e6fbf613be2",
+     "size": 2375773280
+    },
+    "Qwen3-4B-Instruct-2507-Q4_1.gguf": {
+     "sha256": "6e37bc9a4533bae81deefd9081fda514171e8485bbbef86d63ec7407e756eb3f",
+     "size": 2596629600
+    },
+    "Qwen3-4B-Instruct-2507-Q4_K_M.gguf": {
+     "sha256": "3605803b982cb64aead44f6c1b2ae36e3acdb41d8e46c8a94c6533bc4c67e597",
+     "size": 2497281120
+    },
+    "Qwen3-4B-Instruct-2507-Q4_K_S.gguf": {
+     "sha256": "90bc7227557ed8a417696b6ed8a94b2c351ad1d94de39bf2889ad8778366c68a",
+     "size": 2383309920
+    },
+    "Qwen3-4B-Instruct-2507-Q5_K_M.gguf": {
+     "sha256": "5bde5e9d883622acb02bf77fe7dcbc56a8b9a9ad4be78a72ca23a532658b4ecb",
+     "size": 2889514080
+    },
+    "Qwen3-4B-Instruct-2507-Q5_K_S.gguf": {
+     "sha256": "e252a2bb39e90c163ba83524ea833ee73d36f9c5e50d157651c82995e7e72e60",
+     "size": 2823711840
+    },
+    "Qwen3-4B-Instruct-2507-Q6_K.gguf": {
+     "sha256": "cd7b21b38b3e71400587c184b6a9b04d3beb4d13fdae6464d4075dee4f1bc5ad",
+     "size": 3306261600
+    },
+    "Qwen3-4B-Instruct-2507-Q8_0.gguf": {
+     "sha256": "391c1e410fd9f4cf2de2b510273b56a84c19ce18f4fa3bfb3774031dac4ef068",
+     "size": 4280405600
+    },
+    "Qwen3-4B-Instruct-2507-UD-IQ1_M.gguf": {
+     "sha256": "415ed538d93b9f00f7d2cacdf8cf427bc1b05f20ae30e5a3f015fd6b04ba09d1",
+     "size": 1143484000
+    },
+    "Qwen3-4B-Instruct-2507-UD-IQ1_S.gguf": {
+     "sha256": "48e00f29635f0eb1db72d3a3c65ff1a9552676dc15f810b7074be690fbcea59e",
+     "size": 1083149920
+    },
+    "Qwen3-4B-Instruct-2507-UD-IQ2_M.gguf": {
+     "sha256": "6711372517e0e2d6dd1c008a22203299d1ba5d44f894a95fdc40a136815d4fe3",
+     "size": 1530402400
+    },
+    "Qwen3-4B-Instruct-2507-UD-IQ2_XXS.gguf": {
+     "sha256": "b4fb089163ef6c0e32f5edb3e6ef5ca860da23e8fc2c7b8fd53da5a3ce25a17d",
+     "size": 1255345760
+    },
+    "Qwen3-4B-Instruct-2507-UD-IQ3_XXS.gguf": {
+     "sha256": "c886effc2f09e63bbf9419a8136fab49dba22a578c24885f63c5f483de75ad3e",
+     "size": 1674376800
+    },
+    "Qwen3-4B-Instruct-2507-UD-Q2_K_XL.gguf": {
+     "sha256": "b7675a5b61a3e7fec4c2f138ba50504ede76c737c478029ea30510e1ee09976c",
+     "size": 1695724640
+    },
+    "Qwen3-4B-Instruct-2507-UD-Q3_K_XL.gguf": {
+     "sha256": "6aa5c26f5624cf8820f6f0207479445da5a33c4db73a2e097cf6f91f9ce0550e",
+     "size": 2128385120
+    },
+    "Qwen3-4B-Instruct-2507-UD-Q4_K_XL.gguf": {
+     "sha256": "4bbe1f2f8ebe69fad3be8e15d69f220b06448a9dd26f82d7d81cce88ebfc39fd",
+     "size": 2546340960
+    },
+    "Qwen3-4B-Instruct-2507-UD-Q5_K_XL.gguf": {
+     "sha256": "7040e21aa2b43d56735b0e4f9c89210ad21b8282f668d6897f5d1dadf71aa9f2",
+     "size": 2899221600
+    },
+    "Qwen3-4B-Instruct-2507-UD-Q6_K_XL.gguf": {
+     "sha256": "8d5b9304db7e2c419d05f5f3cbb04890b8fa0dd434a72bc3ef448b564ba8b88e",
+     "size": 3658223200
+    },
+    "Qwen3-4B-Instruct-2507-UD-Q8_K_XL.gguf": {
+     "sha256": "0aae4ff27faba8903685f3e3aad97e2004ac6e21f15eeb806e20dec90bb480be",
+     "size": 5056700000
+    }
+   },
+   "ms_by": "www.modelscope.cn"
+  },
+  "unsloth/Qwen3-8B-GGUF": {
+   "hf": {
+    "Qwen3-8B-BF16.gguf": {
+     "sha256": "5e416a2020fe63e76ea13c8979be35fc6070aaf3578f7876400c55c2f5c3eb30",
+     "size": 16388044384
+    },
+    "Qwen3-8B-IQ4_NL.gguf": {
+     "sha256": "07ffccc29bbbf5e11c608d82269bff77a2580ef3a6d60e84707a9f5af6b2e833",
+     "size": 4793624384
+    },
+    "Qwen3-8B-IQ4_XS.gguf": {
+     "sha256": "30a433372c4c986754e30cfaa05848ab78896d38d34b6b275b24c409857801cb",
+     "size": 4581287744
+    },
+    "Qwen3-8B-Q2_K.gguf": {
+     "sha256": "7226e0183d31dca14d81c6f799ada2944be62160b8b7549a70254fba4124a5cf",
+     "size": 3281733440
+    },
+    "Qwen3-8B-Q2_K_L.gguf": {
+     "sha256": "1eae4d41378cc03410ada9c79fc434e772a81067e4c5f016fe5695fbb0646566",
+     "size": 3427592000
+    },
+    "Qwen3-8B-Q3_K_M.gguf": {
+     "sha256": "4924cf38a3b3c4b27ead5ccb93e27027f9418738506ac50a24a70dfe8581a007",
+     "size": 4124161856
+    },
+    "Qwen3-8B-Q3_K_S.gguf": {
+     "sha256": "d9ba948815c357eb7c2c6013ddc22085fb0b2d7802a4fab138ac155c14827f15",
+     "size": 3769612096
+    },
+    "Qwen3-8B-Q4_1.gguf": {
+     "sha256": "26ed2f8ea60cdbcb99f2d1f3ef38fc5a62198a056e1bf2145ecb431a092aa5ee",
+     "size": 5247756096
+    },
+    "Qwen3-8B-Q4_K_M.gguf": {
+     "sha256": "120307ba529eb2439d6c430d94104dabd578497bc7bfe7e322b5d9933b449bd4",
+     "size": 5027784512
+    },
+    "Qwen3-8B-Q4_K_S.gguf": {
+     "sha256": "a0f19938dcdc036ac66a817a34a694fc64d1e2301653a2aaa0380f35df3dcb3c",
+     "size": 4802012992
+    },
+    "Qwen3-8B-Q5_K_M.gguf": {
+     "sha256": "159c694b93271e4edc1dc2a305b10cf981032c8f3035a7da00973312f0331504",
+     "size": 5851113280
+    },
+    "Qwen3-8B-Q5_K_S.gguf": {
+     "sha256": "fa08eab86c1d27dafcfb4357759de84b62eaade0a614fadcd644227e4ca0237a",
+     "size": 5720762176
+    },
+    "Qwen3-8B-Q6_K.gguf": {
+     "sha256": "0eaec718fdeab0f429dfa0ec481c090388811f5e63785ddb582292f4ef3c3827",
+     "size": 6725900096
+    },
+    "Qwen3-8B-Q8_0.gguf": {
+     "sha256": "0cfbf745760f07a76ddeb358dd025a27f2e11d1ca9c9a4169a373d52990fe86e",
+     "size": 8709519168
+    },
+    "Qwen3-8B-UD-IQ1_M.gguf": {
+     "sha256": "04d2d05a45283155fabfaa410731dcf20c90fd3c182b1fda5a1ad6abb034cbe6",
+     "size": 2396489536
+    },
+    "Qwen3-8B-UD-IQ1_S.gguf": {
+     "sha256": "210ada67841bb71977b869095daf9ca70e93592eec9857144f7821ce0fce6f5d",
+     "size": 2275379008
+    },
+    "Qwen3-8B-UD-IQ2_M.gguf": {
+     "sha256": "1dfd67f311a5a82f57ecc1763b54884066ccf1727c45cbe1a619f85ac96368b2",
+     "size": 3110897472
+    },
+    "Qwen3-8B-UD-IQ2_XXS.gguf": {
+     "sha256": "b22bc929d9d093bf7a4f3b4086873a02f7dc4731d135a215429c60d27ce27a89",
+     "size": 2605221696
+    },
+    "Qwen3-8B-UD-IQ3_XXS.gguf": {
+     "sha256": "495e28b50d2373d0f29a439be9c568074596a296e67eccb69330f27ffb4be28a",
+     "size": 3410265920
+    },
+    "Qwen3-8B-UD-Q2_K_XL.gguf": {
+     "sha256": "e1b3da4b0b69ece74bc46cbcc4e43177b16366508864230f49b226b800168b0c",
+     "size": 3501975360
+    },
+    "Qwen3-8B-UD-Q3_K_XL.gguf": {
+     "sha256": "2d8549afad63087f6a78af667aff4834e71fba597830c8806b4edbf5af463e79",
+     "size": 4307052352
+    },
+    "Qwen3-8B-UD-Q4_K_XL.gguf": {
+     "sha256": "34a514d08f7449cb4a694a707aaa2eedccb7bb68290121bf5e5a569b2abe71c3",
+     "size": 5135722304
+    },
+    "Qwen3-8B-UD-Q5_K_XL.gguf": {
+     "sha256": "4b8feb9b20477613883ad2b6aa0a2e8a697fb9576d3a62d909f4f7991275c22e",
+     "size": 5878081344
+    },
+    "Qwen3-8B-UD-Q6_K_XL.gguf": {
+     "sha256": "61201e42b1c1021ce15936f23682e56e873bb4af3e8e5aae7558bc1c53a1dd91",
+     "size": 7490549568
+    },
+    "Qwen3-8B-UD-Q8_K_XL.gguf": {
+     "sha256": "67df3caf1ccc9c9aacff028410e4d5ad9a3a4870f19822a22aa3ac14dcab051b",
+     "size": 10824038208
+    }
+   },
+   "hf_by": "huggingface.co",
+   "ms": {
+    "Qwen3-8B-BF16.gguf": {
+     "sha256": "5e416a2020fe63e76ea13c8979be35fc6070aaf3578f7876400c55c2f5c3eb30",
+     "size": 16388044384
+    },
+    "Qwen3-8B-IQ4_NL.gguf": {
+     "sha256": "07ffccc29bbbf5e11c608d82269bff77a2580ef3a6d60e84707a9f5af6b2e833",
+     "size": 4793624384
+    },
+    "Qwen3-8B-IQ4_XS.gguf": {
+     "sha256": "30a433372c4c986754e30cfaa05848ab78896d38d34b6b275b24c409857801cb",
+     "size": 4581287744
+    },
+    "Qwen3-8B-Q2_K.gguf": {
+     "sha256": "7226e0183d31dca14d81c6f799ada2944be62160b8b7549a70254fba4124a5cf",
+     "size": 3281733440
+    },
+    "Qwen3-8B-Q2_K_L.gguf": {
+     "sha256": "1eae4d41378cc03410ada9c79fc434e772a81067e4c5f016fe5695fbb0646566",
+     "size": 3427592000
+    },
+    "Qwen3-8B-Q3_K_M.gguf": {
+     "sha256": "4924cf38a3b3c4b27ead5ccb93e27027f9418738506ac50a24a70dfe8581a007",
+     "size": 4124161856
+    },
+    "Qwen3-8B-Q3_K_S.gguf": {
+     "sha256": "d9ba948815c357eb7c2c6013ddc22085fb0b2d7802a4fab138ac155c14827f15",
+     "size": 3769612096
+    },
+    "Qwen3-8B-Q4_1.gguf": {
+     "sha256": "26ed2f8ea60cdbcb99f2d1f3ef38fc5a62198a056e1bf2145ecb431a092aa5ee",
+     "size": 5247756096
+    },
+    "Qwen3-8B-Q4_K_M.gguf": {
+     "sha256": "120307ba529eb2439d6c430d94104dabd578497bc7bfe7e322b5d9933b449bd4",
+     "size": 5027784512
+    },
+    "Qwen3-8B-Q4_K_S.gguf": {
+     "sha256": "a0f19938dcdc036ac66a817a34a694fc64d1e2301653a2aaa0380f35df3dcb3c",
+     "size": 4802012992
+    },
+    "Qwen3-8B-Q5_K_M.gguf": {
+     "sha256": "159c694b93271e4edc1dc2a305b10cf981032c8f3035a7da00973312f0331504",
+     "size": 5851113280
+    },
+    "Qwen3-8B-Q5_K_S.gguf": {
+     "sha256": "fa08eab86c1d27dafcfb4357759de84b62eaade0a614fadcd644227e4ca0237a",
+     "size": 5720762176
+    },
+    "Qwen3-8B-Q6_K.gguf": {
+     "sha256": "0eaec718fdeab0f429dfa0ec481c090388811f5e63785ddb582292f4ef3c3827",
+     "size": 6725900096
+    },
+    "Qwen3-8B-Q8_0.gguf": {
+     "sha256": "0cfbf745760f07a76ddeb358dd025a27f2e11d1ca9c9a4169a373d52990fe86e",
+     "size": 8709519168
+    },
+    "Qwen3-8B-UD-IQ1_M.gguf": {
+     "sha256": "04d2d05a45283155fabfaa410731dcf20c90fd3c182b1fda5a1ad6abb034cbe6",
+     "size": 2396489536
+    },
+    "Qwen3-8B-UD-IQ1_S.gguf": {
+     "sha256": "210ada67841bb71977b869095daf9ca70e93592eec9857144f7821ce0fce6f5d",
+     "size": 2275379008
+    },
+    "Qwen3-8B-UD-IQ2_M.gguf": {
+     "sha256": "1dfd67f311a5a82f57ecc1763b54884066ccf1727c45cbe1a619f85ac96368b2",
+     "size": 3110897472
+    },
+    "Qwen3-8B-UD-IQ2_XXS.gguf": {
+     "sha256": "b22bc929d9d093bf7a4f3b4086873a02f7dc4731d135a215429c60d27ce27a89",
+     "size": 2605221696
+    },
+    "Qwen3-8B-UD-IQ3_XXS.gguf": {
+     "sha256": "495e28b50d2373d0f29a439be9c568074596a296e67eccb69330f27ffb4be28a",
+     "size": 3410265920
+    },
+    "Qwen3-8B-UD-Q2_K_XL.gguf": {
+     "sha256": "e1b3da4b0b69ece74bc46cbcc4e43177b16366508864230f49b226b800168b0c",
+     "size": 3501975360
+    },
+    "Qwen3-8B-UD-Q3_K_XL.gguf": {
+     "sha256": "2d8549afad63087f6a78af667aff4834e71fba597830c8806b4edbf5af463e79",
+     "size": 4307052352
+    },
+    "Qwen3-8B-UD-Q4_K_XL.gguf": {
+     "sha256": "34a514d08f7449cb4a694a707aaa2eedccb7bb68290121bf5e5a569b2abe71c3",
+     "size": 5135722304
+    },
+    "Qwen3-8B-UD-Q5_K_XL.gguf": {
+     "sha256": "4b8feb9b20477613883ad2b6aa0a2e8a697fb9576d3a62d909f4f7991275c22e",
+     "size": 5878081344
+    },
+    "Qwen3-8B-UD-Q6_K_XL.gguf": {
+     "sha256": "61201e42b1c1021ce15936f23682e56e873bb4af3e8e5aae7558bc1c53a1dd91",
+     "size": 7490549568
+    },
+    "Qwen3-8B-UD-Q8_K_XL.gguf": {
+     "sha256": "67df3caf1ccc9c9aacff028410e4d5ad9a3a4870f19822a22aa3ac14dcab051b",
+     "size": 10824038208
+    }
+   },
+   "ms_by": "www.modelscope.cn"
+  }
+ },
+ "from": "catalog/describe.json + file_index.hf_files/ms_files",
+ "models": [
+  {
+   "capabilities": [
+    "tool_use"
+   ],
+   "context_length": 40960,
+   "format": "gguf",
+   "gguf_sources": [
+    {
+     "provider": "unsloth",
+     "repo": "unsloth/Qwen3-4B-GGUF"
+    }
+   ],
+   "has_sources": true,
+   "hf_downloads": 12177404,
+   "license": "apache-2.0",
+   "min_ram_gb": 2.2,
+   "min_vram_gb": 2.1,
+   "name": "Qwen/Qwen3-4B",
+   "parameter_count": "4.0B",
+   "pipeline_tag": "text-generation",
+   "provider": "Alibaba",
+   "quantization": "Q4_K_M",
+   "recommended_ram_gb": 3.7,
+   "use_case": "General purpose text generation"
+  },
+  {
+   "capabilities": [
+    "tool_use"
+   ],
+   "context_length": 32768,
+   "format": "gguf",
+   "gguf_sources": [
+    {
+     "provider": "bartowski",
+     "repo": "bartowski/Qwen2.5-3B-Instruct-GGUF"
+    },
+    {
+     "provider": "mradermacher",
+     "repo": "mradermacher/Qwen2.5-3B-Instruct-GGUF"
+    }
+   ],
+   "has_sources": true,
+   "hf_downloads": 4270090,
+   "languages": [
+    "en"
+   ],
+   "license": "qwen-research",
+   "min_ram_gb": 1.7,
+   "min_vram_gb": 1.6,
+   "name": "Qwen/Qwen2.5-3B-Instruct",
+   "parameter_count": "3.1B",
+   "pipeline_tag": "text-generation",
+   "provider": "Alibaba",
+   "quantization": "Q4_K_M",
+   "recommended_ram_gb": 2.9,
+   "use_case": "Instruction following, chat"
+  },
+  {
+   "capabilities": [
+    "tool_use"
+   ],
+   "context_length": 262144,
+   "format": "gguf",
+   "gguf_sources": [
+    {
+     "provider": "unsloth",
+     "repo": "unsloth/Qwen3-4B-Instruct-2507-GGUF"
+    },
+    {
+     "provider": "mradermacher",
+     "repo": "mradermacher/Qwen3-4B-Instruct-2507-GGUF"
+    }
+   ],
+   "has_sources": true,
+   "hf_downloads": 3548400,
+   "license": "apache-2.0",
+   "min_ram_gb": 2.2,
+   "min_vram_gb": 2.1,
+   "name": "Qwen/Qwen3-4B-Instruct-2507",
+   "parameter_count": "4.0B",
+   "pipeline_tag": "text-generation",
+   "provider": "Alibaba",
+   "quantization": "Q4_K_M",
+   "recommended_ram_gb": 3.7,
+   "use_case": "Instruction following, chat"
+  },
+  {
+   "capabilities": [],
+   "context_length": 262144,
+   "format": "gguf",
+   "gguf_sources": [
+    {
+     "provider": "mradermacher",
+     "repo": "mradermacher/Rio-3.0-Open-Mini-GGUF"
+    }
+   ],
+   "has_sources": true,
+   "hf_downloads": 1840449,
+   "license": "mit",
+   "min_ram_gb": 2.2,
+   "min_vram_gb": 2.1,
+   "name": "prefeitura-rio/Rio-3.0-Open-Mini",
+   "parameter_count": "4.0B",
+   "pipeline_tag": "text-generation",
+   "provider": "prefeitura-rio",
+   "quantization": "Q4_K_M",
+   "recommended_ram_gb": 3.7,
+   "use_case": "Lightweight, edge deployment"
+  },
+  {
+   "capabilities": [],
+   "context_length": 262144,
+   "format": "gguf",
+   "gguf_sources": [
+    {
+     "provider": "mradermacher",
+     "repo": "mradermacher/NVIDIA-Nemotron-3-Nano-4B-BF16-GGUF"
+    }
+   ],
+   "has_sources": true,
+   "hf_downloads": 1565039,
+   "languages": [
+    "en"
+   ],
+   "license": "nvidia-nemotron-open-model-license",
+   "min_ram_gb": 2.2,
+   "min_vram_gb": 2.0,
+   "name": "nvidia/NVIDIA-Nemotron-3-Nano-4B-BF16",
+   "parameter_count": "4.0B",
+   "pipeline_tag": "text-generation",
+   "provider": "nvidia",
+   "quantization": "Q4_K_M",
+   "recommended_ram_gb": 3.7,
+   "use_case": "General purpose text generation"
+  },
+  {
+   "capabilities": [
+    "tool_use"
+   ],
+   "context_length": 4096,
+   "format": "gguf",
+   "gguf_sources": [
+    {
+     "provider": "unsloth",
+     "repo": "unsloth/Llama-3.2-3B-Instruct-GGUF"
+    },
+    {
+     "provider": "bartowski",
+     "repo": "bartowski/Llama-3.2-3B-Instruct-GGUF"
+    },
+    {
+     "provider": "mradermacher",
+     "repo": "mradermacher/Llama-3.2-3B-Instruct-GGUF"
+    }
+   ],
+   "has_sources": true,
+   "hf_downloads": 1492929,
+   "languages": [
+    "en",
+    "de",
+    "fr",
+    "it",
+    "pt",
+    "hi",
+    "es",
+    "th"
+   ],
+   "license": "llama3.2",
+   "min_ram_gb": 1.8,
+   "min_vram_gb": 1.6,
+   "name": "meta-llama/Llama-3.2-3B-Instruct",
+   "parameter_count": "3.2B",
+   "pipeline_tag": "text-generation",
+   "provider": "Meta",
+   "quantization": "Q4_K_M",
+   "recommended_ram_gb": 3.0,
+   "use_case": "Instruction following, chat"
+  },
+  {
+   "capabilities": [],
+   "context_length": 131072,
+   "format": "gguf",
+   "gguf_sources": [
+    {
+     "provider": "bartowski",
+     "repo": "bartowski/MiniCPM5-2B-GGUF"
+    },
+    {
+     "provider": "mradermacher",
+     "repo": "mradermacher/MiniCPM5-2B-GGUF"
+    }
+   ],
+   "has_sources": true,
+   "hf_downloads": 1285616,
+   "languages": [
+    "on-device",
+    "en",
+    "zh"
+   ],
+   "license": "apache-2.0",
+   "min_ram_gb": 1.4,
+   "min_vram_gb": 1.3,
+   "name": "openbmb/MiniCPM5-2B",
+   "parameter_count": "2.5B",
+   "pipeline_tag": "text-generation",
+   "provider": "openbmb",
+   "quantization": "Q4_K_M",
+   "recommended_ram_gb": 2.3,
+   "use_case": "Lightweight, edge deployment"
+  },
+  {
+   "capabilities": [],
+   "context_length": 65536,
+   "format": "gguf",
+   "gguf_sources": [
+    {
+     "provider": "unsloth",
+     "repo": "unsloth/SmolLM3-3B-GGUF"
+    },
+    {
+     "provider": "ggml-org",
+     "repo": "ggml-org/SmolLM3-3B-GGUF"
+    },
+    {
+     "provider": "mradermacher",
+     "repo": "mradermacher/SmolLM3-3B-GGUF"
+    }
+   ],
+   "has_sources": true,
+   "hf_downloads": 711661,
+   "languages": [
+    "en",
+    "fr",
+    "es",
+    "it",
+    "pt",
+    "zh",
+    "ar",
+    "ru"
+   ],
+   "license": "apache-2.0",
+   "min_ram_gb": 1.7,
+   "min_vram_gb": 1.6,
+   "name": "HuggingFaceTB/SmolLM3-3B",
+   "parameter_count": "3.1B",
+   "pipeline_tag": "text-generation",
+   "provider": "huggingfacetb",
+   "quantization": "Q4_K_M",
+   "recommended_ram_gb": 2.9,
+   "use_case": "General purpose text generation"
+  },
+  {
+   "capabilities": [
+    "tool_use"
+   ],
+   "context_length": 262144,
+   "format": "gguf",
+   "gguf_sources": [
+    {
+     "provider": "unsloth",
+     "repo": "unsloth/Qwen3-4B-Thinking-2507-GGUF"
+    },
+    {
+     "provider": "mradermacher",
+     "repo": "mradermacher/Qwen3-4B-Thinking-2507-GGUF"
+    }
+   ],
+   "has_sources": true,
+   "hf_downloads": 601059,
+   "license": "apache-2.0",
+   "min_ram_gb": 2.2,
+   "min_vram_gb": 2.1,
+   "name": "Qwen/Qwen3-4B-Thinking-2507",
+   "parameter_count": "4.0B",
+   "pipeline_tag": "text-generation",
+   "provider": "Alibaba",
+   "quantization": "Q4_K_M",
+   "recommended_ram_gb": 3.7,
+   "use_case": "General purpose text generation"
+  },
+  {
+   "capabilities": [],
+   "context_length": 131072,
+   "format": "gguf",
+   "gguf_sources": [
+    {
+     "provider": "unsloth",
+     "repo": "unsloth/granite-4.1-3b-GGUF"
+    },
+    {
+     "provider": "mradermacher",
+     "repo": "mradermacher/granite-4.1-3b-GGUF"
+    }
+   ],
+   "has_sources": true,
+   "hf_downloads": 577715,
+   "license": "apache-2.0",
+   "min_ram_gb": 1.9,
+   "min_vram_gb": 1.7,
+   "name": "ibm-granite/granite-4.1-3b",
+   "parameter_count": "3.4B",
+   "pipeline_tag": "text-generation",
+   "provider": "ibm-granite",
+   "quantization": "Q4_K_M",
+   "recommended_ram_gb": 3.2,
+   "use_case": "General purpose text generation"
+  },
+  {
+   "capabilities": [
+    "tool_use"
+   ],
+   "context_length": 32768,
+   "format": "gguf",
+   "gguf_sources": [
+    {
+     "provider": "mradermacher",
+     "repo": "mradermacher/Qwen3-4B-Base-GGUF"
+    }
+   ],
+   "has_sources": true,
+   "hf_downloads": 576003,
+   "license": "apache-2.0",
+   "min_ram_gb": 2.2,
+   "min_vram_gb": 2.1,
+   "name": "Qwen/Qwen3-4B-Base",
+   "parameter_count": "4.0B",
+   "pipeline_tag": "text-generation",
+   "provider": "Alibaba",
+   "quantization": "Q4_K_M",
+   "recommended_ram_gb": 3.7,
+   "use_case": "General purpose text generation"
+  },
+  {
+   "capabilities": [],
+   "context_length": 2048,
+   "format": "gguf",
+   "gguf_sources": [
+    {
+     "provider": "TheBloke",
+     "repo": "TheBloke/phi-2-GGUF"
+    }
+   ],
+   "has_sources": true,
+   "hf_downloads": 570226,
+   "languages": [
+    "en"
+   ],
+   "license": "mit",
+   "min_ram_gb": 1.6,
+   "min_vram_gb": 1.4,
+   "name": "microsoft/phi-2",
+   "parameter_count": "2.8B",
+   "pipeline_tag": "text-generation",
+   "provider": "Microsoft",
+   "quantization": "Q4_K_M",
+   "recommended_ram_gb": 2.6,
+   "use_case": "General purpose text generation"
+  },
+  {
+   "capabilities": [
+    "tool_use"
+   ],
+   "context_length": 32768,
+   "format": "gguf",
+   "gguf_sources": [
+    {
+     "provider": "unsloth",
+     "repo": "unsloth/Qwen2.5-Coder-3B-Instruct-GGUF"
+    },
+    {
+     "provider": "bartowski",
+     "repo": "bartowski/Qwen2.5-Coder-3B-Instruct-GGUF"
+    },
+    {
+     "provider": "mradermacher",
+     "repo": "mradermacher/Qwen2.5-Coder-3B-Instruct-GGUF"
+    }
+   ],
+   "has_sources": true,
+   "hf_downloads": 507212,
+   "languages": [
+    "en"
+   ],
+   "license": "qwen-research",
+   "min_ram_gb": 1.7,
+   "min_vram_gb": 1.6,
+   "name": "Qwen/Qwen2.5-Coder-3B-Instruct",
+   "parameter_count": "3.1B",
+   "pipeline_tag": "text-generation",
+   "provider": "Alibaba",
+   "quantization": "Q4_K_M",
+   "recommended_ram_gb": 2.9,
+   "use_case": "Code generation and completion"
+  },
+  {
+   "capabilities": [],
+   "context_length": 4096,
+   "format": "gguf",
+   "gguf_sources": [
+    {
+     "provider": "bartowski",
+     "repo": "bartowski/gemma-2-2b-it-GGUF"
+    },
+    {
+     "provider": "mradermacher",
+     "repo": "mradermacher/gemma-2-2b-it-GGUF"
+    }
+   ],
+   "has_sources": true,
+   "hf_downloads": 462320,
+   "license": "gemma",
+   "min_ram_gb": 1.5,
+   "min_vram_gb": 1.3,
+   "name": "google/gemma-2-2b-it",
+   "parameter_count": "2.6B",
+   "pipeline_tag": "text-generation",
+   "provider": "Google",
+   "quantization": "Q4_K_M",
+   "recommended_ram_gb": 2.4,
+   "use_case": "General purpose text generation"
+  },
+  {
+   "capabilities": [],
+   "context_length": 4096,
+   "format": "gguf",
+   "gguf_sources": [
+    {
+     "provider": "bartowski",
+     "repo": "bartowski/Phi-3-mini-4k-instruct-GGUF"
+    },
+    {
+     "provider": "mradermacher",
+     "repo": "mradermacher/Phi-3-mini-4k-instruct-GGUF"
+    }
+   ],
+   "has_sources": true,
+   "hf_downloads": 370784,
+   "languages": [
+    "en",
+    "fr"
+   ],
+   "license": "mit",
+   "min_ram_gb": 2.1,
+   "min_vram_gb": 2.0,
+   "name": "microsoft/Phi-3-mini-4k-instruct",
+   "parameter_count": "3.8B",
+   "pipeline_tag": "text-generation",
+   "provider": "Microsoft",
+   "quantization": "Q4_K_M",
+   "recommended_ram_gb": 3.6,
+   "use_case": "Instruction following, chat"
+  },
+  {
+   "capabilities": [
+    "tool_use"
+   ],
+   "context_length": 40960,
+   "format": "gguf",
+   "gguf_sources": [
+    {
+     "provider": "unsloth",
+     "repo": "unsloth/Qwen3-8B-GGUF"
+    },
+    {
+     "provider": "ggml-org",
+     "repo": "ggml-org/Qwen3-8B-GGUF"
+    },
+    {
+     "provider": "mradermacher",
+     "repo": "mradermacher/Qwen3-8B-GGUF"
+    }
+   ],
+   "has_sources": true,
+   "hf_downloads": 9650573,
+   "license": "apache-2.0",
+   "min_ram_gb": 4.6,
+   "min_vram_gb": 4.2,
+   "name": "Qwen/Qwen3-8B",
+   "parameter_count": "8.2B",
+   "pipeline_tag": "text-generation",
+   "provider": "Alibaba",
+   "quantization": "Q4_K_M",
+   "recommended_ram_gb": 7.6,
+   "use_case": "General purpose text generation"
+  },
+  {
+   "capabilities": [
+    "tool_use"
+   ],
+   "context_length": 32768,
+   "format": "gguf",
+   "gguf_sources": [
+    {
+     "provider": "bartowski",
+     "repo": "bartowski/Qwen2.5-7B-Instruct-GGUF"
+    },
+    {
+     "provider": "mradermacher",
+     "repo": "mradermacher/Qwen2.5-7B-Instruct-GGUF"
+    }
+   ],
+   "has_sources": true,
+   "hf_downloads": 7753092,
+   "languages": [
+    "en"
+   ],
+   "license": "apache-2.0",
+   "min_ram_gb": 4.3,
+   "min_vram_gb": 3.9,
+   "name": "Qwen/Qwen2.5-7B-Instruct",
+   "parameter_count": "7.6B",
+   "pipeline_tag": "text-generation",
+   "provider": "Alibaba",
+   "quantization": "Q4_K_M",
+   "recommended_ram_gb": 7.1,
+   "use_case": "Instruction following, chat"
+  },
+  {
+   "capabilities": [
+    "tool_use"
+   ],
+   "context_length": 4096,
+   "format": "gguf",
+   "gguf_sources": [
+    {
+     "provider": "unsloth",
+     "repo": "unsloth/Llama-3.1-8B-Instruct-GGUF"
+    }
+   ],
+   "has_sources": true,
+   "hf_downloads": 5926413,
+   "languages": [
+    "en",
+    "de",
+    "fr",
+    "it",
+    "pt",
+    "hi",
+    "es",
+    "th"
+   ],
+   "license": "llama3.1",
+   "min_ram_gb": 4.5,
+   "min_vram_gb": 4.1,
+   "name": "meta-llama/Llama-3.1-8B-Instruct",
+   "parameter_count": "8.0B",
+   "pipeline_tag": "text-generation",
+   "provider": "Meta",
+   "quantization": "Q4_K_M",
+   "recommended_ram_gb": 7.5,
+   "use_case": "Instruction following, chat"
+  },
+  {
+   "capabilities": [],
+   "context_length": 262144,
+   "format": "gguf",
+   "gguf_sources": [
+    {
+     "provider": "unsloth",
+     "repo": "unsloth/Ornith-1.0-9B-GGUF"
+    }
+   ],
+   "has_sources": true,
+   "hf_downloads": 2325290,
+   "license": "mit",
+   "min_ram_gb": 4.6,
+   "min_vram_gb": 4.2,
+   "name": "deepreinforce-ai/Ornith-1.0-9B",
+   "parameter_count": "8.2B",
+   "pipeline_tag": "text-generation",
+   "provider": "deepreinforce-ai",
+   "quantization": "Q4_K_M",
+   "recommended_ram_gb": 7.6,
+   "use_case": "General purpose text generation"
+  },
+  {
+   "capabilities": [
+    "tool_use"
+   ],
+   "context_length": 32768,
+   "format": "gguf",
+   "gguf_sources": [
+    {
+     "provider": "unsloth",
+     "repo": "unsloth/Qwen2.5-Coder-7B-Instruct-GGUF"
+    },
+    {
+     "provider": "bartowski",
+     "repo": "bartowski/Qwen2.5-Coder-7B-Instruct-GGUF"
+    },
+    {
+     "provider": "mradermacher",
+     "repo": "mradermacher/Qwen2.5-Coder-7B-Instruct-GGUF"
+    }
+   ],
+   "has_sources": true,
+   "hf_downloads": 1784907,
+   "languages": [
+    "en"
+   ],
+   "license": "apache-2.0",
+   "min_ram_gb": 4.3,
+   "min_vram_gb": 3.9,
+   "name": "Qwen/Qwen2.5-Coder-7B-Instruct",
+   "parameter_count": "7.6B",
+   "pipeline_tag": "text-generation",
+   "provider": "Alibaba",
+   "quantization": "Q4_K_M",
+   "recommended_ram_gb": 7.1,
+   "use_case": "Code generation and completion"
+  },
+  {
+   "capabilities": [
+    "tool_use"
+   ],
+   "context_length": 32768,
+   "format": "gguf",
+   "gguf_sources": [
+    {
+     "provider": "TheBloke",
+     "repo": "TheBloke/Mistral-7B-Instruct-v0.2-GGUF"
+    },
+    {
+     "provider": "mradermacher",
+     "repo": "mradermacher/Mistral-7B-Instruct-v0.2-GGUF"
+    }
+   ],
+   "has_sources": true,
+   "hf_downloads": 1650386,
+   "license": "apache-2.0",
+   "min_ram_gb": 4.0,
+   "min_vram_gb": 3.7,
+   "name": "mistralai/Mistral-7B-Instruct-v0.2",
+   "parameter_count": "7.2B",
+   "pipeline_tag": "text-generation",
+   "provider": "Mistral AI",
+   "quantization": "Q4_K_M",
+   "recommended_ram_gb": 6.7,
+   "use_case": "Instruction following, chat"
+  },
+  {
+   "capabilities": [],
+   "context_length": 262144,
+   "format": "gguf",
+   "gguf_sources": [
+    {
+     "provider": "unsloth",
+     "repo": "unsloth/Ornith-1.0-9B-GGUF"
+    }
+   ],
+   "has_sources": true,
+   "hf_downloads": 897727,
+   "license": "mit",
+   "min_ram_gb": 4.6,
+   "min_vram_gb": 4.2,
+   "name": "ornith-ai/Ornith-1.0-9B",
+   "parameter_count": "8.2B",
+   "pipeline_tag": "text-generation",
+   "provider": "ornith-ai",
+   "quantization": "Q4_K_M",
+   "recommended_ram_gb": 7.6,
+   "use_case": "General purpose text generation"
+  },
+  {
+   "capabilities": [
+    "tool_use"
+   ],
+   "context_length": 131072,
+   "format": "gguf",
+   "gguf_sources": [
+    {
+     "provider": "mradermacher",
+     "repo": "mradermacher/Qwen2.5-7B-GGUF"
+    }
+   ],
+   "has_sources": true,
+   "hf_downloads": 787282,
+   "languages": [
+    "en"
+   ],
+   "license": "apache-2.0",
+   "min_ram_gb": 4.3,
+   "min_vram_gb": 3.9,
+   "name": "Qwen/Qwen2.5-7B",
+   "parameter_count": "7.6B",
+   "pipeline_tag": "text-generation",
+   "provider": "Alibaba",
+   "quantization": "Q4_K_M",
+   "recommended_ram_gb": 7.1,
+   "use_case": "General purpose text generation"
+  },
+  {
+   "capabilities": [
+    "tool_use"
+   ],
+   "context_length": 32768,
+   "format": "gguf",
+   "gguf_sources": [
+    {
+     "provider": "mradermacher",
+     "repo": "mradermacher/Qwen3-8B-Base-GGUF"
+    }
+   ],
+   "has_sources": true,
+   "hf_downloads": 754946,
+   "license": "apache-2.0",
+   "min_ram_gb": 4.6,
+   "min_vram_gb": 4.2,
+   "name": "Qwen/Qwen3-8B-Base",
+   "parameter_count": "8.2B",
+   "pipeline_tag": "text-generation",
+   "provider": "Alibaba",
+   "quantization": "Q4_K_M",
+   "recommended_ram_gb": 7.6,
+   "use_case": "General purpose text generation"
+  },
+  {
+   "capabilities": [
+    "tool_use"
+   ],
+   "context_length": 4096,
+   "format": "gguf",
+   "gguf_sources": [
+    {
+     "provider": "bartowski",
+     "repo": "bartowski/Meta-Llama-3-8B-Instruct-GGUF"
+    },
+    {
+     "provider": "mradermacher",
+     "repo": "mradermacher/Meta-Llama-3-8B-Instruct-GGUF"
+    }
+   ],
+   "has_sources": true,
+   "hf_downloads": 735822,
+   "languages": [
+    "en"
+   ],
+   "license": "llama3",
+   "min_ram_gb": 4.5,
+   "min_vram_gb": 4.1,
+   "name": "meta-llama/Meta-Llama-3-8B-Instruct",
+   "parameter_count": "8.0B",
+   "pipeline_tag": "text-generation",
+   "provider": "Meta",
+   "quantization": "Q4_K_M",
+   "recommended_ram_gb": 7.5,
+   "use_case": "Instruction following, chat"
+  },
+  {
+   "capabilities": [],
+   "context_length": 4096,
+   "format": "gguf",
+   "gguf_sources": [
+    {
+     "provider": "mradermacher",
+     "repo": "mradermacher/Llama-2-7b-hf-GGUF"
+    }
+   ],
+   "has_sources": true,
+   "hf_downloads": 734514,
+   "languages": [
+    "en"
+   ],
+   "license": "llama2",
+   "min_ram_gb": 3.8,
+   "min_vram_gb": 3.5,
+   "name": "meta-llama/Llama-2-7b-hf",
+   "parameter_count": "6.7B",
+   "pipeline_tag": "text-generation",
+   "provider": "Meta",
+   "quantization": "Q4_K_M",
+   "recommended_ram_gb": 6.3,
+   "use_case": "General purpose text generation"
+  },
+  {
+   "capabilities": [],
+   "context_length": 4096,
+   "format": "gguf",
+   "gguf_sources": [
+    {
+     "provider": "mradermacher",
+     "repo": "mradermacher/deepseek-coder-7b-instruct-v1.5-GGUF"
+    }
+   ],
+   "has_sources": true,
+   "hf_downloads": 595258,
+   "license": "deepseek",
+   "min_ram_gb": 3.9,
+   "min_vram_gb": 3.5,
+   "name": "deepseek-ai/deepseek-coder-7b-instruct-v1.5",
+   "parameter_count": "6.9B",
+   "pipeline_tag": "text-generation",
+   "provider": "DeepSeek",
+   "quantization": "Q4_K_M",
+   "recommended_ram_gb": 6.4,
+   "use_case": "Code generation and completion"
+  },
+  {
+   "capabilities": [
+    "tool_use"
+   ],
+   "context_length": 131072,
+   "format": "gguf",
+   "gguf_sources": [
+    {
+     "provider": "unsloth",
+     "repo": "unsloth/DeepSeek-R1-0528-Qwen3-8B-GGUF"
+    },
+    {
+     "provider": "mradermacher",
+     "repo": "mradermacher/DeepSeek-R1-0528-Qwen3-8B-GGUF"
+    }
+   ],
+   "has_sources": true,
+   "hf_downloads": 594281,
+   "license": "mit",
+   "min_ram_gb": 4.6,
+   "min_vram_gb": 4.2,
+   "name": "deepseek-ai/DeepSeek-R1-0528-Qwen3-8B",
+   "parameter_count": "8.2B",
+   "pipeline_tag": "text-generation",
+   "provider": "DeepSeek",
+   "quantization": "Q4_K_M",
+   "recommended_ram_gb": 7.6,
+   "use_case": "Advanced reasoning, chain-of-thought"
+  },
+  {
+   "capabilities": [
+    "tool_use"
+   ],
+   "context_length": 131072,
+   "format": "gguf",
+   "gguf_sources": [
+    {
+     "provider": "mradermacher",
+     "repo": "mradermacher/Hermes-3-Llama-3.1-8B-GGUF"
+    }
+   ],
+   "has_sources": true,
+   "hf_downloads": 509561,
+   "languages": [
+    "en"
+   ],
+   "license": "llama3",
+   "min_ram_gb": 4.5,
+   "min_vram_gb": 4.1,
+   "name": "NousResearch/Hermes-3-Llama-3.1-8B",
+   "parameter_count": "8.0B",
+   "pipeline_tag": "text-generation",
+   "provider": "NousResearch",
+   "quantization": "Q4_K_M",
+   "recommended_ram_gb": 7.5,
+   "use_case": "General purpose text generation"
+  },
+  {
+   "capabilities": [],
+   "context_length": 2048,
+   "format": "gguf",
+   "gguf_sources": [
+    {
+     "provider": "mradermacher",
+     "repo": "mradermacher/pythia-6.9b-GGUF"
+    }
+   ],
+   "has_sources": true,
+   "hf_downloads": 495608,
+   "languages": [
+    "en"
+   ],
+   "license": "apache-2.0",
+   "min_ram_gb": 3.9,
+   "min_vram_gb": 3.6,
+   "name": "EleutherAI/pythia-6.9b",
+   "parameter_count": "7.0B",
+   "pipeline_tag": "text-generation",
+   "provider": "eleutherai",
+   "quantization": "Q4_K_M",
+   "recommended_ram_gb": 6.5,
+   "use_case": "General purpose text generation"
+  },
+  {
+   "capabilities": [
+    "tool_use"
+   ],
+   "context_length": 40960,
+   "format": "gguf",
+   "gguf_sources": [
+    {
+     "provider": "unsloth",
+     "repo": "unsloth/Qwen3-14B-GGUF"
+    },
+    {
+     "provider": "ggml-org",
+     "repo": "ggml-org/Qwen3-14B-GGUF"
+    },
+    {
+     "provider": "mradermacher",
+     "repo": "mradermacher/Qwen3-14B-GGUF"
+    }
+   ],
+   "has_sources": true,
+   "hf_downloads": 5776369,
+   "license": "apache-2.0",
+   "min_ram_gb": 8.3,
+   "min_vram_gb": 7.6,
+   "name": "Qwen/Qwen3-14B",
+   "parameter_count": "14.8B",
+   "pipeline_tag": "text-generation",
+   "provider": "Alibaba",
+   "quantization": "Q4_K_M",
+   "recommended_ram_gb": 13.8,
+   "use_case": "General purpose text generation"
+  },
+  {
+   "capabilities": [
+    "tool_use"
+   ],
+   "context_length": 32768,
+   "format": "gguf",
+   "gguf_sources": [
+    {
+     "provider": "unsloth",
+     "repo": "unsloth/Qwen2.5-Coder-14B-Instruct-GGUF"
+    },
+    {
+     "provider": "bartowski",
+     "repo": "bartowski/Qwen2.5-Coder-14B-Instruct-GGUF"
+    },
+    {
+     "provider": "mradermacher",
+     "repo": "mradermacher/Qwen2.5-Coder-14B-Instruct-GGUF"
+    }
+   ],
+   "has_sources": true,
+   "hf_downloads": 1648998,
+   "languages": [
+    "en"
+   ],
+   "license": "apache-2.0",
+   "min_ram_gb": 8.3,
+   "min_vram_gb": 7.6,
+   "name": "Qwen/Qwen2.5-Coder-14B-Instruct",
+   "parameter_count": "14.8B",
+   "pipeline_tag": "text-generation",
+   "provider": "Alibaba",
+   "quantization": "Q4_K_M",
+   "recommended_ram_gb": 13.8,
+   "use_case": "Code generation and completion"
+  },
+  {
+   "capabilities": [
+    "tool_use"
+   ],
+   "context_length": 32768,
+   "format": "gguf",
+   "gguf_sources": [
+    {
+     "provider": "bartowski",
+     "repo": "bartowski/Qwen2.5-14B-Instruct-GGUF"
+    },
+    {
+     "provider": "mradermacher",
+     "repo": "mradermacher/Qwen2.5-14B-Instruct-GGUF"
+    }
+   ],
+   "has_sources": true,
+   "hf_downloads": 1192472,
+   "languages": [
+    "en"
+   ],
+   "license": "apache-2.0",
+   "min_ram_gb": 8.3,
+   "min_vram_gb": 7.6,
+   "name": "Qwen/Qwen2.5-14B-Instruct",
+   "parameter_count": "14.8B",
+   "pipeline_tag": "text-generation",
+   "provider": "Alibaba",
+   "quantization": "Q4_K_M",
+   "recommended_ram_gb": 13.8,
+   "use_case": "Instruction following, chat"
+  },
+  {
+   "capabilities": [],
+   "context_length": 4096,
+   "format": "gguf",
+   "gguf_sources": [
+    {
+     "provider": "bartowski",
+     "repo": "bartowski/gemma-2-9b-it-GGUF"
+    },
+    {
+     "provider": "mradermacher",
+     "repo": "mradermacher/gemma-2-9b-it-GGUF"
+    }
+   ],
+   "has_sources": true,
+   "hf_downloads": 899531,
+   "license": "gemma",
+   "min_ram_gb": 5.2,
+   "min_vram_gb": 4.7,
+   "name": "google/gemma-2-9b-it",
+   "parameter_count": "9.2B",
+   "pipeline_tag": "text-generation",
+   "provider": "Google",
+   "quantization": "Q4_K_M",
+   "recommended_ram_gb": 8.6,
+   "use_case": "General purpose text generation"
+  },
+  {
+   "capabilities": [],
+   "context_length": 131072,
+   "format": "gguf",
+   "gguf_sources": [
+    {
+     "provider": "mradermacher",
+     "repo": "mradermacher/JiRackUltra_14b-GGUF"
+    }
+   ],
+   "has_sources": true,
+   "hf_downloads": 849854,
+   "languages": [
+    "en",
+    "zh",
+    "ja",
+    "ko",
+    "fr",
+    "es",
+    "pt",
+    "de",
+    "it",
+    "ru",
+    "ar",
+    "vi",
+    "th"
+   ],
+   "license": "mit",
+   "min_ram_gb": 8.3,
+   "min_vram_gb": 7.6,
+   "name": "CMSManhattan/JiRackUltra_14b",
+   "parameter_count": "14.8B",
+   "pipeline_tag": "text-generation",
+   "provider": "cmsmanhattan",
+   "quantization": "Q4_K_M",
+   "recommended_ram_gb": 13.8,
+   "use_case": "General purpose text generation"
+  },
+  {
+   "capabilities": [],
+   "context_length": 163840,
+   "format": "gguf",
+   "gguf_sources": [
+    {
+     "provider": "bartowski",
+     "repo": "bartowski/DeepSeek-Coder-V2-Lite-Instruct-GGUF"
+    },
+    {
+     "provider": "mradermacher",
+     "repo": "mradermacher/DeepSeek-Coder-V2-Lite-Instruct-GGUF"
+    }
+   ],
+   "has_sources": true,
+   "hf_downloads": 816852,
+   "license": "deepseek-license",
+   "min_ram_gb": 8.8,
+   "min_vram_gb": 8.0,
+   "name": "deepseek-ai/DeepSeek-Coder-V2-Lite-Instruct",
+   "parameter_count": "15.7B",
+   "pipeline_tag": "text-generation",
+   "provider": "DeepSeek",
+   "quantization": "Q4_K_M",
+   "recommended_ram_gb": 14.6,
+   "use_case": "Code generation and completion"
+  },
+  {
+   "capabilities": [],
+   "context_length": 262144,
+   "format": "gguf",
+   "gguf_sources": [
+    {
+     "provider": "bartowski",
+     "repo": "bartowski/Ornith-1.5-9B-GGUF"
+    },
+    {
+     "provider": "mradermacher",
+     "repo": "mradermacher/Ornith-1.5-9B-GGUF"
+    }
+   ],
+   "has_sources": true,
+   "hf_downloads": 453339,
+   "license": "mit",
+   "min_ram_gb": 5.4,
+   "min_vram_gb": 4.9,
+   "name": "ornith-ai/Ornith-1.5-9B",
+   "parameter_count": "9.7B",
+   "pipeline_tag": "text-generation",
+   "provider": "ornith-ai",
+   "quantization": "Q4_K_M",
+   "recommended_ram_gb": 9.0,
+   "use_case": "General purpose text generation"
+  },
+  {
+   "capabilities": [],
+   "context_length": 16384,
+   "format": "gguf",
+   "gguf_sources": [
+    {
+     "provider": "unsloth",
+     "repo": "unsloth/phi-4-GGUF"
+    },
+    {
+     "provider": "bartowski",
+     "repo": "bartowski/phi-4-GGUF"
+    },
+    {
+     "provider": "mradermacher",
+     "repo": "mradermacher/phi-4-GGUF"
+    }
+   ],
+   "has_sources": true,
+   "hf_downloads": 376569,
+   "languages": [
+    "en"
+   ],
+   "license": "mit",
+   "min_ram_gb": 8.2,
+   "min_vram_gb": 7.5,
+   "name": "microsoft/phi-4",
+   "parameter_count": "14.7B",
+   "pipeline_tag": "text-generation",
+   "provider": "Microsoft",
+   "quantization": "Q4_K_M",
+   "recommended_ram_gb": 13.7,
+   "use_case": "General purpose text generation"
+  },
+  {
+   "capabilities": [],
+   "context_length": 262144,
+   "format": "gguf",
+   "gguf_sources": [
+    {
+     "provider": "mradermacher",
+     "repo": "mradermacher/Ornith-1.5-9B-OBLITERATED-GGUF"
+    }
+   ],
+   "has_sources": true,
+   "hf_downloads": 341213,
+   "languages": [
+    "en"
+   ],
+   "license": "mit",
+   "min_ram_gb": 5.4,
+   "min_vram_gb": 4.9,
+   "name": "OBLITERATUS/Ornith-1.5-9B-OBLITERATED",
+   "parameter_count": "9.7B",
+   "pipeline_tag": "text-generation",
+   "provider": "obliteratus",
+   "quantization": "Q4_K_M",
+   "recommended_ram_gb": 9.0,
+   "use_case": "General purpose text generation"
+  },
+  {
+   "capabilities": [],
+   "context_length": 131072,
+   "format": "gguf",
+   "gguf_sources": [
+    {
+     "provider": "unsloth",
+     "repo": "unsloth/DeepSeek-R1-Distill-Qwen-14B-GGUF"
+    },
+    {
+     "provider": "bartowski",
+     "repo": "bartowski/DeepSeek-R1-Distill-Qwen-14B-GGUF"
+    },
+    {
+     "provider": "mradermacher",
+     "repo": "mradermacher/DeepSeek-R1-Distill-Qwen-14B-GGUF"
+    }
+   ],
+   "has_sources": true,
+   "hf_downloads": 328480,
+   "license": "mit",
+   "min_ram_gb": 8.3,
+   "min_vram_gb": 7.6,
+   "name": "deepseek-ai/DeepSeek-R1-Distill-Qwen-14B",
+   "parameter_count": "14.8B",
+   "pipeline_tag": "text-generation",
+   "provider": "DeepSeek",
+   "quantization": "Q4_K_M",
+   "recommended_ram_gb": 13.8,
+   "use_case": "Advanced reasoning, chain-of-thought"
+  },
+  {
+   "capabilities": [],
+   "context_length": 4096,
+   "format": "gguf",
+   "gguf_sources": [
+    {
+     "provider": "mradermacher",
+     "repo": "mradermacher/Llama-2-13b-chat-hf-GGUF"
+    }
+   ],
+   "has_sources": true,
+   "hf_downloads": 195992,
+   "languages": [
+    "en"
+   ],
+   "license": "llama2",
+   "min_ram_gb": 7.3,
+   "min_vram_gb": 6.7,
+   "name": "meta-llama/Llama-2-13b-chat-hf",
+   "parameter_count": "13.0B",
+   "pipeline_tag": "text-generation",
+   "provider": "Meta",
+   "quantization": "Q4_K_M",
+   "recommended_ram_gb": 12.1,
+   "use_case": "Instruction following, chat"
+  },
+  {
+   "capabilities": [],
+   "context_length": 163840,
+   "format": "gguf",
+   "gguf_sources": [
+    {
+     "provider": "mradermacher",
+     "repo": "mradermacher/DeepSeek-V2-Lite-GGUF"
+    }
+   ],
+   "has_sources": true,
+   "hf_downloads": 169072,
+   "license": "deepseek",
+   "min_ram_gb": 8.8,
+   "min_vram_gb": 8.0,
+   "name": "deepseek-ai/DeepSeek-V2-Lite",
+   "parameter_count": "15.7B",
+   "pipeline_tag": "text-generation",
+   "provider": "DeepSeek",
+   "quantization": "Q4_K_M",
+   "recommended_ram_gb": 14.6,
+   "use_case": "General purpose text generation"
+  },
+  {
+   "capabilities": [],
+   "context_length": 131072,
+   "format": "gguf",
+   "gguf_sources": [
+    {
+     "provider": "mradermacher",
+     "repo": "mradermacher/lucid-v1-nemo-GGUF"
+    }
+   ],
+   "has_sources": true,
+   "hf_downloads": 138407,
+   "languages": [
+    "en"
+   ],
+   "license": "other",
+   "min_ram_gb": 6.8,
+   "min_vram_gb": 6.3,
+   "name": "dreamgen/lucid-v1-nemo",
+   "parameter_count": "12.2B",
+   "pipeline_tag": "text-generation",
+   "provider": "dreamgen",
+   "quantization": "Q4_K_M",
+   "recommended_ram_gb": 11.4,
+   "use_case": "General purpose text generation"
+  },
+  {
+   "capabilities": [],
+   "context_length": 131072,
+   "format": "gguf",
+   "gguf_sources": [
+    {
+     "provider": "unsloth",
+     "repo": "unsloth/granite-4.1-8b-GGUF"
+    },
+    {
+     "provider": "mradermacher",
+     "repo": "mradermacher/granite-4.1-8b-GGUF"
+    }
+   ],
+   "has_sources": true,
+   "hf_downloads": 128908,
+   "license": "apache-2.0",
+   "min_ram_gb": 4.9,
+   "min_vram_gb": 4.5,
+   "name": "ibm-granite/granite-4.1-8b",
+   "parameter_count": "8.8B",
+   "pipeline_tag": "text-generation",
+   "provider": "ibm-granite",
+   "quantization": "Q4_K_M",
+   "recommended_ram_gb": 8.2,
+   "use_case": "General purpose text generation"
+  },
+  {
+   "capabilities": [],
+   "context_length": 131072,
+   "format": "gguf",
+   "gguf_sources": [
+    {
+     "provider": "bartowski",
+     "repo": "bartowski/granite-4.2-8b-GGUF"
+    },
+    {
+     "provider": "mradermacher",
+     "repo": "mradermacher/granite-4.2-8b-GGUF"
+    }
+   ],
+   "has_sources": true,
+   "hf_downloads": 127199,
+   "languages": [
+    "en",
+    "de",
+    "es",
+    "fr",
+    "ja",
+    "pt",
+    "ar",
+    "cs",
+    "it",
+    "ko",
+    "nl",
+    "zh"
+   ],
+   "license": "apache-2.0",
+   "min_ram_gb": 4.9,
+   "min_vram_gb": 4.5,
+   "name": "ibm-granite/granite-4.2-8b",
+   "parameter_count": "8.8B",
+   "pipeline_tag": "text-generation",
+   "provider": "ibm-granite",
+   "quantization": "Q4_K_M",
+   "recommended_ram_gb": 8.2,
+   "use_case": "General purpose text generation"
+  }
+ ],
+ "per_tier": 5,
+ "table": {
+  "candidate_pool": {
+   "16GB": 158,
+   "4GB": 133,
+   "8GB": 334,
+   "chat": 1283
+  },
+  "dropped": [],
+  "from": [
+   "catalog/describe.json",
+   "file_index 两家元数据"
+  ],
+  "per_tier": 5,
+  "rows": 15,
+  "rule": {
+   "file": "量化偏好顺序 + 排除分片（名字含 -of-）+ 大小 < 档位 × 1 GiB",
+   "hash": "HF tree.lfs.oid × ModelScope 元数据 Sha256；两家一致才 usable",
+   "order": "窗口内按上游 hf_downloads 从多到少，同名忽略大小写只留第一条",
+   "quant": "Q4_K_M/Q4_K_S/Q5_K_M/Q3_K_M/Q2_K/Q4_0/IQ4_XS/Q8_0",
+   "repo": "依次尝试 ggml-org > unsloth > mradermacher（引擎同方优先），直到某个仓库能给出符合下面两条的文件；都不符合就报问题而不是硬选一个",
+   "tier": "半档 < recommended_ram_gb <= 档位（FIT_FRACTION=0.5，两个数都用上游 llmfit 的拟合值）"
+  },
+  "schema": 1,
+  "tiers": [
+   "4GB",
+   "8GB",
+   "16GB"
+  ],
+  "tiers_rows": {
+   "16GB": [
+    {
+     "context_length": 40960,
+     "file": "Qwen3-14B-Q4_K_M.gguf",
+     "file_reason": "量化偏好命中 Q4_K_M（9,001,753,376 字节 < 16 GiB）",
+     "hf_downloads": 5776369,
+     "license": "apache-2.0",
+     "license_flag": "ok",
+     "min_ram_gb": 8.3,
+     "name": "Qwen/Qwen3-14B",
+     "parameter_count": "14.8B",
+     "provider_reason": "provider=ggml-org",
+     "providers": [
+      "huggingface.co",
+      "www.modelscope.cn"
+     ],
+     "recommended_ram_gb": 13.8,
+     "repo": "ggml-org/Qwen3-14B-GGUF",
+     "repos_tried": 1,
+     "sha256": "5ff1fe7a07aebc8d090682d01b17cf268a1b4680c6477050ce75a600aecb9efb",
+     "size": 9001753376,
+     "status": "agree",
+     "urls": [
+      "https://www.modelscope.cn/models/ggml-org/Qwen3-14B-GGUF/resolve/master/Qwen3-14B-Q4_K_M.gguf",
+      "https://hf-mirror.com/ggml-org/Qwen3-14B-GGUF/resolve/main/Qwen3-14B-Q4_K_M.gguf",
+      "https://huggingface.co/ggml-org/Qwen3-14B-GGUF/resolve/main/Qwen3-14B-Q4_K_M.gguf"
+     ],
+     "usable_before_download": true,
+     "use_case": "General purpose text generation"
+    },
+    {
+     "context_length": 32768,
+     "file": "Qwen2.5-Coder-14B-Instruct-Q4_K_M.gguf",
+     "file_reason": "量化偏好命中 Q4_K_M（8,988,110,240 字节 < 16 GiB）",
+     "hf_downloads": 1648998,
+     "license": "apache-2.0",
+     "license_flag": "ok",
+     "min_ram_gb": 8.3,
+     "name": "Qwen/Qwen2.5-Coder-14B-Instruct",
+     "parameter_count": "14.8B",
+     "provider_reason": "provider=unsloth",
+     "providers": [
+      "huggingface.co",
+      "www.modelscope.cn"
+     ],
+     "recommended_ram_gb": 13.8,
+     "repo": "unsloth/Qwen2.5-Coder-14B-Instruct-GGUF",
+     "repos_tried": 1,
+     "sha256": "13dec282d3ac9a87896248d5f69187102fad7c56315c553d2fab5403121702fe",
+     "size": 8988110240,
+     "status": "agree",
+     "urls": [
+      "https://www.modelscope.cn/models/unsloth/Qwen2.5-Coder-14B-Instruct-GGUF/resolve/master/Qwen2.5-Coder-14B-Instruct-Q4_K_M.gguf",
+      "https://hf-mirror.com/unsloth/Qwen2.5-Coder-14B-Instruct-GGUF/resolve/main/Qwen2.5-Coder-14B-Instruct-Q4_K_M.gguf",
+      "https://huggingface.co/unsloth/Qwen2.5-Coder-14B-Instruct-GGUF/resolve/main/Qwen2.5-Coder-14B-Instruct-Q4_K_M.gguf"
+     ],
+     "usable_before_download": true,
+     "use_case": "Code generation and completion"
+    },
+    {
+     "context_length": 32768,
+     "file": "Qwen2.5-14B-Instruct.Q4_K_M.gguf",
+     "file_reason": "量化偏好命中 Q4_K_M（8,988,111,136 字节 < 16 GiB）",
+     "hf_downloads": 1192472,
+     "license": "apache-2.0",
+     "license_flag": "ok",
+     "min_ram_gb": 8.3,
+     "name": "Qwen/Qwen2.5-14B-Instruct",
+     "parameter_count": "14.8B",
+     "provider_reason": "provider=mradermacher",
+     "providers": [
+      "huggingface.co"
+     ],
+     "recommended_ram_gb": 13.8,
+     "repo": "mradermacher/Qwen2.5-14B-Instruct-GGUF",
+     "repos_tried": 1,
+     "sha256": "15a38a19cae606bbb5ded7ded38026ef7880e3cfb080b03440c0a5e2a335dbcb",
+     "size": 8988111136,
+     "status": "single",
+     "urls": [
+      "https://www.modelscope.cn/models/mradermacher/Qwen2.5-14B-Instruct-GGUF/resolve/master/Qwen2.5-14B-Instruct.Q4_K_M.gguf",
+      "https://hf-mirror.com/mradermacher/Qwen2.5-14B-Instruct-GGUF/resolve/main/Qwen2.5-14B-Instruct.Q4_K_M.gguf",
+      "https://huggingface.co/mradermacher/Qwen2.5-14B-Instruct-GGUF/resolve/main/Qwen2.5-14B-Instruct.Q4_K_M.gguf"
+     ],
+     "usable_before_download": false,
+     "use_case": "Instruction following, chat"
+    },
+    {
+     "context_length": 4096,
+     "file": "gemma-2-9b-it.Q4_K_M.gguf",
+     "file_reason": "量化偏好命中 Q4_K_M（5,761,058,880 字节 < 16 GiB）",
+     "hf_downloads": 899531,
+     "license": "gemma",
+     "license_flag": "ok",
+     "min_ram_gb": 5.2,
+     "name": "google/gemma-2-9b-it",
+     "parameter_count": "9.2B",
+     "provider_reason": "provider=mradermacher",
+     "providers": [
+      "huggingface.co"
+     ],
+     "recommended_ram_gb": 8.6,
+     "repo": "mradermacher/gemma-2-9b-it-GGUF",
+     "repos_tried": 1,
+     "sha256": "4da1d1ada7f64adea359bc4a572cb6faa6e4fc26993f621a3fec7ed614ca337e",
+     "size": 5761058880,
+     "status": "single",
+     "urls": [
+      "https://www.modelscope.cn/models/mradermacher/gemma-2-9b-it-GGUF/resolve/master/gemma-2-9b-it.Q4_K_M.gguf",
+      "https://hf-mirror.com/mradermacher/gemma-2-9b-it-GGUF/resolve/main/gemma-2-9b-it.Q4_K_M.gguf",
+      "https://huggingface.co/mradermacher/gemma-2-9b-it-GGUF/resolve/main/gemma-2-9b-it.Q4_K_M.gguf"
+     ],
+     "usable_before_download": false,
+     "use_case": "General purpose text generation"
+    },
+    {
+     "context_length": 131072,
+     "file": "JiRackUltra_14b.Q4_K_M.gguf",
+     "file_reason": "量化偏好命中 Q4_K_M（8,988,110,976 字节 < 16 GiB）",
+     "hf_downloads": 849854,
+     "license": "mit",
+     "license_flag": "ok",
+     "min_ram_gb": 8.3,
+     "name": "CMSManhattan/JiRackUltra_14b",
+     "parameter_count": "14.8B",
+     "provider_reason": "provider=mradermacher",
+     "providers": [
+      "huggingface.co"
+     ],
+     "recommended_ram_gb": 13.8,
+     "repo": "mradermacher/JiRackUltra_14b-GGUF",
+     "repos_tried": 1,
+     "sha256": "42d1e968a1851060a31ecdd60d5e18eb0f02ac197534c5e34712fb01c068fadd",
+     "size": 8988110976,
+     "status": "single",
+     "urls": [
+      "https://www.modelscope.cn/models/mradermacher/JiRackUltra_14b-GGUF/resolve/master/JiRackUltra_14b.Q4_K_M.gguf",
+      "https://hf-mirror.com/mradermacher/JiRackUltra_14b-GGUF/resolve/main/JiRackUltra_14b.Q4_K_M.gguf",
+      "https://huggingface.co/mradermacher/JiRackUltra_14b-GGUF/resolve/main/JiRackUltra_14b.Q4_K_M.gguf"
+     ],
+     "usable_before_download": false,
+     "use_case": "General purpose text generation"
+    }
+   ],
+   "4GB": [
+    {
+     "context_length": 40960,
+     "file": "Qwen3-4B-Q4_K_M.gguf",
+     "file_reason": "量化偏好命中 Q4_K_M（2,497,281,312 字节 < 4 GiB）",
+     "hf_downloads": 12177404,
+     "license": "apache-2.0",
+     "license_flag": "ok",
+     "min_ram_gb": 2.2,
+     "name": "Qwen/Qwen3-4B",
+     "parameter_count": "4.0B",
+     "provider_reason": "provider=unsloth",
+     "providers": [
+      "huggingface.co",
+      "www.modelscope.cn"
+     ],
+     "recommended_ram_gb": 3.7,
+     "repo": "unsloth/Qwen3-4B-GGUF",
+     "repos_tried": 1,
+     "sha256": "f6f851777709861056efcdad3af01da38b31223a3ba26e61a4f8bf3a2195813a",
+     "size": 2497281312,
+     "status": "agree",
+     "urls": [
+      "https://www.modelscope.cn/models/unsloth/Qwen3-4B-GGUF/resolve/master/Qwen3-4B-Q4_K_M.gguf",
+      "https://hf-mirror.com/unsloth/Qwen3-4B-GGUF/resolve/main/Qwen3-4B-Q4_K_M.gguf",
+      "https://huggingface.co/unsloth/Qwen3-4B-GGUF/resolve/main/Qwen3-4B-Q4_K_M.gguf"
+     ],
+     "usable_before_download": true,
+     "use_case": "General purpose text generation"
+    },
+    {
+     "context_length": 32768,
+     "file": "Qwen2.5-3B-Instruct.Q4_K_M.gguf",
+     "file_reason": "量化偏好命中 Q4_K_M（1,929,903,456 字节 < 4 GiB）",
+     "hf_downloads": 4270090,
+     "license": "qwen-research",
+     "license_flag": "ok",
+     "min_ram_gb": 1.7,
+     "name": "Qwen/Qwen2.5-3B-Instruct",
+     "parameter_count": "3.1B",
+     "provider_reason": "provider=mradermacher",
+     "providers": [
+      "huggingface.co"
+     ],
+     "recommended_ram_gb": 2.9,
+     "repo": "mradermacher/Qwen2.5-3B-Instruct-GGUF",
+     "repos_tried": 1,
+     "sha256": "1387ded94cc8b627ad985e0b7c4d05eeaef90e7b58934690af9ed402eb9dda89",
+     "size": 1929903456,
+     "status": "single",
+     "urls": [
+      "https://www.modelscope.cn/models/mradermacher/Qwen2.5-3B-Instruct-GGUF/resolve/master/Qwen2.5-3B-Instruct.Q4_K_M.gguf",
+      "https://hf-mirror.com/mradermacher/Qwen2.5-3B-Instruct-GGUF/resolve/main/Qwen2.5-3B-Instruct.Q4_K_M.gguf",
+      "https://huggingface.co/mradermacher/Qwen2.5-3B-Instruct-GGUF/resolve/main/Qwen2.5-3B-Instruct.Q4_K_M.gguf"
+     ],
+     "usable_before_download": false,
+     "use_case": "Instruction following, chat"
+    },
+    {
+     "context_length": 262144,
+     "file": "Qwen3-4B-Instruct-2507-Q4_K_M.gguf",
+     "file_reason": "量化偏好命中 Q4_K_M（2,497,281,120 字节 < 4 GiB）",
+     "hf_downloads": 3548400,
+     "license": "apache-2.0",
+     "license_flag": "ok",
+     "min_ram_gb": 2.2,
+     "name": "Qwen/Qwen3-4B-Instruct-2507",
+     "parameter_count": "4.0B",
+     "provider_reason": "provider=unsloth",
+     "providers": [
+      "huggingface.co",
+      "www.modelscope.cn"
+     ],
+     "recommended_ram_gb": 3.7,
+     "repo": "unsloth/Qwen3-4B-Instruct-2507-GGUF",
+     "repos_tried": 1,
+     "sha256": "3605803b982cb64aead44f6c1b2ae36e3acdb41d8e46c8a94c6533bc4c67e597",
+     "size": 2497281120,
+     "status": "agree",
+     "urls": [
+      "https://www.modelscope.cn/models/unsloth/Qwen3-4B-Instruct-2507-GGUF/resolve/master/Qwen3-4B-Instruct-2507-Q4_K_M.gguf",
+      "https://hf-mirror.com/unsloth/Qwen3-4B-Instruct-2507-GGUF/resolve/main/Qwen3-4B-Instruct-2507-Q4_K_M.gguf",
+      "https://huggingface.co/unsloth/Qwen3-4B-Instruct-2507-GGUF/resolve/main/Qwen3-4B-Instruct-2507-Q4_K_M.gguf"
+     ],
+     "usable_before_download": true,
+     "use_case": "Instruction following, chat"
+    },
+    {
+     "context_length": 262144,
+     "file": "Rio-3.0-Open-Mini.Q4_K_M.gguf",
+     "file_reason": "量化偏好命中 Q4_K_M（2,497,281,088 字节 < 4 GiB）",
+     "hf_downloads": 1840449,
+     "license": "mit",
+     "license_flag": "ok",
+     "min_ram_gb": 2.2,
+     "name": "prefeitura-rio/Rio-3.0-Open-Mini",
+     "parameter_count": "4.0B",
+     "provider_reason": "provider=mradermacher",
+     "providers": [
+      "huggingface.co"
+     ],
+     "recommended_ram_gb": 3.7,
+     "repo": "mradermacher/Rio-3.0-Open-Mini-GGUF",
+     "repos_tried": 1,
+     "sha256": "f70c3bf3fd7ec61ffde742be5dc9d0aac6b71f116bba37f5dceb0cf587cbb4d2",
+     "size": 2497281088,
+     "status": "single",
+     "urls": [
+      "https://www.modelscope.cn/models/mradermacher/Rio-3.0-Open-Mini-GGUF/resolve/master/Rio-3.0-Open-Mini.Q4_K_M.gguf",
+      "https://hf-mirror.com/mradermacher/Rio-3.0-Open-Mini-GGUF/resolve/main/Rio-3.0-Open-Mini.Q4_K_M.gguf",
+      "https://huggingface.co/mradermacher/Rio-3.0-Open-Mini-GGUF/resolve/main/Rio-3.0-Open-Mini.Q4_K_M.gguf"
+     ],
+     "usable_before_download": false,
+     "use_case": "Lightweight, edge deployment"
+    },
+    {
+     "context_length": 262144,
+     "file": "NVIDIA-Nemotron-3-Nano-4B-BF16.Q4_K_M.gguf",
+     "file_reason": "量化偏好命中 Q4_K_M（2,837,077,280 字节 < 4 GiB）",
+     "hf_downloads": 1565039,
+     "license": "nvidia-nemotron-open-model-license",
+     "license_flag": "ok",
+     "min_ram_gb": 2.2,
+     "name": "nvidia/NVIDIA-Nemotron-3-Nano-4B-BF16",
+     "parameter_count": "4.0B",
+     "provider_reason": "provider=mradermacher",
+     "providers": [
+      "huggingface.co"
+     ],
+     "recommended_ram_gb": 3.7,
+     "repo": "mradermacher/NVIDIA-Nemotron-3-Nano-4B-BF16-GGUF",
+     "repos_tried": 1,
+     "sha256": "21fc5d6f9047f8484765368bd5945883de140913a534f15c690beaa8ff18e6f6",
+     "size": 2837077280,
+     "status": "single",
+     "urls": [
+      "https://www.modelscope.cn/models/mradermacher/NVIDIA-Nemotron-3-Nano-4B-BF16-GGUF/resolve/master/NVIDIA-Nemotron-3-Nano-4B-BF16.Q4_K_M.gguf",
+      "https://hf-mirror.com/mradermacher/NVIDIA-Nemotron-3-Nano-4B-BF16-GGUF/resolve/main/NVIDIA-Nemotron-3-Nano-4B-BF16.Q4_K_M.gguf",
+      "https://huggingface.co/mradermacher/NVIDIA-Nemotron-3-Nano-4B-BF16-GGUF/resolve/main/NVIDIA-Nemotron-3-Nano-4B-BF16.Q4_K_M.gguf"
+     ],
+     "usable_before_download": false,
+     "use_case": "General purpose text generation"
+    }
+   ],
+   "8GB": [
+    {
+     "context_length": 40960,
+     "file": "Qwen3-8B-Q4_K_M.gguf",
+     "file_reason": "量化偏好命中 Q4_K_M（5,027,784,512 字节 < 8 GiB）",
+     "hf_downloads": 9650573,
+     "license": "apache-2.0",
+     "license_flag": "ok",
+     "min_ram_gb": 4.6,
+     "name": "Qwen/Qwen3-8B",
+     "parameter_count": "8.2B",
+     "provider_reason": "provider=unsloth",
+     "providers": [
+      "huggingface.co",
+      "www.modelscope.cn"
+     ],
+     "recommended_ram_gb": 7.6,
+     "repo": "unsloth/Qwen3-8B-GGUF",
+     "repos_tried": 2,
+     "sha256": "120307ba529eb2439d6c430d94104dabd578497bc7bfe7e322b5d9933b449bd4",
+     "size": 5027784512,
+     "status": "agree",
+     "urls": [
+      "https://www.modelscope.cn/models/unsloth/Qwen3-8B-GGUF/resolve/master/Qwen3-8B-Q4_K_M.gguf",
+      "https://hf-mirror.com/unsloth/Qwen3-8B-GGUF/resolve/main/Qwen3-8B-Q4_K_M.gguf",
+      "https://huggingface.co/unsloth/Qwen3-8B-GGUF/resolve/main/Qwen3-8B-Q4_K_M.gguf"
+     ],
+     "usable_before_download": true,
+     "use_case": "General purpose text generation"
+    },
+    {
+     "context_length": 32768,
+     "file": "Qwen2.5-7B-Instruct.Q4_K_M.gguf",
+     "file_reason": "量化偏好命中 Q4_K_M（4,683,074,400 字节 < 8 GiB）",
+     "hf_downloads": 7753092,
+     "license": "apache-2.0",
+     "license_flag": "ok",
+     "min_ram_gb": 4.3,
+     "name": "Qwen/Qwen2.5-7B-Instruct",
+     "parameter_count": "7.6B",
+     "provider_reason": "provider=mradermacher",
+     "providers": [
+      "huggingface.co"
+     ],
+     "recommended_ram_gb": 7.1,
+     "repo": "mradermacher/Qwen2.5-7B-Instruct-GGUF",
+     "repos_tried": 1,
+     "sha256": "b5fe74b613436747acf83405e896a338ded690037ab77581d1177829dc19f680",
+     "size": 4683074400,
+     "status": "single",
+     "urls": [
+      "https://www.modelscope.cn/models/mradermacher/Qwen2.5-7B-Instruct-GGUF/resolve/master/Qwen2.5-7B-Instruct.Q4_K_M.gguf",
+      "https://hf-mirror.com/mradermacher/Qwen2.5-7B-Instruct-GGUF/resolve/main/Qwen2.5-7B-Instruct.Q4_K_M.gguf",
+      "https://huggingface.co/mradermacher/Qwen2.5-7B-Instruct-GGUF/resolve/main/Qwen2.5-7B-Instruct.Q4_K_M.gguf"
+     ],
+     "usable_before_download": false,
+     "use_case": "Instruction following, chat"
+    },
+    {
+     "context_length": 4096,
+     "file": "Llama-3.1-8B-Instruct-Q4_K_M.gguf",
+     "file_reason": "量化偏好命中 Q4_K_M（4,920,739,200 字节 < 8 GiB）",
+     "hf_downloads": 5926413,
+     "license": "llama3.1",
+     "license_flag": "ok",
+     "min_ram_gb": 4.5,
+     "name": "meta-llama/Llama-3.1-8B-Instruct",
+     "parameter_count": "8.0B",
+     "provider_reason": "provider=unsloth",
+     "providers": [
+      "huggingface.co",
+      "www.modelscope.cn"
+     ],
+     "recommended_ram_gb": 7.5,
+     "repo": "unsloth/Llama-3.1-8B-Instruct-GGUF",
+     "repos_tried": 1,
+     "sha256": "b3bdbf23b47d7e6bb791c99b206deb169cd5a96362a9e3399028df2faacdc506",
+     "size": 4920739200,
+     "status": "agree",
+     "urls": [
+      "https://www.modelscope.cn/models/unsloth/Llama-3.1-8B-Instruct-GGUF/resolve/master/Llama-3.1-8B-Instruct-Q4_K_M.gguf",
+      "https://hf-mirror.com/unsloth/Llama-3.1-8B-Instruct-GGUF/resolve/main/Llama-3.1-8B-Instruct-Q4_K_M.gguf",
+      "https://huggingface.co/unsloth/Llama-3.1-8B-Instruct-GGUF/resolve/main/Llama-3.1-8B-Instruct-Q4_K_M.gguf"
+     ],
+     "usable_before_download": true,
+     "use_case": "Instruction following, chat"
+    },
+    {
+     "context_length": 262144,
+     "file": "Ornith-1.0-9B-Q4_K_M.gguf",
+     "file_reason": "量化偏好命中 Q4_K_M（5,701,067,872 字节 < 8 GiB）",
+     "hf_downloads": 2325290,
+     "license": "mit",
+     "license_flag": "ok",
+     "min_ram_gb": 4.6,
+     "name": "deepreinforce-ai/Ornith-1.0-9B",
+     "parameter_count": "8.2B",
+     "provider_reason": "provider=unsloth",
+     "providers": [
+      "huggingface.co",
+      "www.modelscope.cn"
+     ],
+     "recommended_ram_gb": 7.6,
+     "repo": "unsloth/Ornith-1.0-9B-GGUF",
+     "repos_tried": 1,
+     "sha256": "641675b356a4463677a02a0d703f7b571b39f0b747fbd270b379c848edc29e84",
+     "size": 5701067872,
+     "status": "agree",
+     "urls": [
+      "https://www.modelscope.cn/models/unsloth/Ornith-1.0-9B-GGUF/resolve/master/Ornith-1.0-9B-Q4_K_M.gguf",
+      "https://hf-mirror.com/unsloth/Ornith-1.0-9B-GGUF/resolve/main/Ornith-1.0-9B-Q4_K_M.gguf",
+      "https://huggingface.co/unsloth/Ornith-1.0-9B-GGUF/resolve/main/Ornith-1.0-9B-Q4_K_M.gguf"
+     ],
+     "usable_before_download": true,
+     "use_case": "General purpose text generation"
+    },
+    {
+     "context_length": 32768,
+     "file": "Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf",
+     "file_reason": "量化偏好命中 Q4_K_M（4,683,073,504 字节 < 8 GiB）",
+     "hf_downloads": 1784907,
+     "license": "apache-2.0",
+     "license_flag": "ok",
+     "min_ram_gb": 4.3,
+     "name": "Qwen/Qwen2.5-Coder-7B-Instruct",
+     "parameter_count": "7.6B",
+     "provider_reason": "provider=unsloth",
+     "providers": [
+      "huggingface.co",
+      "www.modelscope.cn"
+     ],
+     "recommended_ram_gb": 7.1,
+     "repo": "unsloth/Qwen2.5-Coder-7B-Instruct-GGUF",
+     "repos_tried": 1,
+     "sha256": "9a961bb225cb2b9fd84b2297df0d53089895c049d7d9dc5f5f8aebbcd3247872",
+     "size": 4683073504,
+     "status": "agree",
+     "urls": [
+      "https://www.modelscope.cn/models/unsloth/Qwen2.5-Coder-7B-Instruct-GGUF/resolve/master/Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf",
+      "https://hf-mirror.com/unsloth/Qwen2.5-Coder-7B-Instruct-GGUF/resolve/main/Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf",
+      "https://huggingface.co/unsloth/Qwen2.5-Coder-7B-Instruct-GGUF/resolve/main/Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf"
+     ],
+     "usable_before_download": true,
+     "use_case": "Code generation and completion"
+    }
+   ]
+  },
+  "usable_before_download": 8
+ }
+}

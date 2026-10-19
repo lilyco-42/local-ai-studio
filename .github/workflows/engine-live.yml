@@ -13,6 +13,9 @@ on:
       - "tools/catalog_snapshot.py"
       - "tools/citation_check.py"
       - "tools/file_index.py"
+      - "tools/recommend_models.py"
+      - "catalog/recommendations.json"
+      - "tests/fixtures/recommend_slice.json"
       - "tools/payload_plan.py"
       - "tools/zip_peek.py"
       - "pins/payload-plan.json"
@@ -536,6 +539,26 @@ jobs:
         run: python3 tools/file_index.py --selfcheck
       - name: 按已钉的 pin 做正向与负向对照（覆盖度地板 2 条）
         run: python3 tools/file_index.py --control pins/models.json
+
+  recommendations:
+    # 面向用户的那张"我这台机器该装哪个"表。出厂默认档（catalog/defaults.json）是车道最小样本，
+    # 不是推荐；这张表才是 UI 对话档的来源，所以四条选择规则都得可复核：
+    # 半档<recommended_ram_gb<=档位、档内按上游下载量、仓库依次试 ggml-org→unsloth→mradermacher、
+    # 文件要整只（排除 -of- 分片与 dflash/mmproj 这类附带产物）且大小<档位×1 GiB。
+    # 离线那两步是本车道的主角（runner 有没有网都能红）；真联网那步只负责发现上游漂移。
+    timeout-minutes: 15
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: 判据本身（全部离线：含用真元数据切片重算已提交那张表）
+        run: python -m unittest tests.test_recommend_models -v
+      - name: 用切片离线重算并与已提交的那张比漂移（不联网，改一个字也要红）
+        run: python3 tools/recommend_models.py --fixtures tests/fixtures/recommend_slice.json --check
+      - name: 真取两家元数据重算（上游漂了就红，包括某档凑不满）
+        run: python3 tools/recommend_models.py --live --check
 
   ocr-build-surface:
     # 四项能力里只有 OCR 要现场编译，而"钉 commit"对它**并不等于钉住构建输入**：
