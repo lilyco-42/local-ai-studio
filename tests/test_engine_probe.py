@@ -187,12 +187,33 @@ class TestPlan(unittest.TestCase):
         """车道按 manifest["inferred"] 决定解压哪些产物。上一版这条车道去解压
         llama-win-cpu-x64（名字里明写 win，从来不是推断），拿到的是假证据。"""
         m = probe.manifest_of(self.got)
-        self.assertEqual(sorted(m), ["counts", "inferred", "targets"])
+        self.assertEqual(sorted(m), ["counts", "inferred", "no_pin", "targets"])
         self.assertEqual(m["inferred"], ["whisper-win-base-x64", "whisper-win-blas-x64"],
                          f"实际：{m['inferred']}")
         self.assertTrue(all("win" not in m["targets"][k]["asset"].lower().replace("win32", "")
                             for k in m["inferred"]), "inferred 里不许有名字已写明 OS 的产物")
         self.assertNotIn("llama-win-cpu-x64", m["inferred"])
+
+    def test_upstream_gives_us_a_pin_for_every_target(self) -> None:
+        """2026-10-19 实测：GitHub release 每个产物都有 digest，且两个真实包下载后
+        本地算的 sha256 与 digest 逐字节相等——所以引擎这层的哈希来自上游。
+        上游哪天不给了，必须是这条测试红，而不是下载端静默退回"不校验"。"""
+        self.assertEqual(probe.pin_missing(self.got), [], f"缺 pin：{probe.pin_missing(self.got)}")
+        for k, v in self.got.items():
+            self.assertTrue(v["digest"].startswith("sha256:"), f"{k} digest 前缀不对")
+            self.assertEqual(len(v["digest"]), 71, f"{k} digest 长度不是 sha256 的 64+7")
+
+    def test_missing_digest_is_reported_not_silenced(self) -> None:
+        """负向对照：抹掉一个 digest，pin_missing 必须点名它，否则 pin 检查是摆设。"""
+        import copy
+        tampered = copy.deepcopy(self.got)
+        key = sorted(tampered)[0]
+        tampered[key]["digest"] = None
+        miss = probe.pin_missing(tampered)
+        self.assertIn(key, miss, f"抹掉 {key} 的 digest 却没报")
+        # 前缀对但被截断的（像是"有哈希"）也必须抓出来
+        tampered[key]["digest"] = "sha256:deadbeef"
+        self.assertIn(key, probe.pin_missing(tampered), "截断的假 digest 竟然通过了")
 
     def test_urls_match_asset_names_and_sizes_are_sane(self) -> None:
         for target, v in self.got.items():

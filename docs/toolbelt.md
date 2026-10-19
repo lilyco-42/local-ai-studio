@@ -14,10 +14,10 @@ ADR-0001 只解决了"引擎从哪来"。但把普通人电脑用起来还差三
 | **AlexsJones/llmfit** (Rust) | 检测 RAM/CPU/GPU-VRAM/后端，对目录里每个模型按**显存拟合、预估速度**等四个维度打分，给"你这台机器能跑什么"的答案 | **MIT** | **38,108★**，push **2026-10-19**（今天） | 18 个产物＝9 平台包 ×2：**每个 tar.gz/zip 都配 `.sha256`**；darwin x64+arm64、win msvc x64+arm64、linux gnu+musl x64+arm64+riscv64 | **有**，格式是 `sha256sum -c` 直接能吃的 `<哈希>␣␣<文件名>` |
 | **huggingface/huggingface_hub** (Python, `hf` CLI) | 模型/权重的搜索与下载，`HF_ENDPOINT` 换镜像端点 | **Apache-2.0** | 3,990★，push 2026-10-19 | PyPI 包（不是单文件二进制） | 源码里 `file_download.py` 有 `resume_size`（21 处命中）与 `_adjust_range_header` → **支持断点/Range** |
 | **mostlygeek/llama-swap** (Go) | 给任意 OpenAI/Anthropic 兼容后端做**模型热切换与常驻代理** | **MIT** | 6,012★，push 2026-10-15 | 6 平台包（darwin amd64/arm64、linux amd64/arm64、freebsd、windows） | **有** `llama-swap_265_checksums.txt`，同样是 sha256sum 格式 |
-| **gpustack/gguf-parser-go** (Go) | 读 GGUF 头部、估算内存占用与最大 context（**不用加载权重**） | **MIT** | 307★，push 2026-10-08，open issues **0** | 7 个按平台命名的裸二进制（含 darwin-universal） | 未见 checksums 文件 |
+| **gpustack/gguf-parser-go** (Go) | 读 GGUF 头部、估算内存占用与最大 context（**不用加载权重**） | **MIT** | 307★，push 2026-10-08，open issues **0** | 7 个按平台命名的裸二进制（含 darwin-universal） | 没有 sidecar，但 **API digest 7/7 全有** |
 | **huggingface/hf_transfer** (Rust) | HF 下载加速扩展 | **Apache-2.0** | 582★，push 2026-09-29 | PyPI wheel | — |
 | **huggingface/hf-agents** | HF 官方出的 CLI 扩展：**用 llmfit + llama.cpp 跑本地 agent** | Apache-2.0 | 440★，push 2026-03-25 | — | — |
-| llama.cpp 自带 | `llama-fit-params`、`llama-quantize`、`llama-bench`、`llama-gguf-split`、`llama-server` | MIT | 已在 ADR-0001 实测（`llama-win-cpu-x64.zip` 51 条目里都在） | 是（但**不给 sha256**） | 无 |
+| llama.cpp 自带 | `llama-fit-params`、`llama-quantize`、`llama-bench`、`llama-gguf-split`、`llama-server` | MIT | 已在 ADR-0001 实测（`llama-win-cpu-x64.zip` 51 条目里都在） | 是 | **有**：release 产物的 API `digest = sha256:…`，实测与下载后本地算的一致 |
 
 `hf-agents` 值得单独看一眼：它是 HuggingFace 官方把 **llmfit 当选型层、llama.cpp 当执行层**拼起来的产物，
 等于给我们指了同一条组合，而不是自己发明。
@@ -43,7 +43,11 @@ ADR-0001 只解决了"引擎从哪来"。但把普通人电脑用起来还差三
 
 - 上游会动：llmfit 已到 v1.1.17 且今天还在 push，59 个 open issue。必须**钉具体 release + sha256**，
   不能跟 latest 漂（这正是 ADR-0001 对引擎定的同一条规矩）。
-- `gguf-parser-go` 没给 checksums → 若进安装包，哈希要我们自己算并入库（和 R2 那批一样）。
+- **上游哈希这件事比原先写的乐观**：2026-10-19 更正——GitHub release 的**每个产物**都在 API 里带
+  `digest = sha256:<64hex>`，且实测就是内容哈希（下载两个包本地算，逐字节相等）。
+  所以 llmfit 的 `.sha256` sidecar、llama-swap 的 `checksums.txt` 只是"额外方便"，
+  **连本来"没给 checksums"的 gguf-parser-go 也有 API digest（7/7 实测）**，
+  凡是从 GitHub release 取的东西都不必自己先算一遍哈希；真正需要自算的只有 HF 与自家 R2 两侧。
 - "HF 的 etag 是不是就是 sha256"：`file_download.py` 里有一条注释提到"检查 etag 是否是合法 sha256"，
   但我**没有证明**任何具体文件上 etag==权重 sha256，所以这条只当线索，别当 pin 的来源。
 - 我搜 `gguf summary cli` 与 `llm downloader resume mirror` 两个词组返回空；`--sort stars` 那次还把

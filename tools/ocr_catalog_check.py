@@ -39,8 +39,8 @@ def documented_urls(path: str) -> list[str]:
     return sorted({u.rstrip(".,);") for u in URL_RX.findall(text)})
 
 
-def release_assets() -> dict[str, tuple[int, str]]:
-    out: dict[str, tuple[int, str]] = {}
+def release_assets() -> dict[str, tuple[int, str, str | None]]:
+    out: dict[str, tuple[int, str, str | None]] = {}
     page = 1
     while True:
         rels = gh(f"repos/{REPO}/releases?per_page=100&page={page}")
@@ -48,7 +48,7 @@ def release_assets() -> dict[str, tuple[int, str]]:
             break
         for r in rels:
             for a in r["assets"]:
-                out[a["browser_download_url"]] = (a["size"], a["name"])
+                out[a["browser_download_url"]] = (a["size"], a["name"], a.get("digest"))
         if len(rels) < 100:
             break
         page += 1
@@ -85,7 +85,14 @@ def main(argv: list[str]) -> int:
         return 2
 
     missing = [u for u in linked if norm(u) not in assets_n]
-    onnx = [(sz, name) for sz, name in assets_n.values() if name.endswith(".onnx")]
+    onnx = [(sz, name) for sz, name, _ in assets_n.values() if name.endswith(".onnx")]
+    # 2026-10-19 实测：GitHub release 每个产物都带 `digest = sha256:<64hex>`，
+    # 且下载两个真实包本地算 sha256 与 digest 完全相等（见 ADR-0001 的更正）。
+    # 所以 OCR 权重的 pin 有上游来源；哪天某条不给了，要在这里变红而不是"退回不校验"。
+    no_digest = sorted(name for _sz, name, dg in assets_n.values()
+                       if not (dg and dg.startswith("sha256:") and len(dg) == 71))
+    doc_no_digest = sorted(u for u in linked
+                           if not (assets_n.get(norm(u)) or (0, "", ""))[2])
     report = {
         "documented": len(linked),
         "assets": len(assets_n),
@@ -93,7 +100,9 @@ def main(argv: list[str]) -> int:
         "onnx_count": len(onnx),
         "onnx_total_mib": round(sum(s for s, _ in onnx) / 1048576, 1),
         "largest": [max(onnx)[1], round(max(onnx)[0] / 1048576, 1)] if onnx else None,
-        "sha256_upstream_provided": False,
+        "sha256_upstream_provided": not no_digest,
+        "assets_without_digest": no_digest,
+        "documented_without_digest": doc_no_digest,
     }
     if args.json:
         json.dump(report, open(args.json, "w", encoding="utf-8"), ensure_ascii=False, indent=1, sort_keys=True)
@@ -101,10 +110,15 @@ def main(argv: list[str]) -> int:
           f"缺失 {len(missing)} 个；onnx {report['onnx_count']} 个共 {report['onnx_total_mib']} MiB")
     for u in missing[:20]:
         print("  MISSING", u)
+    if no_digest:
+        print(f"  NO DIGEST：{len(no_digest)} 个产物没有上游 sha256，例如 {no_digest[:5]}", file=sys.stderr)
     if missing:
         print("NOT RESOLVED：有文档链接的权重在 release 里找不到，URL 级 pin 会 404", file=sys.stderr)
         return 1
-    print("OK：全部文档链接的权重都能在 release 里取到（哈希仍需我们自己算）")
+    if no_digest or doc_no_digest:
+        print("NOT RESOLVED：上游 sha256 缺失，目录不能降级成不校验", file=sys.stderr)
+        return 1
+    print("OK：全部文档链接的权重都在 release 里，且每条都有上游给的 sha256")
     return 0
 
 

@@ -107,8 +107,14 @@ DirectML 对这款产品不是锦上添花：目标用户是"普通人已有的�
 - 移动端 det 只有 **4.6 MiB**，rec 7.4–15.8 MiB → OCR 是四项能力里最轻的，可以随首装直接下齐；
 - 服务端 det/rec 80–108 MiB；最大的 `unimernet.onnx` **1,756 MiB**（公式识别，绝不默认下载）。
 
-GitHub release 只给 `size`，**没有官方 sha256**，所以 pin 必须由 CI 自己算并写进清单
-（和 Codex 那边 R2 桶 `lain42-dl` 的 91 键 sha256 做法一致），不能拿"上游没提供哈希"当不校验的理由。
+**更正（2026-10-19 晚）**：这一节原先写"GitHub release 只给 size、没有官方 sha256，所以 pin 必须 CI 自己算"，
+那是错的。release 产物的 API 里有 `digest` 字段，形如 `sha256:<64 位十六进制>`，而且**实测就是内容哈希**：
+`whisper-bin-x64.zip`（8,928,640 B）与 `sd-master-95b3090-bin-win-cpu-x64.zip`（17,706,677 B）下载后本地算
+sha256，与 API 的 digest 逐字节相等。三家引擎每个产物都有（llama 216/216、whisper 36/36、sd 54/54），
+OCR 权重同样全带（`v0.7.0` 8/8、`v0.6.0` 1/1，全部 119 个产物 0 个缺）。
+所以引擎与 OCR 权重这一层的 pin **有上游来源**，CI 的角色变成"核对"而不是"首次计算"；
+`engine_probe` 已把 digest 带进 manifest，缺任何一个就 `pin_missing` 点名并非零退出
+——不能让它静默退回"不校验"。仍需自己算的是 R2 与 HF 那两侧（见"分发源可达性"）。
 
 ## OS 推断的证据（2026-10-19，`tools/zip_peek.py` Range 读中央目录）
 
@@ -210,8 +216,10 @@ Vulkan，不必退回 CPU 的"几分钟一张"**。所以这条能力的设计�
    否则目录里会出现"知道是哪个量化、不知道是谁训的"的条目，sha256 也救不回出处。
 2. R2 与 GitHub 都回 **206 + Content-Range**，所以**断点续传可以做**。在 0.8–1 MiB/s 的实际速率下，
    一个 400 MB 权重要 7–8 分钟，不给续传就是让用户白等一次网络抖动。
-3. 桶里只暴露 `Content-Length`，**没有 sha256 元数据**（和 GitHub release 一样）。
-   所以 pin 只能在入库时由 CI 自己算，运行时再校一次；不能指望"源上写着哈希"。
+3. R2 只暴露 `Content-Length`，**没有 sha256 元数据**；HF 的 tree/siblings 也只给文件名+大小，
+   而 resolve 响应那个 64 位十六进制的 `ETag` **不是**内容哈希（详见 model-catalog.md 的对照表）。
+   所以走这两条源的 pin 必须在入库时自己算，运行时再校一次；
+   而 GitHub release 这一侧不同，它的 `digest` 实测就是内容 sha256，可以直接用作上游 pin 来源。
 
 **能省掉一整类校验的设计事实**：ModelScope 的 CDN 对象路径是
 `lfs-objects/9e/e3/6184e616dfc76df4f5dd66f908dbde6979524ae36e6cefb67f532f798cb8`，
@@ -237,7 +245,7 @@ spending limit needs to be increased"*。同账号的 public 仓库当天早些�
 
 二选一，由用户定：把仓库改 public（车道立刻能跑，但仓库名与 README/ADR 公开），
 或在 Settings→Billing 加付款方式 / 提高 Actions 支出上限。
-在此之前，"47 个 target / 24 个单测 / 93 个模型 URL 全部命中"都只是本机 python 证据。
+在此之前，"47 个 target / 26 个单测 / 93 个模型 URL 全部命中 / 47 个 target 都有上游 sha256"都只是本机 python 证据。
 
 ## 待定（不阻塞本车道）
 

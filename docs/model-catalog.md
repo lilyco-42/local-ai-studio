@@ -29,7 +29,7 @@ SD3.5-medium/large 与 `city96/…`）；对话在 `Qwen/Qwen2.5-0.5B-Instruct-G
 2. 对话与字幕的首装体量是可以接受的（395.9 + 181.3 MiB ≈ 8–11 分钟）；OCR 几乎免费。
 3. 真要"装机就能玩"，能默认装的只有 OCR 和 tiny/base 级 ASR。
 
-## pin 规则：四个源都**不给**内容哈希，而且有一个会咬人的假哈希
+## pin 规则：GitHub 给、HF 与 R2 不给，而 HF 还多一个会咬人的假哈希
 
 在**已知答案的样本**上比对（我们独立钉过 `qwen2.5-0.5b-instruct-q2_k.gguf` =
 `9ee36184e616…f798cb8`、`415,182,688` 字节），2026-10-19 实测：
@@ -39,12 +39,13 @@ SD3.5-medium/large 与 `city96/…`）；对话在 `Qwen/Qwen2.5-0.5B-Instruct-G
 | HF（含 hf-mirror） | **不给**。`tree` 与 `siblings` 两个端点都只有文件名与大小，三个仓库一致 | 探针输出 `元数据是否带内容哈希：{'无'}` ×3 |
 | HF resolve 响应的 `ETag` | **看着像但不是**。`e3545da2…f9deed9` 是 64 位十六进制，却不等于内容 sha256（它是 Xet/cas-bridge 的对象指纹） | 与已知 pin 直接比对不等 |
 | ModelScope | **给**：LFS 对象路径按 `sha[0:2]/sha[2:4]/sha[4:]` 重建后**正好等于**同一个 pin | 上一轮整串重建验过（不是子串匹配） |
-| GitHub release 产物 | 引擎包（llama/whisper/sd）**不给**；但工具类给——llmfit 每个包配 `.sha256`、llama-swap 有 `checksums.txt`，格式都是 `sha256sum -c` 能直接吃的 | 实测读了 sidecar 内容 |
+| GitHub release 产物 | **给**：每个产物的 API 里有 `digest = sha256:<64hex>`，实测就是内容哈希 | 下载 `whisper-bin-x64.zip`(8,928,640 B) 与 `sd-…-win-cpu-x64.zip`(17,706,677 B) 本地算 sha256，与 digest 逐字节相等；三家引擎 216/216、36/36、54/54 全带，OCR 权重 119 个产物 0 缺 |
 | 自家 R2 | 不给，只有 `Content-Length` | 同上一轮 |
 
-所以规则只有一条，且对四项能力统一：**权威 pin = CI 入库时自己算的 sha256**；
-ModelScope 的对象路径可以当独立旁证（它自带内容哈希），HF 的 ETag **禁止**被当校验值使用。
-三处大小互相印证可以放心用：元数据 415,182,688 == HEAD 415,182,688 == 我们的 pin。
+所以规则按源分两条，不是笼统一条：**引擎二进制与 OCR 权重（都在 GitHub release 上）直接用上游 `digest` 当 pin**，
+CI 负责核对而不是首次计算；**HF 权重与自家 R2 镜像仍必须入库时自算 sha256**（HF 元数据不给，且 ETag 是假哈希）。
+ModelScope 的对象路径可当独立旁证，HF ETag **禁止**被当校验值使用。三处大小互相印证可以放心用：
+元数据 415,182,688 == HEAD 415,182,688 == 我们的 pin。
 
 ## 还没证的
 

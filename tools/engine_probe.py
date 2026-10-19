@@ -174,7 +174,8 @@ def plan(releases: dict) -> dict:
                 if not info:
                     continue
                 info.update({"engine": engine, "release": tag, "release_rank": rank,
-                             "url": a["browser_download_url"], "size": a["size"]})
+                             "url": a["browser_download_url"], "size": a["size"],
+                             "digest": a.get("digest")})
                 cur = out.get(info["target"])
                 if cur is None or _better(info, cur):
                     out[info["target"]] = info
@@ -219,13 +220,31 @@ def github_api(path: str) -> object:
         return json.loads(r.read().decode("utf-8"))
 
 
+def pin_missing(got: dict) -> list[str]:
+    """上游给的 pin 形如 `sha256:<64 位十六进制>`。
+    2026-10-19 实测三家 release 产物**每一个**都带 digest（llama 216/216、whisper 36/36、sd 54/54），
+    并且拿两个真实包下载后本地算 sha256，与 digest 逐字节相等
+    （whisper-bin-x64.zip 8,928,640 B 与 sd-...-win-cpu-x64.zip 17,706,677 B）。
+    所以引擎这一层的哈希可以来自上游，不必等 CI 先算一遍——但也因此"哪个 target 没拿到 digest"
+    必须当成失败，而不是降级成我们自己算：静默少一个 pin 正是会被当成"有 pin"的那种 bug。
+    """
+    out = []
+    for target, v in got.items():
+        d = v.get("digest") or ""
+        if not (d.startswith("sha256:") and len(d) == 71):
+            out.append(target)
+    return sorted(out)
+
+
 def manifest_of(got: dict) -> dict:
     """CI 直接按这份结构取产物：inferred 是"OS 靠猜、必须解压证实"的 target 清单，
-    车道要遍历的正是它，不能拿一个本来就写了 win 的产物去当证据。"""
+    车道要遍历的正是它，不能拿一个本来就写了 win 的产物去当证据。
+    no_pin 是上游 digest 缺失的 target；非空就必须红，别让下载端退回"不校验"。"""
     return {
         "targets": got,
         "counts": {e: sum(1 for v in got.values() if v["engine"] == e) for e in UPSTREAM},
         "inferred": sorted(k for k, v in got.items() if v["inferred_platform"]),
+        "no_pin": pin_missing(got),
     }
 
 
@@ -258,10 +277,14 @@ def main(argv: list[str]) -> int:
     if manifest["inferred"]:
         print(f"OS 靠推断（待 CI 解压证实）：{manifest['inferred']}")
     bad = check(got, args.require_gpu)
+    if manifest["no_pin"]:
+        print(f"NO PIN: 这些 target 没拿到上游 sha256：{manifest['no_pin']}", file=sys.stderr)
     if bad:
         print(f"NOT RESOLVED: {bad}", file=sys.stderr)
         return 1
-    print(f"OK：{len(got)} 个 target 可解析，必需项全命中")
+    if manifest["no_pin"]:
+        return 1
+    print(f"OK：{len(got)} 个 target 可解析，必需项全命中，且全部带上游 sha256")
     return 0
 
 

@@ -71,7 +71,7 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
 
 ## 验收标准（在当前唯一可用验证手段 = GitHub Actions 下）
 
-1. `ci.yml`：24+ 单测绿、`yaml_gate.py` 0 BAD、离线发现器解析出全部必需 target。
+1. `ci.yml`：26 个单测绿、`yaml_gate.py` 0 BAD、离线发现器解析出全部必需 target 且每个都带上游 sha256。
 2. `engine-live.yml`：`discover` 用真实 API 出 manifest；`os-inference-proof` 对
    `manifest["inferred"]` 每一个产物解压要求 PE；`ocr-catalog` 93 条模型 URL 0 缺失；
    `headless-inference` 在 CPU runner 上真抓到 `tokens per second > 0`。
