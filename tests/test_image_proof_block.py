@@ -16,14 +16,12 @@ import unittest
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import lane_replay  # noqa: E402  （discover -s tests 会自己加这条路径，单跑一个模块时不会）
 
-JOB, IDX = "image-proof", 2
+JOB, NEEDLE = "image-proof", "生成一张小图"
 
 
 def lane_block() -> str:
     """取出 image-proof 里那段真正做产物判据的 heredoc PY（与 yaml_gate 同一个抽法）。"""
-    assert "参数生效" in lane_replay.step_name(JOB, IDX) or "生成一张小图" in lane_replay.step_name(JOB, IDX), \
-        f"{JOB}#{IDX} 步骤名变了，判据指向可能错位：{lane_replay.step_name(JOB, IDX)}"
-    return lane_replay.block(JOB, IDX)
+    return lane_replay.block(JOB, lane_replay.find_index(JOB, NEEDLE))
 
 def chunk(typ: bytes, data: bytes) -> bytes:
     return struct.pack(">I", len(data)) + typ + data + b"\x00\x00\x00\x00"

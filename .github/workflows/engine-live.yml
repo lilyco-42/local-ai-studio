@@ -12,6 +12,8 @@ on:
       - "tools/toolbelt_pins.py"
       - "tools/catalog_snapshot.py"
       - "tools/citation_check.py"
+      - "tools/ocr_build_surface.py"
+      - "pins/ocr-build-surface.json"
       - "pins/citations.json"
       - "catalog/describe.sha256"
       - "pins/toolbelt.json"
@@ -332,6 +334,24 @@ jobs:
           N=$(grep -c -- '-->' "$SRT")
           echo "::notice::字幕车道通过：$SRT 有 $N 条带时间戳的段，引擎与权重均按上游 sha256 校验"
 
+  ocr-build-surface:
+    # 四项能力里只有 OCR 要现场编译，而"钉 commit"对它**并不等于钉住构建输入**：
+    # 上游 .gitignore 明写 `Cargo.lock`，实测那颗 commit 里也没有（raw 回 404，正向对照 Cargo.toml 206），
+    # 而 40 个外部包里只有 ort 是 `=` 精确钉的，其余 37 个都是 caret —— cargo 会在构建时重新解析。
+    # 这条车道盯两件会悄悄变的事：① 依赖声明的钉法分布（fingerprint 漂了就红，并点名谁变了）；
+    # ② 上游哪天开始发 Cargo.lock（那意味着车道该改成取它的锁，而不是自己解析）。
+    timeout-minutes: 8
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: 先跑离线对照（分类器与比对函数自己得是对的）
+        run: python -m unittest tests.test_ocr_build_surface -v
+      - name: 按 pin 住的 commit 量一遍依赖面并与已提交记录比对
+        run: python3 tools/ocr_build_surface.py --check
+
   ocr-proof:
     # OCR 是四项能力里唯一没有上游二进制的，所以这条车道要在 CI 里 cargo build（CI 编译是允许的，
     # 本机禁止）。所有输入都可钉：源码用 git 提交号（git 本身内容寻址），
@@ -389,12 +409,65 @@ jobs:
           grep -q 'edition = "2024"' Cargo.toml || { echo "workspace edition 变了，工具链要求要重量"; exit 1; }
       - name: 编译 CLI（CI 编译，本机禁止）
         working-directory: src
+        # 2026-10-20 实测：上游 .gitignore 明写 `Cargo.lock`，钉住的那颗 commit 里也没有
+        # （raw 回 404，正向对照 Cargo.toml 回 206）。`tools/ocr_build_surface.py` 量到
+        # 40 个外部包里只有 ort 是 `=` 精确钉的，其余 37 个是 caret —— 所以**钉 commit 不等于钉构建输入**，
+        # cargo 会在构建时重新解析依赖图。这一项是四项能力里唯一的例外，别的都能靠 release+sha256 钉死。
+        # 处置：锁由我们自己出。第一次真跑在这里 `cargo generate-lockfile` 并把 Cargo.lock 传成 artifact，
+        # 人把它提交成 `pins/ocr-Cargo.lock`；此后这一步改走 `--locked`，缺锁或漂了都红。
         run: |
-          cargo build --release -p oar-ocr-cli
+          set -euo pipefail
+          LOCKED=""
+          if [ -f ../pins/ocr-Cargo.lock ]; then
+            cp ../pins/ocr-Cargo.lock Cargo.lock
+            LOCKED="--locked"
+            echo "::notice::依赖图按仓库里的 pins/ocr-Cargo.lock 钉住（cargo 走 --locked）"
+          else
+            cargo generate-lockfile
+            echo "::warning::上游不发 Cargo.lock 而仓库里也还没有 pins/ocr-Cargo.lock —— 这次的依赖图是现场解析的，不能算钉住"
+          fi
+          test -s Cargo.lock || { echo "没有 Cargo.lock，锁形状断言无从谈起"; exit 1; }
+          sha256sum Cargo.lock | tee "$RUNNER_TEMP/ocr-Cargo.lock.sha256"
+          python3 - <<'PY'
+          import re
+
+
+          def fail(msg):
+              raise SystemExit(f"依赖锁不合格：{msg}")
+
+
+          text = open("Cargo.lock", encoding="utf-8", errors="replace").read()
+          pkgs = re.findall(r'(?m)^\[\[package\]\]$', text)
+          pairs = dict()
+          for blk in text.split("[[package]]")[1:]:
+              n = re.search(r'name = "([^"]+)"', blk)
+              v = re.search(r'version = "([^"]+)"', blk)
+              if n and v:
+                  pairs[n.group(1)] = v.group(1)
+          print(f"lock 里 {len(pkgs)} 个包；{len(pairs)} 个有名有版本")
+          if len(pkgs) < 50:
+              fail(f"只有 {len(pkgs)} 个包，不像一份完整的依赖锁（oar-ocr 的图不可能这么小）")
+          # ort 是 ADR 里唯一被上游写成 =精确 的那个，也是最容易在解析时漂掉的一个
+          if pairs.get("ort") != "2.0.0-rc.13":
+              fail(f"ort 在锁里是 {pairs.get('ort')!r}，而 workspace 声明的是 =2.0.0-rc.13")
+          for must in ("onig_sys", "tokenizers"):
+              if must not in pairs:
+                  fail(f"锁里没有 {must} —— 与 ADR 记的 C 工具链代价不符，要重量一遍")
+          print("锁的形状认得：", {k: pairs[k] for k in sorted(pairs)[:6]})
+          PY
+          cargo build $LOCKED --release -p oar-ocr-cli
           BIN=target/release/oar
           test -x "$BIN" || { echo "编出来的不是 target/release/oar，看下面："; ls -l target/release | head -20; exit 1; }
           "$BIN" --help > "$RUNNER_TEMP/help.txt" 2>&1 < /dev/null || true
           head -25 "$RUNNER_TEMP/help.txt"
+      - name: 把这份依赖锁传回来（第一次真跑后由人提交成 pins/ocr-Cargo.lock）
+        uses: actions/upload-artifact@v4
+        with:
+          name: oar-cargo-lock
+          path: |
+            src/Cargo.lock
+            ${{ runner.temp }}/ocr-Cargo.lock.sha256
+          if-none-available: false
       - name: 取三个模型文件并按上游 digest 校验
         # 模型/字典来自 release **v0.7.0**，与上面源码的 commit 不同源是有意为之：
         # 这三条 tiny 文件只在 v0.7.0 那批产物里（2026-10-19 逐条下整包验过：

@@ -71,8 +71,9 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
 
 ## 验收标准（在当前唯一可用验证手段 = GitHub Actions 下）
 
-1. `ci.yml`：130 个单测绿（含 `test_yaml_gate.py` 给闸门自己的 11 条、`test_toolbelt_pins.py` 给工具带
+1. `ci.yml`：150 个单测绿（含 `test_yaml_gate.py` 给闸门自己的 11 条、`test_toolbelt_pins.py` 给工具带
    钉表的 14 条、`test_catalog_snapshot.py` 给目录快照与其侧表的 16 条、`test_citation_check.py` 给出处闸门的 12 条、
+   `test_ocr_build_surface.py` 给 OCR 依赖面分类器与比对的 15 条、
    `test_establish_verify.py` 给字节复核的 8 条、
    `test_r2_manifest.py` 给镜像清单的 6 条、`test_lane_assertions.py` + `test_image_proof_block.py`
    给车道判据的 27 条、`test_shell_vars.py` 给 shell 变量判据的 10 条），
@@ -108,7 +109,7 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
    权重钉死（1.5 GB，一次下载要 45 min 级 timeout）。
    但覆盖度说的是**车道存在**，不是跑过 —— 跑过与否要看 Actions 的真实记录，目前为零。
 5. **车道里的 Python 片段要真编译**：`yaml_gate.py` 现在把两条 workflow 里的每段 `<<'PY'` 抽出来
-   `compile()`（本轮 13 段；`python tools/yaml_gate.py` 自己会打印这个数，别信文档里的静态值），
+   `compile()`（本轮 14 段；`python tools/yaml_gate.py` 自己会打印这个数，别信文档里的静态值），
    并验过它会红 —— 掺一段缩进错的 PY 进去，它按
    `文件:job#步骤 第N段` 报出语法错。这个能力是被我上一次写的车道逼出来的：
    一个多缩进两格的注释就是 IndentationError，而旧闸门只查 heredoc 是否闭合，放它过去了。
@@ -153,6 +154,16 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
    "判据指向一个不存在的东西却照样跑完"（`llama-completions`、去 tag 里找 CLI、`-of jfk.srt`、
    去日志里找 `Steps:`、grep `tokens per second`…）。
    证过它承重：临时改一条 expect → 1 条红并打印上游实际那一行；行号整体 +1 → 21 条全红。
+11. **OCR 的依赖图要真的被钉住**（这条目前是**未达成**状态，写在这里是为了不让它被"车道绿了"蒙过去）：
+   上游 oar-ocr 不发 `Cargo.lock`（实测 404，正向对照 206），而 40 个外部包里只有 `ort` 是 `=` 精确钉的、
+   其余 37 个是 caret → `cargo build` 会在构建时重新解析。所以：
+   ① `ocr-proof` 第一次真跑生成锁并把 `Cargo.lock` + sha256 传成 artifact；
+   ② 由人提交成 `pins/ocr-Cargo.lock`；③ 此后该步骤走 `cargo build --locked`，缺锁就红。
+   在 ② 之前，OCR 那条只能算"编出来了"，**不能算"编的是钉住的那份依赖图"** —— 交付说明要照这句写。
+   漂移由 `ocr-build-surface` 车道守：`tools/ocr_build_surface.py --check` 比对
+   `pins/ocr-build-surface.json`（fingerprint + 锁文件状态），上游一旦开始发锁也会红（那就该改成取它的锁）。
+   分类判据本身有 15 条离线单测，其中三条是给"曾经算错的样子"写的：`{ workspace = true }` 不是未钉、
+   `[package]` 里的 `readme` 不是依赖、带 Range 的探测存在时回 206 而不是 200。
 
 ## 车道判据的出处（全部按**钉住的那个 ref** 核过，不是按 HEAD 记的）
 
@@ -169,7 +180,7 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
 车道第一次跑就会红在无关的地方 —— `image-proof` 原本就是这么错的（它去 grep 日志，
 而参数其实只进 PNG）。所以**每条硬编码判据都要有 ref 级出处**，上游改动时按这张表逐条重量。
 
-判据本身也不能只靠"看上去对"：`engine-live.yml` 里 11 段 `<<'PY'`（两条 workflow 合起来 13 段，
+判据本身也不能只靠"看上去对"：`engine-live.yml` 里 12 段 `<<'PY'`（两条 workflow 合起来 14 段，
 段数由 `yaml_gate.py` 打印）中有 6 段是**断言段**，
 其中 5 段已在本地预跑过（`tests/lane_replay.py` 把那段原样抽出来、放合成输入、exec 一遍，
 `SystemExit` 当结论；共 27 条用例，每段都配一条"必须过"的正向对照，另有一条

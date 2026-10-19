@@ -23,12 +23,10 @@ def files_of(d: dict) -> dict:
 
 
 class TestOcrKnownWord(unittest.TestCase):
-    JOB, IDX = "ocr-proof", 5
+    JOB, NEEDLE = "ocr-proof", "认得出那个词"
 
     def code(self) -> str:
-        assert "认得出那个词" in lane_replay.step_name(self.JOB, self.IDX), \
-            f"{self.JOB}#{self.IDX} 步骤名变了，判据指向可能错位"
-        return lane_replay.block(self.JOB, self.IDX)
+        return lane_replay.block(self.JOB, lane_replay.find_index(self.JOB, self.NEEDLE))
 
     def test_recognised_word_passes(self) -> None:
         """正向对照：带排版噪声的输出里有那个词，就必须过。"""
@@ -55,11 +53,10 @@ class TestOcrKnownWord(unittest.TestCase):
 
 
 class TestLlmfitJsonShape(unittest.TestCase):
-    JOB, IDX = "toolbelt-pins", 4
+    JOB, NEEDLE = "toolbelt-pins", "--json"
 
     def code(self) -> str:
-        assert "--json" in lane_replay.step_name(self.JOB, self.IDX), lane_replay.step_name(self.JOB, self.IDX)
-        return lane_replay.block(self.JOB, self.IDX)
+        return lane_replay.block(self.JOB, lane_replay.find_index(self.JOB, self.NEEDLE))
 
     def test_valid_json_passes_even_if_empty(self) -> None:
         """runner 上一个模型都没有，"查无结果"是合法输出：这条必须过，否则车道会因无关原因红。"""
@@ -82,11 +79,10 @@ class TestLlmfitJsonShape(unittest.TestCase):
 
 
 class TestOcrPinDrift(unittest.TestCase):
-    JOB, IDX = "ocr-catalog", 2
+    JOB, NEEDLE = "ocr-catalog", "digest"
 
     def code(self) -> str:
-        assert "digest" in lane_replay.step_name(self.JOB, self.IDX), lane_replay.step_name(self.JOB, self.IDX)
-        return lane_replay.block(self.JOB, self.IDX)
+        return lane_replay.block(self.JOB, lane_replay.find_index(self.JOB, self.NEEDLE))
 
     @staticmethod
     def pins(sha: str) -> str:
@@ -157,11 +153,10 @@ class TestServerLane(unittest.TestCase):
     """常驻 llama-server 那条：ADR 说外壳要起服务，但四项能力车道原本全是 one-shot CLI，
     那个决定从没被验证过。这里的用例只测判据本身（真起服务要等 CI）。"""
 
-    JOB, IDX = "headless-inference", 4
+    JOB, NEEDLE = "headless-inference", "llama-server"
 
     def code(self) -> str:
-        assert "llama-server" in lane_replay.step_name(self.JOB, self.IDX), lane_replay.step_name(self.JOB, self.IDX)
-        return lane_replay.block(self.JOB, self.IDX)
+        return lane_replay.block(self.JOB, lane_replay.find_index(self.JOB, self.NEEDLE))
 
     @staticmethod
     def files(chat: str, props: str = '{"model_path":"model.gguf"}') -> dict:
@@ -206,6 +201,58 @@ class TestServerLane(unittest.TestCase):
         self.assertIn("502 Bad Gateway", log)
 
 
+class TestOcrLockShape(unittest.TestCase):
+    """上游不发 Cargo.lock（实测 404，正向对照 Cargo.toml 206），所以 ocr 那条车道的依赖锁
+    要么由仓库自己钉（pins/ocr-Cargo.lock + --locked），要么第一次跑生成后传回来。
+    这段判据是在**没有 cargo 的情况下**也保证"锁形状认得出"。"""
+
+    JOB, NEEDLE = "ocr-proof", "编译 CLI"
+
+    def code(self) -> str:
+        return lane_replay.block(self.JOB, lane_replay.find_index(self.JOB, self.NEEDLE))
+
+    @staticmethod
+    def lock(n: int = 60, ort: str = "2.0.0-rc.13", with_onig: bool = True,
+             with_tok: bool = True) -> str:
+        blocks = [f'[[package]]\nname = "ort"\nversion = "{ort}"\n']
+        if with_onig:
+            blocks.append('[[package]]\nname = "onig_sys"\nversion = "69.9.1"\n')
+        if with_tok:
+            blocks.append('[[package]]\nname = "tokenizers"\nversion = "0.23.1"\n')
+        for i in range(n - len(blocks)):
+            blocks.append(f'[[package]]\nname = "dep{i}"\nversion = "1.0.0"\n')
+        return "".join(blocks)
+
+    def files(self, text: str) -> dict:
+        return {"Cargo.lock": text}
+
+    def test_real_shaped_lock_passes(self) -> None:
+        rc, log = lane_replay.run(self.code(), self.files(self.lock()))
+        self.assertEqual(rc, 0, log)
+
+    def test_drifted_ort_is_red_and_named(self) -> None:
+        """ort 是上游唯一用 `=` 钉死的那个；锁里漂了就点名，而不是编出来才知道。"""
+        rc, log = lane_replay.run(self.code(), self.files(self.lock(ort="2.0.0-rc.12")))
+        self.assertEqual(rc, 1, log)
+        self.assertIn("ort", log)
+
+    def test_thin_lock_is_red(self) -> None:
+        rc, log = lane_replay.run(self.code(), self.files(self.lock(n=8)))
+        self.assertEqual(rc, 1, log)
+        self.assertIn("不像一份完整的依赖锁", log)
+
+    def test_missing_c_toolchain_dep_is_red(self) -> None:
+        """onig_sys / tokenizers 缺席意味着 ADR 记的"C 工具链代价"变了，要重量而不是照旧跑。"""
+        for kwargs in ({"with_onig": False}, {"with_tok": False}):
+            rc, log = lane_replay.run(self.code(), self.files(self.lock(**kwargs)))
+            self.assertEqual(rc, 1, f"{kwargs} → {log}")
+
+    def test_absent_lock_is_a_verdict_not_a_crash(self) -> None:
+        rc, log = lane_replay.run(self.code(), self.files(""))
+        self.assertEqual(rc, 1, log)
+        self.assertIn("只有 0 个包", log)
+
+
 class TestHarnessItself(unittest.TestCase):
     def test_unexpected_exception_is_not_reported_as_a_legit_red(self) -> None:
         """判据段自己抛异常（比如忘了造某个文件）要报 99，不能和"判据认为不合格"混成一回事。"""
@@ -213,10 +260,16 @@ class TestHarnessItself(unittest.TestCase):
         self.assertEqual(rc, 99, log)
         self.assertIn("FileNotFoundError", log)
 
-    def test_step_index_drift_is_caught(self) -> None:
-        """(job, 序号) 指错时必须立刻报错，而不是静默去测另一段判据。"""
+    def test_step_lookup_must_be_unambiguous(self) -> None:
+        """按名字定位时命中两步 = "不知道在测哪一段"，必须当场报错。
+        写死序号的做法本轮就差点出事：往 ocr-proof 中间插一步"传依赖锁"之后，
+        所有后续序号都被推位，测试会安静地指到别的判据上（这次靠步骤名 assert 才没指错）。"""
         with self.assertRaises(AssertionError):
-            lane_replay.block("ocr-proof", 5, n=3)
+            lane_replay.find_index("ocr-proof", "取")          # 取源码 / 取三个模型文件，两个都命中
+        with self.assertRaises(AssertionError):
+            lane_replay.find_index("ocr-proof", "这句名字不存在")
+        idx = lane_replay.find_index("ocr-proof", "认得出那个词")
+        self.assertIn("认得出那个词", lane_replay.step_name("ocr-proof", idx))
 
 
 if __name__ == "__main__":

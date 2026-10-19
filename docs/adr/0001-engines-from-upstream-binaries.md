@@ -95,6 +95,18 @@ DirectML 对这款产品不是锦上添花：目标用户是"普通人已有的�
    它另开了 `copy-dylibs`，编出来的产物旁边就带着 dylib，正好适合安装包收集。
 3. `auto-download` 默认从 **ModelScope** 拉模型（对中国用户比 Hugging Face 友好），
    但我们的设计仍然是"自己 pin 后从自家镜像下"，所以只把它当兜底，不作为 pin 的来源。
+4. **"钉住 commit" 对 OCR 并不等于钉住构建输入**（2026-10-20 `tools/ocr_build_surface.py` 实测）：
+   上游 `.gitignore` 明写 `Cargo.lock`（库的惯例），pin 住的那颗 commit 里也确实没有
+   （raw 回 404；正向对照 `Cargo.toml` 回 206 —— 探测带 `Range: bytes=0-0`，所以存在时是 206 而不是 200）。
+   六份 manifest 里 40 个外部包，**只有 `ort` 是 `=` 精确钉的，其余 37 个是 caret**（`"1"` 在 cargo 里就是 `^1`），
+   再加 2 个只写 `{ workspace = true }` 的本地兄弟 crate。也就是说 `cargo build` 会在构建时重新解析依赖图，
+   今天与下个月编出来的 `oar` 可以不是同一份代码 —— 而 sha256 侧表、`--verify`、跨提供方复核那套
+   **全都覆盖不到它**（它们管的是模型权重与上游二进制，不是 Rust 依赖树）。
+   处置：**锁由我们自己出**。`ocr-proof` 车道第一次真跑时 `cargo generate-lockfile` 并把 `Cargo.lock`
+   连同 sha256 传成 artifact；人把它提交成 `pins/ocr-Cargo.lock`，此后该步骤改走 `cargo build --locked`。
+   在此之前这条车道只能算"编出来了"，不能算"编的是钉住的那份依赖图"—— 这句要照实写进交付说明。
+   漂移由 `ocr-build-surface` 车道守着：fingerprint 变了会点名"哪些包新变未钉/新被钉住"，
+   上游哪天开始发 `Cargo.lock` 也会红（那时应改成取上游的锁而不是自己解析）。
 
 ### EP 特性表与两条下载路（v0.10.0 的 Cargo.toml 实测，2026-10-19）
 

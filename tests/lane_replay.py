@@ -39,6 +39,21 @@ def step_name(job: str, step_idx: int) -> str:
     return doc["jobs"][job]["steps"][step_idx].get("name") or ""
 
 
+def find_index(job: str, needle: str) -> int:
+    """按步骤名片段定位，命中数必须正好是 1。
+
+    为什么不用写死的序号：本轮往 ocr-proof 中间插了一步"传依赖锁"，把所有后续序号都推了一位，
+    而写死序号的测试会**安静地指到别的判据上**（这里靠 assert 步骤名才没指错）。
+    名字才是这一步存在的证据；步骤被改名或删掉时这里会当场报错，而不是去测另一段。
+    """
+    with open(WF, encoding="utf-8") as fh:
+        doc = yaml.safe_load(fh)
+    steps = doc["jobs"][job]["steps"]
+    hits = [i for i, s in enumerate(steps) if needle in (s.get("name") or "")]
+    assert len(hits) == 1, f"{job} 里 {needle!r} 命中 {len(hits)} 步 {hits}：判据不知道该指哪一步"
+    return hits[0]
+
+
 def run(code: str, files: dict | None = None, env: dict | None = None) -> tuple[int, str]:
     """在临时目录里放好 files、设好 env，exec 这段判据。返回 (退出码, 合并输出)。
 
