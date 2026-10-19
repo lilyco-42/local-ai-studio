@@ -76,7 +76,7 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
 
 ## 验收标准（在当前唯一可用验证手段 = GitHub Actions 下）
 
-1. `ci.yml`：601 个单测绿（重数：`python -W error::ResourceWarning -m unittest discover -s tests
+1. `ci.yml`：637 个单测绿（重数：`python -W error::ResourceWarning -m unittest discover -s tests
    -p "test_*.py"`；按文件数就 `python -m unittest tests.<模块名>`。2026-10-20 实测逐文件：
    `test_yaml_gate.py` 闸门自己 11、`test_toolbelt_pins.py` 工具带钉表 14、
    `test_catalog_snapshot.py` 目录快照与侧表 16、`test_citation_check.py` 出处闸门 22、
@@ -88,7 +88,8 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
    `test_lane_replay_report.py` 给分段、预跑与 job 数计数 4、`test_engine_probe.py` 产物名解析与 skipped 点名 30、
    `test_recommend_subtitle.py` 字幕四表对账 44、`test_recommend_models.py` 对话档位表 46、
    `test_launch_plan.py` 启动计划（含 10 条源码变异体全部被抓）46、
-   `test_install_deps.py` 装依赖清单（含 8 条源码变异体与真捕获夹具的字节校验）36），
+   `test_install_deps.py` 装依赖清单（含 8 条源码变异体与真捕获夹具的字节校验）36、
+   `test_action_pins.py` action 钉法（含 7 条源码变异体与形状对表复核）36），
    `yaml_gate.py` 0 BAD、
    离线发现器解析出全部必需 target 且每个都带上游 sha256；单测在 `-W error::ResourceWarning` 下跑。
    闸门还把**车道 env 里每一条 64 位十六进制的值**反查出处（必须在 `pins/*.json` 或
@@ -492,6 +493,20 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     `python3 tools/install_deps.py --check --fill --cache .cache/refs`。
     跑在 `citation-drift` 这条车道里（它本来就是"按 pin 读上游"的车道，job 数因此仍是 21）。
 
+
+24. **出包那只手自己也要钉住**（`tools/action_pins.py` → `pins/actions.json`）：
+    硬约束是"只能靠 GitHub Actions 出包"，那么 workflow 里每个 `uses:` 就是那条路径本身。
+    这一轮之前它们全是**浮动大版本 tag**（4 个 action、44 处），今天全部改成 40 位 commit SHA，
+    尾注保留它来自哪个 tag；判据三件：形状必须是 SHA、尾注 tag 重新解析后**漂了就红但不自动跟**
+    （重钉必须是显式动作）、`action.yml` 的 `runs.using` 与 `inputs` 键集合必须与表一致。
+    形状这件事差点被自己骗过去：第一版用自写缩进正则，把 `actions/checkout` 的 21 个输入读成
+    8 个（`description: |-` 折叠块让读取提前收尾），**基线读少了，上游真加输入时那次比对反而像"没变"**
+    —— 现在改成用 pyyaml 复核并有一条用例逐行对表（取不到上游就明说跳过，不当通过）。
+    403 与 404 也分开报：匿名 GitHub API 60 次/小时，撞限流时说"被限流/没权限"，
+    不许伪装成"上游没这个提交"。`tauri-apps/tauri-action` 钉了但还没用（#30），
+    它的 release 名（`action-v1.0.0`）与 tag 名（`v1.0.0`）不同，两个名字都进表、机器复核。
+    重数：`python3 tools/action_pins.py --selftest`、`--offline`（只查形状、**拒绝落盘**）、
+    `GITHUB_TOKEN=$(gh auth token) python3 tools/action_pins.py --check`。
 
 ## 车道判据的出处（全部按**钉住的那个 ref** 核过，不是按 HEAD 记的）
 

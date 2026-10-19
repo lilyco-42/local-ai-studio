@@ -185,6 +185,21 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   `--skip-provenance` 时报 0 ——「没查」不能长得像「查过了」。
   变异扫描留在仓库里：`tests/test_launch_plan.py::TestSourceMutants` 改坏源码 10 处，
   四处探针（离线对照 / 重算漂移 / 出处 id 闸门 / 缺席声明照扫）每条至少被抓一次，并带一条正向对照。
+- `tools/action_pins.py` + `pins/actions.json`：**出包那只手自己也要钉住**。这一轮之前三个
+  workflow 里 4 个 `uses:` 全是浮动大版本 tag（`checkout@v4`、`setup-python@v5`、
+  `upload-artifact@v4`、`download-artifact@v4`，共 **44 处**）—— 仓库对引擎/权重/工具带都定了
+  "release + sha256"，唯独真正跑包的东西跟着别人随时会移动的 tag 走。现在全部改成 40 位 commit
+  SHA 并把尾注留着记它来自哪个 tag：`checkout 11d5960a…`(v4.4.0)、`setup-python a26af69b…`(v5.6.0)、
+  `upload-artifact ea165f8d…`(v4.6.2)、`download-artifact d3f86a10…`(v4.3.0)，都是 MIT、`node20`。
+  判据不只是"形状对不对"：每次重新解析尾注那个 tag，**漂了就红但绝不自动跟**（重钉必须是显式动作）；
+  还取那份 `action.yml` 复核 `runs.using` 与 `inputs` 键集合 —— 上游换 runtime 或加输入会点名。
+  `tauri-apps/tauri-action` 已量好但还没被任何 workflow 用到（#30 才用）：`v1.0.0` → `1deb371b…`、
+  `node24`、23 个输入、入口是提交进仓库的 `dist/index.js`（所以钉 commit 等于钉住那份 bundle）；
+  它还有个容易看错的形状：**release 叫 `action-v1.0.0` 而 tag 叫 `v1.0.0`**，两个名字都进表，
+  谁把 `releases/latest` 当 tag 用就会红。形状用 pyyaml 复核而不是自写正则 ——
+  第一版的缩进正则把 checkout 的 21 个输入读成 8 个，那张漂移基线就成了假的（现在有单测对表）。
+  匿名 GitHub API 只有 60 次/小时：撞限流时报"被限流/没权限"，**不会伪装成"上游没这个提交"**。
+  本机重跑：`GITHUB_TOKEN=$(gh auth token) python3 tools/action_pins.py --check`。
 - `tools/install_deps.py` + `pins/install-deps.json`：**安装包车道第一步该 apt 装什么**，从 Tauri
   官方前提页读出来。只认 `<TabItem label="Debian">` 那一族里**包管理器那条安装命令**的续行
   （`prerequisites.mdx:33-41`，九颗各带上游行号）；其余 tab 里的 `export JAVA_HOME=…` 与散文不算清单

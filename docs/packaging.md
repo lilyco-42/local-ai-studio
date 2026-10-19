@@ -52,8 +52,30 @@ application as a Tauri binary for macOS, Linux and Windows"，最新 release 是
 **assets = 0**（它是 `uses:` 型 JS action，没有下载物）。
 
 所以工具带那套"具体 release + 上游 sha256 digest"**对它不适用**，改成 **pin commit SHA**
-（`uses: tauri-apps/tauri-action@<40hex>`）并把它记进引用表。按"有先例就克隆研究具体实现"处理：
-外壳的安装包车道以它为骨架，只写我们多出来的那两步（塞引擎负载与 `payload-manifest.json`）。
+（`uses: tauri-apps/tauri-action@1deb371b0cd8bd54025b384f1cd735e725c4060f`，即 tag `v1.0.0`）
+并记进 `pins/actions.json`。它的入口是仓库里提交的 `dist/index.js`，所以钉 commit
+**就等于钉住那份 bundle**；`runs.using = node24`、23 个输入也一并记进表里（换 runtime 或改输入会红）。
+按"有先例就克隆研究具体实现"处理：外壳的安装包车道以它为骨架，只写我们多出来的那两步
+（塞引擎负载与 `payload-manifest.json`）。
+
+顺手把这张表存在的理由说完：**在这一轮之前，三个 workflow 里 4 个 `uses:` 全是浮动大版本 tag**
+（`actions/checkout@v4`、`actions/setup-python@v5`、`actions/upload-artifact@v4`、
+`actions/download-artifact@v4`，共 44 处）。仓库对引擎、权重、工具带都定了"release + sha256"，
+唯独真正执行出包的那只手跟着别人随时会移动的 tag 走。现在：
+
+| action | 钉住的 commit | 来自哪个 tag | runtime / 输入数 | 许可 |
+|---|---|---|---|---|
+| `actions/checkout` | `11d5960a…` | v4.4.0（= `v4` 当前所指） | node20 / 21 | MIT |
+| `actions/setup-python` | `a26af69b…` | v5.6.0（= `v5`） | node20 / 10 | MIT |
+| `actions/upload-artifact` | `ea165f8d…` | v4.6.2（= `v4`） | node20 / 7 | MIT |
+| `actions/download-artifact` | `d3f86a10…` | v4.3.0（= `v4`） | node20 / 8 | MIT |
+| `tauri-apps/tauri-action` | `1deb371b…` | v1.0.0（预留，尚未被任何 workflow 用到） | node24 / 23 | MIT |
+
+判据与"tag 漂了只报不跟"由 `tools/action_pins.py` 守：车道每次重新解析尾注里那个 tag，
+与本表不同就红（要显式重钉），本机重跑 `GITHUB_TOKEN=$(gh auth token) python3 tools/action_pins.py --check`。
+两个容易踩的形状也一并记在表里，不再靠嘴说：**release 名与 tag 名不是一回事**
+（它叫 `action-v1.0.0`，tag 叫 `v1.0.0` → `pin_is_a_release_tag: false`），
+以及**匿名 GitHub API 只有 60 次/小时**（撞限流时报"被限流/没权限"，不会伪装成"上游没这个提交"）。
 
 同一次查询又撞回那个老坑：`releases/latest` 在 `actions/runner-images` 上给出的是
 **`win25/20261013.288`**（windows 镜像的 tag）。这是本轮第二次证明

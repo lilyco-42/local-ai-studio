@@ -12,8 +12,8 @@ jobs:
     timeout-minutes: 10
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4.4.0
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5.6.0
         with:
           python-version: "3.12"
       - name: 静态门禁
@@ -23,6 +23,7 @@ jobs:
           python tools/yaml_gate.py
           python tools/bash_gate.py
           python tools/citation_check.py --selftest
+          python tools/action_pins.py --selftest
           python - <<'PY'
           import ast,sys
           for f in ("tools/engine_probe.py","tests/test_engine_probe.py",
@@ -31,8 +32,15 @@ jobs:
               ast.parse(open(f,encoding="utf-8").read())
           print("AST ok")
           PY
+      - name: 出包路径上每个第三方 action 都必须钉 40 位 SHA（离线那层）
+        # 这一条是给"只能靠 GitHub Actions 出包"这句硬约束兜底的：以前 4 个 uses: 全是
+        # 浮动大版本 tag（v4/v5），别人的仓库推一个 tag 就能改变我们出包时跑什么。
+        run: python tools/action_pins.py --offline
       - name: 单测（夹具为 2026-10-18 真实 API 捕获）
         # -W 归解释器管，放到 unittest 参数上会直接 "unrecognized arguments"
+        # 带 GITHUB_TOKEN：有一条用例要真取 action.yml 复核形状，匿名 60 次/小时会整片跳过
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: python -W error::ResourceWarning -m unittest discover -s tests -p "test_*.py" -v
       - name: 离线跑一遍发现器
         run: python tools/engine_probe.py --fixtures tests/fixtures --require-gpu --json /tmp/manifest.json

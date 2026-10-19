@@ -36,6 +36,8 @@ on:
       - "pins/launch-plan.json"
       - "tools/install_deps.py"
       - "pins/install-deps.json"
+      - "tools/action_pins.py"
+      - "pins/actions.json"
       - "pins/payload-plan.json"
       - "catalog/defaults.json"
       - "tools/ocr_build_surface.py"
@@ -70,8 +72,8 @@ jobs:
       sd_size: ${{ steps.pick.outputs.sd_size }}
       sd_tag: ${{ steps.pick.outputs.sd_tag }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4.4.0
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5.6.0
         with:
           python-version: "3.12"
       - name: 打真实 GitHub API 发现产物
@@ -95,7 +97,7 @@ jobs:
           print("::notice::sd %s 产物 %s %.1fMB 上游digest=%s"
                 % (sd["release"], sd["asset"], sd["size"] / 1048576, sd["digest"][:18]))
           PY
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4.6.2
         with:
           name: engine-manifest
           path: manifest.json
@@ -109,10 +111,10 @@ jobs:
     timeout-minutes: 15
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093  # v4.3.0
         with:
           name: engine-manifest
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5.6.0
         with:
           python-version: "3.12"
       - name: 生成待证实清单
@@ -152,7 +154,7 @@ jobs:
     timeout-minutes: 10
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4.4.0
       - name: 文档链接的权重是否都还在 release 里
         run: python3 tools/ocr_catalog_check.py --json ocr-catalog.json
       - name: 默认档的上游 digest 还是不是我们钉的那颗
@@ -182,7 +184,7 @@ jobs:
               print("::warning::" + d)
           raise SystemExit(1 if drift else 0)
           PY
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4.6.2
         with:
           name: ocr-catalog
           path: ocr-catalog.json
@@ -203,7 +205,7 @@ jobs:
     timeout-minutes: 15
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4.4.0
       - name: 与仓库快照自洽（离线，上游今天心情不好也照样能红）
         run: python3 tools/ocr_language_pins.py --check --fixtures
       - name: 默认档那张 pin 的两家元数据也必须一致
@@ -287,10 +289,10 @@ jobs:
     timeout-minutes: 8
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4.4.0
       - name: 目录搜索探针
         run: python3 tools/catalog_probe.py --json catalog-probe.json
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4.6.2
         if: always()
         with:
           name: catalog-probe
@@ -304,7 +306,7 @@ jobs:
     timeout-minutes: 10
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4.4.0
       - name: 权重目录与哈希可得性探针
         run: python3 tools/model_catalog_probe.py
       - name: 第二家哈希：把 HF 的 tree.lfs.oid 与已钉的 pin 对表
@@ -313,7 +315,7 @@ jobs:
         # 也不许写进 bytes_verified。上一版探针读错键名（读 oidsha/sha）得出"HF 不给哈希"，
         # 于是这句假结论进了五处文档 —— 这条同时也是那个盲点的守卫。
         run: python3 tools/establish_pins.py --cross-hf pins/models.json
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4.6.2
         with:
           name: model-catalog
           path: model-catalog.json
@@ -326,8 +328,8 @@ jobs:
     timeout-minutes: 8
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4.4.0
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5.6.0
         with:
           python-version: "3.12"
       - name: 取上游快照 → 校验钉住的哈希 → 核对侧表（快照可复现）
@@ -351,8 +353,8 @@ jobs:
     timeout-minutes: 8
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4.4.0
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5.6.0
         with:
           python-version: "3.12"
       - name: 实时取上游产物表，与钉表逐字段比对
@@ -420,7 +422,7 @@ jobs:
       SAMPLE_SIZE: "352078"
       SAMPLE_SHA256: 59dfb9a4acb36fe2a2affc14bacbee2920ff435cb13cc314a08c13f66ba7860e
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4.4.0
         # 常驻服务那一步要调 tools/srt_proof.py，判据抽成了工具就得让仓库在场。
       - name: 下载引擎并校上游 digest
         run: |
@@ -531,8 +533,8 @@ jobs:
     timeout-minutes: 10
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4.4.0
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5.6.0
         with:
           python-version: "3.12"
       - name: 离线：产物级选择与大小（选错产物就是打错包）
@@ -549,8 +551,8 @@ jobs:
     timeout-minutes: 8
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4.4.0
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5.6.0
         with:
           python-version: "3.12"
       - name: 离线对照（五种状态 + 候选顺序，明知错的必须认成错）
@@ -565,7 +567,7 @@ jobs:
         run: python3 tools/file_index.py --queue catalog/machine-budget.json
              --json queue-report.json
       - name: 队列报告落档（外壳实现直接拿它当下载顺序与校验输入）
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4.6.2
         with:
           name: first-run-queue
           path: queue-report.json
@@ -579,8 +581,8 @@ jobs:
     timeout-minutes: 15
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4.4.0
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5.6.0
         with:
           python-version: "3.12"
       - name: 判据本身（全部离线：含用真元数据切片重算已提交那张表）
@@ -599,8 +601,8 @@ jobs:
     timeout-minutes: 10
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4.4.0
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5.6.0
         with:
           python-version: "3.12"
       - name: 判据本身（离线，含明知是错的必须认成错）
@@ -627,8 +629,8 @@ jobs:
     timeout-minutes: 15
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4.4.0
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5.6.0
         with:
           python-version: "3.12"
       - name: 判据单测（离线；含与已钉 SD1.5 pin 的跨产物一致性与整张表深比对）
@@ -652,8 +654,8 @@ jobs:
     timeout-minutes: 8
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4.4.0
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5.6.0
         with:
           python-version: "3.12"
       - name: 判据本身（离线对照：明知会被少算的必须被算出来）
@@ -675,8 +677,8 @@ jobs:
     timeout-minutes: 8
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4.4.0
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5.6.0
         with:
           python-version: "3.12"
       - name: 判据本身（缺席判据要能认缺席、生图旗标必须来自那张表而不是代码里另写一份）
@@ -688,7 +690,7 @@ jobs:
       - name: 按钉住的 ref 逐条核对 needle 与缺席声明（上游改了命令行就红）
         run: python3 tools/launch_plan.py --check --fill --cache .cache/refs
       - name: 核对用过的那几份上游原文留档
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4.6.2
         with:
           name: launch-plan-refs
           path: .cache/refs
@@ -703,8 +705,8 @@ jobs:
     timeout-minutes: 8
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4.4.0
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5.6.0
         with:
           python-version: "3.12"
       - name: 先跑离线对照（分类器与比对函数自己得是对的）
@@ -821,7 +823,7 @@ jobs:
           "$BIN" --help > "$RUNNER_TEMP/help.txt" 2>&1 < /dev/null || true
           head -25 "$RUNNER_TEMP/help.txt"
       - name: 把这份依赖锁传回来（第一次真跑后由人提交成 pins/ocr-Cargo.lock）
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4.6.2
         with:
           name: oar-cargo-lock
           path: |
@@ -906,7 +908,7 @@ jobs:
       WEIGHT_SIZE: "1566768416"
       WEIGHT_SHA256: b8944e9fe0b69b36ae1b5bb0185b3a7b8ef14347fe0fa9af6c64c4829022261f
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4.4.0
         # 常驻服务那一步要调 tools/png_proof.py。
       - name: 下载引擎（discover 实时给的，digest 由上游 release 提供）
         run: |
@@ -1076,8 +1078,8 @@ jobs:
     timeout-minutes: 6
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4.4.0
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5.6.0
         with:
           python-version: "3.12"
       - name: 先跑离线对照（明知是错的必须被认成错）
@@ -1104,6 +1106,16 @@ jobs:
         run: |
           python3 tools/install_deps.py --selftest
           python3 -m unittest tests.test_install_deps -v
+      - name: Action 钉法：判据、单测，再按钉住的 SHA 实取上游复核
+        # 形状（runs.using / inputs 键集合）由 pyyaml 复核一遍：自己写的缩进正则把
+        # checkout 的 21 个输入读成 8 个，那张漂移基线就成了假的。
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python -m pip install --quiet pyyaml
+          python3 tools/action_pins.py --selftest
+          python3 -m unittest tests.test_action_pins -v
+          python3 tools/action_pins.py --check
       - name: 按钉住的 Tauri 前提页与镜像 readme 重算装依赖那张表，并与已提交比漂移
         # 上游改包表（加一个包、或把 webkit 4.1 换成别的）时这一步红：docs/packaging.md 里那段
         # 包名散文从此是这张派生表的副本，不是"抄一次就永远对"。
