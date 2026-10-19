@@ -13,6 +13,9 @@ on:
       - "tools/catalog_snapshot.py"
       - "tools/citation_check.py"
       - "tools/file_index.py"
+      - "tools/payload_plan.py"
+      - "tools/zip_peek.py"
+      - "pins/payload-plan.json"
       - "tools/ocr_build_surface.py"
       - "pins/ocr-build-surface.json"
       - "pins/citations.json"
@@ -340,6 +343,23 @@ jobs:
           tr 'A-Z' 'a-z' < "$SRT" | grep -qE 'country|ask not' || { echo "转写内容与已知样本对不上"; exit 1; }
           N=$(grep -c -- '-->' "$SRT")
           echo "::notice::字幕车道通过：$SRT 有 $N 条带时间戳的段，引擎与权重均按上游 sha256 校验"
+
+  payload-plan:
+    # 出包前的最后一个空白：每个 OS 默认档到底取哪个产物、包里收哪些文件、下多少占多少。
+    # 这里只做 Range 读中央目录（不解压、不下整包、不运行任何东西），
+    # 三条判据都是"清单看着对但其实没用"的那类：主二进制被滤掉、排除规则从没命中过、
+    # win 的 x-impl.dll 成了孤儿。
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: 离线：产物级选择与大小（选错产物就是打错包）
+        run: python3 tools/payload_plan.py
+      - name: 逐文件：Range 读 zip 中央目录（tar.gz 如实标 needs_extract）
+        run: python3 tools/payload_plan.py --live
 
   file-index:
     # 下载层的形状判据：两家分发方的元数据哈希**一致**才允许"下载前就信"；

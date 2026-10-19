@@ -61,6 +61,11 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   同时读 HF `tree.lfs.oid` 与 ModelScope `repo/files` 的 `Sha256`，状态分 `agree / single / conflict /
   pin_conflict / absent`，**只有两家都给且相等才允许下载前就信**；两家不等时一个答案都不给。
   车道 `file-index` 跑离线对照（五种状态 + 顺序）与实跑对照（正向=已钉的 pin，负向=故意造的假文件名）。
+- `tools/payload_plan.py` + `pins/payload-plan.json`：装机负载计划（出包前必须先有的数字）。
+  按"没 CUDA 的 x64 / Apple silicon"选默认产物，Range 读 zip 中央目录拿逐文件大小：
+  引擎净负载 win 44.2 / linux 52.1 / macOS 46.5 MiB（不含权重），`whisper-bin-x64.zip` 41 条里
+  收 31 排除 10 个 `test-*.exe`。tar.gz（llama/whisper 的 Linux 与 macOS 包）读不了中央目录，
+  如实标 `needs_extract`；**whisper 上游根本没有 macOS 产物** —— 字幕在 Apple silicon 上要自编译。
 - `.github/workflows/ci.yml`：静态门禁（含 yaml_gate）+ 单测（夹具是真实 API 捕获）+ 离线跑发现器
   与离线回放工具带钉表。
 - `.github/workflows/engine-live.yml`：打真实 API 发现产物 → 下载 linux 引擎（不编译）→ 下载 pin 住的

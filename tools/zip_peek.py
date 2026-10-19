@@ -90,6 +90,44 @@ def names(url: str) -> list[str]:
     return out
 
 
+def entries(url: str) -> list[dict]:
+    """中央目录的逐条目 (名字, 解压后大小, 压缩后大小, 是不是目录)。
+
+    为什么单开一个函数而不是给 names() 加返回值：`payload_plan` 要算"装机要带多少字节"，
+    只有名字是不够的；而整包下载又违反本项目的硬约束（本机不下引擎、CI 也只挑要的那几个）。
+    压缩后大小就是用户首装要下的量，解压后大小就是占的盘 —— 两个都得有。
+    """
+    total = _total(url)
+    back = min(total, TAIL)
+    tail, _ = _curl(url, f"{total - back}-{total - 1}")
+    if len(tail) != back:
+        raise SystemExit(f"尾部只拿回 {len(tail)} 字节（要 {back}）")
+    i = tail.rfind(b"PK\x05\x06")
+    if i < 0:
+        raise SystemExit("尾部没有 EOCD：中央目录比这还大，或不是 zip")
+    _, _, _, n1, n2, cd_size, cd_off, clen = struct.unpack_from("<IHHHHIIH", tail, i)
+    count = n2 or n1
+    if 0xFFFFFFFF in (cd_size, cd_off) or count == 0xFFFF:
+        raise SystemExit("zip64 中央目录未实现，请改用整包下载")
+    slice_start = total - len(tail)
+    if cd_off < slice_start or cd_off + cd_size > total - 22 - clen:
+        cd, _ = _curl(url, f"{cd_off}-{cd_off + cd_size - 1}")
+    else:
+        cd = tail[cd_off - slice_start: cd_off - slice_start + cd_size]
+    out, p = [], 0
+    while p + 46 <= len(cd) and cd[p:p + 4] == b"PK\x01\x02":
+        csize, usize = struct.unpack_from("<II", cd, p + 20)
+        ext = struct.unpack_from("<I", cd, p + 38)[0]
+        nl, el, cm = struct.unpack_from("<HHH", cd, p + 28)
+        name = cd[p + 46:p + 46 + nl].decode("utf-8", "replace")
+        out.append({"name": name, "size": usize, "packed": csize,
+                    "dir": bool(ext & 0x10) or name.endswith("/")})
+        p += 46 + nl + el + cm
+    if len(out) != count:
+        raise SystemExit(f"中央目录声明 {count} 条，只解析出 {len(out)} 条")
+    return out
+
+
 def classify(ns: list[str]) -> str:
     pe = [n for n in ns if n.lower().endswith((".exe", ".dll"))]
     so = [n for n in ns if ".so" in n.lower()]

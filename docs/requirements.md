@@ -71,9 +71,10 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
 
 ## 验收标准（在当前唯一可用验证手段 = GitHub Actions 下）
 
-1. `ci.yml`：178 个单测绿（含 `test_yaml_gate.py` 给闸门自己的 11 条、`test_toolbelt_pins.py` 给工具带
+1. `ci.yml`：189 个单测绿（含 `test_yaml_gate.py` 给闸门自己的 11 条、`test_toolbelt_pins.py` 给工具带
    钉表的 14 条、`test_catalog_snapshot.py` 给目录快照与其侧表的 16 条、`test_citation_check.py` 给出处闸门的 12 条、
    `test_ocr_build_surface.py` 给 OCR 依赖面分类器与比对的 15 条、`test_file_index.py` 给下载层五种状态的 20 条、
+   `test_payload_plan.py` 给装机负载清单的 11 条、
    `test_establish_verify.py` 给字节复核与哈希对照的 16 条、`test_shell_vars.py` 给 shell 变量判据的 10 条、
    `test_r2_manifest.py` 给镜像清单的 6 条、`test_lane_assertions.py` + `test_image_proof_block.py`
    给车道判据的 32 条），
@@ -175,6 +176,19 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
    就说明这套比对对任何输入都有答案；另有"至少 2 条被两家确认"的覆盖度地板，
    以及一条把"取数失败"与"这家没有这个仓库"分开的判据（前者必须红，后者是 `single`）。
    实测：qwen 与 SD `agree`（都等于 pin），`ggml-tiny.bin` `single`（ModelScope 未镜像，200 + 0 文件）。
+13. **装机负载必须先量出来再设计打包**（`tools/payload_plan.py` → `pins/payload-plan.json`，
+    车道 `payload-plan`；Range 读 zip 中央目录，不解压、不下整包、不运行任何东西）：
+    按"普通人默认档"（没 CUDA 的 x64 / Apple silicon）选产物，引擎净负载
+    win-x64 **44.2 MiB**、linux-x64 **52.1**、macos-arm64 **46.5**（都还没算权重）。
+    逐文件侧：`llama-win-cpu-x64.zip` 51 条全收（解压 47.9 MiB）、
+    `whisper-bin-x64.zip` 41 条**收 31 排除 10**（`test-*.exe` 那批 —— ADR 的条目表第一次变成可对账的数字）、
+    `sd-win-cpu` 20 条 45.6 MiB、`sd-linux` 35 条 65.0 MiB、`sd-macOS` 只有 5 条却 93.9 MiB（`.dylib` 闭包肥）。
+    三条判据：主二进制不许被过滤掉、排除规则的总命中数不许为 0（**不逐包要求** ——
+    llama/sd 的包里本来就没有 `test-*`，上一版就是这么误红的）、win 的 `x-impl.dll` 不许成孤儿。
+    两个真实缺口写清楚而不是藏起来：
+    ① **whisper.cpp 的 release 没有 macOS 产物** → 字幕在 Apple silicon 上只能自编译或不做（产品决定，已立任务）；
+    ② llama/whisper 的 Linux 与 macOS 包是 **tar.gz**，中央目录读不了（格式决定），
+    那几行如实标 `needs_extract`，逐文件清单只能由 CI 真打包时产出。
 
 ## 车道判据的出处（全部按**钉住的那个 ref** 核过，不是按 HEAD 记的）
 
