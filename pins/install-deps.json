@@ -1,0 +1,147 @@
+{
+ "apt_get_line": "sudo apt-get install -y libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev",
+ "apt_packages": [
+  {
+   "line": 33,
+   "package": "libwebkit2gtk-4.1-dev"
+  },
+  {
+   "line": 34,
+   "package": "build-essential"
+  },
+  {
+   "line": 35,
+   "package": "curl"
+  },
+  {
+   "line": 36,
+   "package": "wget"
+  },
+  {
+   "line": 37,
+   "package": "file"
+  },
+  {
+   "line": 38,
+   "package": "libxdo-dev"
+  },
+  {
+   "line": 39,
+   "package": "libssl-dev"
+  },
+  {
+   "line": 40,
+   "package": "libayatana-appindicator3-dev"
+  },
+  {
+   "line": 41,
+   "package": "librsvg2-dev"
+  }
+ ],
+ "install_line": 33,
+ "install_pm": "apt",
+ "missing_per_readme": [
+  "libwebkit2gtk-4.1-dev",
+  "build-essential",
+  "libxdo-dev",
+  "libayatana-appindicator3-dev",
+  "librsvg2-dev"
+ ],
+ "os_family": "Debian",
+ "rule": {
+  "image_pins": "ubuntu-latest 的 readme 是按 commit 钉的，标签本身会漂到下一代镜像",
+  "must_verify_in_ci": "apt 装完必须打印 pkg-config --modversion webkit2gtk-4.1，否则等于没人知道装对没",
+  "why_derived": "包表必须从上游那一页读出来：手抄的那段散文在上游改名时不会红"
+ },
+ "runner_probe": [
+  {
+   "doc_line": 33,
+   "package": "libwebkit2gtk-4.1-dev",
+   "probe": "libwebkit2gtk-4.1-dev",
+   "readme_version": null,
+   "verdict": "not_listed"
+  },
+  {
+   "doc_line": 34,
+   "package": "build-essential",
+   "probe": "build-essential",
+   "readme_version": null,
+   "verdict": "not_listed"
+  },
+  {
+   "doc_line": 35,
+   "package": "curl",
+   "probe": "curl",
+   "readme_version": "8.5.0-2ubuntu10.16",
+   "verdict": "listed"
+  },
+  {
+   "doc_line": 36,
+   "package": "wget",
+   "probe": "wget",
+   "readme_version": "1.21.4-1ubuntu4.5",
+   "verdict": "listed"
+  },
+  {
+   "doc_line": 37,
+   "package": "file",
+   "probe": "file",
+   "readme_version": "1:5.45-3build1",
+   "verdict": "listed"
+  },
+  {
+   "doc_line": 38,
+   "package": "libxdo-dev",
+   "probe": "libxdo-dev",
+   "readme_version": null,
+   "verdict": "not_listed"
+  },
+  {
+   "doc_line": 39,
+   "package": "libssl-dev",
+   "probe": "libssl-dev",
+   "readme_version": "3.0.13-0ubuntu3.16",
+   "verdict": "listed"
+  },
+  {
+   "doc_line": 40,
+   "package": "libayatana-appindicator3-dev",
+   "probe": "libayatana-appindicator3-dev",
+   "readme_version": null,
+   "verdict": "not_listed"
+  },
+  {
+   "doc_line": 41,
+   "package": "librsvg2-dev",
+   "probe": "librsvg2-dev",
+   "readme_version": null,
+   "verdict": "not_listed"
+  }
+ ],
+ "schema": 1,
+ "source": {
+  "block_lines": [
+   33,
+   41
+  ],
+  "families": [
+   "Alpine",
+   "Arch",
+   "Debian",
+   "Fedora",
+   "OSTree",
+   "openSUSE"
+  ],
+  "path": "src/content/docs/start/prerequisites.mdx",
+  "ref": "2e513e3f7934d68ec7fef37fc46a5aa482f8a091",
+  "repo": "tauri-apps/tauri-docs"
+ },
+ "toolchain_from_image": {
+  "node": "22.23.3",
+  "rust": "1.99.1"
+ },
+ "verdict_legend": {
+  "listed": "readme 的包表里逐字有这个名字（版本照 readme 那一列，不等于适合我们）",
+  "not_listed": "readme 没提到 —— 不等于机器上没装，readme 不是 dpkg -l"
+ }
+}

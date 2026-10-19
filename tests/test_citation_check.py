@@ -76,10 +76,10 @@ class TestCommittedSpec(unittest.TestCase):
     def test_covers_the_three_servers_and_the_lane_flags(self) -> None:
         s = self.spec()
         self.assertGreaterEqual(len(s), 20, f"只有 {len(s)} 条，这张表的意义就是覆盖度")
-        # 总数也立成字面量（2026-10-20 实测 78：`python -c "import json;print(len(json.load(
-        # open('pins/citations.json',encoding='utf-8'))))"`）。文档里"78 条"那句与这张表
+        # 总数也立成字面量（2026-10-20 实测 82：`python -c "import json;print(len(json.load(
+        # open('pins/citations.json',encoding='utf-8'))))"`）。文档里"82 条"那句与这张表
         # 就此绑在一起：加一条要同时改这里，删一条会当场红。
-        self.assertEqual(len(s), 78, f"表里现在是 {len(s)} 条，散文里的数字要一起改")
+        self.assertEqual(len(s), 82, f"表里现在是 {len(s)} 条，散文里的数字要一起改")
         repos = {c["repo"] for c in s}
         self.assertEqual(repos, {"ggml-org/llama.cpp", "ggml-org/whisper.cpp",
                                  "leejet/stable-diffusion.cpp", "GreatV/oar-ocr",
@@ -135,7 +135,10 @@ class TestCommittedSpec(unittest.TestCase):
                      "oar-size-conflicts-models", "oar-images-positional-required",
                      "oar-output-is-dir", "oar-device-default-auto",
                      "llama-health-is-public", "llama-chat-completions-route",
-                     "whisper-default-host-loopback"):
+                     "whisper-default-host-loopback",
+                     # 装依赖清单（install_deps.py）读的就是这四行所在的形状
+                     "tauri-prereq-debian-tab", "tauri-prereq-appindicator",
+                     "image-readme-has-pkg-table", "image-readme-node"):
             self.assertIn(must, ids)
 
     def test_spec_clears_the_floor_the_code_enforces(self) -> None:

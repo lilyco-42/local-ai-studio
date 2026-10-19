@@ -56,11 +56,11 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
 - `tools/r2_manifest.py`：从 `pins/*.json` 推导"该镜像什么"，按源分组给实测吞吐换算，
   产出 `mirror/r2-intake.json`（只是清单，不含上传动作）。
 - `tools/citation_check.py` + `pins/citations.json`：把"上游某 ref 的某一行写着某件事"这类结论
-  变成能查的东西。78 条声明各记（2026-10-20 按 pin ref 实跑过一次，0 问题；`--cache .cache/refs --fill` 抓一次原文之后可离线复算） `repo/ref/path/line/expect`（还多一种 `absent`：连「这份文件里没有 X」也要查），逐条取回上游**核对那一行仍然含那个子串**
+  变成能查的东西。82 条声明各记（2026-10-20 按 pin ref 实跑过一次，0 问题；`--cache .cache/refs --fill` 抓一次原文之后可离线复算） `repo/ref/path/line/expect`（还多一种 `absent`：连「这份文件里没有 X」也要查），逐条取回上游**核对那一行仍然含那个子串**
   （只看文件在不在没用：默认值改了文件照样在）。
   2026-10-20 加了一条硬判据：**相邻行也含同一子串 → 这条不会红**（行号漂一格就撞上隔壁那行，
   `/health` 与 `/v1/health` 两行注释一模一样，实测"行号 +1"复算时它是唯一没红的）。
-  相隔很远的重复不拦，它不破坏灵敏度。总数由单测钉成字面量，所以"78"这个数改表时必须一起改。
+  相隔很远的重复不拦，它不破坏灵敏度。总数由单测钉成字面量，所以"82"这个数改表时必须一起改（这一轮加 4 条时它就叫了一嗓子）。
   车道 `citation-drift` 先跑 `--selftest`（明知错的必须认成错）再逐条核对。
   来历：本轮踩过七次"判据指向一个不存在的东西却照样跑完"（`llama-completions`、去 tag 里找 CLI、
   `-of jfk.srt`、去日志里找 `Steps:`、grep `tokens per second`、启动计划引用了两个表里不存在的出处 id、
@@ -185,6 +185,19 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   `--skip-provenance` 时报 0 ——「没查」不能长得像「查过了」。
   变异扫描留在仓库里：`tests/test_launch_plan.py::TestSourceMutants` 改坏源码 10 处，
   四处探针（离线对照 / 重算漂移 / 出处 id 闸门 / 缺席声明照扫）每条至少被抓一次，并带一条正向对照。
+- `tools/install_deps.py` + `pins/install-deps.json`：**安装包车道第一步该 apt 装什么**，从 Tauri
+  官方前提页读出来。只认 `<TabItem label="Debian">` 那一族里**包管理器那条安装命令**的续行
+  （`prerequisites.mdx:33-41`，九颗各带上游行号）；其余 tab 里的 `export JAVA_HOME=…` 与散文不算清单
+  （第一版就是把它们读了进来，产物里冒出 10 个假家族），`apt update` / `pacman -Syu` / `zypper up`
+  这类刷新行也不算。再逐字去 ubuntu-24.04 镜像 readme 的包表查在场：实测
+  **`curl` / `wget` / `file` / `libssl-dev` 在表里**（版本一起带出，如 `libssl-dev 3.0.13-0ubuntu3.16`），
+  **`libwebkit2gtk-4.1-dev` / `build-essential` / `libxdo-dev` / `libayatana-appindicator3-dev` /
+  `librsvg2-dev` 没提到**。判语只写 `not_listed` 不写"没装" —— **readme 不是 `dpkg -l`**，
+  这句留在产物 `verdict_legend` 里；装没装要由车道打印 `pkg-config --modversion webkit2gtk-4.1` 才算。
+  两根哨兵：包管理器不是 apt 就报、`libwebkit2gtk-4.1-dev` 不在表里就报（上游换 4.2 不许默默照旧）。
+  顺带删掉一处查不到出处的旧说法：那份页里 `gstreamer` 命中 0 次。
+  跑在 `citation-drift` 车道里；`tests/test_install_deps.py` 36 条，含 8 个把工具源码改坏的变异体
+  与"不改坏时五条探针全在位"的正向对照。
 - `tools/payload_plan.py` + `pins/payload-plan.json`：装机负载计划（出包前必须先有的数字）。
   按"没 CUDA 的 x64 / Apple silicon"选默认产物，zip 用 Range 读中央目录、tar.gz 读成员表
   （都只读名字与大小，不解包、不执行）拿逐文件大小：引擎净负载 win 44.2 / linux 52.1 /

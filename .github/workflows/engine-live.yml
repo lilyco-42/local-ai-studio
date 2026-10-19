@@ -34,6 +34,8 @@ on:
       # 这一条都得重跑（它给的是"外壳该敲哪一行"，不是给人看的说明）。
       - "tools/launch_plan.py"
       - "pins/launch-plan.json"
+      - "tools/install_deps.py"
+      - "pins/install-deps.json"
       - "pins/payload-plan.json"
       - "catalog/defaults.json"
       - "tools/ocr_build_surface.py"
@@ -1098,6 +1100,14 @@ jobs:
                                f"要么重钉 ref 并复核结论，要么更正文档，不许改成 warning 放行")
           print("  全部出处仍然成立")
           PY
+      - name: 装依赖清单：判据本身与单测（离线；含把源码改坏的变异体）
+        run: |
+          python3 tools/install_deps.py --selftest
+          python3 -m unittest tests.test_install_deps -v
+      - name: 按钉住的 Tauri 前提页与镜像 readme 重算装依赖那张表，并与已提交比漂移
+        # 上游改包表（加一个包、或把 webkit 4.1 换成别的）时这一步红：docs/packaging.md 里那段
+        # 包名散文从此是这张派生表的副本，不是"抄一次就永远对"。
+        run: python3 tools/install_deps.py --check --fill --cache .cache/refs
 
   headless-inference:
     needs: discover

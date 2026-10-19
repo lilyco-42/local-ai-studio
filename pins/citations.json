@@ -893,5 +893,49 @@
   "claim": "对话主入口是 POST /v1/chat/completions（外壳按这条转发生成请求）",
   "as_of": "2026-10-20",
   "line_text": "ctx_http.post(\"/v1/chat/completions\",      ex_wrapper(routes.post_chat_completions));"
+ },
+ {
+  "id": "tauri-prereq-debian-tab",
+  "repo": "tauri-apps/tauri-docs",
+  "ref": "2e513e3f7934d68ec7fef37fc46a5aa482f8a091",
+  "path": "src/content/docs/start/prerequisites.mdx",
+  "line": 29,
+  "expect": "<TabItem label=\"Debian\">",
+  "claim": "前提页按发行版分叉，我们取的是 Debian 那一族 —— 上游改标签名这一族就读不到了",
+  "as_of": "2026-10-20",
+  "line_text": "<TabItem label=\"Debian\">"
+ },
+ {
+  "id": "tauri-prereq-appindicator",
+  "repo": "tauri-apps/tauri-docs",
+  "ref": "2e513e3f7934d68ec7fef37fc46a5aa482f8a091",
+  "path": "src/content/docs/start/prerequisites.mdx",
+  "line": 40,
+  "expect": "libayatana-appindicator3-dev",
+  "claim": "Debian 那一族点名要 Ayatana 指示器开发包（整文件唯一命中，所以这块清单变了会当场红）",
+  "as_of": "2026-10-20",
+  "line_text": "libayatana-appindicator3-dev \\"
+ },
+ {
+  "id": "image-readme-has-pkg-table",
+  "repo": "actions/runner-images",
+  "ref": "b4067e48bd9bd803e958bfe1503ea0a06a3a127f",
+  "path": "images/ubuntu/Ubuntu2404-Readme.md",
+  "line": 289,
+  "expect": "| libssl-dev",
+  "claim": "镜像 readme 里确实有「| 包名 | 版本 |」这张表（不然逐字查全是 not_listed 只是因为读错了表）",
+  "as_of": "2026-10-20",
+  "line_text": "| libssl-dev             | 3.0.13-0ubuntu3.16            |"
+ },
+ {
+  "id": "image-readme-node",
+  "repo": "actions/runner-images",
+  "ref": "b4067e48bd9bd803e958bfe1503ea0a06a3a127f",
+  "path": "images/ubuntu/Ubuntu2404-Readme.md",
+  "line": 26,
+  "expect": "- Node.js 22.23.3",
+  "claim": "ubuntu-24.04 镜像自带 Node 22.23.3（外壳前端出包用它，版本要显式复核，不靠「这次够」）",
+  "as_of": "2026-10-20",
+  "line_text": "- Node.js 22.23.3"
  }
 ]

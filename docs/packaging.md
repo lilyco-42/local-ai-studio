@@ -15,20 +15,35 @@ raw 取文件必须换成 commit）那份 `images/ubuntu/Ubuntu2404-Readme.md` �
 镜像自带的 1.99.1 已经高于它 —— 也就是说 OCR 车道的工具链前提在 runner 上是现成的。
 车道里仍然显式钉 toolchain（`ocr-proof#0` 那条），因为"这次够"不等于"下个月那批镜像还够"。
 
-## ② 那缺什么？—— Linux 侧缺 GTK/webkit 一族，而且必须自己装
+## ② 那缺什么？—— 包表由工具从上游那一页读出来，不是一串手抄的名字
 
-同一份镜像 readme 里 **`webkit2gtk` 出现 0 次**（这条做成了 `absent` 型出处：连"没有"也查得到，
-命中就把行号打出来）。而 Tauri 2 的 Linux 前提（`tauri-apps/tauri-docs` @ `2e513e3f…`，
-`src/content/docs/start/prerequisites.mdx` 第 33-41 行）点名要：
+以前这一节把九颗包名抄成一段散文，而 `pins/citations.json` 只钉得住 `libwebkit2gtk-4.1-dev`
+那一行（`:33`）—— 上游加一颗或把 4.1 换成 4.2，这段散文不会红。
+现在它派生自 `tools/install_deps.py` → `pins/install-deps.json`：读
+`tauri-apps/tauri-docs` @ `2e513e3f…` 的 `src/content/docs/start/prerequisites.mdx` 里
+`<TabItem label="Debian">` 那一族（`:33-41`），只认**包管理器那条安装命令**的续行，
+逐颗带上游行号。车道 `citation-drift` 每次都按 pin 现查并与已提交那张比漂移。
 
-```
-libwebkit2gtk-4.1-dev  build-essential  curl  wget  file  libxdo-dev
-libssl-dev  libayatana-appindicator3-dev  librsvg2-dev
-```
+同一张表还逐字去镜像 readme 的包表里查在场情况（2026-10-20 实测）：
 
-后果很具体：**安装包车道的第一步是 `apt-get install` 这一族**，装完还要把
-`pkg-config --modversion webkit2gtk-4.1` 打出来 —— 不打印就等于"装了但没人知道装对没"。
-（Tauri 文档同时给的是 4.1 而不是 4.0，这条别凭印象写。）
+| 上游点名的 9 颗 | readme 里的情况 |
+|---|---|
+| `curl` `wget` `file` `libssl-dev` | **在表里**，版本分别 8.5.0-2ubuntu10.16 / 1.21.4-1ubuntu4.5 / 1:5.45-3build1 / 3.0.13-0ubuntu3.16 |
+| `libwebkit2gtk-4.1-dev` `build-essential` `libxdo-dev` `libayatana-appindicator3-dev` `librsvg2-dev` | **readme 没提到** |
+
+后一半这五个格子要说准：**readme 没提到 ≠ 机器上没装**（readme 是给人看的清单，不是 `dpkg -l`）。
+所以"到底装没装"仍然只能由车道给：第一步 `apt-get install -y` 这九颗（多装在场的那四颗无害），
+装完必须打印 `pkg-config --modversion webkit2gtk-4.1` —— 不打印就等于"装了但没人知道装对没"。
+`webkit2gtk` 在整份 readme 里命中 0 次这条做成了 `absent` 型出处（连"没有"也查得到，命中就打行号）。
+
+顺手记一处更正：此前任务与本文都写过"(+ gstreamer 插件族)"，**这一页 `2e513e3f…` 里 `gstreamer`
+命中 0 次**（整份 prerequisites 页都搜不到），那是 Tauri 1 时代的清单留在记忆里的东西。
+要加它得先给一个能查的出处，别凭印象写回这张表。
+
+重数：`python3 tools/install_deps.py --selftest`、
+`python -W error::ResourceWarning -m unittest tests.test_install_deps -v`（36 条，含 8 个把工具源码
+改坏的变异体）、`python3 tools/install_deps.py --check --fill --cache .cache/refs`（联网按 pin 重算）。
+（Tauri 文档给的是 4.1 而不是 4.0，这条也别凭印象写 —— 表里那颗就是判据。）
 
 ## ③ 要不要用现成的？—— 有 MIT 的官方 action，但它的钉法不一样
 

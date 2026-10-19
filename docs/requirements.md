@@ -76,7 +76,7 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
 
 ## 验收标准（在当前唯一可用验证手段 = GitHub Actions 下）
 
-1. `ci.yml`：565 个单测绿（重数：`python -W error::ResourceWarning -m unittest discover -s tests
+1. `ci.yml`：601 个单测绿（重数：`python -W error::ResourceWarning -m unittest discover -s tests
    -p "test_*.py"`；按文件数就 `python -m unittest tests.<模块名>`。2026-10-20 实测逐文件：
    `test_yaml_gate.py` 闸门自己 11、`test_toolbelt_pins.py` 工具带钉表 14、
    `test_catalog_snapshot.py` 目录快照与侧表 16、`test_citation_check.py` 出处闸门 22、
@@ -87,7 +87,8 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
    车道判据 38 + 6 = 44、`test_recommend_image.py` 生图档位表 31、`test_machine_budget.py` 装机预算 20、
    `test_lane_replay_report.py` 给分段、预跑与 job 数计数 4、`test_engine_probe.py` 产物名解析与 skipped 点名 30、
    `test_recommend_subtitle.py` 字幕四表对账 44、`test_recommend_models.py` 对话档位表 46、
-   `test_launch_plan.py` 启动计划（含 10 条源码变异体全部被抓）46），
+   `test_launch_plan.py` 启动计划（含 10 条源码变异体全部被抓）46、
+   `test_install_deps.py` 装依赖清单（含 8 条源码变异体与真捕获夹具的字节校验）36），
    `yaml_gate.py` 0 BAD、
    离线发现器解析出全部必需 target 且每个都带上游 sha256；单测在 `-W error::ResourceWarning` 下跑。
    闸门还把**车道 env 里每一条 64 位十六进制的值**反查出处（必须在 `pins/*.json` 或
@@ -199,7 +200,7 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
    `--cors-origins` 收窄到应用来源；② whisper / sd **没有 key 可给**，只能按需起、用完停，或由外壳反代
    （外壳持有唯一端口并自己发 token）；③ UI 永不直连引擎端口。
    这一条现在只有源码级证据，实现与验证都还没做 —— 列在验收里是为了别等写外壳时才发现架构选错了。
-11. **每条 `file:line` 出处本身要能被查**：`pins/citations.json` 78 条声明（其中 1 条是 `absent`
+11. **每条 `file:line` 出处本身要能被查**：`pins/citations.json` 82 条声明（其中 1 条是 `absent`
     型缺席断言：runner 镜像 readme 里没有 `webkit2gtk`），每条记
    `repo/ref/path/line/expect/claim`；`tools/citation_check.py` 按 pin 住的 ref 取回那份文件，
    核对**那一行仍然含着 expect 的子串**（不是只看文件在不在 —— 上游把 `cors_origins` 默认值改掉
@@ -213,12 +214,12 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
    重复代码行当成漂移。
    车道 `citation-drift` 先跑 `--selftest`（明知是错的必须被认成错，含"相邻重复必须红 /
    相隔两行以上的重复不拦"这一对正反对照），再逐条核对并守住"至少 20 条"的覆盖度地板；
-   单测同时把总数钉成 78（加一条要一起改，删一条当场红）。这一条是给第 10 条与整张判据出处表兜底的：
+   单测同时把总数钉成 82（加一条要一起改，删一条当场红 —— 这一轮加 4 条时它就叫了一嗓子）。这一条是给第 10 条与整张判据出处表兜底的：
    本轮已经踩过七次"判据指向一个不存在的东西却照样跑完"（`llama-completions`、去 tag 里找 CLI、
    `-of jfk.srt`、去日志里找 `Steps:`、grep `tokens per second`、启动计划里两个表上没有的 cite id、
    以及这条相邻重复）。
    证过它承重：临时改一条 expect → **1 条红**并打印上游实际那一行；
-   行号整体 +1 → **77 条红**（78 条里除 1 条 `absent` 型之外全部，那条本来就不看行号），
+   行号整体 +1 → **81 条红**（82 条里除 1 条 `absent` 型之外全部，那条本来就不看行号），
    也就是说这张表里没有一条"永远绿"的摆设。这件事现在**不必联网也能重跑**：
    `python tools/citation_check.py --cache .cache/refs --fill` 抓一次原文（30 份、1,236 KB，
    目录已 .gitignore），之后 `--cache .cache/refs` 离线复算就是"78 条真查了、0 条跳过"；
@@ -466,6 +467,32 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     argv 真能被引擎接受，属于 #25 实现之后在 CI 里跑的那一轮
     （而这条仓库现在还没有 runner，见 #19）。
 
+23. **安装包车道要装什么，也是读出来的**：`tools/install_deps.py` → `pins/install-deps.json`
+    从 Tauri 前提页（`tauri-apps/tauri-docs` @ `2e513e3f…`）的 `<TabItem label="Debian">` 那一族
+    抽出九颗包名并逐颗带上游行号（`:33-41`），再逐字去 ubuntu-24.04 镜像 readme 的包表里查在场情况。
+    实测分两半：**在表里**的 `curl` / `wget` / `file` / `libssl-dev`（版本一并带出，如
+    `libssl-dev 3.0.13-0ubuntu3.16`），**readme 没提到**的 `libwebkit2gtk-4.1-dev` /
+    `build-essential` / `libxdo-dev` / `libayatana-appindicator3-dev` / `librsvg2-dev`。
+    判语只能写成 `not_listed` 而不能写"没装"：**readme 是给人看的清单，不是 `dpkg -l`**，
+    这一条写在产物 `verdict_legend` 里，不许哪天被顺手改成缺席证据；
+    "到底装没装"由车道给 —— 装完必须打印 `pkg-config --modversion webkit2gtk-4.1`。
+    两个上游事实也立成判据：**包管理器必须是 apt**（读到 dnf 就报，车道那行命令要跟着改）、
+    **`libwebkit2gtk-4.1-dev` 必须在表里**（换成 4.2 就报，别默默照旧装 4.1）。
+    `source.families` 这一栏是修 bug 修出来的：第一版把块里所有像包名的词都算进去，
+    于是真页里 Windows/Linux/macOS 那几个 tab 的 `export JAVA_HOME=…` 和 `Most / apps / refresh`
+    被当成包，产物里冒出 **10 个假家族**；现在只认包管理器那条安装命令的续行，
+    `apt update` / `pacman -Syu` / `zypper up` / `dnf check-update` 都不算清单，剩 **6 个真家族**。
+    顺带更正一处流传的假事实：此前任务与文档都写过"+ gstreamer 插件族"，
+    而这份钉住的页里 `gstreamer` **命中 0 次** —— 那是 Tauri 1 时代清单的记忆，
+    要加回去得先给一个能查的出处。
+    重数：`python3 tools/install_deps.py --selftest`、
+    `python -W error::ResourceWarning -m unittest tests.test_install_deps -v`（36 条：
+    8 个源码变异体各被四条以上探针之一抓住，另有"不改坏时五条探针全在位"的正向对照，
+    以及两份真捕获夹具的 sha256 前缀 + 无 CRLF 字节校验），
+    `python3 tools/install_deps.py --check --fill --cache .cache/refs`。
+    跑在 `citation-drift` 这条车道里（它本来就是"按 pin 读上游"的车道，job 数因此仍是 21）。
+
+
 ## 车道判据的出处（全部按**钉住的那个 ref** 核过，不是按 HEAD 记的）
 
 | 车道 | 判据依赖的东西 | 出处 |
@@ -482,7 +509,8 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
 | `subtitle-tiers` | 字幕档位表的四个来源与"哪一条不许我们替上游补数字" | whisper.cpp `b5454`：`README.md:138-144` 是 `Model \| Disk \| Mem` 表（`Mem` 列 tiny `~273 MB` → large `~3.9 GB`，`:140` 已进 `pins/citations.json`）；`models/README.md:63` 明写 **Models are multilingual unless the model name includes `.en`**（顺序按这条排）、同一文件 `:67` 明写 **`for-tests-` 前缀的模型文件是空的**（收集清单按名字排掉）；`models/download-ggml-model.sh:9` 写死宿主 `src="https://huggingface.co/ggerganov/whisper.cpp"`（下载源从脚本读出来，不硬编码在我们代码里）。哈希只有一家给：同一次捕获里 HF `tree.lfs.oid` 有 47 条、ModelScope 对该仓库 **0 条** → 整轴 `single`，`ggml-tiny.bin` 的 oid 与 `pins/models.json` 那颗 pin 逐字节相同（正向对照）。上游自己不一致的两处也记进产物 `upstream_deltas`：白名单有 `small.en-tdrz` 而宿主无此文件；宿主有 4 个 `.en-q8_0` 而白名单没列 |
 | `image-tiers` | 生图这一档**为什么只能给算术下限、不能给内存承诺**，以及三条来源各自的位置 | sd.cpp `95b3090`：`docs/performance.md:143` 分段执行的容量检查留 `128 MiB of headroom`、`:145` 保住 `512 MiB device` 底线、`:102` 的 `--offload-to-cpu`（那一行 `--offload-to-cpu` 在文件里命中 6 次，所以进表的是 "saving VRAM without reducing generation speed" —— 子串不唯一就不配进这张表）、`README.md:157` 把内存/显存这件事推到这份文档（**上游给的是运行时策略，不是一张静态表**）；`docs/sd.md:5` 明写 SD1.5 的出处是 `huggingface.co/stable-diffusion-v1-5/stable-diffusion-v1-5` 的 **safetensors** —— GGUF 量化全在社区仓库，所以候选池只能由上游搜索推导。文件级哈希与字幕那行同一套机制（HF `tree.lfs.oid` × ModelScope `Sha256`），实测这次 338 行里 191 行两家一致 |
 | `machine-budget` | 这一条几乎不依赖上游 file:line —— 它的输入是**已提交那五张表的数字**加一张实测吞吐表；唯一的外部依据是「每个家族在主体之外还要不要外挂权重」 | sd.cpp `95b3090`：`docs/sd.md` 的 txt2img 例子五行 —— `:13` SD1.5 只给 `-m`（`sd-example-sd15-only-model`）、`:14` SDXL 要 `--vae`（`sd-example-sdxl-needs-vae`）、`:15` sd3_medium 那颗文件名自带 clips/t5xxl（`sd-example-sd3-medium-selfcontained`）、`:16` flux 要 `--vae --clip_l --t5xxl`（`sd-flux-needs-companions`）、`:17` sd3.5_large 要 `--clip_l --clip_g --t5xxl`（`sd-sd35-needs-encoders`），五条都由 `citation-drift` 逐行查；吞吐 `4.2 / 0.25 MiB/s` 不是上游声明，是 `tools/r2_manifest.py` 里那次 lain42.top 实测，所以产物里 `measured_at_exit` 写明是哪台机器量的 |
-| `launch-plan` | 外壳起每一项能力该敲哪些旗标、引擎自己有没有鉴权 | llama.cpp `b11727`：`--api-key` = `common/arg.cpp:3513`，`/health` 那行注释 `public endpoint (no API key check)` = `tools/server/server.cpp:263`（相邻的 `/v1/health` :264 注释一模一样，所以 expect 加长到只命中 263）。whisper.cpp `b5454`：只有 `--host`/`--port`（`examples/server/server.cpp:252/251`），默认绑 127.0.0.1（`:59`），整份文件查不到 `--api-key`/`api_key` —— 缺席也是一条被扫出来的判据。stable-diffusion.cpp `95b3090`：`--listen-ip`/`--listen-port` = `examples/server/runtime.cpp:193/198`，四份编码器旗标 = `examples/common/common.cpp:407/411/421/471`。oar-ocr `84817f5`：`name = "oar"` `oar-ocr-cli/src/args.rs:10`、子命令 `Ocr(Ocr),` `:49`、`requires_all = ["rec", "dict"]` `:59`、`conflicts_with_all = ["det", "rec", "dict"]` `:84`、位置参数 `INPUTS` `:90` —— 这份文件里没有 `--port`/`--listen`/`--api-key`。以上九条都进了 `pins/citations.json`（现 78 条），并由 `tools/launch_plan.py` 的 28 条 needle 与 8 条缺席声明在车道里逐条现查 |
+| `launch-plan` | 外壳起每一项能力该敲哪些旗标、引擎自己有没有鉴权 | llama.cpp `b11727`：`--api-key` = `common/arg.cpp:3513`，`/health` 那行注释 `public endpoint (no API key check)` = `tools/server/server.cpp:263`（相邻的 `/v1/health` :264 注释一模一样，所以 expect 加长到只命中 263）。whisper.cpp `b5454`：只有 `--host`/`--port`（`examples/server/server.cpp:252/251`），默认绑 127.0.0.1（`:59`），整份文件查不到 `--api-key`/`api_key` —— 缺席也是一条被扫出来的判据。stable-diffusion.cpp `95b3090`：`--listen-ip`/`--listen-port` = `examples/server/runtime.cpp:193/198`，四份编码器旗标 = `examples/common/common.cpp:407/411/421/471`。oar-ocr `84817f5`：`name = "oar"` `oar-ocr-cli/src/args.rs:10`、子命令 `Ocr(Ocr),` `:49`、`requires_all = ["rec", "dict"]` `:59`、`conflicts_with_all = ["det", "rec", "dict"]` `:84`、位置参数 `INPUTS` `:90` —— 这份文件里没有 `--port`/`--listen`/`--api-key`。以上九条都进了 `pins/citations.json`（现 82 条），并由 `tools/launch_plan.py` 的 28 条 needle 与 8 条缺席声明在车道里逐条现查 |
+| `install-deps` | 安装包车道第一步该 `apt-get install` 什么、镜像 readme 里在不在 | Tauri `2e513e3f`：`<TabItem label="Debian">` = `src/content/docs/start/prerequisites.mdx:29`，族里最后一颗点名的 `libayatana-appindicator3-dev` = `:40`（整页唯一命中），安装命令首行 `sudo apt install libwebkit2gtk-4.1-dev` = `:33`；**整页搜 `gstreamer` 命中 0 次** —— 旧文档里那句"+ gstreamer 插件族"没有出处，已删。runner-images `b4067e48`：包表形状靠 `| libssl-dev             | 3.0.13-0ubuntu3.16 |` = `images/ubuntu/Ubuntu2404-Readme.md:289` 证明（不然逐字查全是 `not_listed` 只可能是读错了表），工具链 `- Node.js 22.23.3` = `:26`、`- Rust 1.99.1` = `:140`。在场判语只说 `listed / not_listed`，产物 `verdict_legend` 明写"readme 没提到 ≠ 机器上没装"，真要证明装没装得看车道打印 `pkg-config --modversion webkit2gtk-4.1` |
 | 引擎与权重输入 | 上游 `digest` 就是内容哈希 | 五个包整包下回实算相等（llama b11727、whisper b5454、sd 95b3090、qwen 415 MB、SD1.5 1.5 GB），见 `pins/models.json` 的 `bytes_verified` |
 
 写这张表的理由：CI 现在一次都跑不了，而"日志里会出现某串"这类假设一旦错，
