@@ -54,6 +54,29 @@ ADR-0001 只解决了"引擎从哪来"。但把普通人电脑用起来还差三
   "huggingface cli" 排成 11★ 打头 —— 这轮**所有星标与"存在性"结论都改成按具体仓库名 `gh api` 单查**，
   不靠搜索排序。
 
+## 装这些工具时实测到的坑（写车道前必须知道的）
+
+- **`cargo install oar-ocr-cli` 会直接失败。** crates.io 明确回
+  `{"errors":[{"detail":"crate \`oar-ocr-cli\` does not exist"}]}`，而仓库的 workspace 成员里确实有它
+  （`members = [".", "oar-ocr-derive", "oar-ocr-core", "oar-ocr-vl", "oar-ocr-bench", "oar-ocr-cli"]`）。
+  README 那句安装命令是给仓库外的人看的门面话 —— 车道必须 `git clone` 后
+  `cargo build --release -p oar-ocr-cli`。库本体 `oar-ocr` 是发布的，`.crate` 在 crates.io 上有校验和，
+  所以"取源码"这一步仍然可以按上游哈希钉住，只是**可执行文件这一层没有预编译产物**（与 ADR 里那条一致）。
+- **工具链版本是硬前提**：workspace 里写 `edition = "2024"`、`rust-version = "1.95"`。
+  runner 上的默认 toolchain 不够新就会在依赖解析阶段失败，所以 OCR 车道要显式 `rustup toolchain install`。
+- **CI 没有"小而快"的扩散模型可用**（本轮实测 hf-mirror 的 `tree` 大小）：
+  `Green-Sky/SD-Turbo-GGUF` 最小档 `sd_turbo-f16-q8_0.gguf` 是 **1,930.0 MiB**，
+  比 `second-state/stable-diffusion-v1-5-GGUF` 的 `Q4_0` **1,494.2 MiB** 还大。
+  也就是说想给生图做冒烟，1.5 GB 下载省不掉；而且这些权重在 HF 上（无 digest），
+  pin 只能靠首次运行时算并回填 —— 在那之前这条车道没有可信判据，**先不写**，
+  别拿"能跑起来"当"验过了"。
+- `sd-cli` 的参数以源码为准实测过：`-m/--model`、`-p`、`-o/--output`（main.cpp 的选项表里就是
+  `{"-o", "--output"`)，长参数另有 `--diffusion-model`、`--vae`、`--clip_l`、`--t5xxl`、
+  `--cfg-scale`、`--sampling-method`、`--steps`、`-M convert`、`--type`、`-v`
+  （后几组来自项目自己的 `docs/flux.md`，最小命令是 README 里的 `./bin/sd-cli -m <模型> -p "a lovely cat"`）。
+  它同时有 `-h` 打 usage，所以车道可以照对话那条路的办法：**先抓 help 再决定用哪些旗标**，
+  不把我记住的名字当事实。
+
 ## 下一步（需要 runner，仍在阻塞）
 
 把上面这套钉成一条车道：按 release 拉各工具的产物、用上游 `.sha256`/`checksums.txt` 校验、
