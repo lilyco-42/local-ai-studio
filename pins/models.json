@@ -8,11 +8,21 @@
   "size": 77691713
  },
  "qwen2.5-0.5b-instruct-q2_k.gguf": {
+  "alt_sources": [
+   "https://www.modelscope.cn/models/Qwen/Qwen2.5-0.5B-Instruct-GGUF/resolve/master/qwen2.5-0.5b-instruct-q2_k.gguf"
+  ],
+  "bytes_verified": {
+   "bytes": 415182688,
+   "level": "跨提供方 + 真字节（一家给哈希，另一家给字节）",
+   "sha256": "9ee36184e616dfc76df4f5dd66f908dbde6979524ae36e6cefb67f532f798cb8",
+   "url": "（旧记录只存了提供方名：hf-mirror.com）"
+  },
   "cross_checked_against": "同家 CDN lfs-objects 路径 + huggingface.co tree 总长",
   "primary": "ModelScope repo/files 元数据",
   "provenance": "两个提供方对总长一致；哈希出自 ModelScope 的两条独立机制，整包字节未经下载校验 —— 首次真正下载时仍要按此 pin 复核",
   "sha256": "9ee36184e616dfc76df4f5dd66f908dbde6979524ae36e6cefb67f532f798cb8",
-  "size": 415182688
+  "size": 415182688,
+  "url": "https://hf-mirror.com/Qwen/Qwen2.5-0.5B-Instruct-GGUF/resolve/main/qwen2.5-0.5b-instruct-q2_k.gguf"
  },
  "samples/jfk.wav": {
   "cross_checked_against": "https://github.com/ggml-org/whisper.cpp/raw/master/samples/jfk.wav",
@@ -23,10 +33,20 @@
   "size": 352078
  },
  "stable-diffusion-v1-5-pruned-emaonly-Q4_0.gguf": {
+  "alt_sources": [
+   "https://www.modelscope.cn/models/second-state/stable-diffusion-v1-5-GGUF/resolve/master/stable-diffusion-v1-5-pruned-emaonly-Q4_0.gguf"
+  ],
+  "bytes_verified": {
+   "bytes": 1566768416,
+   "level": "跨提供方 + 真字节（一家给哈希，另一家给字节）",
+   "sha256": "b8944e9fe0b69b36ae1b5bb0185b3a7b8ef14347fe0fa9af6c64c4829022261f",
+   "url": "（旧记录只存了提供方名：hf-mirror.com）"
+  },
   "cross_checked_against": "同家 CDN lfs-objects 路径 + huggingface.co tree 总长",
   "primary": "ModelScope repo/files 元数据",
   "provenance": "两个提供方对总长一致；哈希出自 ModelScope 的两条独立机制，整包字节未经下载校验 —— 首次真正下载时仍要按此 pin 复核",
   "sha256": "b8944e9fe0b69b36ae1b5bb0185b3a7b8ef14347fe0fa9af6c64c4829022261f",
-  "size": 1566768416
+  "size": 1566768416,
+  "url": "https://hf-mirror.com/second-state/stable-diffusion-v1-5-GGUF/resolve/main/stable-diffusion-v1-5-pruned-emaonly-Q4_0.gguf"
  }
 }

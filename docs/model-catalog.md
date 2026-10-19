@@ -151,6 +151,56 @@ python tools/catalog_snapshot.py --live             # 重新生成 catalog/*.jso
 - 车道：`engine-live.yml` 的 `catalog-snapshot` 用 `--live --check` 盯上游漂移；
   `ci.yml` 用真实切片夹具离线跑同一套规则。
 
+## pin 强度不是一条线，是六级（`establish_pins.py --verify` 用来把低升到高）
+
+"这个权重钉住了没有"不是非黑即白。按**证据能走到哪一步**分六级，写目录/交付说明时必须标出级数：
+
+| 级 | 凭据 | 能说明什么 | 说不清什么 |
+|---|---|---|---|
+| 1 | 哈希只写在 workflow env 里 | 什么也不能说明 | 没人复现过它 —— 本轮之前那颗 415 MB 对话权重就在这一级 |
+| 2 | 上游只给体积（HF `tree`、自家 R2） | 文件还在、长度没变 | 内容对不对 |
+| 3 | 上游给 `digest = sha256:`（GitHub release 全部产物） | 内容与发布方算过的一致 | 发布方只有一家；来源独立性没有 |
+| 4 | 元数据 `Sha256` + CDN 内容寻址路径 + 跨源总长（ModelScope 零下载） | 同一提供方**两条独立机制**一致，另一家体积也一致 | 整包字节一次都没下过 |
+| 5 | `--verify`：从**另一家**下整包算 sha256，与已钉的哈希逐字节相等 | 跨提供方 + 真字节，两边都不许说谎 | 仍是两个镜像，不是两个原作者 |
+| 6 | 两个独立发布方各下整包且哈希一致 | 真正的来源独立 | 现实中几乎不存在：whisper/SD 权重实测只有一家发布 |
+
+```
+python tools/establish_pins.py --verify pins/models.json                 # 全部元数据来的 pin 都升一级
+python tools/establish_pins.py --verify pins/models.json --only qwen2.5   # 只升某一条（1.5 GB 那条要单独挑）
+```
+
+三条硬规矩，都是这轮踩出来的：
+- **只对"哈希来自元数据"的那几条有意义**。download 路线的哈希本来就是自己算的，再"复核"一遍是自证。
+- 换提供方是这条检查的全部价值所在：所以 URL 只能从 `TARGETS` 推（`sources()`），
+  `TARGETS` 里认不出仓库的键**直接拒绝**，绝不拼一个猜出来的地址。
+- **一次车道运行就是一次第 5 级复核**：`subtitle-proof` / `image-proof` / `headless-inference` 都会
+  `sha256sum -c` 真下载的文件。换句话说 CI 跑绿的那天，这些 pin 会被自动重验一遍 ——
+  而 CI 现在一次都没跑过，所以这一级目前只有本机证据。
+
+### 每条 pin 现在处在哪一级（2026-10-19 全部实测）
+
+| pin | 级 | 实测凭据 |
+|---|---|---|
+| `qwen2.5-0.5b-instruct-q2_k.gguf`（对话） | **5** | ModelScope 元数据给哈希，**hf-mirror 下满 415,182,688 B 真字节**，实算 `9ee36184e616…` 与钉值相等 |
+| `stable-diffusion-v1-5-pruned-emaonly-Q4_0.gguf`（生图） | **5** | 同上，整包 1,566,768,416 B 流式算完，`b8944e9fe0b6…` 相等 |
+| OCR `pp-ocrv6_tiny_det/rec` 与 `ppocrv6_tiny_dict` | **3 + 同家真字节** | 上游 release digest 给哈希，同一条 URL 整包下回并算一致（1,780,590 / 4,462,639 / 27,156）；**提供方只有一个** |
+| `ggml-tiny.bin` | 3 + 同族两主机头尾 | 整包自算 + huggingface.co 头尾 4 MiB 与 hf-mirror 逐字节一致；ModelScope 无该仓库 → **升不到第 5 级** |
+| `samples/jfk.wav` | 3 + git 旁证 | 整包自算 + 同族对照 + 与 git blob sha1 相等（内容寻址的第三方旁证） |
+| 工具带 12 条 | 3（8 条双机制） | sidecar × API digest 两套机制一致，但**都出自 GitHub 一家** |
+
+**没有任何一条到第 6 级**，而且大概率永远到不了：这些权重的原始发布方各只有一家，
+ModelScope 与 HF 是两个**分发渠道**而不是两个**发布者**。交付说明里"两个来源都验过"必须写成
+"两家分发渠道给的字节一致"，不能说成"来源独立"。
+
+顺带一条会改变镜像决策的实测（同一次复核带出来的）：
+从这台 CN 出口拉 ModelScope 的同一颗权重，1 / 16 / 32 MiB 三档分别给出
+**4.2 / 22.9 / 12.1 MiB/s**，而早轮自家 R2 只有 **0.82–1.01 MiB/s** ——
+也就是说**大权重不该镜像到 R2，而该把 ModelScope 列为首选候选源**；
+GitHub release 那侧（工具带 + OCR，合计 154.2 MiB，实测 0.014 MiB/s ≈ 184 min）才真的值得镜像。
+清单由 `tools/r2_manifest.py` 从 `pins/*.json` 推导（`mirror/r2-intake.json`，
+含每条的候选源与按源分组的结论），一个数字都不手打。前提是先有上面的第 5 级：
+**正因为字节与哈希跨提供方对得上，才敢把更快的那家列为首选。**
+
 ## 还没证的
 
 - 上面所有"下载耗时"是从我们自己那台出口机的一次换算，不同城市/运营商必然不同，只能当量级。

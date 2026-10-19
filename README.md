@@ -31,6 +31,10 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   三条判据一起成立才算过：泛词有结果、按精确仓库名能搜到它、乱词必须 0 条。
 - `tools/establish_pins.py`：给权重立 pin，两条路子 —— `download`（整包算 sha256 + 第二主机头尾 4 MiB
   逐字节对照）与 `modelscope`（一个字节不下：元数据 `Sha256` == CDN 内容寻址路径 == 跨源总长）。
+  第三条 `--verify` 是**降级用的**：拿另一家的整包真字节复核已钉的哈希，把 pin 从"元数据说一致"
+  升到"两边逐字节实测一致"（对话 415 MB 与生图 1.5 GB 都验过，见 `pins/models.json`）。
+- `tools/r2_manifest.py`：从 `pins/*.json` 推导"该镜像什么"，按源分组给实测吞吐换算，
+  产出 `mirror/r2-intake.json`（只是清单，不含上传动作）。
 - `tools/toolbelt_pins.py` + `pins/toolbelt.json`：把工具带（llmfit / llama-swap / gguf-parser）
   按 ADR-0001 同一条规矩钉成"具体 release + sha256"。12 条 pin 里 8 条有 sidecar 与 API digest
   两套机制互相对照，4 条只有 API digest（如实记 `sidecar: null`，不和前者混成一类）。

@@ -21,6 +21,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import re
 import subprocess
 import sys
@@ -107,6 +108,10 @@ def via_modelscope(display, repo, path, rev):
         return None
     print("  ✔ 元数据哈希 == 内容寻址路径，且总长与另一家一致 → 立 pin（零下载）")
     return {"sha256": ms_sha, "size": ms_size, "primary": "ModelScope repo/files 元数据",
+            # pin 记录必须自带可下载地址：清单、镜像、外壳下载层都要靠它，
+            # 只有说明文字的话，下游只能猜 URL —— 猜出来的地址不算证据（2026-10-19 就撞上了）。
+            "url": sources(repo, path, "main")[0],
+            "alt_sources": [f"https://www.modelscope.cn/models/{repo}/resolve/{rev}/{path}"],
             "cross_checked_against": f"同家 CDN lfs-objects 路径 + {hf_host or 'HF'} tree 总长",
             "provenance": "两个提供方对总长一致；哈希出自 ModelScope 的两条独立机制，"
                           "整包字节未经下载校验 —— 首次真正下载时仍要按此 pin 复核"}
@@ -184,10 +189,126 @@ def handle(display, repo, path, rev):
     return None
 
 
+def sha_stream(url: str) -> tuple[str | None, int, str]:
+    """边下边算，不整包进内存（1.5 GB 的权重不该为了复核把机器 RAM 吃掉）。
+    返回 (sha256 或 None, 收到字节数, 错误摘要)。"""
+    import hashlib
+    p = subprocess.Popen(["curl", "-sSL", "--fail", "--max-time", "3600",
+                          "-A", "establish-pins/1.0", url], stdout=subprocess.PIPE)
+    h = hashlib.sha256()
+    n = 0
+    while True:
+        chunk = p.stdout.read(1 << 20)
+        if not chunk:
+            break
+        n += len(chunk)
+        h.update(chunk)
+    rc = p.wait()
+    if rc != 0:
+        return None, n, f"curl rc={rc}"
+    return h.hexdigest(), n, ""
+
+
+def verify(pins_path: str, only: str) -> int:
+    """用真字节复核已有 pin。两类来源，强度不同，必须分开写：
+
+    · 元数据来的（ModelScope 给哈希）→ 从**另一家**（hf-mirror）下整包。对上就是
+      "跨提供方 + 真字节"级：一家说哈希是 A，另一家给的字节算出来也是 A。
+    · 上游 digest 来的（pin 里直接带 URL，例如 OCR 那三条）→ 只能下同一个提供方，
+      对上涨的是"这颗 digest 确实是内容哈希"，**不是**来源独立，别混着写。
+
+    只对元数据来的那几条有意义？不 —— 两条路都值得，但必须如实标级别。"""
+    with open(pins_path, encoding="utf-8") as fh:
+        pins = json.load(fh)
+    hf_repo = {path: repo for _d, route, repo, path, _r in TARGETS if route == "modelscope"}
+    cands = [(k, v) for k, v in pins.items() if not only or only in k]
+    targets = [(k, v) for k, v in cands if "ModelScope" in str(v.get("primary", ""))
+               or str(v.get("primary", "")).startswith("https://github.com/")]
+    if not targets:
+        print(f"{pins_path} 里没有可复核的 pin（要么哈希来自元数据，要么 pin 里带可下载的 URL）")
+        return 1
+    print("待复核字节合计 = %.1f MiB" % (sum(v["size"] for _, v in targets) / 1048576))
+    rc_all = 0
+    for key, v in targets:
+        cross = "ModelScope" in str(v.get("primary", ""))
+        if cross:
+            repo = hf_repo.get(key)
+            if not repo:
+                print(f"  ✗ {key}: TARGETS 里没有它的 HF 同名仓库，换不了提供方")
+                rc_all = 1
+                continue
+            url = sources(repo, key, "main")[0]   # 与立 pin 时同一套 URL 规则：hf-mirror 在前
+        else:
+            url = v["primary"]
+        print("=" * 72)
+        print(f"{key}\n  钉的 sha256 = {v['sha256']}  体积 = {v['size']:,}\n  下载 = {url}")
+        got, n, err = sha_stream(url)
+        if got is None:
+            print(f"  ✗ 下载失败：{err}（已收 {n:,} B）→ 这颗 pin 仍是『整包未校验』级")
+            rc_all = 1
+            continue
+        ok_hash = got == v["sha256"]
+        ok_size = n == v["size"]
+        print(f"  实收 {n:,} B 体积一致 = {ok_size}；实算 sha256 = {got}")
+        print(f"  与钉的哈希一致 = {ok_hash}")
+        if ok_hash and ok_size:
+            v["bytes_verified"] = {
+                "url": url, "bytes": n, "sha256": got,
+                "level": "跨提供方 + 真字节（一家给哈希，另一家给字节）" if cross
+                         else "同提供方真字节（只证明 digest 是内容哈希，不证明来源独立）"}
+            print(f"  ✔ 升级：{v['bytes_verified']['level']}")
+        else:
+            rc_all = 1
+            print("  ✗ 不一致 → 上游被换过或元数据/digest 说谎，这条不能当 pin 用")
+    if rc_all == 0:
+        with open(pins_path, "w", encoding="utf-8") as fh:
+            json.dump(pins, fh, ensure_ascii=False, indent=1, sort_keys=True)
+        print(f"复核记录已写回 {pins_path}")
+    return rc_all
+
+
+def merge_prior_records(new_pins: dict, path: str) -> tuple[int, list[str]]:
+    """重新立 pin 时保留已有的字节复核记录 —— 但只在哈希与体积都没变时保留。
+    没有这条，重跑一次 `--json` 就会把几百 MB 的跨提供方复核成果默默清空，
+    而报告看上去和昨天一样绿。"""
+    kept, lost = 0, []
+    if not os.path.exists(path):
+        return 0, lost
+    with open(path, encoding="utf-8") as fh:
+        old = json.load(fh)
+    for key, v in new_pins.items():
+        prior = old.get(key) or {}
+        for f in ("bytes_verified", "cross_provider_bytes_verified"):
+            rec = prior.get(f)
+            if not rec:
+                continue
+            if prior.get("sha256") == v.get("sha256") and prior.get("size") == v.get("size"):
+                if f == "cross_provider_bytes_verified":   # 旧字段名统一成新的
+                    rec = {"url": rec.get("url") or sources_of(key, prior, rec),
+                           "bytes": rec.get("bytes", v.get("size")),
+                           "sha256": rec.get("sha256", v.get("sha256")),
+                           "level": rec.get("level") or "跨提供方 + 真字节（一家给哈希，另一家给字节）"}
+                v["bytes_verified"] = rec
+                kept += 1
+            else:
+                lost.append(f"{key}: 哈希或体积变了，旧复核记录作废")
+    return kept, lost
+
+
+def sources_of(key, prior, rec):
+    """旧记录只存了 provider 名。能从新 pin 拿到 url 就用新的，拿不到就留个说明，
+    总之不许把"验过"这件事写成"没地址"。"""
+    return prior.get("url") or "（旧记录只存了提供方名：" + str(rec.get("provider")) + "）"
+
+
 def main(argv):
     ap = argparse.ArgumentParser()
     ap.add_argument("--json", default="")
+    ap.add_argument("--verify", default="", help="用另一家的真字节复核已有 pin 文件")
+    ap.add_argument("--only", default="", help="配合 --verify，只复核名字里含这段的那条")
     args = ap.parse_args(argv)
+    if args.verify:
+        return verify(args.verify, args.only)
     pins = {}
     for display, route, repo, path, rev in TARGETS:
         p = via_modelscope(display, repo, path, rev) if route == "modelscope" \
@@ -197,7 +318,13 @@ def main(argv):
     print("=" * 72)
     print("立住的 pin：", list(pins) or "无")
     if args.json:
-        json.dump(pins, open(args.json, "w", encoding="utf-8"), ensure_ascii=False, indent=1, sort_keys=True)
+        kept, lost = merge_prior_records(pins, args.json)
+        if kept:
+            print(f"保留旧字节复核记录 {kept} 条（哈希与体积都没变才保留）")
+        for l in lost:
+            print("  !", l)
+        with open(args.json, "w", encoding="utf-8") as fh:
+            json.dump(pins, fh, ensure_ascii=False, indent=1, sort_keys=True)
     return 0 if len(pins) == len(TARGETS) else 1
 
 

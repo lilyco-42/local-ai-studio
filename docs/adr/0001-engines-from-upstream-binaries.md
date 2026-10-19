@@ -265,7 +265,7 @@ spending limit needs to be increased"*。同账号的 public 仓库当天早些�
 
 二选一，由用户定：把仓库改 public（车道立刻能跑，但仓库名与 README/ADR 公开），
 或在 Settings→Billing 加付款方式 / 提高 Actions 支出上限。
-在此之前，"47 个 target / 59 个单测 / 93 个模型 URL 全部命中 / 47 个 target 都有上游 sha256 /
+在此之前，"47 个 target / 73 个单测 / 93 个模型 URL 全部命中 / 47 个 target 都有上游 sha256 /
 工具带 12 条 pin 其中 8 条有两套机制对照"都只是本机 python 证据。
 （这些数字每次改动都会漂，复核命令是同一条：`python tools/yaml_gate.py &&
 python -W error::ResourceWarning -m unittest discover -s tests -p "test_*.py"`。）
@@ -303,6 +303,14 @@ python -W error::ResourceWarning -m unittest discover -s tests -p "test_*.py"`�
   三件合计约 37.7 MiB，走 GitHub 是 45 分钟量级，走 R2（0.82–1.01 MiB/s）是 40 秒量级。
   同一 URL 从本机（Windows+代理）是 1.350 MiB/s，所以慢的是出口不是产物。
   数字来自单主机单时段，只用于决定分发层级，不当用户侧承诺。
+  **但"权重也一律进 R2"这句要按实测收窄**：把 pin 复核做完整后（ModelScope 给哈希、
+  hf-mirror 给整包字节，两条都对上）顺手量了 ModelScope 的下载速度，同一台 CN 出口
+  1 / 16 / 32 MiB 三档是 **4.2 / 22.9 / 12.1 MiB/s**，比自家 R2 的 0.82–1.01 MiB/s 快一到两个数量级。
+  于是层级变成：**GitHub release 那侧（工具带 + OCR，154.2 MiB，0.014 MiB/s ≈ 184 min）值得镜像进 R2；
+  大权重不镜像，把 ModelScope 列为首选候选源、hf-mirror 作备选**，
+  清单与逐条结论由 `tools/r2_manifest.py` 从 `pins/*.json` 推导（`mirror/r2-intake.json`）。
+  注意这条决定的成立**依赖于先做过跨提供方字节复核** —— 只是因为快就把某家列首选，
+  等于把校验责任推给速度。
 - **i18n 语言集**：已按实测拆成两条轴并给出默认包，见 [../i18n.md](../i18n.md)。
   识别侧 14 种语言共 23 个 rec 权重（单个 7.4–12.8 MiB），全装约 **122 MiB** ——
   OCR 的多语言便宜到不该做成高级功能；但**繁中、日文、格鲁吉亚语只有 PP-OCRv3 的语言包**，

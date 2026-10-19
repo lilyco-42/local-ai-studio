@@ -71,8 +71,9 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
 
 ## 验收标准（在当前唯一可用验证手段 = GitHub Actions 下）
 
-1. `ci.yml`：59 个单测绿（含 `test_yaml_gate.py` 给闸门自己的 11 条、`test_toolbelt_pins.py` 给工具带
-   钉表的 14 条、`test_catalog_snapshot.py` 给目录快照的 8 条，其中负向对照合计 10+ 条）、
+1. `ci.yml`：73 个单测绿（含 `test_yaml_gate.py` 给闸门自己的 11 条、`test_toolbelt_pins.py` 给工具带
+   钉表的 14 条、`test_catalog_snapshot.py` 给目录快照的 8 条、`test_establish_verify.py` 给字节复核的 8 条、
+   `test_r2_manifest.py` 给镜像清单的 6 条），
    `yaml_gate.py` 0 BAD、
    离线发现器解析出全部必需 target 且每个都带上游 sha256；单测在 `-W error::ResourceWarning` 下跑。
    闸门还把**车道 env 里每一条 64 位十六进制的值**反查出处（必须在 `pins/*.json` 或
@@ -104,6 +105,13 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
 6. **工具带也要钉**：`pins/toolbelt.json` 12 条 pin（llmfit v1.1.17 / llama-swap v265 / gguf-parser v0.26.4），
    8 条有 sidecar 与 API digest 两套机制互相对照、4 条只有 API digest（`sidecar: null` 如实记）。
    详见 [docs/toolbelt.md](toolbelt.md) 的"已钉住"一节。
+7. **pin 要标强度级，不许压成一句"已校验"**：六级阶梯（配置里写着 → 只有体积 → 上游 digest →
+   元数据两条机制 + 跨源体积 → 一家给哈希另一家给整包字节 → 两个独立发布方各下整包）
+   与每级能说明什么，见 [model-catalog.md](model-catalog.md)。
+   验收动作是 `python tools/establish_pins.py --verify pins/models.json` 与
+   `--verify pins/ocr.json`：字节与钉的哈希对不上就红；`catalog/defaults.json` 会把这条 pin 的
+   强度级一起带出去，UI 才有东西可显示。第 6 级目前**没有任何一条到达** ——
+   whisper/SD 权重实测只有一家发布，这点在交付说明里要照实写。
 
 **CI 证明不了的**：GUI 是否真打开、集显/独显上的真实性能与兼容性、DirectML/Vulkan EP 是否真的加速。
 这几项必须留到设备矩阵，交付说明里要写清，不拿 CI 绿当"能用"。

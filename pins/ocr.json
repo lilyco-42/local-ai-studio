@@ -1,17 +1,35 @@
 {
  "pp-ocrv6_tiny_det.onnx": {
+  "bytes_verified": {
+   "bytes": 1780590,
+   "level": "同提供方真字节（只证明 digest 是内容哈希，不证明来源独立）",
+   "sha256": "193bab7a04fca699a6c82e6abb5b81bdb28177f0abd4062552b04908dafb19f8",
+   "url": "https://github.com/GreatV/oar-ocr/releases/download/v0.7.0/pp-ocrv6_tiny_det.onnx"
+  },
   "primary": "https://github.com/GreatV/oar-ocr/releases/download/v0.7.0/pp-ocrv6_tiny_det.onnx",
   "provenance": "上游 release 的 digest（GitHub 给的内容哈希）；本工具不整包下载，车道真下载时按这颗 pin 复核",
   "sha256": "193bab7a04fca699a6c82e6abb5b81bdb28177f0abd4062552b04908dafb19f8",
   "size": 1780590
  },
  "pp-ocrv6_tiny_rec.onnx": {
+  "bytes_verified": {
+   "bytes": 4462639,
+   "level": "同提供方真字节（只证明 digest 是内容哈希，不证明来源独立）",
+   "sha256": "9ef676d6ed3c88256a2d92c640c44f25b0c40947e111b14b8be8f594091563e6",
+   "url": "https://github.com/GreatV/oar-ocr/releases/download/v0.7.0/pp-ocrv6_tiny_rec.onnx"
+  },
   "primary": "https://github.com/GreatV/oar-ocr/releases/download/v0.7.0/pp-ocrv6_tiny_rec.onnx",
   "provenance": "上游 release 的 digest（GitHub 给的内容哈希）；本工具不整包下载，车道真下载时按这颗 pin 复核",
   "sha256": "9ef676d6ed3c88256a2d92c640c44f25b0c40947e111b14b8be8f594091563e6",
   "size": 4462639
  },
  "ppocrv6_tiny_dict.txt": {
+  "bytes_verified": {
+   "bytes": 27156,
+   "level": "同提供方真字节（只证明 digest 是内容哈希，不证明来源独立）",
+   "sha256": "c5cbe34ef40c29c4df07ed012bf96569cb69a2d2a01a07027e9f13cb832bd9cd",
+   "url": "https://github.com/GreatV/oar-ocr/releases/download/v0.7.0/ppocrv6_tiny_dict.txt"
+  },
   "primary": "https://github.com/GreatV/oar-ocr/releases/download/v0.7.0/ppocrv6_tiny_dict.txt",
   "provenance": "上游 release 的 digest（GitHub 给的内容哈希）；本工具不整包下载，车道真下载时按这颗 pin 复核",
   "sha256": "c5cbe34ef40c29c4df07ed012bf96569cb69a2d2a01a07027e9f13cb832bd9cd",

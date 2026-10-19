@@ -186,7 +186,10 @@ def main(argv) -> int:
     picks = picks_of(defaults)
     dpp = os.path.join(ROOT, "catalog", "defaults.json")
     m = emit(dpp, {"schema": 1, "from": ["pins/models.json", "pins/ocr.json"],
-                   "entries": {k: {f: v[f] for f in ("sha256", "size", "primary", "provenance")
+                   # 一起带出"这颗 pin 的字节被谁验过"，UI 才谈得出这句强度；
+                   # 只给哈希不给强度，等于把六级证据压成一句"已校验"。
+                   "entries": {k: {f: v[f] for f in ("sha256", "size", "primary", "provenance",
+                                                   "bytes_verified")
                                    if f in v} for k, v in picks.items()}})
     print(f"  写入 {dpp}：{m:,} B，默认档 {len(picks)} 条（哈希与出处都来自 pins/models.json，"
           f"排除 samples/ 车道样本 {len(defaults) - len(picks)} 条）")

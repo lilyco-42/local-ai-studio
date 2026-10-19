@@ -1,0 +1,238 @@
+{
+ "artifacts": [
+  {
+   "candidates": [
+    "https://github.com/gpustack/gguf-parser-go/releases/download/v0.26.4/gguf-parser-darwin-amd64"
+   ],
+   "digest_from": "上游 release digest + sidecar 对照",
+   "kind": "toolbelt",
+   "name": "darwin-amd64",
+   "sha256": "ace89d7ef58cc9b86182b5282e088be9482a9e26e5dbba730beafeb570a2aa7a",
+   "size": 9461104,
+   "source": "https://github.com/gpustack/gguf-parser-go/releases/download/v0.26.4/gguf-parser-darwin-amd64"
+  },
+  {
+   "candidates": [
+    "https://github.com/gpustack/gguf-parser-go/releases/download/v0.26.4/gguf-parser-darwin-arm64"
+   ],
+   "digest_from": "上游 release digest + sidecar 对照",
+   "kind": "toolbelt",
+   "name": "darwin-arm64",
+   "sha256": "bb33961acc40466312940290553d9f84fdd1d19f532faedd60e02752e2a082b2",
+   "size": 9130434,
+   "source": "https://github.com/gpustack/gguf-parser-go/releases/download/v0.26.4/gguf-parser-darwin-arm64"
+  },
+  {
+   "candidates": [
+    "https://github.com/gpustack/gguf-parser-go/releases/download/v0.26.4/gguf-parser-linux-amd64"
+   ],
+   "digest_from": "上游 release digest + sidecar 对照",
+   "kind": "toolbelt",
+   "name": "linux-amd64",
+   "sha256": "b33c4488eb073d3a58329a1c4c7041af168241a1bb832eb962051da99689c1ec",
+   "size": 9224344,
+   "source": "https://github.com/gpustack/gguf-parser-go/releases/download/v0.26.4/gguf-parser-linux-amd64"
+  },
+  {
+   "candidates": [
+    "https://github.com/gpustack/gguf-parser-go/releases/download/v0.26.4/gguf-parser-windows-amd64.exe"
+   ],
+   "digest_from": "上游 release digest + sidecar 对照",
+   "kind": "toolbelt",
+   "name": "windows-amd64",
+   "sha256": "8da9ae6b8968d5d2dee4eaf48dbc24ed48bf3de02794c8dbe0b2a9443b12c92c",
+   "size": 9592832,
+   "source": "https://github.com/gpustack/gguf-parser-go/releases/download/v0.26.4/gguf-parser-windows-amd64.exe"
+  },
+  {
+   "candidates": [
+    "https://github.com/mostlygeek/llama-swap/releases/download/v265/llama-swap_265_darwin_amd64.tar.gz"
+   ],
+   "digest_from": "上游 release digest + sidecar 对照",
+   "kind": "toolbelt",
+   "name": "darwin_amd64",
+   "sha256": "b7ab78ae48e6d0a9047a927cb0ee016a09a86afe087b1b87d70d21accc6e4ffd",
+   "size": 23051954,
+   "source": "https://github.com/mostlygeek/llama-swap/releases/download/v265/llama-swap_265_darwin_amd64.tar.gz"
+  },
+  {
+   "candidates": [
+    "https://github.com/mostlygeek/llama-swap/releases/download/v265/llama-swap_265_darwin_arm64.tar.gz"
+   ],
+   "digest_from": "上游 release digest + sidecar 对照",
+   "kind": "toolbelt",
+   "name": "darwin_arm64",
+   "sha256": "01d8d543198973dcfa52fd263e5696230ee1a77fb204f48c5d542761a67623b0",
+   "size": 22043365,
+   "source": "https://github.com/mostlygeek/llama-swap/releases/download/v265/llama-swap_265_darwin_arm64.tar.gz"
+  },
+  {
+   "candidates": [
+    "https://github.com/mostlygeek/llama-swap/releases/download/v265/llama-swap_265_linux_amd64.tar.gz"
+   ],
+   "digest_from": "上游 release digest + sidecar 对照",
+   "kind": "toolbelt",
+   "name": "linux_amd64",
+   "sha256": "cb1f9a94be05afa129d3c17868f1dd2ca710b919333c7b868239dc31575dcfa1",
+   "size": 23187896,
+   "source": "https://github.com/mostlygeek/llama-swap/releases/download/v265/llama-swap_265_linux_amd64.tar.gz"
+  },
+  {
+   "candidates": [
+    "https://github.com/mostlygeek/llama-swap/releases/download/v265/llama-swap_265_windows_amd64.zip"
+   ],
+   "digest_from": "上游 release digest + sidecar 对照",
+   "kind": "toolbelt",
+   "name": "windows_amd64",
+   "sha256": "80b61f4e980a11e659d5c8973f8b72f22cc5f68eaa33e28645ff67c16763bcc9",
+   "size": 23062503,
+   "source": "https://github.com/mostlygeek/llama-swap/releases/download/v265/llama-swap_265_windows_amd64.zip"
+  },
+  {
+   "candidates": [
+    "https://github.com/AlexsJones/llmfit/releases/download/v1.1.17/llmfit-v1.1.17-aarch64-apple-darwin.tar.gz"
+   ],
+   "digest_from": "上游 release digest + sidecar 对照",
+   "kind": "toolbelt",
+   "name": "aarch64-apple-darwin",
+   "sha256": "294abbb9faa62315acbdb5ee55a2558f327c98df6644922d493d1dde1518a858",
+   "size": 6579395,
+   "source": "https://github.com/AlexsJones/llmfit/releases/download/v1.1.17/llmfit-v1.1.17-aarch64-apple-darwin.tar.gz"
+  },
+  {
+   "candidates": [
+    "https://github.com/AlexsJones/llmfit/releases/download/v1.1.17/llmfit-v1.1.17-x86_64-apple-darwin.tar.gz"
+   ],
+   "digest_from": "上游 release digest + sidecar 对照",
+   "kind": "toolbelt",
+   "name": "x86_64-apple-darwin",
+   "sha256": "a859d79292e961e9b9ed21b29bbeb787206c036668a7ec833f23c26e5ef7ca45",
+   "size": 6685409,
+   "source": "https://github.com/AlexsJones/llmfit/releases/download/v1.1.17/llmfit-v1.1.17-x86_64-apple-darwin.tar.gz"
+  },
+  {
+   "candidates": [
+    "https://github.com/AlexsJones/llmfit/releases/download/v1.1.17/llmfit-v1.1.17-x86_64-pc-windows-msvc.zip"
+   ],
+   "digest_from": "上游 release digest + sidecar 对照",
+   "kind": "toolbelt",
+   "name": "x86_64-pc-windows-msvc",
+   "sha256": "661b6ea57d835f681fbabcf3366649ff681d0081267fd3a05db254e67af6073f",
+   "size": 6222681,
+   "source": "https://github.com/AlexsJones/llmfit/releases/download/v1.1.17/llmfit-v1.1.17-x86_64-pc-windows-msvc.zip"
+  },
+  {
+   "candidates": [
+    "https://github.com/AlexsJones/llmfit/releases/download/v1.1.17/llmfit-v1.1.17-x86_64-unknown-linux-gnu.tar.gz"
+   ],
+   "digest_from": "上游 release digest + sidecar 对照",
+   "kind": "toolbelt",
+   "name": "x86_64-unknown-linux-gnu",
+   "sha256": "76915a48416aa1bfc6c2d481a951e0ae38b690a9d849eb8b9af136c281bcea95",
+   "size": 7160946,
+   "source": "https://github.com/AlexsJones/llmfit/releases/download/v1.1.17/llmfit-v1.1.17-x86_64-unknown-linux-gnu.tar.gz"
+  },
+  {
+   "candidates": [
+    "https://hf-mirror.com/ggerganov/whisper.cpp/resolve/main/ggml-tiny.bin"
+   ],
+   "digest_from": "只有单一发布方（HF 或 GitHub）；本对照证明的是传输与镜像未改写，不是来源独立",
+   "kind": "models",
+   "name": "ggml-tiny.bin",
+   "sha256": "be07e048e1e599ad46341c8d2a135645097a538221678b7acdd1b1919c6e1b21",
+   "size": 77691713,
+   "source": "https://hf-mirror.com/ggerganov/whisper.cpp/resolve/main/ggml-tiny.bin"
+  },
+  {
+   "candidates": [
+    "https://hf-mirror.com/Qwen/Qwen2.5-0.5B-Instruct-GGUF/resolve/main/qwen2.5-0.5b-instruct-q2_k.gguf",
+    "https://www.modelscope.cn/models/Qwen/Qwen2.5-0.5B-Instruct-GGUF/resolve/master/qwen2.5-0.5b-instruct-q2_k.gguf"
+   ],
+   "digest_from": "跨提供方真字节",
+   "kind": "models",
+   "name": "qwen2.5-0.5b-instruct-q2_k.gguf",
+   "sha256": "9ee36184e616dfc76df4f5dd66f908dbde6979524ae36e6cefb67f532f798cb8",
+   "size": 415182688,
+   "source": "https://hf-mirror.com/Qwen/Qwen2.5-0.5B-Instruct-GGUF/resolve/main/qwen2.5-0.5b-instruct-q2_k.gguf"
+  },
+  {
+   "candidates": [
+    "https://hf-mirror.com/second-state/stable-diffusion-v1-5-GGUF/resolve/main/stable-diffusion-v1-5-pruned-emaonly-Q4_0.gguf",
+    "https://www.modelscope.cn/models/second-state/stable-diffusion-v1-5-GGUF/resolve/master/stable-diffusion-v1-5-pruned-emaonly-Q4_0.gguf"
+   ],
+   "digest_from": "跨提供方真字节",
+   "kind": "models",
+   "name": "stable-diffusion-v1-5-pruned-emaonly-Q4_0.gguf",
+   "sha256": "b8944e9fe0b69b36ae1b5bb0185b3a7b8ef14347fe0fa9af6c64c4829022261f",
+   "size": 1566768416,
+   "source": "https://hf-mirror.com/second-state/stable-diffusion-v1-5-GGUF/resolve/main/stable-diffusion-v1-5-pruned-emaonly-Q4_0.gguf"
+  },
+  {
+   "candidates": [
+    "https://github.com/GreatV/oar-ocr/releases/download/v0.7.0/pp-ocrv6_tiny_det.onnx"
+   ],
+   "digest_from": "跨提供方真字节",
+   "kind": "ocr",
+   "name": "pp-ocrv6_tiny_det.onnx",
+   "sha256": "193bab7a04fca699a6c82e6abb5b81bdb28177f0abd4062552b04908dafb19f8",
+   "size": 1780590,
+   "source": "https://github.com/GreatV/oar-ocr/releases/download/v0.7.0/pp-ocrv6_tiny_det.onnx"
+  },
+  {
+   "candidates": [
+    "https://github.com/GreatV/oar-ocr/releases/download/v0.7.0/pp-ocrv6_tiny_rec.onnx"
+   ],
+   "digest_from": "跨提供方真字节",
+   "kind": "ocr",
+   "name": "pp-ocrv6_tiny_rec.onnx",
+   "sha256": "9ef676d6ed3c88256a2d92c640c44f25b0c40947e111b14b8be8f594091563e6",
+   "size": 4462639,
+   "source": "https://github.com/GreatV/oar-ocr/releases/download/v0.7.0/pp-ocrv6_tiny_rec.onnx"
+  },
+  {
+   "candidates": [
+    "https://github.com/GreatV/oar-ocr/releases/download/v0.7.0/ppocrv6_tiny_dict.txt"
+   ],
+   "digest_from": "跨提供方真字节",
+   "kind": "ocr",
+   "name": "ppocrv6_tiny_dict.txt",
+   "sha256": "c5cbe34ef40c29c4df07ed012bf96569cb69a2d2a01a07027e9f13cb832bd9cd",
+   "size": 27156,
+   "source": "https://github.com/GreatV/oar-ocr/releases/download/v0.7.0/ppocrv6_tiny_dict.txt"
+  }
+ ],
+ "by_source": {
+  "github.com": {
+   "bytes": 161673248,
+   "count": 15,
+   "measured_mib_s": 0.014,
+   "other_candidates": [],
+   "sample_note": "GitHub release 三个 1 MiB 样本 0.012–0.017",
+   "verdict": "值得镜像：现源 0.014 → R2 0.9，183.6 min 变 171 s"
+  },
+  "hf-mirror.com": {
+   "bytes": 77691713,
+   "count": 1,
+   "measured_mib_s": 0.25,
+   "other_candidates": [],
+   "sample_note": "1 MiB 样本，含 ttfb 1.8 s",
+   "verdict": "值得镜像：现源 0.25 → R2 0.9，4.9 min 变 82 s"
+  },
+  "modelscope": {
+   "bytes": 1981951104,
+   "count": 2,
+   "measured_mib_s": 4.2,
+   "other_candidates": [
+    "hf-mirror.com"
+   ],
+   "sample_note": "1/16/32 MiB 三档最保守一档",
+   "verdict": "不必镜像：现源 4.2 已 ≥ R2 0.9（把 modelscope 列为首选，其余 ['hf-mirror.com'] 留作备选）"
+  }
+ },
+ "measured_mib_s": {
+  "own_r2_cn_egress": 0.9
+ },
+ "note": "只是清单，不含上传动作；灌不灌由用户决定",
+ "schema": 1,
+ "total_bytes": 2221316065
+}
