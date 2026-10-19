@@ -71,17 +71,24 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
 
 ## 验收标准（在当前唯一可用验证手段 = GitHub Actions 下）
 
-1. `ci.yml`：26 个单测绿、`yaml_gate.py` 0 BAD、离线发现器解析出全部必需 target 且每个都带上游 sha256。
+1. `ci.yml`：32 个单测绿（含 `test_yaml_gate.py` 给闸门自己的 6 条）、`yaml_gate.py` 0 BAD、
+   离线发现器解析出全部必需 target 且每个都带上游 sha256；单测在 `-W error::ResourceWarning` 下跑。
 2. `engine-live.yml`：`discover` 用真实 API 出 manifest（每个 target 都带上游 sha256）；`os-inference-proof` 对
    `manifest["inferred"]` 每一个产物解压要求 PE；`ocr-catalog` 93 条模型 URL 0 缺失且每条都有上游 digest；
    `model-catalog` 盯权重目录与"上游给不给哈希"的漂移；
    `headless-inference` 在 CPU runner 上对话真抓到 `tokens per second > 0`；
    `subtitle-proof` 用钉好的引擎+权重+已知答案样本跑出一份**带时间戳且内容对得上**的 SRT。
 3. 目录可达性探针（`catalog_probe.py`）三条判据全过：泛词有结果、正向对照命中精确仓库、负向对照 0 条。
-4. **车道覆盖度**：四项能力里目前只有对话与字幕有执行车道。
-   生图缺一条 `sd-cli` 冒烟（最省量化也要 1,494 MiB，CI 里跑得设低步数小图）；
-   OCR 缺一条 `cargo build` + 一张图出文字的冒烟（它是唯一没有上游二进制的引擎）。
-   这两条要在 runner 可用后补，别把"只有两条能跑"说成"四项都验过"。
+4. **车道覆盖度**：四项能力现在有**三条**执行车道 —— 对话（`headless-inference` 抓 tokens/s）、
+   字幕（`subtitle-proof` 出带时间戳的 SRT）、文字识别（`ocr-proof`：CI 里 `cargo build` 出 `oar`，
+   用钉住的 tiny det/rec/dict 三件套认出一张自画合成图里的已知词）。
+   只缺**生图**一条：实测最小可用扩散权重也要 1,494.2 MiB（SD-Turbo 反而 1,930.0 MiB 更大），
+   且这类权重在 HF 上没有 digest，pin 只能首测算并回填 —— 在那之前不写这条，
+   免得用一条没有可信判据的车道冒充"四项都验过"。
+5. **车道里的 Python 片段要真编译**：`yaml_gate.py` 现在把两条 workflow 里的每段 `<<'PY'` 抽出来
+   `compile()`（本轮覆盖 7 段），并验过它会红 —— 掺一段缩进错的 PY 进去，它按
+   `文件:job#步骤 第N段` 报出语法错。这个能力是被我上一次写的车道逼出来的：
+   一个多缩进两格的注释就是 IndentationError，而旧闸门只查 heredoc 是否闭合，放它过去了。
 
 **CI 证明不了的**：GUI 是否真打开、集显/独显上的真实性能与兼容性、DirectML/Vulkan EP 是否真的加速。
 这几项必须留到设备矩阵，交付说明里要写清，不拿 CI 绿当"能用"。

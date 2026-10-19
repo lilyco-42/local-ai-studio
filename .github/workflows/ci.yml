@@ -28,7 +28,8 @@ jobs:
           print("AST ok")
           PY
       - name: 单测（夹具为 2026-10-18 真实 API 捕获）
-        run: python -m unittest discover -s tests -p "test_*.py" -v
+        # -W 归解释器管，放到 unittest 参数上会直接 "unrecognized arguments"
+        run: python -W error::ResourceWarning -m unittest discover -s tests -p "test_*.py" -v
       - name: 离线跑一遍发现器
         run: python tools/engine_probe.py --fixtures tests/fixtures --require-gpu --json /tmp/manifest.json
       - name: 产物清单落盘

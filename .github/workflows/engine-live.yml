@@ -205,6 +205,109 @@ jobs:
           N=$(grep -c -- '-->' "$SRT")
           echo "::notice::字幕车道通过：$SRT 有 $N 条带时间戳的段，引擎与权重均按上游 sha256 校验"
 
+  ocr-proof:
+    # OCR 是四项能力里唯一没有上游二进制的，所以这条车道要在 CI 里 cargo build（CI 编译是允许的，
+    # 本机禁止）。所有输入都可钉：源码用 git 提交号（git 本身内容寻址），
+    # 三个模型/字典用 release 的 digest（实测每个产物都有），测试图由车道自己画——
+    # 自己生成的东西不需要 pin，pin 只在"从别人那儿拿"时才需要。
+    # 每个名字都查到过出处：包叫 oar-ocr-cli、二进制叫 oar（Cargo.toml 的 [[bin]]），
+    # 自定义模型必须 --det/--rec/--dict 三个一起给（其 README 明说不能与 --size 混用）。
+    timeout-minutes: 34
+    runs-on: ubuntu-latest
+    env:
+      TAG: v0.10.0
+      COMMIT: f755256f260d3760a062a6051d23826958972c33   # v0.10.0 解引用后的 commit（gh api git/ref/tags 实测）
+      DET_SHA: 193bab7a04fca699a6c82e6abb5b81bdb28177f0abd4062552b04908dafb19f8
+      REC_SHA: 9ef676d6ed3c88256a2d92c640c44f25b0c40947e111b14b8be8f594091563e6
+      DICT_SHA: c5cbe34ef40c29c4df07ed012bf96569cb69a2d2a01a07027e9f13cb832bd9cd
+      DET_SIZE: "1780590"
+      REC_SIZE: "4462639"
+      DICT_SIZE: "27156"
+      WORD: OARCI2291
+    steps:
+      - name: 确认工具链够新（workspace 要 edition 2024 / rust-version 1.95）
+        run: |
+          rustup toolchain install stable --profile minimal
+          rustup default stable
+          rustc --version
+          python3 - <<'PY'
+          import re, subprocess, sys
+          v = subprocess.run(["rustc", "--version"], capture_output=True, text=True).stdout
+          m = re.search(r"(\d+)\.(\d+)", v)
+          major, minor = int(m.group(1)), int(m.group(2))
+          print(f"::notice::rustc {major}.{minor}，workspace 要求 ≥1.95")
+          if (major, minor) < (1, 95):
+              sys.exit(f"工具链 {major}.{minor} 低于 oar-ocr workspace 声明的 1.95，"
+                       "换 toolchain 而不是降低要求")
+          PY
+      - name: 按提交号取源码
+        run: |
+          git clone --depth 1 --branch "$TAG" https://github.com/greatv/oar-ocr.git src
+          cd src
+          git fetch --depth 1 origin "$COMMIT" 2>/dev/null || true
+          HEAD_SHA=$(git rev-parse HEAD^{commit})
+          test "$HEAD_SHA" = "$COMMIT" || { echo "tag $TAG 指向 $HEAD_SHA，与钉住的 $COMMIT 不符（上游重打过 tag）"; exit 1; }
+          grep -q 'name = "oar-ocr-cli"' Cargo.toml || { echo "workspace 成员名变了"; exit 1; }
+      - name: 编译 CLI（CI 编译，本机禁止）
+        working-directory: src
+        run: |
+          cargo build --release -p oar-ocr-cli
+          BIN=target/release/oar
+          test -x "$BIN" || { echo "编出来的不是 target/release/oar，看下面："; ls -l target/release | head -20; exit 1; }
+          "$BIN" --help > "$RUNNER_TEMP/help.txt" 2>&1 || true
+          head -25 "$RUNNER_TEMP/help.txt"
+      - name: 取三个模型文件并按上游 digest 校验
+        run: |
+          base=https://github.com/greatv/oar-ocr/releases/download/v0.7.0
+          curl -sSL --fail --max-time 300 -o det.onnx  "$base/pp-ocrv6_tiny_det.onnx"
+          curl -sSL --fail --max-time 300 -o rec.onnx  "$base/pp-ocrv6_tiny_rec.onnx"
+          curl -sSL --fail --max-time 300 -o dict.txt  "$base/ppocrv6_tiny_dict.txt"
+          test "$(stat -c %s det.onnx)" = "$DET_SIZE" || { echo "det 体积不符"; exit 1; }
+          test "$(stat -c %s rec.onnx)" = "$REC_SIZE" || { echo "rec 体积不符"; exit 1; }
+          test "$(stat -c %s dict.txt)" = "$DICT_SIZE" || { echo "dict 体积不符"; exit 1; }
+          echo "$DET_SHA  det.onnx" | sha256sum -c -
+          echo "$REC_SHA  rec.onnx" | sha256sum -c -
+          echo "$DICT_SHA  dict.txt" | sha256sum -c -
+      - name: 画一张已知答案的图
+        run: |
+          python -m pip install --quiet pillow
+          python - <<'PY'
+          import os
+          from PIL import Image, ImageDraw, ImageFont
+          word = os.environ["WORD"]
+          img = Image.new("RGB", (900, 220), "white")
+          d = ImageDraw.Draw(img)
+          # 字体用 runner 自带的 DejaVu；找不到就退回 Pillow 内置点阵字（会糊，但车道会如实红）
+          cands = ["/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+                   "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"]
+          p = next((c for c in cands if os.path.exists(c)), None)
+          if p is None:
+              print("::warning::没找到 DejaVu，用默认字体，识别率会掉——这条车道要的是链路通，不是指标")
+              d.text((40, 80), word, fill="black")
+          else:
+              d.text((40, 60), word, fill="black", font=ImageFont.truetype(p, 96))
+          img.save("page.png")
+          print("page.png 字节数 =", os.path.getsize("page.png"))
+          PY
+      - name: 跑 OCR，要求认得出那个词
+        run: |
+          src/target/release/oar ocr --det det.onnx --rec rec.onnx --dict dict.txt page.png > out.txt 2> err.txt \
+            || { echo "oar 非零退出："; tail -25 err.txt; exit 1; }
+          echo "=== stderr 尾部 ==="; tail -8 err.txt
+          echo "=== stdout ==="; cat out.txt
+          # 归一化后比子串：不假设模型输出的空格/换行/置信度排版
+          python3 - <<'PY'
+          import os, re
+          got = re.sub(r"[^A-Z0-9]", "", open("out.txt", encoding="utf-8", errors="replace").read().upper())
+          want = os.environ["WORD"]
+          print(f"归一化后 {len(got)} 个字符，找 {want}：{'命中' if want in got else '没命中'}")
+          if want not in got:
+              raise SystemExit(
+                  "已知答案的词没认出来。这**不是链路坏了**（前面全部校验都过了），"
+                  f"而是 tiny 档在这张合成图上的质量低于底线：实际输出={got[:120]!r}")
+          PY
+          echo "::notice::OCR 车道通过：tiny 档从自建图认出了 $WORD"
+
   headless-inference:
     needs: discover
     timeout-minutes: 25
