@@ -153,6 +153,15 @@ class TestArtifact(unittest.TestCase):
                 self.assertEqual(cell["backends"]["default"],
                                  next((o["asset"] for o in opts if o["is_default"]), None))
 
+    def test_subtitle_request_fields_come_from_the_table(self) -> None:
+        caps = sc.load(ART)["capabilities"]
+        self.assertEqual(caps["字幕"]["request"]["multipart_field"], "file")
+        self.assertEqual(caps["字幕"]["request"]["extra_fields"],
+                         {"response_format": "srt"})
+        for cap in ("对话", "生图", "文字识别"):
+            req = caps[cap]["request"] or {}
+            self.assertNotIn("extra_fields", req, cap)
+
     def test_ui_is_not_claimed_as_checked(self) -> None:
         doc = sc.load(ART)
         self.assertIs(doc["ui_checked"], False)
@@ -181,6 +190,9 @@ class TestSourceMutants(unittest.TestCase):
             return fh.read()
 
     MUTANTS = [
+        ("whisper 文件字段被改名不报",
+         '        if cap in MULTIPART_FIELD and req.get("multipart_field") != MULTIPART_FIELD[cap]:',
+         '        if False and cap in MULTIPART_FIELD and req.get("multipart_field") != MULTIPART_FIELD[cap]:'),
         ("有钥匙却没收窄 CORS 不报",
          '        if has_key and not cors:',
          '        if False and has_key and not cors:'),
@@ -365,7 +377,7 @@ class TestSourceMutants(unittest.TestCase):
         self.assertEqual(missed, [], "这些变异没人报：对应判据是装饰\n" + "\n".join(missed))
 
     def test_mutant_count(self) -> None:
-        self.assertEqual(len(self.MUTANTS), 12)
+        self.assertEqual(len(self.MUTANTS), 13)
 
 
 if __name__ == "__main__":

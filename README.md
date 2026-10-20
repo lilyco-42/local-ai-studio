@@ -25,12 +25,12 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   名字里没写 OS 的（whisper 那两个）只**推断**成 win，并单列进 `manifest["inferred"]`。
 - `tools/zip_peek.py`：用 HTTP Range 只读 zip 中央目录，不下载整包、不解压、不运行，
   把上面那个推断换成条目级证据；带一正一负对照，见 ADR。
-- `tools/yaml_gate.py`：解析三条 workflow，核对 needs 链、step 输出引用、heredoc 闭合与**每段 PY 真编译**，
+- `tools/yaml_gate.py`：解析四条 workflow，核对 needs 链、step 输出引用、heredoc 闭合与**每段 PY 真编译**，
   以及车道里写死的 target 名确实存在于 manifest（已用假 target 验证它会红）。
   `needs.X.outputs.Y` 也按 **job 自己的文本**查三件事：X 这个 job 存在、本 job 真 `needs` 它、
   X 真导出 Y —— 引用没导出的输出在 Actions 里拿到的是空字符串而不是报错，而"扫整份文件"那一版
   会让任何带 `needs:` 的 job 为别人的引用背锅（见 `docs/requirements.md` 验收第 5 条）。
-  车道分段与预跑的**计数**由 `tests/test_lane_replay_report.py` 钉住：三条 workflow 共 17 段 `<<'PY'`、
+  车道分段与预跑的**计数**由 `tests/test_lane_replay_report.py` 钉住：四条 workflow 共 17 段 `<<'PY'`、
   其中 12 段含判据（认 `check(`/`SystemExit`/`assert`/`sys.exit(`）、本地预跑引用 8 个
   (job, 步骤名) 组合 —— 重数：`python -W error::ResourceWarning -m unittest tests.test_lane_replay_report -v`。
   这几个数以前只活在文档里，漂过三次，所以现在是断言不是散文。
@@ -295,7 +295,7 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   漂移只报不跟。现取车道用 `--live` 口径：只核对钉住那颗还在、产物没被重打包；上游又发新版
   不算红（实测抓完半小时后 llama 又发了 5 个版本 —— 按"有新版本"红会让这条道永远红）。
   重数：`python3 tools/runtime_versions.py --selftest`、`--check`。
-- `tools/shell_contract.py` + `pins/shell-contract.json`：**外壳还没写，先把它必须遵守的合同钉成表**。
+- `tools/shell_contract.py` + `pins/shell-contract.json`：**外壳的 Tauri 层还没写，先把它必须遵守的合同钉成表**。
   只从已提交的五张表推导（launch-plan / backend-choice / runtime-versions / payload-plan /
   ocr-build-surface），不读外壳源码：入口（外壳 0 个监听口，UI 只走 Tauri IPC）、
   鉴权（只有 llama 有 `--api-key`，token 每次现生成、只存内存）、
@@ -304,8 +304,16 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   runtime 目录（`<data>/runtime/<os>/<engine>/<version>/<asset-stem>/`）。
   三个 server 能力 × 各自 OS 格 = 8 颗默认档，逐颗与 payload-plan 的行、钉住 release 的产物名
   与 digest 三方对表。**UI 源码不存在就写 `ui_checked=false`**；OCR 的二进制还没进出包清单，
-  这条缺口以 `ocr-manifest` 留在产物里。12 条源码变异体 × 23 条探针、16 条单测。
+  这条缺口以 `ocr-manifest` 留在产物里。13 条源码变异体 × 23 条探针、17 条单测。
   重数：`python3 tools/shell_contract.py --selftest`、`--check`。
+- `shell/core`（Rust，不依赖 Tauri）：把上面那张合同写成可测逻辑 —— 生产代码只做一次
+  `127.0.0.1:0` 探测并立刻 drop（自己不监听）、token 长度读合同且只进内存、没钥匙的引擎
+  `on_demand` + 300 s 回收、`spawn` 前必须过 `payload-manifest.json` 的逐文件 sha256、
+  argv 全由合同/启动表渲染；HTTP 客户端自己实现（chunked/trailers/512 MiB 上限）并带
+  chat / transcribe / image / ocr 四个调用。`tools/shell_source.py` 扫生产源码：引擎名、
+  引擎旗标、引擎端口一律不许出现，`Command::new` 只有一处、`TcpListener::bind` 只有一处。
+  **但它一次都没被编译过**：`shell.yml`（3 OS `cargo test --all-targets`）因仓库 private、
+  runner 未解锁而 0 次执行，`Cargo.lock` 也还没产出；离线只证了结构闸门与 10 条 Python 单测。
 - `tools/action_pins.py` + `pins/actions.json`：**出包那只手自己也要钉住**。这一轮之前三个
   workflow 里 4 个 `uses:` 全是浮动大版本 tag（`checkout@v4`、`setup-python@v5`、
   `upload-artifact@v4`、`download-artifact@v4`，共 **47 处**）—— 仓库对引擎/权重/工具带都定了

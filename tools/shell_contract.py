@@ -35,6 +35,10 @@ IDLE_MAX = 300
 RUNTIME_TEMPLATE = "<data>/runtime/<os>/<engine>/<version>/<asset-stem>/"
 UI_FORBIDDEN = ["fetch(", "XMLHttpRequest", "WebSocket", "EventSource",
                 "127.0.0.1", "localhost:"]
+# 车道实测的上游字段：whisper 要 `response_format=srt` 才回 x-subrip，文件字段名叫 `file`。
+# 外壳不许把这两个词写死在自己的源码里 —— 从这张表读。
+MULTIPART_FIELD = {"字幕": "file"}
+REQUEST_ADDENDA = {"字幕": {"response_format": "srt"}}
 
 # 生命周期是**我们的决定**，理由必须能指回上游事实或验收条款。
 LIFECYCLE = {
@@ -186,6 +190,12 @@ def build(plan: dict | None = None, choice: dict | None = None,
                 "asset_dir": f"<data>/runtime/{os_label}/{engine}/{version_dir(vbody['pinned'])}/{asset_stem(asset)}",
                 "backends": backends(choice, engine, os_label),
             }
+        req = dict(spec.get("request") or {})
+        if cap in MULTIPART_FIELD and req.get("multipart_field") != MULTIPART_FIELD[cap]:
+            bad.append(f"{cap}: 上游的文件字段叫 {MULTIPART_FIELD[cap]!r}，"
+                       f"launch-plan 写的是 {req.get('multipart_field')!r}")
+        if cap in REQUEST_ADDENDA:
+            req["extra_fields"] = dict(REQUEST_ADDENDA[cap])
         caps[cap] = {
             "engine": engine, "mode": spec["mode"], "bind": bind if spec["mode"] == "server" else None,
             "auth": {"mode": "api-key" if has_key else "none",
@@ -199,7 +209,7 @@ def build(plan: dict | None = None, choice: dict | None = None,
             "lifecycle": life,
             "install_stage": spec.get("install_stage"),
             "readiness": spec.get("readiness"),
-            "request": spec.get("request"),
+            "request": req or None,
             "version": {"pinned": vbody["pinned"],
                         "oldest_verifiable": vbody.get("oldest_verifiable_tag"),
                         "verifiable_count": len(vbody.get("verifiable_tags") or [])},
@@ -280,6 +290,8 @@ def selftest() -> int:
         pl["capabilities"]["字幕"]["engine_auth"]["engine_supports_api_key"] = True
 
     expect_red("whisper 被写成有钥匙", whisper_key)
+    expect_red("whisper 的文件字段被改名",
+               lambda pl, *_: pl["capabilities"]["字幕"]["request"].update(multipart_field="audio"))
     expect_red("llama 丢了 CORS",
                lambda pl, *_: pl["capabilities"]["对话"].update(cors=None))
     expect_red("llama 的默认档不在钉住的 release 里",

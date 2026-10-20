@@ -131,6 +131,9 @@
      "whisper-inference-route",
      "ws-file-field"
     ],
+    "extra_fields": {
+     "response_format": "srt"
+    },
     "method": "POST",
     "multipart_field": "file",
     "path": "/inference"

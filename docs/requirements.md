@@ -98,7 +98,7 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
 
 ## 验收标准（在当前唯一可用验证手段 = GitHub Actions 下）
 
-1. `ci.yml`：799 个单测绿（重数：`python -W error::ResourceWarning -m unittest discover -s tests
+1. `ci.yml`：810 个单测绿（重数：`python -W error::ResourceWarning -m unittest discover -s tests
    -p "test_*.py"`；按文件数就 `python -m unittest tests.<模块名>`。2026-10-20 实测逐文件：
    `test_yaml_gate.py` 闸门自己 14、`test_lane_argv.py` 车道 ↔ 启动表一致（含 15 个 workflow 文本变异）10、
    `test_sideload.py` sideload 按内容认领（6 条源码变异体 + 三个真上游文件）22、
@@ -106,7 +106,8 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
    `test_backend_choice.py` 换档表（12 条源码变异体 × 16 条探针，输入是三份已钉产物）25、
    `test_runtime_parity.py` server 在场表（11 条源码变异体 × 15 条探针 + 捕获夹具字节复核）21、
    `test_runtime_versions.py` runtime 版本轴（18 条源码变异体 × 24 条探针 + 窗口元数据夹具）21、
-   `test_shell_contract.py` 外壳合同（12 条源码变异体 × 23 条探针，输入是五张已钉产物）16、
+   `test_shell_contract.py` 外壳合同（13 条源码变异体 × 23 条探针，输入是五张已钉产物）17、
+   `test_shell_source.py` 外壳源码结构闸门（7 条源码变异体 + 2 条 UI 负控、Rust 分隔符平衡）10、
    `test_toolbelt_pins.py` 工具带钉表 14、
    `test_catalog_snapshot.py` 目录快照与侧表 16、`test_citation_check.py` 出处闸门 22、
    `test_ocr_build_surface.py` OCR 依赖面 15、`test_file_index.py` 下载层五种状态与首启队列 35、
@@ -160,7 +161,7 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
    产物里却是 `Steps: 3`/256x256，才能证明参数是从请求体吃进去的）。
    OCR 没有服务形态可测（见"技术前提"第 4 条的例外说明）。
    但覆盖度说的是**车道存在**，不是跑过 —— 跑过与否要看 Actions 的真实记录，目前为零。
-5. **车道里的 Python 片段要真编译**：`yaml_gate.py` 现在把三条 workflow 里的每段 `<<'PY'` 抽出来
+5. **车道里的 Python 片段要真编译**：`yaml_gate.py` 现在把四条 workflow 里的每段 `<<'PY'` 抽出来
    `compile()`（本轮 17 段；`python tools/yaml_gate.py` 自己会打印这个数，别信文档里的静态值），
    并验过它会红 —— 掺一段缩进错的 PY 进去，它按
    `文件:job#步骤 第N段` 报出语法错。这个能力是被我上一次写的车道逼出来的：
@@ -217,7 +218,7 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
    的环境，同一行的 `"$FOO"` 由当前 shell 展开，`set -u` 下确实未定义（这条是写完判据才发现自己
    原来的"对照用例"预期错了，判据比对照对）。
    证过它承重：把守卫去掉（临时副本，不动工作树），闸门红在第 5 行点名 `$LD_LIBRARY_PATH`。
-9. **语法这一层交给真解析器，但先验证解析器本身**：`tools/bash_gate.py` 把三条 workflow 的每一段
+9. **语法这一层交给真解析器，但先验证解析器本身**：`tools/bash_gate.py` 把四条 workflow 的每一段
    `run:` 写进临时文件跑 `bash -n`（只解析，绝不执行）。2026-10-20 实测覆盖 53 段、0 问。
    这条工具是被一个假结论逼出来的：本机 PATH 上的 `bash` 是 WSL 的占位程序，它对**任何**文件都返回
    非 0 并吐一段 UTF-16 的"未安装"提示 —— 第一遍跑出的是"42/42 步骤全部语法错"，看着像查得很严，
@@ -315,7 +316,7 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     （留着就等于把二次解包推给用户首启）。同名不同目录的成员**不许静默覆盖**，
     要点名进排除表 —— 覆盖会让"装进去的文件"与"清单里的文件"不是同一份。
     离线对照 10 条（合成 zip + 合成 tar.gz，含 digest 不符与下载失败两条），
-    闸门现在同时解析三条 workflow（17 段 heredoc PY；重数：`python3 tools/yaml_gate.py` 的
+    闸门现在同时解析四条 workflow（17 段 heredoc PY；重数：`python3 tools/yaml_gate.py` 的
     "编译了 N 段"那行）。
     车道仍 0 次执行，所以这一条给的是"出包这一步有路、有判据、有清单格式"，不是"包已经出出来"。
 16. **"只能靠 GitHub Actions 出包"这句本身要被验，不能当审美前提**：拆开四问，答案全部来自
@@ -810,9 +811,26 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     取自 `ocr-build-surface.json` 的 `ref`（`84817f58`），而不是另写一个常量。
     **没做的照实写**：UI 源码还不存在，所以 `ui_checked=false`；OCR 的二进制由 CI 现编，
     出包车道还没把它写进 `payload-manifest.json`，这条缺口以 `ocr-manifest` 记在产物里，
-    不删也不当成已覆盖。12 条源码变异体 × 23 条探针（每条判据都能被单独改坏：常驻不带钥匙、
+    不删也不当成已覆盖。13 条源码变异体 × 23 条探针（每条判据都能被单独改坏：常驻不带钥匙、
     llama 丢 CORS、OCR ref 不是 commit、默认档不在 release、digest 对不上、check 不看鉴权/缺口、
-    runtime 目录不写版本……），16 条单测，CI 静态门禁跑 `--selftest` 与 `--check`。
+    runtime 目录不写版本、whisper 的多段字段被改名……），17 条单测，CI 静态门禁跑 `--selftest` 与 `--check`。
+32. **这张合同的每一条都有代码了，但代码一行都还没被编译过**：`shell/core`（Tauri-free，可离线测）
+    把上面 ①–④ 写成可执行逻辑 ——
+    ① 生产代码里只有一次 `127.0.0.1:0` 探测，绑定后立刻 `drop`，不监听端口；
+    ② token 字节数读合同、由 OS 随机数生成，只进请求头与（llama 的）argv，不进环境变量；
+    whisper/sd 只能是 `on_demand` 且 300 s 空闲回收，调用时会话先验 `inputs` 文件在场；
+    ③ `ensure_running`/`ocr` 都必须先过 `verify_payload`（清单存在、OS 相符、逐文件字节+sha256）
+    才轮到 `spawn`，且全文只有一处 `Command::new(&plan.program)`；
+    ④ argv 的占位符（`{bin}/{port}/{token}`）与模型路径全部由合同 + 启动表现渲染，
+    生产源码里不许出现引擎名、引擎旗标或引擎端口（`tools/shell_source.py` 按词表扫，连
+    `llama|whisper|sd-server|oar-ocr|ggml` 都算）；HTTP 层自己实现（chunked/trailers/512 MiB 上限）、
+    multipart、base64；对话请求强制 `stream=false`，字幕的 `file` 字段与 `response_format=srt`
+    都从合同读，生图的 `poll_url` 只许回环地址。
+    **证据的边界**：`.github/workflows/shell.yml` 已写（3 OS 跑 `cargo test --all-targets`，
+    ubuntu 上传 `shell-core-Cargo.lock`），但仓库仍是 private 且 runner 未解锁（任务 #19），
+    所以 Rust 编译与单测**至今 0 次执行**，`Cargo.lock` 也还没提交；离线能证的只有
+    `python tools/shell_source.py --check`（问题 0 条）、Rust 分隔符平衡与那 10 条 Python 单测。
+    这次不把"写了"说成"过了"。
 
 ## 车道判据的出处（全部按**钉住的那个 ref** 核过，不是按 HEAD 记的）
 
@@ -845,8 +863,8 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
 判据本身也不能只靠"看上去对"，而且**这几个计数不许只活在散文里**：
 `tests/test_lane_replay_report.py` 把它们钉成断言，重数只要一条命令
 （`python -W error::ResourceWarning -m unittest tests.test_lane_replay_report -v`）。
-2026-10-20 实测：三条 workflow 合起来 **17 段** `<<'PY'`（`engine-live.yml` 14、`ci.yml` 2、
-`package.yml` 1；`yaml_gate.py` 会打同一份编译计数，段数打 0 就意味着闸门什么都没查），
+2026-10-20 实测：四条 workflow 合起来 **17 段** `<<'PY'`（`engine-live.yml` 14、`ci.yml` 2、
+`package.yml` 1、`shell.yml` 0；`yaml_gate.py` 会打同一份编译计数，段数打 0 就意味着闸门什么都没查），
 其中 **12 段含判据**（认 `check(` / `SystemExit` / `assert` / `sys.exit(` —— 最后这个是这轮补的：
 `ocr-proof` 那段工具链版本闸就是靠 `sys.exit("工具链低于…")` 红的，只找前三个会漏），
 5 段是取数与打印。被本地预跑引用到的是 **8 个 (job, 步骤名) 组合**：
