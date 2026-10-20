@@ -1,0 +1,21 @@
+[package]
+name = "local-ai-studio-shell"
+version = "0.1.0"
+edition = "2021"
+publish = false
+description = "Local AI Studio 的 Tauri 外壳：只做 IPC，不监听端口"
+
+[lib]
+name = "local_ai_studio_shell_lib"
+
+[build-dependencies]
+tauri-build = { version = "=2.7.3", features = [] }
+
+[dependencies]
+local-ai-studio-core = { path = "../core" }
+tauri = { version = "=2.12.4", features = [] }
+serde = { version = "=1.0.229", features = ["derive"] }
+serde_json = "=1.0.154"
+
+[features]
+custom-protocol = ["tauri/custom-protocol"]

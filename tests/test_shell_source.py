@@ -18,6 +18,7 @@ sys.path.insert(0, os.path.join(ROOT, "tools"))
 import shell_source as gate  # noqa: E402
 
 CORE = os.path.join(ROOT, "shell", "core", "src")
+APP = os.path.join(ROOT, "shell", "src-tauri", "src")
 
 
 class TestGate(unittest.TestCase):
@@ -69,6 +70,13 @@ class TestGate(unittest.TestCase):
         missing = os.path.join(ROOT, "shell", "definitely-not-a-ui")
         self.assertEqual(gate.ui_scan(missing), [])
 
+    def test_app_layer_is_green_and_a_hardcoded_engine_is_red(self) -> None:
+        self.assertEqual(gate.app_scan(), [])
+        with tempfile.TemporaryDirectory() as d:
+            with open(os.path.join(d, "bad.rs"), "w", encoding="utf-8") as fh:
+                fh.write('pub const E: &str = "whisper";\n')
+            self.assertTrue(gate.app_scan(d))
+
     def test_every_declared_module_has_a_file(self) -> None:
         lib = open(os.path.join(CORE, "lib.rs"), encoding="utf-8").read()
         declared = set(gate.re.findall(r"^pub mod (\w+);", lib, gate.re.M))
@@ -115,8 +123,9 @@ class TestGate(unittest.TestCase):
                     i += 1
             return "".join(out)
 
-        for path in glob.glob(os.path.join(CORE, "*.rs")):
-            body = stripped(open(path, encoding="utf-8").read())
+        for path in glob.glob(os.path.join(CORE, "*.rs")) + glob.glob(os.path.join(APP, "*.rs")):
+            with open(path, encoding="utf-8") as fh:
+                body = stripped(fh.read())
             for op, cl in ("{}", "()", "[]"):
                 depth = low = 0
                 for c in body:

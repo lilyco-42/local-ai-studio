@@ -10,8 +10,8 @@
   ④ runtime 目录：`<data>/runtime/<os>/<engine>/<version>/<asset-stem>/`，
      version 取 `runtime-versions` 的钉值，换后端只是换 asset 目录，回退只是换 version。
 
-三条验收里 ① 的 UI 那一半要等 UI 源码存在后才能静态扫；在此之前产物里如实写
-`ui_checked: false`，不许把"规则写下来了"说成"扫过了"。
+三条验收里 ① 的 UI 那一半由 `--ui`（默认 `shell/ui`）静态扫描：真的扫了哪个目录，
+产物就写哪个目录；不传或目录不存在时如实写 `ui_checked: false`，不许把"规则写下来了"说成"扫过了"。
 """
 from __future__ import annotations
 
@@ -216,6 +216,13 @@ def build(plan: dict | None = None, choice: dict | None = None,
             "os": by_os,
         }
     ui_checked = bool(ui_dir) and os.path.isdir(ui_dir)
+    ui_label = ""
+    if ui_dir:
+        try:
+            ui_label = os.path.relpath(ui_dir, ROOT)
+        except ValueError:                       # 另一块盘（测试用临时目录）
+            ui_label = ui_dir
+        ui_label = os.path.normpath(ui_label).replace(os.sep, "/")
     doc = {
         "schema": 1,
         "rule": {
@@ -230,7 +237,7 @@ def build(plan: dict | None = None, choice: dict | None = None,
             "lifecycle": f"没有引擎鉴权的能力不许常驻：on_demand 且 idle_timeout_secs <= {IDLE_MAX}；关窗即停",
         },
         "ui_checked": ui_checked,
-        "ui_dir": ui_dir or None,
+        "ui_dir": ui_label or None,
         "capabilities": caps,
         "gaps": [
             {"id": "ocr-manifest",
@@ -251,6 +258,8 @@ def check(committed: dict, fresh: dict) -> list[str]:
         bad.append(f"合同口径变了：{diff} —— 外壳实现与验收证据要一起重看")
     if committed.get("ui_checked") != fresh.get("ui_checked"):
         bad.append(f"UI 扫描状态从 {committed.get('ui_checked')} 变成 {fresh.get('ui_checked')}")
+    if committed.get("ui_dir") != fresh.get("ui_dir"):
+        bad.append(f"UI 扫描位置从 {committed.get('ui_dir')!r} 变成 {fresh.get('ui_dir')!r}")
     for cap, spec in fresh["capabilities"].items():
         old = (committed.get("capabilities") or {}).get(cap)
         if not old:
@@ -309,7 +318,7 @@ def selftest() -> int:
     if base["capabilities"]["文字识别"]["version"]["pinned"] != ocr["ref"]:
         bad.append("OCR 的 runtime 目录没钉在 ocr-build-surface.json 的 ref 上")
     if base["ui_checked"] is not False:
-        bad.append("UI 还没写就把 ui_checked 说成真了")
+        bad.append("不传 ui_dir 时不能把 ui_checked 说成真了（扫描状态要反映真的扫了哪里）")
     for x in bad:
         print("  BAD:", x)
     print("BAD 数量 =", len(bad))
@@ -320,7 +329,8 @@ def main(argv: list[str]) -> int:
     ap = argparse.ArgumentParser(prog="shell_contract.py")
     ap.add_argument("--selftest", action="store_true")
     ap.add_argument("--check", action="store_true")
-    ap.add_argument("--ui", default="", help="UI 源码目录；不存在就如实标 ui_checked=false")
+    ap.add_argument("--ui", default=os.path.join(ROOT, "shell", "ui"),
+                    help="UI 源码目录；不存在就如实标 ui_checked=false")
     ap.add_argument("--out", default=OUT)
     a = ap.parse_args(argv)
     if a.selftest:

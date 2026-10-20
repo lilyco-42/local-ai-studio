@@ -35,3 +35,38 @@ jobs:
           name: shell-core-Cargo.lock
           path: shell/core/Cargo.lock
           if-no-files-found: error
+
+  app:
+    # 外壳层真的要编 Tauri：Linux 缺 WebKitGTK 连 build script 都过不去，
+    # Windows 的 tauri-build 会把 icons/icon.ico 嵌进资源段（缺了直接报错）。
+    # 仍然不起窗口、不起引擎、不联网；三档只证明类型与 Tauri API 用法编得过。
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+        working-directory: shell/src-tauri
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4.4.0
+      - name: Linux 的 WebKitGTK 依赖
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev
+      - name: 工具链是镜像自带的
+        run: |
+          rustc --version
+          cargo --version
+      - name: 单测（编 Tauri 用法与 8 条 IPC 命令，不跑窗口）
+        run: cargo test --all-targets
+      - name: 把首轮解析出的 Cargo.lock 留档（Tauri 依赖图目前未钉）
+        if: matrix.os == 'ubuntu-latest'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4.6.2
+        with:
+          name: shell-app-Cargo.lock
+          path: shell/src-tauri/Cargo.lock
+          if-no-files-found: error

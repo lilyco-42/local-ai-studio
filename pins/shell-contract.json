@@ -790,6 +790,6 @@
   "version_sanitize": "[^A-Za-z0-9._-] → _"
  },
  "schema": 1,
- "ui_checked": false,
- "ui_dir": null
+ "ui_checked": true,
+ "ui_dir": "shell/ui"
 }

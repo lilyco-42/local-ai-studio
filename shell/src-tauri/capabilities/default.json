@@ -1,0 +1,7 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "主窗口只需要核心 IPC 权限；引擎 HTTP 由 Rust 侧发，前端没有网络能力",
+  "windows": ["main"],
+  "permissions": ["core:default"]
+}

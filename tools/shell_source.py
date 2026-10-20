@@ -5,12 +5,13 @@
 的一句规则：
 
   * 合同是编译期嵌入的（`include_str!` 指向那张提交在仓库里的表），不是运行时去找；
-  * 生产代码里没有引擎名/旗标/默认端口 —— 这些只许出现在表里；
+  * 生产代码里没有引擎名/旗标/默认端口 —— 这些只许出现在表里（core 与 src-tauri 两层都扫）；
   * 只起一个进程：`Command::new` 的参数只能来自 `LaunchPlan`；
   * 起之前先校验载荷：`verify_payload` 必须排在 `spawn` 前面（server 与 OCR 两条路）；
   * 外壳自己不监听：`TcpListener::bind` 只能出现在取临时端口的函数里，且端口是 0；
   * token 只在内存里：启动/日志路径上不许出现它；
-  * UI 存在时，不许出现 fetch/XHR/WS/硬编码回环地址。
+  * UI 存在时，不许出现 fetch/XHR/WS/硬编码回环地址；
+  * UI 调用的每条 IPC 命令都真的在 `generate_handler!` 里，且命令定义与注册两个集合一致。
 
 `#[cfg(test)]` 之后的部分不算生产代码 —— 测试里点名 llama/oar 是故意的。
 """
@@ -24,6 +25,7 @@ import sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, ".."))
 CORE = os.path.join(ROOT, "shell", "core", "src")
+APP = os.path.join(ROOT, "shell", "src-tauri", "src")
 CONTRACT = os.path.join(ROOT, "pins", "shell-contract.json")
 
 ENGINE_WORDS = re.compile(r"(?i)\b(llama|whisper|sd-server|sd_server|oar-ocr|qwen|ggml)\b")
@@ -34,6 +36,11 @@ TEST_CUT = "\n#[cfg(test)]"
 UI_FORBIDDEN = ["fetch(", "XMLHttpRequest", "WebSocket", "EventSource",
                 "127.0.0.1", "localhost:"]
 UI_SUFFIXES = (".js", ".mjs", ".html", ".htm", ".jsx", ".ts", ".tsx")
+
+INVOKE = re.compile(r"invoke\(\s*['\"]([A-Za-z_][A-Za-z0-9_]*)['\"]")
+REGISTERED = re.compile(r"commands::([A-Za-z_][A-Za-z0-9_]*)")
+COMMAND_FN = re.compile(
+    r"#\[tauri::command\]\s*(?:pub\s+)?(?:async\s+)?fn\s+([A-Za-z_][A-Za-z0-9_]*)")
 
 
 def production(text: str) -> str:
@@ -128,6 +135,59 @@ def scan(core: str = CORE, contract: str = CONTRACT) -> list[str]:
     return bad
 
 
+def app_scan(app_dir: str = APP) -> list[str]:
+    """Tauri 包装层也不许把引擎名/旗标/端口抄进来 —— 它只能调 core 与合同。"""
+    if not os.path.isdir(app_dir):
+        return []
+    bad = []
+    for name in sorted(os.listdir(app_dir)):
+        if not name.endswith(".rs"):
+            continue
+        with open(os.path.join(app_dir, name), encoding="utf-8") as fh:
+            text = production(fh.read())
+        hits = [("引擎名", m.group(0)) for m in ENGINE_WORDS.finditer(text)]
+        hits += [("引擎旗标", m.group(0)) for m in FLAGS.finditer(text)]
+        hits += [("端口", m.group(0)) for m in ENGINE_PORTS.finditer(text)]
+        for kind, token in hits:
+            bad.append(f"src-tauri/{name}: 包装层写死了{kind} {token!r}")
+    return bad
+
+
+def ipc_scan(app_dir: str = APP, ui_dir: str = "") -> list[str]:
+    """UI 能点的每个后端，必须真的挂在 generate_handler! 上。
+
+    半死的界面（按钮在、命令没注册）在这个仓库里已经出现过一次；只看单边
+    集合发现不了，所以命令定义、注册、调用三张名单都要对。
+    """
+    if not ui_dir or not os.path.isdir(ui_dir) or not os.path.isdir(app_dir):
+        return []
+    lib_path = os.path.join(app_dir, "lib.rs")
+    cmd_path = os.path.join(app_dir, "commands.rs")
+    if not (os.path.isfile(lib_path) and os.path.isfile(cmd_path)):
+        return [f"{app_dir} 里缺 lib.rs 或 commands.rs"]
+    with open(lib_path, encoding="utf-8") as fh:
+        lib = production(fh.read())
+    with open(cmd_path, encoding="utf-8") as fh:
+        cmds = production(fh.read())
+    registered = set(REGISTERED.findall(lib))
+    defined = set(COMMAND_FN.findall(cmds))
+    invoked: set[str] = set()
+    for base, _dirs, files in os.walk(ui_dir):
+        for name in files:
+            if not name.endswith(UI_SUFFIXES):
+                continue
+            with open(os.path.join(base, name), encoding="utf-8", errors="replace") as fh:
+                invoked |= set(INVOKE.findall(fh.read()))
+    bad = []
+    if not invoked:
+        bad.append("UI 里一条 IPC 调用都没找到（扫描位置错了？）")
+    for name in sorted(defined - registered):
+        bad.append(f"命令 {name} 定义了却没注册进 generate_handler!")
+    for name in sorted(invoked - registered):
+        bad.append(f"UI 调用了 {name}，但外壳没有注册这条命令")
+    return bad
+
+
 def ui_scan(ui_dir: str) -> list[str]:
     if not ui_dir or not os.path.isdir(ui_dir):
         return []
@@ -205,6 +265,35 @@ def selftest() -> int:
                 fh.write(f"const x = \"{body}\";\n")
             if not ui_scan(d):
                 bad.append(f"负向对照「UI 出现 {label}」没被抓住")
+    import tempfile
+    with tempfile.TemporaryDirectory() as d:
+        with open(os.path.join(d, "bad.rs"), "w", encoding="utf-8") as fh:
+            fh.write("pub const X: &str = \"--api-key\";\n")
+        if not app_scan(d):
+            bad.append("负向对照「包装层写死引擎旗标」没被抓住")
+    with tempfile.TemporaryDirectory() as d:
+        app = os.path.join(d, "app")
+        ui = os.path.join(d, "ui")
+        os.makedirs(app)
+        os.makedirs(ui)
+        with open(os.path.join(app, "lib.rs"), "w", encoding="utf-8") as fh:
+            fh.write("fn run() { .invoke_handler(generate_handler![commands::a,]); }\n")
+        with open(os.path.join(app, "commands.rs"), "w", encoding="utf-8") as fh:
+            fh.write("#[tauri::command]\npub fn a() {}\n")
+        ui_file = os.path.join(ui, "m.js")
+        with open(ui_file, "w", encoding="utf-8") as fh:
+            fh.write("invoke('a');\n")
+        green = ipc_scan(app, ui)
+        if green:
+            bad.append("正向对照「UI 只调已注册命令」被误报: " + "; ".join(green))
+        with open(ui_file, "w", encoding="utf-8") as fh:
+            fh.write("invoke('a'); invoke('b');\n")
+        if not ipc_scan(app, ui):
+            bad.append("负向对照「UI 调用未注册命令」没被抓住")
+        with open(os.path.join(app, "commands.rs"), "a", encoding="utf-8") as fh:
+            fh.write("#[tauri::command]\npub fn c() {}\n")
+        if not any("命令 c 定义" in x for x in ipc_scan(app, ui)):
+            bad.append("负向对照「命令定义了没注册」没被抓住")
     for x in bad:
         print("  BAD:", x)
     print("BAD 数量 =", len(bad))
@@ -219,7 +308,7 @@ def main(argv: list[str]) -> int:
     a = ap.parse_args(argv)
     if a.selftest:
         return selftest()
-    bad = scan() + ui_scan(a.ui)
+    bad = scan() + app_scan() + ipc_scan(ui_dir=a.ui) + ui_scan(a.ui)
     for x in bad:
         print("BAD:", x)
     print(f"外壳源码门禁：问题 {len(bad)} 条；UI 目录存在 = {os.path.isdir(a.ui)}")

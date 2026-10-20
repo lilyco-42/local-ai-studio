@@ -98,7 +98,7 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
 
 ## 验收标准（在当前唯一可用验证手段 = GitHub Actions 下）
 
-1. `ci.yml`：810 个单测绿（重数：`python -W error::ResourceWarning -m unittest discover -s tests
+1. `ci.yml`：812 个单测绿（重数：`python -W error::ResourceWarning -m unittest discover -s tests
    -p "test_*.py"`；按文件数就 `python -m unittest tests.<模块名>`。2026-10-20 实测逐文件：
    `test_yaml_gate.py` 闸门自己 14、`test_lane_argv.py` 车道 ↔ 启动表一致（含 15 个 workflow 文本变异）10、
    `test_sideload.py` sideload 按内容认领（6 条源码变异体 + 三个真上游文件）22、
@@ -106,8 +106,9 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
    `test_backend_choice.py` 换档表（12 条源码变异体 × 16 条探针，输入是三份已钉产物）25、
    `test_runtime_parity.py` server 在场表（11 条源码变异体 × 15 条探针 + 捕获夹具字节复核）21、
    `test_runtime_versions.py` runtime 版本轴（18 条源码变异体 × 24 条探针 + 窗口元数据夹具）21、
-   `test_shell_contract.py` 外壳合同（13 条源码变异体 × 23 条探针，输入是五张已钉产物）17、
-   `test_shell_source.py` 外壳源码结构闸门（7 条源码变异体 + 2 条 UI 负控、Rust 分隔符平衡）10、
+   `test_shell_contract.py` 外壳合同（14 条源码变异体 × 24 条探针，输入是五张已钉产物）18、
+   `test_shell_source.py` 外壳源码结构闸门（7 条核心变异体 + 2 条 UI 负控 + 1 条包装层负控 +
+   3 条 IPC 对表、Rust 分隔符平衡）11、
    `test_toolbelt_pins.py` 工具带钉表 14、
    `test_catalog_snapshot.py` 目录快照与侧表 16、`test_citation_check.py` 出处闸门 22、
    `test_ocr_build_surface.py` OCR 依赖面 15、`test_file_index.py` 下载层五种状态与首启队列 35、
@@ -809,11 +810,14 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     默认档不是抄来的：三个 server 能力 × 各自 OS 格 = **8 颗**，逐颗与 `payload-plan` 的行、
     钉住 release 的产物名与 digest 三方对表；后端选项逐格来自 `backend-choice`；OCR 的版本
     取自 `ocr-build-surface.json` 的 `ref`（`84817f58`），而不是另写一个常量。
-    **没做的照实写**：UI 源码还不存在，所以 `ui_checked=false`；OCR 的二进制由 CI 现编，
+    **没做的照实写**：`shell/ui` 已经存在，所以产物记 `ui_checked=true`、`ui_dir="shell/ui"`，
+    扫描器会拒绝 fetch/XHR/WS/硬编码回环地址，并核对 UI 调用的每条 IPC 都注册在
+    `generate_handler!` 里；OCR 的二进制由 CI 现编，
     出包车道还没把它写进 `payload-manifest.json`，这条缺口以 `ocr-manifest` 记在产物里，
-    不删也不当成已覆盖。13 条源码变异体 × 23 条探针（每条判据都能被单独改坏：常驻不带钥匙、
-    llama 丢 CORS、OCR ref 不是 commit、默认档不在 release、digest 对不上、check 不看鉴权/缺口、
-    runtime 目录不写版本、whisper 的多段字段被改名……），17 条单测，CI 静态门禁跑 `--selftest` 与 `--check`。
+    不删也不当成已覆盖。14 条源码变异体 × 24 条探针（每条判据都能被单独改坏：常驻不带钥匙、
+    llama 丢 CORS、OCR ref 不是 commit、默认档不在 release、digest 对不上、check 不看鉴权/缺口/
+    UI 扫描位置、runtime 目录不写版本、whisper 的多段字段被改名……），18 条单测，CI 静态门禁跑
+    `--selftest` 与 `--check`。
 32. **这张合同的每一条都有代码了，但代码一行都还没被编译过**：`shell/core`（Tauri-free，可离线测）
     把上面 ①–④ 写成可执行逻辑 ——
     ① 生产代码里只有一次 `127.0.0.1:0` 探测，绑定后立刻 `drop`，不监听端口；
@@ -826,10 +830,16 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     `llama|whisper|sd-server|oar-ocr|ggml` 都算）；HTTP 层自己实现（chunked/trailers/512 MiB 上限）、
     multipart、base64；对话请求强制 `stream=false`，字幕的 `file` 字段与 `response_format=srt`
     都从合同读，生图的 `poll_url` 只许回环地址。
-    **证据的边界**：`.github/workflows/shell.yml` 已写（3 OS 跑 `cargo test --all-targets`，
-    ubuntu 上传 `shell-core-Cargo.lock`），但仓库仍是 private 且 runner 未解锁（任务 #19），
-    所以 Rust 编译与单测**至今 0 次执行**，`Cargo.lock` 也还没提交；离线能证的只有
-    `python tools/shell_source.py --check`（问题 0 条）、Rust 分隔符平衡与那 10 条 Python 单测。
+    `shell/src-tauri`（Tauri 2）只做装配：`AppState` 持有 supervisor 与数据根，8 条 IPC 命令
+    （status / data_root / start_engine / stop_engine / chat / transcribe / image / ocr）全部把
+    阻塞调用丢进 `spawn_blocking`，返回结构一律 `serde`；UI（`shell/ui`）只调
+    `window.__TAURI__.core.invoke`，没有网络 API，中英两套文案；`icons/icon.ico` 是
+    Windows 资源段要的那一颗（`tauri-build` 缺它会直接报错，而不是跳过）。
+    **证据的边界**：`.github/workflows/shell.yml` 现在是两个 job —— `core` 与 `app` 各在 3 OS 跑
+    `cargo test --all-targets`（`app` 在 Ubuntu 先装 WebKitGTK；两个 job 都上传首轮的 `Cargo.lock`），
+    但仓库仍是 private 且 runner 未解锁（任务 #19），
+    所以两个 crate 的编译与单测**至今 0 次执行**，`Cargo.lock` 也还没提交；离线能证的只有
+    `python tools/shell_source.py --check`（问题 0 条）、Rust 分隔符平衡与那 11 条 Python 单测。
     这次不把"写了"说成"过了"。
 
 ## 车道判据的出处（全部按**钉住的那个 ref** 核过，不是按 HEAD 记的）

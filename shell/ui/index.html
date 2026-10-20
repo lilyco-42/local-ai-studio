@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Local AI Studio</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="boot" class="boot" hidden data-i18n="bootError"></div>
+
+  <header class="top">
+    <div class="brand">
+      <span class="dot" aria-hidden="true"></span>
+      <strong data-i18n="appName"></strong>
+      <span class="tagline" data-i18n="tagline"></span>
+    </div>
+    <div class="top-right">
+      <span id="engine-chip" class="chip">…</span>
+      <button id="lang" class="ghost" type="button" aria-label="language">EN</button>
+    </div>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button class="tab active" type="button" data-tab="chat" data-i18n="tabChat"></button>
+    <button class="tab" type="button" data-tab="subtitle" data-i18n="tabSubtitle"></button>
+    <button class="tab" type="button" data-tab="ocr" data-i18n="tabOcr"></button>
+    <button class="tab" type="button" data-tab="image" data-i18n="tabImage"></button>
+  </nav>
+
+  <div id="enginebar" class="enginebar">
+    <span id="engine-state" class="state"></span>
+    <button id="engine-start" class="primary" type="button" data-i18n="startEngine"></button>
+    <button id="engine-stop" class="ghost" type="button" data-i18n="stopEngine"></button>
+  </div>
+
+  <main>
+    <section id="panel-chat" class="panel active">
+      <div id="messages" class="messages" aria-live="polite"></div>
+      <div class="composer">
+        <textarea id="chat-input" rows="3" data-i18n-ph="chatPlaceholder"></textarea>
+        <button id="chat-send" class="primary" type="button" data-i18n="send"></button>
+      </div>
+    </section>
+
+    <section id="panel-subtitle" class="panel">
+      <div class="row">
+        <label class="field grow">
+          <span data-i18n="subtitlePick"></span>
+          <input id="sub-file" type="file" accept="audio/*,video/*">
+        </label>
+        <label class="field narrow">
+          <span data-i18n="subtitleLang"></span>
+          <select id="sub-lang">
+            <option value="">auto</option>
+            <option value="zh">中文</option>
+            <option value="en">English</option>
+            <option value="ja">日本語</option>
+            <option value="ko">한국어</option>
+          </select>
+        </label>
+        <button id="sub-run" class="primary" type="button" data-i18n="transcribe"></button>
+      </div>
+      <pre id="sub-out" class="out" hidden></pre>
+    </section>
+
+    <section id="panel-ocr" class="panel">
+      <div class="grid4">
+        <label class="field">
+          <span data-i18n="ocrImage"></span>
+          <input id="ocr-image" type="file" accept="image/*">
+        </label>
+        <label class="field">
+          <span data-i18n="ocrDet"></span>
+          <input id="ocr-det" type="file">
+        </label>
+        <label class="field">
+          <span data-i18n="ocrRec"></span>
+          <input id="ocr-rec" type="file">
+        </label>
+        <label class="field">
+          <span data-i18n="ocrDict"></span>
+          <input id="ocr-dict" type="file">
+        </label>
+      </div>
+      <div class="row">
+        <button id="ocr-run" class="primary" type="button" data-i18n="runOcr"></button>
+        <span class="note" data-i18n="ocrHint"></span>
+      </div>
+      <div id="ocr-out" class="outlist"></div>
+    </section>
+
+    <section id="panel-image" class="panel">
+      <label class="field">
+        <span data-i18n="imagePrompt"></span>
+        <textarea id="img-prompt" rows="3"></textarea>
+      </label>
+      <div class="row">
+        <label class="field tiny">
+          <span data-i18n="steps"></span>
+          <input id="img-steps" type="number" min="1" max="20" value="3">
+        </label>
+        <label class="field tiny">
+          <span data-i18n="size"></span>
+          <select id="img-size">
+            <option value="256">256×256</option>
+            <option value="512">512×512</option>
+          </select>
+        </label>
+        <button id="img-run" class="primary" type="button" data-i18n="generate"></button>
+      </div>
+      <figure class="figure">
+        <img id="img-out" alt="" hidden>
+        <figcaption id="img-note" class="note"></figcaption>
+      </figure>
+    </section>
+  </main>
+
+  <footer>
+    <span data-i18n="dataDir"></span>
+    <code id="data-root">…</code>
+    <span class="note" data-i18n="payloadHint"></span>
+  </footer>
+
+  <script src="main.js"></script>
+</body>
+</html>

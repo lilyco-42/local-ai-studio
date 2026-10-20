@@ -142,7 +142,7 @@ fn log_tail(path: &Path, max_bytes: usize) -> String {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, serde::Serialize)]
 pub struct Status {
     pub capability: String,
     pub engine: String,

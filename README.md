@@ -295,7 +295,7 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   漂移只报不跟。现取车道用 `--live` 口径：只核对钉住那颗还在、产物没被重打包；上游又发新版
   不算红（实测抓完半小时后 llama 又发了 5 个版本 —— 按"有新版本"红会让这条道永远红）。
   重数：`python3 tools/runtime_versions.py --selftest`、`--check`。
-- `tools/shell_contract.py` + `pins/shell-contract.json`：**外壳的 Tauri 层还没写，先把它必须遵守的合同钉成表**。
+- `tools/shell_contract.py` + `pins/shell-contract.json`：**把外壳必须遵守的合同钉成表**。
   只从已提交的五张表推导（launch-plan / backend-choice / runtime-versions / payload-plan /
   ocr-build-surface），不读外壳源码：入口（外壳 0 个监听口，UI 只走 Tauri IPC）、
   鉴权（只有 llama 有 `--api-key`，token 每次现生成、只存内存）、
@@ -303,8 +303,10 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   spawn（exec 前逐文件对 `payload-manifest.json` 的 sha256）、
   runtime 目录（`<data>/runtime/<os>/<engine>/<version>/<asset-stem>/`）。
   三个 server 能力 × 各自 OS 格 = 8 颗默认档，逐颗与 payload-plan 的行、钉住 release 的产物名
-  与 digest 三方对表。**UI 源码不存在就写 `ui_checked=false`**；OCR 的二进制还没进出包清单，
-  这条缺口以 `ocr-manifest` 留在产物里。13 条源码变异体 × 23 条探针、17 条单测。
+  与 digest 三方对表。**UI 存在就真扫**：产物记 `ui_checked=true`、`ui_dir="shell/ui"`，
+  fetch/XHR/WS/硬编码回环地址一律拒绝，且 UI 调用的每条 IPC 都要挂在 `generate_handler!` 上；
+  OCR 的二进制还没进出包清单，这条缺口以 `ocr-manifest` 留在产物里。
+  14 条源码变异体 × 24 条探针、18 条单测。
   重数：`python3 tools/shell_contract.py --selftest`、`--check`。
 - `shell/core`（Rust，不依赖 Tauri）：把上面那张合同写成可测逻辑 —— 生产代码只做一次
   `127.0.0.1:0` 探测并立刻 drop（自己不监听）、token 长度读合同且只进内存、没钥匙的引擎
@@ -312,8 +314,12 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   argv 全由合同/启动表渲染；HTTP 客户端自己实现（chunked/trailers/512 MiB 上限）并带
   chat / transcribe / image / ocr 四个调用。`tools/shell_source.py` 扫生产源码：引擎名、
   引擎旗标、引擎端口一律不许出现，`Command::new` 只有一处、`TcpListener::bind` 只有一处。
-  **但它一次都没被编译过**：`shell.yml`（3 OS `cargo test --all-targets`）因仓库 private、
-  runner 未解锁而 0 次执行，`Cargo.lock` 也还没产出；离线只证了结构闸门与 10 条 Python 单测。
+  `shell/src-tauri`（Tauri 2）只做装配：`AppState` + 8 条 IPC 命令全部 `spawn_blocking`
+  调 core，`shell/ui` 只有 IPC、没有网络 API、中英两套文案；`icons/icon.ico` 是 Windows
+  资源段要的那一颗。
+  **但这些代码一次都没被编译过**：`shell.yml` 的 `core` 与 `app` 两个 job（各 3 OS
+  `cargo test --all-targets`，`app` 在 Ubuntu 先装 WebKitGTK）因仓库 private、
+  runner 未解锁而 0 次执行，`Cargo.lock` 也还没产出；离线只证了结构闸门与 11 条 Python 单测。
 - `tools/action_pins.py` + `pins/actions.json`：**出包那只手自己也要钉住**。这一轮之前三个
   workflow 里 4 个 `uses:` 全是浮动大版本 tag（`checkout@v4`、`setup-python@v5`、
   `upload-artifact@v4`、`download-artifact@v4`，共 **47 处**）—— 仓库对引擎/权重/工具带都定了

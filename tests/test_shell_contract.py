@@ -3,8 +3,8 @@
 这张表存在的理由是把"外壳还没写"与"外壳可以怎么写"分开：
   * 这里钉住的是**外壳必须遵守的约束**（llama 才有钥匙；没钥匙的 server 不许常驻；
     起的正是下的那一颗；目录里带版本），每一条都能指回上游事实或验收条款；
-  * 外壳源码里真正做了什么，等 UI/进程层存在后由 `--ui` 静态扫描回答；在那之前
-    `ui_checked` 如实为 false —— 写了规则不等于扫过了源码。
+  * 外壳 UI 源码已经存在，所以 `ui_checked` 为 true，并记录扫的是 `shell/ui`；
+    不传 `ui_dir` 时仍然必须为 false —— 写了规则不等于扫过了源码。
 
 判据必须会红：改坏四张输入里的任何一张，`build()` 都要报；改坏合同里的任何一个
 字段，`check()` 都要报。
@@ -33,6 +33,7 @@ CHOICE = os.path.join(ROOT, "pins", "backend-choice.json")
 VERSIONS = os.path.join(ROOT, "pins", "runtime-versions.json")
 PAYLOAD = os.path.join(ROOT, "pins", "payload-plan.json")
 OCR = os.path.join(ROOT, "pins", "ocr-build-surface.json")
+UI = os.path.join(ROOT, "shell", "ui")
 
 ENGINES = {"字幕": "whisper", "对话": "llama", "文字识别": "oar-ocr", "生图": "sd"}
 
@@ -49,7 +50,7 @@ def inputs() -> dict:
 
 def rebuild(ins: dict | None = None) -> tuple[dict, list[str]]:
     i = ins if ins is not None else inputs()
-    return sc.build(i["plan"], i["choice"], i["versions"], i["payload"], i["ocr"])
+    return sc.build(i["plan"], i["choice"], i["versions"], i["payload"], i["ocr"], ui_dir=UI)
 
 
 class TestArtifact(unittest.TestCase):
@@ -162,12 +163,18 @@ class TestArtifact(unittest.TestCase):
             req = caps[cap]["request"] or {}
             self.assertNotIn("extra_fields", req, cap)
 
-    def test_ui_is_not_claimed_as_checked(self) -> None:
-        doc = sc.load(ART)
-        self.assertIs(doc["ui_checked"], False)
-        self.assertIsNone(doc["ui_dir"])
+    def test_without_a_ui_dir_nothing_is_claimed(self) -> None:
+        fresh, _p = sc.build(load(PLAN), load(CHOICE), load(VERSIONS), load(PAYLOAD), load(OCR))
+        self.assertIs(fresh["ui_checked"], False)
+        self.assertIsNone(fresh["ui_dir"])
         self.assertIn("127.0.0.1", sc.UI_FORBIDDEN)
         self.assertIn("fetch(", sc.UI_FORBIDDEN)
+
+    def test_the_real_ui_dir_is_scanned_and_recorded(self) -> None:
+        doc = sc.load(ART)
+        self.assertIs(doc["ui_checked"], True)
+        self.assertEqual(doc["ui_dir"], "shell/ui")
+        self.assertTrue(os.path.isdir(UI))
 
     def test_known_gap_is_recorded_not_erased(self) -> None:
         gaps = sc.load(ART)["gaps"]
@@ -220,6 +227,9 @@ class TestSourceMutants(unittest.TestCase):
         ("check 不看缺口清单",
          '    if committed.get("gaps") != fresh.get("gaps"):',
          '    if False and committed.get("gaps") != fresh.get("gaps"):'),
+        ("check 不看 UI 扫描位置",
+         '    if committed.get("ui_dir") != fresh.get("ui_dir"):',
+         '    if False and committed.get("ui_dir") != fresh.get("ui_dir"):'),
         ("ui_checked 恒真",
          "    ui_checked = bool(ui_dir) and os.path.isdir(ui_dir)",
          "    ui_checked = True"),
@@ -245,7 +255,8 @@ class TestSourceMutants(unittest.TestCase):
 
         def build(i=None):
             i = i or ins
-            return mod.build(i["plan"], i["choice"], i["versions"], i["payload"], i["ocr"])
+            return mod.build(i["plan"], i["choice"], i["versions"], i["payload"], i["ocr"],
+                             ui_dir=UI)
 
         def red(i=None) -> bool:
             return bool(build(i)[1])
@@ -286,8 +297,10 @@ class TestSourceMutants(unittest.TestCase):
             out["g 默认档 8 颗且带哈希"] = len(shipped) == 8 and all(
                 cell["asset_dir"].endswith(mod.asset_stem(cell["default_asset"]))
                 for cell in shipped)
+            no_ui, _p2 = mod.build(ins["plan"], ins["choice"], ins["versions"],
+                                   ins["payload"], ins["ocr"])
             out["h UI 没扫就不算扫过"] = (
-                fresh["ui_checked"] is False and fresh["ui_dir"] is None
+                no_ui["ui_checked"] is False and no_ui["ui_dir"] is None
                 and "127.0.0.1" in mod.UI_FORBIDDEN)
             out["i 缺口如实记录"] = [g["id"] for g in fresh["gaps"]] == ["ocr-manifest"]
             c1 = copy.deepcopy(committed)
@@ -299,6 +312,9 @@ class TestSourceMutants(unittest.TestCase):
             c3 = copy.deepcopy(committed)
             c3["gaps"] = []
             out["l 缺口被删被叫"] = bool(mod.check(committed, c3))
+            c4 = copy.deepcopy(committed)
+            c4["ui_dir"] = "shell/另一个-ui"
+            out["l2 UI 扫描位置漂移被叫"] = bool(mod.check(committed, c4))
 
             i1 = copy.deepcopy(ins)
             i1["plan"]["capabilities"]["字幕"]["engine_auth"]["engine_supports_api_key"] = True
@@ -353,6 +369,7 @@ class TestSourceMutants(unittest.TestCase):
         "f runtime 目录带版本": True, "g 默认档 8 颗且带哈希": True,
         "h UI 没扫就不算扫过": True, "i 缺口如实记录": True,
         "j 鉴权漂移被叫": True, "k 运行文件漂移被叫": True, "l 缺口被删被叫": True,
+        "l2 UI 扫描位置漂移被叫": True,
         "m whisper 有钥匙被报": True, "n llama 丢 CORS 被报": True,
         "o OCR ref 不是 commit 被报": True, "p 默认档 digest 不一致被报": True,
         "q 默认档不在 release 被报": True, "r 没这条旗标却带上被报": True,
@@ -377,7 +394,7 @@ class TestSourceMutants(unittest.TestCase):
         self.assertEqual(missed, [], "这些变异没人报：对应判据是装饰\n" + "\n".join(missed))
 
     def test_mutant_count(self) -> None:
-        self.assertEqual(len(self.MUTANTS), 13)
+        self.assertEqual(len(self.MUTANTS), 14)
 
 
 if __name__ == "__main__":
