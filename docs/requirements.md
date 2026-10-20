@@ -76,7 +76,8 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
    （`machine-budget.json` 的 `default_install` + `first_run_*` / `download_*` 两组数，
    `pins/launch-plan.json` 每项能力的 `install_stage`），半装半不装直接红 —— 见验收第 20 条。
    **"有哪些后端可换"这一半也已经有产物**（`pins/backend-matrix.json`，验收第 27 条；
-   换哪一档与安装量差值是 `pins/backend-choice.json`，验收第 28 条）；
+   换哪一档与安装量差值是 `pins/backend-choice.json`，验收第 28 条；
+   能升到哪、能退回哪、每颗能不能校验是 `pins/runtime-versions.json`，验收第 30 条）；
    "这台机器检测到哪个后端"那一半仍属外壳（#25），要等 CI 能跑或真机 —— 这两句不许混着说。
 
 ## MVP / MVP+ 切分
@@ -97,13 +98,14 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
 
 ## 验收标准（在当前唯一可用验证手段 = GitHub Actions 下）
 
-1. `ci.yml`：762 个单测绿（重数：`python -W error::ResourceWarning -m unittest discover -s tests
+1. `ci.yml`：783 个单测绿（重数：`python -W error::ResourceWarning -m unittest discover -s tests
    -p "test_*.py"`；按文件数就 `python -m unittest tests.<模块名>`。2026-10-20 实测逐文件：
    `test_yaml_gate.py` 闸门自己 14、`test_lane_argv.py` 车道 ↔ 启动表一致（含 9 个 workflow 文本变异）10、
    `test_sideload.py` sideload 按内容认领（6 条源码变异体 + 三个真上游文件）22、
    `test_backends.py` 后端矩阵（7 条源码变异体 + 真实 release 捕获）22、
    `test_backend_choice.py` 换档表（12 条源码变异体 × 16 条探针，输入是三份已钉产物）25、
    `test_runtime_parity.py` server 在场表（11 条源码变异体 × 15 条探针 + 捕获夹具字节复核）21、
+   `test_runtime_versions.py` runtime 版本轴（18 条源码变异体 × 24 条探针 + 窗口元数据夹具）21、
    `test_toolbelt_pins.py` 工具带钉表 14、
    `test_catalog_snapshot.py` 目录快照与侧表 16、`test_citation_check.py` 出处闸门 22、
    `test_ocr_build_surface.py` OCR 依赖面 15、`test_file_index.py` 下载层五种状态与首启队列 35、
@@ -699,7 +701,7 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     分层地板清空、体积差不进比对表、落地体积未知被写成 0、默认档缺落地体积不报）×
     **16 条探针**全被抓；另有一条链式核对：这张表的输入本身还能从重算的 release 夹具复现
     （夹具 → 矩阵 → 换档表，三环各自 0 问题）。
-    车道 `backends`（engine-live 第 22 个 job，现在 **15 步**）里那四步换档步骤会拿**现取**那份矩阵重算一遍：
+    车道 `backends`（engine-live 第 22 个 job，现在 **19 步**）里那四步换档步骤会拿**现取**那份矩阵重算一遍：
     上游补发或撤掉某个 CUDA 版本时，先红的会是伴生包配对而不是体积。
     重数：`python3 tools/backend_choice.py --selftest`、`--check`、
     `python3 tools/backend_choice.py --matrix <现取那份> --check`。
@@ -741,12 +743,44 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     默认档缺 server 降级成备注 / tar 被当成读过 / 默认档整颗消失不点名 / 真装的 tar 没读也不报 /
     tar 的整包 digest 不符不报 / 平台改成猜 win-x64 / `has_server` 不进漂移比对表）×
     **15 条探针**全被抓，另有"可选档少 server 只点名不报警"这条防止判据过度报警的正向对照。
-    捕获钉成 `tests/fixtures/parity-captures.json`（31 颗 / 44,548 B，sha256 记在 `.meta.json`
+    捕获钉成 `tests/fixtures/parity-captures.json`（31 颗 / 46,530 B，sha256 记在 `.meta.json`
     并由测试复算字节），所以没有 runner 也能离线重算。
-    车道 `backends` 最后四步跑它：判据本身 / 单测 / 离线对表 / **现读 28 颗 zip 的中央目录与真装默认档那 3 颗 tar 的成员表，再对一次**
+    车道 `backends` 随后四步跑它：判据本身 / 单测 / 离线对表 / **现读 28 颗 zip 的中央目录与真装默认档那 3 颗 tar 的成员表，再对一次**
     —— 上游重打包、把某档的 server 换掉或删掉，就在这一步红，而不是等外壳去 exec 一个不存在的文件。
     重数：`python3 tools/runtime_parity.py --selftest`、`--check`、
     `python3 tools/runtime_parity.py --fetch --captures <路径> --check --captures <路径>`。
+
+30. **runtime 的版本轴也得是表：能升到哪、能退回哪、每颗能不能校验**：`tools/runtime_versions.py`
+    → `pins/runtime-versions.json`。约束第 3 条写"引擎按 runtime 打包、可替换"，矩阵却只覆盖
+    **钉住的那一个 ref**，版本轴一句都没有 —— 外壳的"更新 runtime / 回退 runtime"就靠这张表。
+    **窗口是翻出来的，不是写死的**：每个仓库从最新往下翻，翻到钉住那颗为止（100/页 × 至多 5 页，
+    再裁到至少 25 个）。llama 一天发 6 个 release，固定 12 个的窗口装不下我们钉的 b11727 ——
+    窗口不含钉值时"能退回哪"这句就不成立，而表看起来仍然完整。
+    实测三件事：
+    ① **llama 钉的 b11727 上面已有 12 个带产物的版本**（最新 b11748），但覆盖面没变
+    （`os_lost`/`os_added` 都为空）—— "能升"与"升完还发同样的包"是两个数，都得在表里；
+    ② **whisper 的 `releases/latest` 是 v1.9.5，0 个产物**，真正能装的 b5454 正是我们钉的那颗；
+    窗口里 9 个只有源码的标签，`latest_runtime_tag` 与 `pinned` 相同。外壳按 `releases/latest`
+    取 runtime 会"检查更新成功、装不上任何东西"；
+    ③ **回退不是翻到最老**：v1.7.6 之前 13 个 release 上游根本没发 digest（v1.6.0、v1.5.4…），
+    所以 whisper 的可校验候选只有 16 个、`oldest_verifiable_tag` = v1.7.6。没有 digest 的版本
+    单列在 `unverifiable_tags` 里，不冒充候选，也不当噪音删掉。
+    窗口内 75 个 release / 带产物 66 / runtime 资产行 1021 / 附件 7（`whispercpp.jar.zip` 这类
+    附属文件按扩展名先排掉，否则会被 `classify` 当成"认不出的后端词"）/ 认不出的词 0 / 可校验 66。
+    钉住那颗的 47 颗产物名与 `backend-matrix` 逐颗相等（同一个 release，两张表不许漂）。
+    **漂移只报不跟**：`capability_delta` 记"从钉住升到最新"的 OS 增减，并写明这不是自动动作；
+    新版本若丢掉我们真装的 OS 直接红。
+    18 条源码变异体 × 24 条探针（含"0 产物的标签也当候选"、"verifiable 不看 digest"、
+    "latest 是否带产物不进漂移比对"、"真装 OS 丢了不报"、"live 口径把新版当红"）。捕获
+    `tests/fixtures/release-window.json`（259,753 B，sha256 记在 `.meta.json` 并由测试复算字节，
+    只有 tag / published_at / asset 的 name+size+digest 三种元数据），没有 runner 也能离线重算。
+    车道 `backends` 最后四步：判据本身 / 单测 / 离线对表 / **现取三个仓库的窗口核对钉值**。
+    最后一步用 `--live` 口径：**只核对钉住那颗还在、产物没被重打包、真装 OS 没变**；
+    上游在钉住之上又发新版本**不算红** —— 这条不是假设：抓完这张表约半小时后 llama 又发了
+    5 个版本（b11748 → b11753）。把"有新版本"当红，这条车道会永远红，红就不再是信号；
+    新版本只在下一次显式重抓时进表（漂移只报不跟）。
+    重数：`python3 tools/runtime_versions.py --selftest`、`--check`、
+    `python3 tools/runtime_versions.py --fetch --captures <路径> --check --live --captures <路径>`。
 
 ## 车道判据的出处（全部按**钉住的那个 ref** 核过，不是按 HEAD 记的）
 

@@ -275,6 +275,19 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   31 颗 / 46,530 B）。顺带落下一条独立证据：**sd 在 macOS 有 `sd-server` + 1 个 `.dylib`**，
   而 whisper 在 macOS 只有 xcframework（#29）—— 生图在这台机器上有路，字幕没有。
   重数：`python3 tools/runtime_parity.py --selftest`、`--check`。
+- `tools/runtime_versions.py` + `pins/runtime-versions.json`：**能升到哪、能退回哪、每颗能不能校验也是表**。
+  矩阵只覆盖钉住的那一个 ref；外壳要给"更新 / 回退 runtime"，就得知道相邻版本发不发同样的包。
+  窗口按"翻到钉住那颗为止"取（100/页 × 至多 5 页），不是写死 12 —— llama 一天发 6 个 release，
+  固定窗口装不下我们钉的 b11727。实测 **llama 的 b11727 上面还有 12 个带产物的版本**（最新 b11748），
+  覆盖面没变；**whisper 的 `releases/latest` 是 v1.9.5、0 个产物**，真正能装的 b5454 正是我们钉的那颗
+  （9 个只有源码的标签单列，按 latest 取 runtime 会"成功但装不上"）；
+  **回退边界是 digest 不是年龄**：v1.7.6 之前 13 个 release 上游没发 digest，可校验候选只有 16 个。
+  窗口内 75 个 release / 66 个带产物 / 1021 行 runtime 资产 / 7 个附件 / 认不出的词 0；
+  钉住那颗的 47 颗产物名与矩阵逐颗相等（同一个 release，两张表不许漂）。
+  18 条源码变异体 × 24 条探针 + 窗口元数据夹具（`tests/fixtures/release-window.json`，259,753 B），
+  漂移只报不跟。现取车道用 `--live` 口径：只核对钉住那颗还在、产物没被重打包；上游又发新版
+  不算红（实测抓完半小时后 llama 又发了 5 个版本 —— 按"有新版本"红会让这条道永远红）。
+  重数：`python3 tools/runtime_versions.py --selftest`、`--check`。
 - `tools/action_pins.py` + `pins/actions.json`：**出包那只手自己也要钉住**。这一轮之前三个
   workflow 里 4 个 `uses:` 全是浮动大版本 tag（`checkout@v4`、`setup-python@v5`、
   `upload-artifact@v4`、`download-artifact@v4`，共 **47 处**）—— 仓库对引擎/权重/工具带都定了

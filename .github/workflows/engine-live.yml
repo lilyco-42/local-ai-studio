@@ -45,6 +45,11 @@ on:
       - "pins/runtime-parity.json"
       - "tests/test_runtime_parity.py"
       - "tests/fixtures/parity-captures.json"
+      # 版本轴的窗口是一次抓取的产物：重抓、改窗口政策、改钉值都必须能触发这一条
+      - "tools/runtime_versions.py"
+      - "pins/runtime-versions.json"
+      - "tests/test_runtime_versions.py"
+      - "tests/fixtures/release-window.json"
       - "tests/fixtures/backend_assets*"
       - "tools/install_deps.py"
       - "pins/install-deps.json"
@@ -740,6 +745,9 @@ jobs:
     # 再后四个步骤是"server 在场表"：HTTP Range 读 zip 中央目录，加上真装默认档那 3 颗
     # tar.gz 的整包成员表（字节数与上游 digest 都对上才算读到），证明每一档都有外壳要 exec 的
     # 那个 server —— "换个 asset 就换个后端"这句话的前提。不解压、不运行任何东西。
+    # 最后四步是"版本轴"：能升到哪、能退回哪、每颗能不能校验。窗口是**翻到钉住那颗为止**
+    # （llama 一天发 6 个 release，固定 12 个装不下我们钉的 b11727）；whisper 的 latest
+    # 指向 0 产物标签、往回退到 v1.7.6 之前上游没发 digest —— 两个坑都是表里的一列。
     timeout-minutes: 10
     runs-on: ubuntu-latest
     steps:
@@ -770,13 +778,27 @@ jobs:
         run: python3 tools/backend_choice.py --matrix .cache/backend-matrix-live.json --check
       - name: server 在场表：判据本身（默认档缺 server 必须红，tar 不许冒充"读过了"）
         run: python3 tools/runtime_parity.py --selftest
-      - name: server 在场单测（9 个把源码改坏的变异体 × 11 条探针）
+      - name: server 在场单测（11 个把源码改坏的变异体 × 15 条探针）
         run: python -m unittest tests.test_runtime_parity -v
       - name: 离线：用已提交那份成员表对表
         run: python3 tools/runtime_parity.py --check
       - name: 现读 zip 中央目录与 3 颗默认档 tar 的成员表再对一次（上游重打包就在这里红）
         run: python3 tools/runtime_parity.py --fetch --captures .cache/live-parity.json
              --check --captures .cache/live-parity.json
+      - name: 版本轴：判据本身（latest 空标签、退回的 digest 边界必须被抓住）
+        run: python3 tools/runtime_versions.py --selftest
+      - name: 版本轴单测（18 个把源码改坏的变异体 × 24 条探针）
+        run: python -m unittest tests.test_runtime_versions -v
+      - name: 离线：窗口、钉值与已提交那张版本轴对表
+        run: python3 tools/runtime_versions.py --check
+      - name: 现取三个仓库的窗口，核对钉住那颗还在、产物没被重打包（有新版本不算红）
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        # --fetch 与 --check 必须在**同一次调用**里：分开跑时第一段会把已提交那张覆盖成
+        # 现取的版本，第二段就成了自己跟自己比 —— 看起来绿，什么都没核对。
+        # --live：llama 一天发几十个 release，把"上游又发了新版"当红会让这条道永远红。
+        run: python3 tools/runtime_versions.py --fetch --captures .cache/live-window.json
+             --check --live --captures .cache/live-window.json
 
   ocr-build-surface:
     # 四项能力里只有 OCR 要现场编译，而"钉 commit"对它**并不等于钉住构建输入**：
