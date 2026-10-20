@@ -107,7 +107,8 @@ def step_bodies(files: list[str]) -> list[tuple[str, str]]:
 def main(argv: list[str]) -> int:
     root = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
     files = argv or [os.path.join(root, ".github", "workflows", f)
-                     for f in ("ci.yml", "engine-live.yml", "package.yml", "shell.yml")]
+                     for f in ("ci.yml", "engine-live.yml", "package.yml",
+                               "shell.yml", "installer.yml")]
     for f in files:
         if not os.path.exists(f):
             print(f"BAD: 要检查的 workflow 不存在：{f}")

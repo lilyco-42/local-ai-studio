@@ -14,10 +14,11 @@
   * `# v4` 那种尾注记着原来的浮动 tag：车道每次重新解析它，一旦与本表不同就红 ——
     意思是"上游出了新版，要么显式重钉、要么写明不跟"，**不许悄悄跟**。
 
-`tauri-apps/tauri-action` 还没被任何 workflow 用到（外壳车道 #30 才用），但已经量好：
-`v1.0.0` → `1deb371b…`、`runs.using = node24`、23 个输入、入口是仓库里提交的
+`tauri-apps/tauri-action` 现在由 `installer.yml` 使用（外壳出包车道 #30），量好的形状继续
+留作漂移判据：`v1.0.0` → `1deb371b…`、`runs.using = node24`、23 个输入、入口是仓库里提交的
 `dist/index.js`（所以钉 commit 就等于钉住那份 bundle）。顺带记一处容易看错的形状：
 它的 **release 叫 `action-v1.0.0`，而 tag 叫 `v1.0.0`** —— 按 tag 拼 raw URL 时别拿 release 名。
+`RESERVED` 里的条目一旦真被某个 workflow 用上，就只出现在 `pins` 里，不再重复记成"预留"。
 
 用法：`--selftest` 先证明判据本身会红；`--offline` 只算本地能算的部分（`uses:` 的形状）；
 `--check` 走网络逐条核对并与已提交那张比漂移。
@@ -40,8 +41,9 @@ USES_RX = re.compile(r"^\s*(?:-\s+)?uses:\s*([^\s@]+)@(\S+)(?:\s+#\s*([A-Za-z0-9
                      re.M)
 SHA_RX = re.compile(r"^[0-9a-f]{40}$")
 WORKFLOWS = (".github/workflows/ci.yml", ".github/workflows/engine-live.yml",
-             ".github/workflows/package.yml")
-# 还没用、但已经量好的：外壳出包车道（#30）要用它，值现在就得是查过的，不是到时候再猜。
+             ".github/workflows/package.yml", ".github/workflows/installer.yml",
+             ".github/workflows/shell.yml")
+# 已经由 installer.yml 用上；这行留着是为了让 release 名与 tag 名不一致这件事每次都被复核。
 RESERVED = {"tauri-apps/tauri-action": ("v1.0.0", "1deb371b0cd8bd54025b384f1cd735e725c4060f")}
 
 
@@ -87,7 +89,7 @@ def raw(repo: str, sha: str, name: str = "action.yml") -> str | None:
 
 
 def parse_uses(texts: dict[str, str]) -> list[dict]:
-    """三个 workflow 里的 `uses:`，按 owner/repo@ref 归并并数每个文件用了几次。"""
+    """这些 workflow 里的 `uses:`，按 owner/repo@ref 归并并数每个文件用了几次。"""
     out: dict[str, dict] = {}
     for fname, text in sorted(texts.items()):
         for m in USES_RX.finditer(text):
@@ -192,12 +194,22 @@ def build(live: bool = True, known: dict | None = None) -> tuple[dict, list[str]
         row["expect_inputs"] = old.get("inputs")
         _pinned, bad = pin_one(row, live)
         problems += bad
+        if row["repo"] in RESERVED:
+            # release 名与 tag 名不是一回事（tauri-action 的 release 叫 action-v1.0.0、
+            # tag 叫 v1.0.0）；这两个字段对已启用的 action 也要留着，否则"名字对不上"的
+            # 教训只存在于预留记录里。
+            row["latest_release_tag"] = (api(f"repos/{row['repo']}/releases/latest")
+                                         or {}).get("tag_name")
+            row["pin_is_a_release_tag"] = row["latest_release_tag"] == row["floating_tag"]
         for k in ("expect_using", "expect_inputs"):
             row.pop(k, None)                 # 内部比对用的暂存，不进表（表里重复两份会漂）
     problems += tag_drift(rows, live)
     old_res = {r.get("repo"): r for r in (known.get("reserved_for_installer_lane") or [])}
+    used_repos = {r["repo"] for r in rows}
     reserved = []
     for repo, (tag, sha) in RESERVED.items():
+        if repo in used_repos:
+            continue                          # 已经进了 pins，不再重复记一份"预留"
         old = old_res.get(repo, {})
         row = {"uses": f"{repo}@{sha}", "repo": repo, "ref": sha, "floating_tag": tag,
                "tag_comment": None, "workflows": {},

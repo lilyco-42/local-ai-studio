@@ -1,8 +1,8 @@
 {
  "counts": {
-  "distinct": 4,
-  "uses_total": 47,
-  "workflow_files": 3
+  "distinct": 5,
+  "uses_total": 53,
+  "workflow_files": 5
  },
  "pins": [
   {
@@ -41,7 +41,9 @@
    "workflows": {
     ".github/workflows/ci.yml": 1,
     ".github/workflows/engine-live.yml": 19,
-    ".github/workflows/package.yml": 1
+    ".github/workflows/installer.yml": 1,
+    ".github/workflows/package.yml": 1,
+    ".github/workflows/shell.yml": 2
    }
   },
   {
@@ -117,16 +119,10 @@
    "uses": "actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02",
    "workflows": {
     ".github/workflows/engine-live.yml": 7,
-    ".github/workflows/package.yml": 1
+    ".github/workflows/package.yml": 1,
+    ".github/workflows/shell.yml": 2
    }
-  }
- ],
- "policy": {
-  "rule": "出包路径上的每个 uses: 都钉 40 位 commit SHA；浮动 tag 移动只报不跟，重钉必须是显式动作",
-  "runtime_note": "官方四个都是 node20，tauri-action v1.0.0 是 node24 —— runtime 由 Actions 自己装，不依赖镜像里的 Node",
-  "why": "硬约束是「只能靠 GitHub Actions 出包」，这些 action 就是那条路径本身"
- },
- "reserved_for_installer_lane": [
+  },
   {
    "commit_date": "2026-06-29T17:03:57Z",
    "floating_tag": "v1.0.0",
@@ -161,10 +157,19 @@
    "ref": "1deb371b0cd8bd54025b384f1cd735e725c4060f",
    "repo": "tauri-apps/tauri-action",
    "runs_using": "node24",
-   "tag_comment": null,
+   "tag_comment": "v1.0.0",
+   "tag_now_points_to": "1deb371b0cd8bd54025b384f1cd735e725c4060f",
    "uses": "tauri-apps/tauri-action@1deb371b0cd8bd54025b384f1cd735e725c4060f",
-   "workflows": {}
+   "workflows": {
+    ".github/workflows/installer.yml": 1
+   }
   }
  ],
+ "policy": {
+  "rule": "出包路径上的每个 uses: 都钉 40 位 commit SHA；浮动 tag 移动只报不跟，重钉必须是显式动作",
+  "runtime_note": "官方四个都是 node20，tauri-action v1.0.0 是 node24 —— runtime 由 Actions 自己装，不依赖镜像里的 Node",
+  "why": "硬约束是「只能靠 GitHub Actions 出包」，这些 action 就是那条路径本身"
+ },
+ "reserved_for_installer_lane": [],
  "schema": 1
 }

@@ -21,7 +21,8 @@ ROOT = os.path.abspath(os.path.join(HERE, ".."))
 # 而不是只能靠我手工掺假再手工还原。
 FILES = (sys.argv[1:] or
          [os.path.join(ROOT, ".github", "workflows", f)
-          for f in ("ci.yml", "engine-live.yml", "package.yml", "shell.yml")])
+          for f in ("ci.yml", "engine-live.yml", "package.yml", "shell.yml",
+                    "installer.yml")])
 rel = {e: json.load(open(os.path.join(HERE, "..", "tests", "fixtures", f"{e}.json"), encoding="utf-8"))
        for e in probe.UPSTREAM}
 keys = set(probe.manifest_of(probe.plan(rel))["targets"])

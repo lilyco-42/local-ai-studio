@@ -25,12 +25,13 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   名字里没写 OS 的（whisper 那两个）只**推断**成 win，并单列进 `manifest["inferred"]`。
 - `tools/zip_peek.py`：用 HTTP Range 只读 zip 中央目录，不下载整包、不解压、不运行，
   把上面那个推断换成条目级证据；带一正一负对照，见 ADR。
-- `tools/yaml_gate.py`：解析四条 workflow，核对 needs 链、step 输出引用、heredoc 闭合与**每段 PY 真编译**，
+- `tools/yaml_gate.py`：解析五条 workflow，核对 needs 链、step 输出引用、heredoc 闭合与**每段 PY 真编译**，
   以及车道里写死的 target 名确实存在于 manifest（已用假 target 验证它会红）。
   `needs.X.outputs.Y` 也按 **job 自己的文本**查三件事：X 这个 job 存在、本 job 真 `needs` 它、
   X 真导出 Y —— 引用没导出的输出在 Actions 里拿到的是空字符串而不是报错，而"扫整份文件"那一版
   会让任何带 `needs:` 的 job 为别人的引用背锅（见 `docs/requirements.md` 验收第 5 条）。
-  车道分段与预跑的**计数**由 `tests/test_lane_replay_report.py` 钉住：四条 workflow 共 17 段 `<<'PY'`、
+  车道分段与预跑的**计数**由 `tests/test_lane_replay_report.py` 钉住：五条 workflow 共 17 段 `<<'PY'`
+  （`installer.yml` 没有 heredoc）、
   其中 12 段含判据（认 `check(`/`SystemExit`/`assert`/`sys.exit(`）、本地预跑引用 8 个
   (job, 步骤名) 组合 —— 重数：`python -W error::ResourceWarning -m unittest tests.test_lane_replay_report -v`。
   这几个数以前只活在文档里，漂过三次，所以现在是断言不是散文。
@@ -45,7 +46,7 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   来历是一个假结论：本机 PATH 上的 `bash` 是 WSL 占位程序，对任何文件都返回非 0，
   第一遍跑出"42/42 步骤全部语法错"，看着像查得严其实一条真信息都没有。
   所以现在每个候选 bash 必须先过双对照（坏文件非 0、好文件 0），过不了就换下一个，
-  全不过就报 `SKIP（unreliable/missing + 原因）` 而不是装成查过。2026-10-20 实测覆盖 53 段、0 问。
+  全不过就报 `SKIP（unreliable/missing + 原因）` 而不是装成查过。2026-10-20 实测覆盖 108 段、0 问。
 - `tools/png_proof.py` / `tools/srt_proof.py`：两条常驻服务车道与 CLI 车道**共用**的产物判据。
   前者读 PNG 的 IHDR 与 `tEXt/parameters`（也认 `result.images[0].b64_json` 那种塞在 JSON 里的图），
   后者把 SRT 解析成块再逐块要编号连续、时间单调、正文非空 —— 而不是 `grep '-->'` 一发过。
@@ -320,15 +321,17 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   **但这些代码一次都没被编译过**：`shell.yml` 的 `core` 与 `app` 两个 job（各 3 OS
   `cargo test --all-targets`，`app` 在 Ubuntu 先装 WebKitGTK）因仓库 private、
   runner 未解锁而 0 次执行，`Cargo.lock` 也还没产出；离线只证了结构闸门与 11 条 Python 单测。
-- `tools/action_pins.py` + `pins/actions.json`：**出包那只手自己也要钉住**。这一轮之前三个
+- `tools/action_pins.py` + `pins/actions.json`：**出包那只手自己也要钉住**。开工时三个
   workflow 里 4 个 `uses:` 全是浮动大版本 tag（`checkout@v4`、`setup-python@v5`、
-  `upload-artifact@v4`、`download-artifact@v4`，共 **47 处**）—— 仓库对引擎/权重/工具带都定了
-  "release + sha256"，唯独真正跑包的东西跟着别人随时会移动的 tag 走。现在全部改成 40 位 commit
-  SHA 并把尾注留着记它来自哪个 tag：`checkout 11d5960a…`(v4.4.0)、`setup-python a26af69b…`(v5.6.0)、
+  `upload-artifact@v4`、`download-artifact@v4`）—— 仓库对引擎/权重/工具带都定了
+  "release + sha256"，唯独真正跑包的东西跟着别人随时会移动的 tag 走。
+  现在五条 workflow / 5 个 action / **53 处 uses** 全部是 40 位 commit SHA，尾注留着记它来自哪个
+  tag（重数：`python3 tools/action_pins.py --check`；上一版表漏了 `shell.yml` 的 4 处，
+  是这轮把它补进扫描表时才数出来的）：`checkout 11d5960a…`(v4.4.0)、`setup-python a26af69b…`(v5.6.0)、
   `upload-artifact ea165f8d…`(v4.6.2)、`download-artifact d3f86a10…`(v4.3.0)，都是 MIT、`node20`。
   判据不只是"形状对不对"：每次重新解析尾注那个 tag，**漂了就红但绝不自动跟**（重钉必须是显式动作）；
   还取那份 `action.yml` 复核 `runs.using` 与 `inputs` 键集合 —— 上游换 runtime 或加输入会点名。
-  `tauri-apps/tauri-action` 已量好但还没被任何 workflow 用到（#30 才用）：`v1.0.0` → `1deb371b…`、
+  `tauri-apps/tauri-action` 现在由 `installer.yml` 使用：`v1.0.0` → `1deb371b…`、
   `node24`、23 个输入、入口是提交进仓库的 `dist/index.js`（所以钉 commit 等于钉住那份 bundle）；
   它还有个容易看错的形状：**release 叫 `action-v1.0.0` 而 tag 叫 `v1.0.0`**，两个名字都进表，
   谁把 `releases/latest` 当 tag 用就会红。形状用 pyyaml 复核而不是自写正则 ——
@@ -372,6 +375,18 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   根清单**最后写**（临时文件 + `os.replace`），中途任何失败都不会留下"看似齐全"的根清单；
   `--check` 再解析两份清单逐键相等并重算每个文件。包里没有的能力（OCR、macOS 字幕）记进
   `not_in_manifest` 点名，不当作失败。13 条合成自测 + 10 条离线对照。**这一步至今 0 次执行**（#19）。
+- `.github/workflows/installer.yml` + `tools/make_icons.py`：**安装包本身**，三平台各一个未签名包，
+  只装壳、不带引擎与权重（引擎 115.6 MiB + 权重 415 MB 起，装不进安装器）。矩阵 Windows `nsis` /
+  macOS `dmg` / Linux `deb`，用钉住的 `tauri-apps/tauri-action`；CLI 显式传
+  `npx --yes @tauri-apps/cli@2.12.3` —— 不传时 action 会自己 `npm install -g @tauri-apps/cli@v2`，
+  浮在一个大版本上。`tauri.conf.json` 的 `bundle.active` 打开、targets 三档、图标五件；
+  图标不是手画的：`make_icons.py` 只从仓库里已有的 `icon.ico` 用纯 stdlib 派生 32/128/256 PNG
+  与 ICNS（预乘 alpha 双线性缩放，避免透明边缘发黑）。`--check` 先比字节，不同就**解压后逐像素比**
+  —— 压缩流随 zlib 实现而变（本机 python3 的 zlib-ng 1.3.1 与 Anaconda python 的 zlib 1.3.2
+  对同一份像素给出 6,389 vs 6,393 B），逐字节比会在 CI 的另一种 zlib 上假红；
+  `tests/test_make_icons.py` 10 条（含"重新压缩但图没变"的阳性对照与改一个像素的阴性对照）。车道最后一步断言 glob 真找到包且非空
+  （`uploadWorkflowArtifacts` 成功不代表编出了东西）。**证据边界**：这条车道 0 次执行、包未签名，
+  `tauriScript` 与 deb maintainer 都只是静态核对（#19 未解）。
 - `.github/workflows/ci.yml`：静态门禁（含 yaml_gate）+ 单测（夹具是真实 API 捕获）+ 离线跑发现器
   与离线回放工具带钉表。
 - `.github/workflows/engine-live.yml`：打真实 API 发现产物 → 下载 linux 引擎（不编译）→ 下载 pin 住的

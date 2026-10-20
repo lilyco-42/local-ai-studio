@@ -67,7 +67,7 @@ class TestParseUses(unittest.TestCase):
 
     def test_counts_match_the_measured_totals(self) -> None:
         doc = artifact()
-        self.assertEqual(doc["counts"], {"workflow_files": 3, "uses_total": 47, "distinct": 4})
+        self.assertEqual(doc["counts"], {"workflow_files": 5, "uses_total": 53, "distinct": 5})
 
 
 class TestShape(unittest.TestCase):
@@ -266,15 +266,16 @@ class TestArtifact(unittest.TestCase):
         got = {r["repo"]: r["ref"] for r in doc["pins"] + doc["reserved_for_installer_lane"]}
         self.assertEqual(got, REAL_SHAS)
 
-    def test_tauri_action_is_reserved_not_used(self) -> None:
+    def test_tauri_action_is_used_by_the_installer_lane(self) -> None:
         doc = artifact()
-        self.assertEqual(doc["reserved_for_installer_lane"][0]["workflows"], {})
-        self.assertNotIn("tauri-apps/tauri-action", json.dumps([r["repo"] for r in doc["pins"]]))
-        self.assertEqual(doc["reserved_for_installer_lane"][0]["runs_using"], "node24")
+        r = by_repo(doc, "tauri-apps/tauri-action")
+        self.assertEqual(r["workflows"], {".github/workflows/installer.yml": 1})
+        self.assertEqual(r["runs_using"], "node24")
+        self.assertEqual(doc["reserved_for_installer_lane"], [])
 
     def test_release_name_is_not_the_tag_name(self) -> None:
         """文档里那句"release 叫 action-v1.0.0、tag 叫 v1.0.0"现在有机读版本。"""
-        r = artifact()["reserved_for_installer_lane"][0]
+        r = by_repo(artifact(), "tauri-apps/tauri-action")
         self.assertEqual(r["latest_release_tag"], "action-v1.0.0")
         self.assertEqual(r["floating_tag"], "v1.0.0")
         self.assertFalse(r["pin_is_a_release_tag"])

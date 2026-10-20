@@ -1,0 +1,80 @@
+name: 安装包（未签名，只装外壳）
+
+# 这条车道只做一件事：把 shell/ 编成三平台的安装包（Windows nsis / macOS dmg / Linux deb）。
+# 引擎与权重都不进包 —— 它们按 pins/payload-plan.json 首启下载，包体因此只有外壳。
+# 签名的两个证书还没定（#30），所以这里出来的包未签名；首启会有系统警告。
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "shell/**"
+      - ".github/workflows/installer.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: installer-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  bundle:
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            bundles: deb
+            glob: shell/src-tauri/target/release/bundle/deb/*.deb
+          - os: windows-latest
+            bundles: nsis
+            glob: shell/src-tauri/target/release/bundle/nsis/*.exe
+          - os: macos-latest
+            bundles: dmg
+            glob: shell/src-tauri/target/release/bundle/dmg/*.dmg
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4.4.0
+      - name: Linux 的 WebKitGTK 依赖
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev
+      - name: 工具链是镜像自带的（Rust 编外壳，Node 只跑固定版本的 Tauri CLI）
+        run: |
+          rustc --version
+          cargo --version
+          node --version
+          npm --version
+      - name: 出安装包（CLI 版本钉死；不用 tauri-action 的全局安装回退）
+        uses: tauri-apps/tauri-action@1deb371b0cd8bd54025b384f1cd735e725c4060f  # v1.0.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          projectPath: shell
+          tauriScript: npx --yes @tauri-apps/cli@2.12.3
+          args: --bundles ${{ matrix.bundles }}
+          uploadWorkflowArtifacts: true
+      - name: 包必须真的落盘且非空（上传成功不代表编出了东西）
+        env:
+          GLOB: ${{ matrix.glob }}
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          files=($GLOB)
+          if [ ${#files[@]} -eq 0 ]; then
+            echo "BAD: 没有找到 $GLOB"
+            exit 1
+          fi
+          for f in "${files[@]}"; do
+            if [ ! -s "$f" ]; then
+              echo "BAD: $f 是空文件"
+              exit 1
+            fi
+            ls -l "$f"
+          done

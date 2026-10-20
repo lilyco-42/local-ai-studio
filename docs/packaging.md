@@ -55,15 +55,19 @@ application as a Tauri binary for macOS, Linux and Windows"，最新 release 是
 （`uses: tauri-apps/tauri-action@1deb371b0cd8bd54025b384f1cd735e725c4060f`，即 tag `v1.0.0`）
 并记进 `pins/actions.json`。它的入口是仓库里提交的 `dist/index.js`，所以钉 commit
 **就等于钉住那份 bundle**；`runs.using = node24`、23 个输入也一并记进表里（换 runtime 或改输入会红）。
-按"有先例就克隆研究具体实现"处理：外壳的安装包车道以它为骨架，只写我们多出来的那两步
-（塞引擎负载与 `payload-manifest.json`）。
+按"有先例就克隆研究具体实现"处理：安装包车道以它为骨架，但**不用它的 CLI 自动回退** ——
+它在找不到 `@tauri-apps/cli` 时会 `npm install -g @tauri-apps/cli@v2`（一个浮动大版本），
+所以车道显式传 `tauriScript: npx --yes @tauri-apps/cli@2.12.3` 把这个坐标钉死。
+引擎与 `payload-manifest.json` 也**不进安装包**（见 ④/⑤），车道只多一步"产物必须非空"。
 
 顺手把这张表存在的理由说完：**在这一轮之前，三个 workflow 里 4 个 `uses:` 全是浮动大版本 tag**
 （`actions/checkout@v4`、`actions/setup-python@v5`、`actions/upload-artifact@v4`、
-`actions/download-artifact@v4`，共 44 处；**现在这张表记的是 47 处** —— `launch-plan` 加了一处
-`download-artifact` 去吃 `file-index` 那份首启队列报告，`backends` 那条新车道又带进 checkout 与
-setup-python 各一处。计数不靠这句话自证：
-`python3 tools/action_pins.py --check` 会按三份 workflow 重数一遍）。仓库对引擎、权重、工具带都定了"release + sha256"，
+`actions/download-artifact@v4`，共 44 处；**现在这张表记的是 53 处 / 5 个 workflow / 5 个 action**
+—— `launch-plan` 加了一处 `download-artifact` 去吃 `file-index` 那份首启队列报告，`backends` 那条
+新车道又带进 checkout 与 setup-python 各一处，`installer.yml` 再带进 checkout 与 tauri-action 各一处；
+**另有 4 处是补漏**：上一版扫描表没列 `shell.yml`，它从进仓库起就有 2 个 checkout + 2 个
+upload-artifact 没被数过（"49 处"因此少算）。计数不靠这句话自证：
+`python3 tools/action_pins.py --check` 会按五份 workflow 重数一遍）。仓库对引擎、权重、工具带都定了"release + sha256"，
 唯独真正执行出包的那只手跟着别人随时会移动的 tag 走。现在：
 
 | action | 钉住的 commit | 来自哪个 tag | runtime / 输入数 | 许可 |
@@ -72,7 +76,7 @@ setup-python 各一处。计数不靠这句话自证：
 | `actions/setup-python` | `a26af69b…` | v5.6.0（= `v5`） | node20 / 10 | MIT |
 | `actions/upload-artifact` | `ea165f8d…` | v4.6.2（= `v4`） | node20 / 7 | MIT |
 | `actions/download-artifact` | `d3f86a10…` | v4.3.0（= `v4`） | node20 / 8 | MIT |
-| `tauri-apps/tauri-action` | `1deb371b…` | v1.0.0（预留，尚未被任何 workflow 用到） | node24 / 23 | MIT |
+| `tauri-apps/tauri-action` | `1deb371b…` | v1.0.0（`installer.yml` 使用） | node24 / 23 | MIT |
 
 判据与"tag 漂了只报不跟"由 `tools/action_pins.py` 守：车道每次重新解析尾注里那个 tag，
 与本表不同就红（要显式重钉），本机重跑 `GITHUB_TOKEN=$(gh auth token) python3 tools/action_pins.py --check`。
@@ -125,13 +129,35 @@ asset/OS/引擎不符等）；`tests/test_stage_payload.py` 10 条离线对照�
 `--json` 出报告 + `--check` 复核两步。**车道至今 0 次执行**（#19），所以"CI 上真摆对"仍未证；
 权重不在这一步，它们按 [model-catalog.md](model-catalog.md) 首启下载。
 
+## ⑥ 安装包本身怎么出？—— 三平台各一个未签名包，图标由 ICO 派生
+
+`.github/workflows/installer.yml`：`shell/**` 或它自己变动时触发（也留 `workflow_dispatch`），
+矩阵三格 Windows `nsis`、macOS `dmg`、Linux `deb`；`projectPath: shell`，
+`tauriScript: npx --yes @tauri-apps/cli@2.12.3`（钉死，绕开 tauri-action 在找不到 CLI 时
+`npm install -g @tauri-apps/cli@v2` 的浮动回退），`tauri-action` 钉 `1deb371b…`，
+产物用 `uploadWorkflowArtifacts` 上传。包里只有外壳，引擎与权重不在其中。
+
+图标：打包器按平台读 `.ico` / `.icns` / PNG，仓库原来只有一张 32×32 的 `icon.ico`。
+`tools/make_icons.py` 用纯 stdlib 解 ICO 的 32bpp BGRA（`biHeight` 是高度的两倍，下半是
+AND 掩码），按**预乘 alpha** 做双线性放大，写出 `32x32.png`、`128x128.png`、`128x128@2x.png`
+与 `icon.icns`（`icp4/icp5/icp6/ic07/ic08/ic09`，每块直接放 PNG）。同一解释器下输出确定；
+`--check` **不能只逐字节比**：本机两个解释器的 zlib 不同（zlib-ng 1.3.1 vs zlib 1.3.2），
+同一份像素压缩出 6,389 vs 6,393 B —— 所以字节不同时解压后逐像素比，CI 才不会假红。
+10 条单测覆盖形状、块类型、预乘、坏 ICO、篡改与缺文件、以及"重压缩的同一张图必须认、
+改一个像素必须拒"这对正负对照。
+`bundle.active` 已打开，目标写在 `tauri.conf.json`，车道再用 `--bundles` 逐平台收窄。
+
+证据边界：**车道 0 次执行**。CLI 版本、图标、矩阵与最后那条"产物必须非空"都只做了静态核对；
+签名仍没做（macOS 无公证、Windows 无代码签名，首启有系统警告），证书是 #30 里等他决定的部分。
+
 ## 还欠什么（都在等一个决定，不是技术问题）
 
 - **CI 本身没跑过**：2026-10-20 在 `4202ef0` 上量到的形状是 run 建了、`engine-live.yml` 的 21 个
-  job 全部登记，但每个都 `runner_name` 空、`steps: 0`、2-3 秒 failure；原因只在 check-run
+  job 全部登记（现在是 22 个，多了 `backends` 那条；同样没有一次执行），
+  但每个都 `runner_name` 空、`steps: 0`、2-3 秒 failure；原因只在 check-run
   annotation 里，写的是**账单/支出上限**（"recent account payments have failed or your spending
   limit needs to be increased"），不是"private 没有免费额度"一句话。逐条复现命令与完整观察
-  记在 README 末段"这套 CI 能证明什么"。上面 ①②④⑤ 都是本机读公共来源量的，
+  记在 README 末段"这套 CI 能证明什么"。`installer.yml` 同样只有 0 步。上面 ①②④⑤⑥ 都是本机读公共来源量的，
   **唯独"车道真跑一遍装出包"必须等解锁**（#19）。
 - **签名**：macOS 要 Apple 证书 + notarization secrets；Windows 签名要代码签名证书，不签就吃 SmartScreen 提示。
   这两件都要花钱/要账号，由他定；不签名也能出包，只是首启有警告。
