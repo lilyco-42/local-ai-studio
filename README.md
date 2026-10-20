@@ -252,6 +252,22 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   属外壳（#25）。10 条源码变异体 × 13 条探针，外加一条链式核对（release 夹具 → 矩阵 → 换档表）；
   离线那层在 `ci.yml` 静态门禁，车道 `backends` 最后一步拿现取那份矩阵重算
   （重数：`python3 tools/backend_choice.py --selftest`、`--check`）。
+- `tools/runtime_parity.py` + `pins/runtime-parity.json`：**换后端那句的前提也得有表**。
+  "换个 asset 就换个后端"要求那一档的包里**有外壳要 exec 的那个文件**（约束第 3 条 × 第 4 条）。
+  证法只用只读元数据：zip 用 `tools/zip_peek.py` 的 HTTP Range 读**中央目录**（每颗约 1 MiB 尾部，
+  不整包下载、不解压、不运行）。实测 **47 个 runtime 资产 / 27 颗读到成员表 / 27 颗都带着 server /
+  0 档缺 server**：llama 在 Windows 的 11 颗（cpu / cuda ×2 版本 / vulkan / rocm / sycl / openvino /
+  opencl-adreno…）全都 `llama-server.exe` **与 `llama-server-impl.dll` 成对**，whisper 的 8 颗带
+  `whisper-server.exe`，sd 的 8 颗带 `sd-server`。**三条边界不猜**：`.tar.gz` 那 19 颗读不了中央目录
+  → 标 `not_read` 并写明"该由出包车道证"，**绝不写进 server_gaps**（未知冒充缺席=谎称知道）；
+  8 颗默认档里 5 颗已证、3 颗是 tar.gz 未证（要等 #19）；`whisper-blas-bin-x64.zip` 名字不写平台而
+  plan 又没装它 → 停在未知，而 whisper 那颗 CPU 默认包的 OS 是**从 payload-plan 取的、不是猜的**
+  （把它改成"猜 win-x64"的变异体被探针抓住）。`server_sibling_lib` 只对 llama 求值，whisper/sd 写
+  `null` 不写 `false`。可执行名**只有一个来源**（`launch_plan.SERVER_BASE`），源码里出现字面量由
+  一条 ast 扫描拒绝。9 条源码变异体 × 11 条探针 + 捕获夹具字节复核（`tests/fixtures/parity-captures.json`，
+  28 颗 / 36,628 B）。顺带落下一条独立证据：**sd 在 macOS 有 `sd-server` + 1 个 `.dylib`**，
+  而 whisper 在 macOS 只有 xcframework（#29）—— 生图在这台机器上有路，字幕没有。
+  重数：`python3 tools/runtime_parity.py --selftest`、`--check`。
 - `tools/action_pins.py` + `pins/actions.json`：**出包那只手自己也要钉住**。这一轮之前三个
   workflow 里 4 个 `uses:` 全是浮动大版本 tag（`checkout@v4`、`setup-python@v5`、
   `upload-artifact@v4`、`download-artifact@v4`，共 **47 处**）—— 仓库对引擎/权重/工具带都定了

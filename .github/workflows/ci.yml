@@ -32,6 +32,8 @@ jobs:
           python tools/backends.py --check
           python tools/backend_choice.py --selftest
           python tools/backend_choice.py --check
+          python tools/runtime_parity.py --selftest
+          python tools/runtime_parity.py --check
           python - <<'PY'
           import ast,sys
           for f in ("tools/engine_probe.py","tests/test_engine_probe.py",

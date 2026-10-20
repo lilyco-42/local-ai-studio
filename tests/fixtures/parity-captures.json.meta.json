@@ -1,0 +1,9 @@
+{
+ "sha256": "5bc5c8871b76185b3ed1cd8a02ced2015011ae54137a9a69436e9c52d2acca7b",
+ "bytes": 36628,
+ "lines": 1261,
+ "crlf": 0,
+ "assets": 28,
+ "captured_at": "2026-10-20",
+ "how": "tools/runtime_parity.py --fetch：tools/zip_peek.py 用 HTTP Range 读 zip 中央目录（每颗约 1 MiB 尾部），不整包下载、不解压、不运行"
+}

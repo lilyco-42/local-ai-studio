@@ -41,6 +41,10 @@ on:
       - "tools/backend_choice.py"
       - "pins/backend-choice.json"
       - "tests/test_backend_choice.py"
+      - "tools/runtime_parity.py"
+      - "pins/runtime-parity.json"
+      - "tests/test_runtime_parity.py"
+      - "tests/fixtures/parity-captures.json"
       - "tests/fixtures/backend_assets*"
       - "tools/install_deps.py"
       - "pins/install-deps.json"
@@ -733,7 +737,9 @@ jobs:
     # 而不是等外壳按一张过期表去挑后端。认不出来的词必须人来认一次，不许静默归成 cpu。
     # 后四个步骤是"换档那张表"（默认档 / 伴生包 / 体积差 / CPU 退路），最后一步拿现取的
     # 矩阵重算一遍：上游撤掉某个 CUDA 版本时，先红的会是伴生包配对而不是体积。
-    timeout-minutes: 6
+    # 再后四个步骤是"server 在场表"：用 HTTP Range 读 zip 中央目录（不整包下载、不解压、不运行），
+    # 证明每一档包里都有外壳要点名执行的那个 server —— "换个 asset 就换个后端"这句话的前提。
+    timeout-minutes: 10
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4.4.0
@@ -761,6 +767,15 @@ jobs:
         run: python3 tools/backend_choice.py --check
       - name: 用现取那份矩阵再算一遍换档表（上游加/撤一档就在这里红）
         run: python3 tools/backend_choice.py --matrix .cache/backend-matrix-live.json --check
+      - name: server 在场表：判据本身（默认档缺 server 必须红，tar 不许冒充"读过了"）
+        run: python3 tools/runtime_parity.py --selftest
+      - name: server 在场单测（9 个把源码改坏的变异体 × 11 条探针）
+        run: python -m unittest tests.test_runtime_parity -v
+      - name: 离线：用已提交那份成员表对表
+        run: python3 tools/runtime_parity.py --check
+      - name: 现读 zip 的中央目录再对一次（上游重打包、把 server 换掉就在这里红）
+        run: python3 tools/runtime_parity.py --fetch --captures .cache/live-parity.json
+             --check --captures .cache/live-parity.json
 
   ocr-build-surface:
     # 四项能力里只有 OCR 要现场编译，而"钉 commit"对它**并不等于钉住构建输入**：
