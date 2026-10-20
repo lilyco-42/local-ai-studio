@@ -38,6 +38,9 @@ on:
       - "tests/fixtures/first-run-queue*"
       - "tools/backends.py"
       - "pins/backend-matrix.json"
+      - "tools/backend_choice.py"
+      - "pins/backend-choice.json"
+      - "tests/test_backend_choice.py"
       - "tests/fixtures/backend_assets*"
       - "tools/install_deps.py"
       - "pins/install-deps.json"
@@ -725,9 +728,11 @@ jobs:
   backends:
     # 约束第 5 条（按检测到的后端分层）与第 3 条（runtime 可替换）的数据面：
     # 三项引擎在这个 ref 上到底发了哪几档加速包、各多大、digest 是多少。
-    # 前三步离线（判据自身 / 单测 / 与已提交那张比漂移），第四步才现取一次 release 表 ——
+    # 前三个矩阵步骤离线（判据自身 / 单测 / 与已提交那张比漂移），第四个才现取一次 release 表 ——
     # 上游加档、撤档、改拼法（sd 的 CUDA 同时写 cuda12 与 cu12 就是例子）都会在这里红，
     # 而不是等外壳按一张过期表去挑后端。认不出来的词必须人来认一次，不许静默归成 cpu。
+    # 后四个步骤是"换档那张表"（默认档 / 伴生包 / 体积差 / CPU 退路），最后一步拿现取的
+    # 矩阵重算一遍：上游撤掉某个 CUDA 版本时，先红的会是伴生包配对而不是体积。
     timeout-minutes: 6
     runs-on: ubuntu-latest
     steps:
@@ -737,7 +742,7 @@ jobs:
           python-version: "3.12"
       - name: 判据本身（假后端词必须报、mac 不许被猜成 metal、Darwin 不许被分到 win）
         run: python3 tools/backends.py --selftest
-      - name: 判据单测（含把源码改坏的 5 个变异体与真实夹具的字节校验）
+      - name: 判据单测（含把源码改坏的 7 个变异体与真实夹具的字节校验）
         run: python -m unittest tests.test_backends -v
       - name: 离线：与已提交那张比漂移
         run: python3 tools/backends.py --check
@@ -748,6 +753,14 @@ jobs:
              --out .cache/backend-matrix-live.json
       - name: 现取的那份与已提交那张对表（这一步才是"分层还能用吗"的答案）
         run: python3 tools/backends.py --check --captures .cache/live-assets.json
+      - name: 换档那张表：默认档搬运、伴生包配对、CPU 退路（判据本身，10 条对照）
+        run: python3 tools/backend_choice.py --selftest
+      - name: 换档单测（含 10 个把源码改坏的变异体 × 13 条探针）
+        run: python -m unittest tests.test_backend_choice -v
+      - name: 换档表离线对表（默认档必须还是 payload-plan 那三行）
+        run: python3 tools/backend_choice.py --check
+      - name: 用现取那份矩阵再算一遍换档表（上游加/撤一档就在这里红）
+        run: python3 tools/backend_choice.py --matrix .cache/backend-matrix-live.json --check
 
   ocr-build-surface:
     # 四项能力里只有 OCR 要现场编译，而"钉 commit"对它**并不等于钉住构建输入**：

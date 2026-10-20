@@ -45,6 +45,9 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
    并且和 LM Studio 的 LM Runtimes 同形，便于后续对齐习惯。
    **可替换的对象现在有表可查了**（验收第 27 条）。那张表同时也说清了三处换不了的地方：
    macOS 的资产名不标后端、whisper 有两颗包名里不写平台、oar-ocr 没有预编译产物。
+   **"换到哪一档、要多下多少"是另一张表**（验收第 28 条）：默认档从 `payload-plan` 搬、
+   CUDA 档必须连 `cudart-` 伴生包一起算（实测伴生包 373–567 MiB，比本体还大），
+   CPU 退路分四态算出来。
 4. **对话、字幕、生图三项起常驻 server，而不是一次一进程**：上游包里就有
    `llama-server` / `whisper-server` / `sd-server`（见 ADR-0001"包内到底有什么"）。
    400 MB 权重每次重载不可接受。`llama-bench` 也在包里，"这台机器多少 tok/s"不用自研。
@@ -64,7 +67,8 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
    含着用户根本没点的 2,033.8 MiB（16GB 档是 9,612.6 MiB）。现在它是一张机器读的表
    （`machine-budget.json` 的 `default_install` + `first_run_*` / `download_*` 两组数，
    `pins/launch-plan.json` 每项能力的 `install_stage`），半装半不装直接红 —— 见验收第 20 条。
-   **"有哪些后端可换"这一半也已经有产物**（`pins/backend-matrix.json`，验收第 27 条）；
+   **"有哪些后端可换"这一半也已经有产物**（`pins/backend-matrix.json`，验收第 27 条；
+   换哪一档与安装量差值是 `pins/backend-choice.json`，验收第 28 条）；
    "这台机器检测到哪个后端"那一半仍属外壳（#25），要等 CI 能跑或真机 —— 这两句不许混着说。
 
 ## MVP / MVP+ 切分
@@ -85,11 +89,12 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
 
 ## 验收标准（在当前唯一可用验证手段 = GitHub Actions 下）
 
-1. `ci.yml`：716 个单测绿（重数：`python -W error::ResourceWarning -m unittest discover -s tests
+1. `ci.yml`：738 个单测绿（重数：`python -W error::ResourceWarning -m unittest discover -s tests
    -p "test_*.py"`；按文件数就 `python -m unittest tests.<模块名>`。2026-10-20 实测逐文件：
    `test_yaml_gate.py` 闸门自己 14、`test_lane_argv.py` 车道 ↔ 启动表一致（含 9 个 workflow 文本变异）10、
    `test_sideload.py` sideload 按内容认领（6 条源码变异体 + 三个真上游文件）22、
    `test_backends.py` 后端矩阵（7 条源码变异体 + 真实 release 捕获）22、
+   `test_backend_choice.py` 换档表（10 条源码变异体 × 13 条探针，输入是两份已钉产物）22、
    `test_toolbelt_pins.py` 工具带钉表 14、
    `test_catalog_snapshot.py` 目录快照与侧表 16、`test_citation_check.py` 出处闸门 22、
    `test_ocr_build_surface.py` OCR 依赖面 15、`test_file_index.py` 下载层五种状态与首启队列 35、
@@ -648,6 +653,38 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     重数：`python3 tools/backends.py --selftest`、`--check`、
     `python3 tools/backends.py --fetch --captures <路径> --check --captures <路径>`。
 
+28. **"换哪一档、要多下多少"也得是表，不能等外壳里凭估计**：`tools/backend_choice.py`
+    → `pins/backend-choice.json`。它的两份输入都是**别家已经落盘的产物**（矩阵给体积与哈希、
+    `payload-plan` 给默认档），所以这张表不许自己挑默认档 —— 逐行等于 `payload-plan` 那三行才算对
+    （探针「默认档搬对」钉这条，把"改成自己挑一颗"那个变异体当场抓住）。
+    实测 **16 个 引擎×OS / 41 个格子 / 45 个可选档 / 10 档 CUDA / 7 份 `cudart-` 伴生包**。
+    三条只有把两张表并起来才看得见的数：
+    ① llama 在 win-x64 从 CPU 默认档换 CUDA 12.4 是 **+236.3 MiB 本体，另加 373.3 MiB 伴生包**
+    （伴生包比本体还大），而换 **Vulkan 只 +12.0 MiB 且没有伴生包** —— "有独显的普通笔记本最便宜的
+    那条加速路是 Vulkan"这句话，此前没有任何产物撑得住；
+    ② whisper 的三档 CUDA（win-arm64 `13.4`、win-x64 `11.8.0` / `12.4.0`）**没有对应伴生包**
+    （10 − 7 = 3，实测就是这三档）→ 进 `cuda_rows_without_companion` 并带 `because`：
+    **"没有"与"不需要"是两句话**，与 `no_acceleration_named` / `missing_cell_default` 拆开记是同一条纪律；
+    ③ sd 的伴生包写 `cu12` 而 runtime 写 `cuda12` —— 拼法不同但必须配上同一颗（单独一条用例钉住）。
+    `cpu_fallback` 四态（`named_cpu` / `only_unnamed_asset` / `name_does_not_say` / `absent`）
+    **由格子算出来，不许手写**：whisper 在 win-x64 那颗 CPU 包名字里不写平台 → `only_unnamed_asset`，
+    同时它**不在按名字分出来的可换清单里**（`default_outside_cell` 实测 1 条，`default_in_cell: false`）；
+    llama/sd 在 macOS 是 `name_does_not_say`（不断言 Metal）；`payload-plan` 里 whisper 在 mac 那一行
+    **连 engine 都没有**（上游无产物）→ 记进 `missing_cell_default`（实测 1 条）。
+    一张只说"有哪些档"的表还会骗人第二回：**4 个 引擎×OS**（llama linux-s390x、whisper
+    linux-arm64 / linux-x64 / win-x86）按名字**分不出任何加速档** → 点名进 `no_acceleration_named`，
+    而 llama 与 sd 在 win-x64 / linux-x64 有没有加速档是**硬地板**（把那一格的加速档撤光就红）。
+    这张表**故意不说**的写在 `rule.driver`：这台机器的驱动能不能吃到某一档 CUDA，要运行时问
+    `nvidia-smi`，属外壳 #25 —— 与"有哪些档可换"仍是两句话。
+    判据的承重：**10 条源码变异体**（配不上的伴生包被静默吸收、一档对上两颗、没哈希的档进表、
+    默认档凭空消失、把推断写成事实、CPU 退路没了不报、默认档改成自己挑一颗、输入形状漂了不报、
+    分层地板清空、体积差不进比对表）× **13 条探针**全被抓；另有一条链式核对：这张表的输入本身
+    还能从重算的 release 夹具复现（夹具 → 矩阵 → 换档表，三环各自 0 问题）。
+    车道 `backends`（engine-live 第 22 个 job，现在 11 步）最后一步拿**现取**那份矩阵重算一遍：
+    上游补发或撤掉某个 CUDA 版本时，先红的会是伴生包配对而不是体积。
+    重数：`python3 tools/backend_choice.py --selftest`、`--check`、
+    `python3 tools/backend_choice.py --matrix <现取那份> --check`。
+
 ## 车道判据的出处（全部按**钉住的那个 ref** 核过，不是按 HEAD 记的）
 
 | 车道 | 判据依赖的东西 | 出处 |
@@ -668,7 +705,7 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
 | `install-deps` | 安装包车道第一步该 `apt-get install` 什么、镜像 readme 里在不在 | Tauri `2e513e3f`：`<TabItem label="Debian">` = `src/content/docs/start/prerequisites.mdx:29`，族里最后一颗点名的 `libayatana-appindicator3-dev` = `:40`（整页唯一命中），安装命令首行 `sudo apt install libwebkit2gtk-4.1-dev` = `:33`；**整页搜 `gstreamer` 命中 0 次** —— 旧文档里那句"+ gstreamer 插件族"没有出处，已删。runner-images `b4067e48`：包表形状靠 `| libssl-dev             | 3.0.13-0ubuntu3.16 |` = `images/ubuntu/Ubuntu2404-Readme.md:289` 证明（不然逐字查全是 `not_listed` 只可能是读错了表），工具链 `- Node.js 22.23.3` = `:26`、`- Rust 1.99.1` = `:140`。在场判语只说 `listed / not_listed`，产物 `verdict_legend` 明写"readme 没提到 ≠ 机器上没装"，真要证明装没装得看车道打印 `pkg-config --modversion webkit2gtk-4.1` |
 | `lane-argv` | 车道真敲的那一行是否与 `pins/launch-plan.json` 一致 | **不是上游声明，是本仓库两份产物互相核对**：读 `.github/workflows/engine-live.yml`（pyyaml），按表里的 `binaries` / `bind` / `flags_absent` / `omit` / `subcommand` 查。九种改坏 workflow 文本的对照全被报（含 `$SRV` 换成 `:` 的"只 find 不 exec"）；判据不吃注释与 heredoc 正文，这条本身也有正反对照。上游那五处旗标事实的出处仍归 `launch-plan` 那一行 |
 | `sideload` | 用户手上的文件能不能按内容认领 | 三个**真实下载的上游文件**（`tests/fixtures/sideload/`，都 <30 KB）：两颗钉过的字典 + `ppocrv5_latin_dict.txt` 的另一颗同名不同字节者。同一串 sha256 取自 GitHub API 的 `asset.digest`（复现命令连同两颗 tag 的体积与 digest 一起记在 `tests/fixtures/sideload.meta.json` 的 reproduce 字段 —— 那条 jq 里有竖线，写进这张表会打断一行），meta 记完整串、测试按 meta 复算字节。`.gguf` 文件头不在这一层解读（归 CI/外壳里的 gguf-parser），产物 `rule.header` 写明了这条边界 |
-| `backends` | 分层与 runtime 可替换这两句有多少可选面 | 三个 ref 的 release 表按 `pins/payload-plan.json` 钉的那一个现取（`gh api repos/<repo>/releases/tags/<tag>` 的 name / size / digest）：llama `b11727` 36 个、whisper `b5454` 12 个、sd `master-975-95b3090` 9 个 = 57，与 ADR-0001 那句"36 个产物"逐条对得上。真实捕获钉在 `tests/fixtures/backend_assets.json`（sha256 记在 `.meta.json`，测试复算字节），车道 `backends` 第四步再现取一次对表 |
+| `backends` | 分层与 runtime 可替换这两句有多少可选面 | 三个 ref 的 release 表按 `pins/payload-plan.json` 钉的那一个现取（`gh api repos/<repo>/releases/tags/<tag>` 的 name / size / digest）：llama `b11727` 36 个、whisper `b5454` 12 个、sd `master-975-95b3090` 9 个 = 57，与 ADR-0001 那句"36 个产物"逐条对得上。真实捕获钉在 `tests/fixtures/backend_assets.json`（sha256 记在 `.meta.json`，测试复算字节），车道 `backends` 的现取步骤再现取一次对表；同一 job 后四步是换档表（`--selftest` / 单测 / 离线对表 / 拿现取那份矩阵重算） |
 | 引擎与权重输入 | 上游 `digest` 就是内容哈希 | 五个包整包下回实算相等（llama b11727、whisper b5454、sd 95b3090、qwen 415 MB、SD1.5 1.5 GB），见 `pins/models.json` 的 `bytes_verified` |
 
 写这张表的理由：CI 现在一次都跑不了，而"日志里会出现某串"这类假设一旦错，

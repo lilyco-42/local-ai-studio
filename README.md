@@ -237,8 +237,21 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   3 颗（格子数与总行数那几格都看不出来），现在按 `(引擎, 资产)` 去重。
   认不出的词（上游加一档 hip/mtl）一律报 `unknown_token` 并红，**不许静默归成 cpu**；
   7 条源码变异体 × 10 条探针 + 真实夹具字节校验；离线那层在 `ci.yml` 静态门禁，
-  车道 `backends` 第四步还回现取一次再对表（重数：`python3 tools/backends.py --selftest`、
+  车道 `backends` 的现取步骤还回现取一次再对表（重数：`python3 tools/backends.py --selftest`、
   `python3 tools/backends.py --check`）。
+- `tools/backend_choice.py` + `pins/backend-choice.json`：**"换哪一档、要多下多少"也是表**。
+  矩阵说有哪些档，这张表说外壳该下哪一颗：默认档从 `payload-plan` 逐行搬（不许自己挑，有探针钉着）、
+  体积差每次重算、CUDA 档必须连 `cudart-` 伴生包一起算 —— 实测 llama 在 win-x64 换 CUDA 12.4 是
+  **+236.3 MiB 本体 + 373.3 MiB 伴生包**（伴生包比本体还大），而换 **Vulkan 只 +12.0 MiB 且没有伴生包**：
+  "有独显的普通笔记本最便宜的加速路是 Vulkan"这句话，此前没有任何产物撑得住。
+  10 档 CUDA 对 7 份伴生包，剩下 whisper 那 3 档**没有**伴生包 → 写进 `cuda_rows_without_companion`
+  并带 `because`，"没有"不是"不需要"。`cpu_fallback` 四态由格子算出来，不许手写：whisper 在 win-x64
+  那颗 CPU 包名字里不写平台（`only_unnamed_asset`，而且它不在按名字分出的可换清单里）、
+  macOS 两个引擎是 `name_does_not_say`（不断言 Metal）。sd 的伴生包写 `cu12` 而 runtime 写 `cuda12`，
+  拼法不同也必须配上同一颗。**这张表不说"这台机器的驱动能吃到哪一档"** —— 那要运行时问 `nvidia-smi`，
+  属外壳（#25）。10 条源码变异体 × 13 条探针，外加一条链式核对（release 夹具 → 矩阵 → 换档表）；
+  离线那层在 `ci.yml` 静态门禁，车道 `backends` 最后一步拿现取那份矩阵重算
+  （重数：`python3 tools/backend_choice.py --selftest`、`--check`）。
 - `tools/action_pins.py` + `pins/actions.json`：**出包那只手自己也要钉住**。这一轮之前三个
   workflow 里 4 个 `uses:` 全是浮动大版本 tag（`checkout@v4`、`setup-python@v5`、
   `upload-artifact@v4`、`download-artifact@v4`，共 **47 处**）—— 仓库对引擎/权重/工具带都定了

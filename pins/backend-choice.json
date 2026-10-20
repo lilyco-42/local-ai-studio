@@ -1,0 +1,860 @@
+{
+ "companions": {
+  "cudart-llama-b11727-bin-ubuntu-cuda-12.8-x64.tar.gz": {
+   "cuda": "12.8",
+   "engine": "llama",
+   "os": "linux-x64"
+  },
+  "cudart-llama-b11727-bin-ubuntu-cuda-13.4-arm64.tar.gz": {
+   "cuda": "13.4",
+   "engine": "llama",
+   "os": "linux-arm64"
+  },
+  "cudart-llama-b11727-bin-ubuntu-cuda-13.4-x64.tar.gz": {
+   "cuda": "13.4",
+   "engine": "llama",
+   "os": "linux-x64"
+  },
+  "cudart-llama-bin-win-cuda-12.4-x64.zip": {
+   "cuda": "12.4",
+   "engine": "llama",
+   "os": "win-x64"
+  },
+  "cudart-llama-bin-win-cuda-13.4-arm64.zip": {
+   "cuda": "13.4",
+   "engine": "llama",
+   "os": "win-arm64"
+  },
+  "cudart-llama-bin-win-cuda-13.4-x64.zip": {
+   "cuda": "13.4",
+   "engine": "llama",
+   "os": "win-x64"
+  },
+  "cudart-sd-bin-win-cu12-x64.zip": {
+   "cuda": "12",
+   "engine": "sd",
+   "os": "win-x64"
+  }
+ },
+ "cuda_rows_without_companion": [
+  {
+   "asset": "whisper-bin-win-cuda-13.4-arm64.zip",
+   "because": "cudart- 前缀的产物里没有对上这一档的那些",
+   "engine": "whisper",
+   "os": "win-arm64",
+   "version": "13.4"
+  },
+  {
+   "asset": "whisper-bin-win-cuda-11.8.0-x64.zip",
+   "because": "cudart- 前缀的产物里没有对上这一档的那些",
+   "engine": "whisper",
+   "os": "win-x64",
+   "version": "11.8.0"
+  },
+  {
+   "asset": "whisper-bin-win-cuda-12.4.0-x64.zip",
+   "because": "cudart- 前缀的产物里没有对上这一档的那些",
+   "engine": "whisper",
+   "os": "win-x64",
+   "version": "12.4.0"
+  }
+ ],
+ "default_outside_cell": [
+  {
+   "asset": "whisper-bin-x64.zip",
+   "because": "默认档那颗的名字里不写平台，所以不在按名字分出来的清单里 —— 外壳要换回 CPU 时不能靠资产名挑",
+   "engine": "whisper",
+   "inferred_platform": true,
+   "os": "win-x64"
+  }
+ ],
+ "engines": {
+  "llama": {
+   "os": {
+    "android-arm64": {
+     "acceleration_named": [
+      "qnn-snapdragon"
+     ],
+     "cell_backends": [
+      "cpu",
+      "qnn-snapdragon"
+     ],
+     "cpu_fallback": "named_cpu",
+     "default": null,
+     "default_in_cell": false,
+     "default_note": "payload-plan 没覆盖这个 OS（默认档不由这张表决定）",
+     "install": "not_shipped",
+     "options": [
+      {
+       "asset": "llama-b11727-bin-android-arm64.tar.gz",
+       "backend": "cpu",
+       "extra_mib_vs_default": null,
+       "is_default": false,
+       "mib": 72.8,
+       "sha256": "9336df533c31d30300c52c5dae29f66104a276880d77152311074b09f1c64337",
+       "version": null
+      },
+      {
+       "asset": "llama-b11727-bin-android-arm64-snapdragon.tar.gz",
+       "backend": "qnn-snapdragon",
+       "extra_mib_vs_default": null,
+       "is_default": false,
+       "mib": 57.4,
+       "sha256": "419878707d40cbeda5b87cda3f6b4c378227450468114aadfd430b6edd93d826",
+       "version": null
+      }
+     ]
+    },
+    "linux-arm64": {
+     "acceleration_named": [
+      "cuda",
+      "qnn-snapdragon",
+      "vulkan"
+     ],
+     "cell_backends": [
+      "cpu",
+      "cuda",
+      "qnn-snapdragon",
+      "vulkan"
+     ],
+     "cpu_fallback": "named_cpu",
+     "default": null,
+     "default_in_cell": false,
+     "default_note": "payload-plan 没覆盖这个 OS（默认档不由这张表决定）",
+     "install": "not_shipped",
+     "options": [
+      {
+       "asset": "llama-b11727-bin-ubuntu-arm64.tar.gz",
+       "backend": "cpu",
+       "extra_mib_vs_default": null,
+       "is_default": false,
+       "mib": 13.4,
+       "sha256": "cabe1c5db0a9ef28e6979031fda3b27be62a5e9ae8ff3897c6db560505f7b687",
+       "version": null
+      },
+      {
+       "asset": "llama-b11727-bin-ubuntu-cuda-13.4-arm64.tar.gz",
+       "backend": "cuda",
+       "cudart": {
+        "asset": "cudart-llama-b11727-bin-ubuntu-cuda-13.4-arm64.tar.gz",
+        "mib": 526.9,
+        "sha256": "2aa75f00740b4fc80301dcff8f51fafc4c47babd2c434feb75482787da6ca383"
+       },
+       "extra_mib_vs_default": null,
+       "is_default": false,
+       "mib": 142.8,
+       "sha256": "cf85ec8afab7a7dea8f9336fa295b342cbbab77a8babd2dc6810925e68d21119",
+       "version": "13.4"
+      },
+      {
+       "asset": "llama-b11727-bin-linux-arm64-snapdragon.tar.gz",
+       "backend": "qnn-snapdragon",
+       "extra_mib_vs_default": null,
+       "is_default": false,
+       "mib": 18.8,
+       "sha256": "b02e56815ba273164af26422c8dbbf599875f0aab5307e966f326df930fce00b",
+       "version": null
+      },
+      {
+       "asset": "llama-b11727-bin-ubuntu-vulkan-arm64.tar.gz",
+       "backend": "vulkan",
+       "extra_mib_vs_default": null,
+       "is_default": false,
+       "mib": 23.2,
+       "sha256": "7c5a071545a9eada489dee9b47993b7307f7b1f98e3d19ae704c5bdfbb09a081",
+       "version": null
+      }
+     ]
+    },
+    "linux-s390x": {
+     "acceleration_named": [],
+     "cell_backends": [
+      "cpu"
+     ],
+     "cpu_fallback": "named_cpu",
+     "default": null,
+     "default_in_cell": false,
+     "default_note": "payload-plan 没覆盖这个 OS（默认档不由这张表决定）",
+     "install": "not_shipped",
+     "options": [
+      {
+       "asset": "llama-b11727-bin-ubuntu-s390x.tar.gz",
+       "backend": "cpu",
+       "extra_mib_vs_default": null,
+       "is_default": false,
+       "mib": 15.7,
+       "sha256": "6f3c84e026ff3a574e6755fbb2caa8245dd3e8c3763607c0c4d9d0a597b7a163",
+       "version": null
+      }
+     ]
+    },
+    "linux-x64": {
+     "acceleration_named": [
+      "cuda",
+      "openvino",
+      "rocm",
+      "sycl",
+      "vulkan"
+     ],
+     "cell_backends": [
+      "cpu",
+      "cuda",
+      "openvino",
+      "rocm",
+      "sycl",
+      "vulkan"
+     ],
+     "cpu_fallback": "named_cpu",
+     "default": "llama-b11727-bin-ubuntu-x64.tar.gz",
+     "default_in_cell": true,
+     "default_note": null,
+     "install": "shipped",
+     "options": [
+      {
+       "asset": "llama-b11727-bin-ubuntu-x64.tar.gz",
+       "backend": "cpu",
+       "extra_mib_vs_default": 0.0,
+       "is_default": true,
+       "mib": 17.1,
+       "sha256": "17bfcf2217ab5168888dd629a833e264babd488c0512fe18bc66e49632f00241",
+       "version": null
+      },
+      {
+       "asset": "llama-b11727-bin-ubuntu-cuda-12.8-x64.tar.gz",
+       "backend": "cuda",
+       "cudart": {
+        "asset": "cudart-llama-b11727-bin-ubuntu-cuda-12.8-x64.tar.gz",
+        "mib": 566.8,
+        "sha256": "82e05f993613f6f1cbdd64c3373ddfa06428e1c77abc4768a424d95cf0ce2824"
+       },
+       "extra_mib_vs_default": 148.2,
+       "is_default": false,
+       "mib": 165.3,
+       "sha256": "987ed7efac16e9157877c80d14a7f2f5f34a7a96bcc1a602683e3e9d1e39cb84",
+       "version": "12.8"
+      },
+      {
+       "asset": "llama-b11727-bin-ubuntu-cuda-13.4-x64.tar.gz",
+       "backend": "cuda",
+       "cudart": {
+        "asset": "cudart-llama-b11727-bin-ubuntu-cuda-13.4-x64.tar.gz",
+        "mib": 419.8,
+        "sha256": "06581ea1fd042556549ecfd7882ff7c2b798a63d86cb621923f95c1d50aaaf44"
+       },
+       "extra_mib_vs_default": 130.0,
+       "is_default": false,
+       "mib": 147.1,
+       "sha256": "5f2b3fe0e9833324e872749a05d9464a1628826c37ad7d19994a11c407754ae3",
+       "version": "13.4"
+      },
+      {
+       "asset": "llama-b11727-bin-ubuntu-openvino-2026.4.1-x64.tar.gz",
+       "backend": "openvino",
+       "extra_mib_vs_default": 95.0,
+       "is_default": false,
+       "mib": 112.1,
+       "sha256": "50159c2d67487ddc840f4f28db2cbfb05651ecb505021c85a2b7b1e84bace097",
+       "version": "2026.4.1"
+      },
+      {
+       "asset": "llama-b11727-bin-ubuntu-rocm-10.0-x64.tar.gz",
+       "backend": "rocm",
+       "extra_mib_vs_default": 216.9,
+       "is_default": false,
+       "mib": 234.0,
+       "sha256": "c7b77952c514f8c5f0472e698c1d0f4dd20509d78c9951139d4e475580e640ce",
+       "version": "10.0"
+      },
+      {
+       "asset": "llama-b11727-bin-ubuntu-sycl-fp16-x64.tar.gz",
+       "backend": "sycl",
+       "extra_mib_vs_default": 38.1,
+       "is_default": false,
+       "mib": 55.2,
+       "sha256": "a489244c3d29d79926c8954db6436fab4ecdb7bbcfd68651c3d97274c6162511",
+       "version": "16"
+      },
+      {
+       "asset": "llama-b11727-bin-ubuntu-sycl-fp32-x64.tar.gz",
+       "backend": "sycl",
+       "extra_mib_vs_default": 38.0,
+       "is_default": false,
+       "mib": 55.1,
+       "sha256": "bde8184985957dc8f8bd134a0eb97e0dbb09d10be91e75c872e06b614f46070f",
+       "version": "32"
+      },
+      {
+       "asset": "llama-b11727-bin-ubuntu-vulkan-x64.tar.gz",
+       "backend": "vulkan",
+       "extra_mib_vs_default": 12.1,
+       "is_default": false,
+       "mib": 29.2,
+       "sha256": "7d301bce1b63afd6ef1673b2c9668ac7beda392a0ff4faf2402a2c1a43e68a78",
+       "version": null
+      }
+     ]
+    },
+    "macos-arm64": {
+     "acceleration_named": [
+      "unknown_from_name"
+     ],
+     "cell_backends": [
+      "unknown_from_name"
+     ],
+     "cpu_fallback": "name_does_not_say",
+     "default": "llama-b11727-bin-macos-arm64.tar.gz",
+     "default_in_cell": true,
+     "default_note": null,
+     "install": "shipped",
+     "options": [
+      {
+       "asset": "llama-b11727-bin-macos-arm64.tar.gz",
+       "backend": "unknown_from_name",
+       "extra_mib_vs_default": 0.0,
+       "is_default": true,
+       "mib": 11.7,
+       "sha256": "46d40093b6946854525682ce4ac53dcf4fd4b2e94ee03dd24e7b4f64ed039b95",
+       "version": null
+      }
+     ]
+    },
+    "macos-x64": {
+     "acceleration_named": [
+      "unknown_from_name"
+     ],
+     "cell_backends": [
+      "unknown_from_name"
+     ],
+     "cpu_fallback": "name_does_not_say",
+     "default": null,
+     "default_in_cell": false,
+     "default_note": "payload-plan 没覆盖这个 OS（默认档不由这张表决定）",
+     "install": "not_shipped",
+     "options": [
+      {
+       "asset": "llama-b11727-bin-macos-x64.tar.gz",
+       "backend": "unknown_from_name",
+       "extra_mib_vs_default": null,
+       "is_default": false,
+       "mib": 11.2,
+       "sha256": "c6567bdcc0ae81221ecfe87e87b651fd9d70b4edc0edaedcf7b95b1742972eaf",
+       "version": null
+      }
+     ]
+    },
+    "win-arm64": {
+     "acceleration_named": [
+      "cuda",
+      "opencl-adreno",
+      "vulkan"
+     ],
+     "cell_backends": [
+      "cpu",
+      "cuda",
+      "opencl-adreno",
+      "vulkan"
+     ],
+     "cpu_fallback": "named_cpu",
+     "default": null,
+     "default_in_cell": false,
+     "default_note": "payload-plan 没覆盖这个 OS（默认档不由这张表决定）",
+     "install": "not_shipped",
+     "options": [
+      {
+       "asset": "llama-b11727-bin-win-cpu-arm64.zip",
+       "backend": "cpu",
+       "extra_mib_vs_default": null,
+       "is_default": false,
+       "mib": 12.0,
+       "sha256": "6761c4ca85aca0922dcb4cce6b8b3fc64062ebc5ae89bed88c4b98f961ac4f98",
+       "version": null
+      },
+      {
+       "asset": "llama-b11727-bin-win-cuda-13.4-arm64.zip",
+       "backend": "cuda",
+       "cudart": {
+        "asset": "cudart-llama-bin-win-cuda-13.4-arm64.zip",
+        "mib": 146.2,
+        "sha256": "642dcde8805b3e3165ca710a5443b3b4044b27d96bd3ee3132473988c9bcb774"
+       },
+       "extra_mib_vs_default": null,
+       "is_default": false,
+       "mib": 140.5,
+       "sha256": "09efb4f0a3037b67445585015db157606b2d220810e88c1f87d4e8e2976b0653",
+       "version": "13.4"
+      },
+      {
+       "asset": "llama-b11727-bin-win-opencl-adreno-arm64.zip",
+       "backend": "opencl-adreno",
+       "extra_mib_vs_default": null,
+       "is_default": false,
+       "mib": 12.8,
+       "sha256": "71da4f560d75070cf2df050b5f638e8a6e91403975810b50348f48b09e937ace",
+       "version": null
+      },
+      {
+       "asset": "llama-b11727-bin-win-vulkan-arm64.zip",
+       "backend": "vulkan",
+       "extra_mib_vs_default": null,
+       "is_default": false,
+       "mib": 23.8,
+       "sha256": "e55636aaeb720b0989573448a9fb33056b5fb818203741cd50ce12659176725a",
+       "version": null
+      }
+     ]
+    },
+    "win-x64": {
+     "acceleration_named": [
+      "cuda",
+      "openvino",
+      "rocm",
+      "sycl",
+      "vulkan"
+     ],
+     "cell_backends": [
+      "cpu",
+      "cuda",
+      "openvino",
+      "rocm",
+      "sycl",
+      "vulkan"
+     ],
+     "cpu_fallback": "named_cpu",
+     "default": "llama-b11727-bin-win-cpu-x64.zip",
+     "default_in_cell": true,
+     "default_note": null,
+     "install": "shipped",
+     "options": [
+      {
+       "asset": "llama-b11727-bin-win-cpu-x64.zip",
+       "backend": "cpu",
+       "extra_mib_vs_default": 0.0,
+       "is_default": true,
+       "mib": 18.8,
+       "sha256": "d71a767fd77b2509cc4698d1017d9820b49b0bfaabf5aef7d1ea7e0696d80a71",
+       "version": null
+      },
+      {
+       "asset": "llama-b11727-bin-win-cuda-12.4-x64.zip",
+       "backend": "cuda",
+       "cudart": {
+        "asset": "cudart-llama-bin-win-cuda-12.4-x64.zip",
+        "mib": 373.3,
+        "sha256": "8c79a9b226de4b3cacfd1f83d24f962d0773be79f1e7b75c6af4ded7e32ae1d6"
+       },
+       "extra_mib_vs_default": 236.3,
+       "is_default": false,
+       "mib": 255.1,
+       "sha256": "1b11ccb85226318c3a6037e9ba2f1772c0823e6bcb8dd65a17c1137a0d04e4a8",
+       "version": "12.4"
+      },
+      {
+       "asset": "llama-b11727-bin-win-cuda-13.4-x64.zip",
+       "backend": "cuda",
+       "cudart": {
+        "asset": "cudart-llama-bin-win-cuda-13.4-x64.zip",
+        "mib": 403.9,
+        "sha256": "738f8c251ac22b70c3ae6f83a10cf222725df0395246a2cf58f32bdb85fbe668"
+       },
+       "extra_mib_vs_default": 129.1,
+       "is_default": false,
+       "mib": 147.9,
+       "sha256": "8fa05f3fb392f8cfb3aef5ce231910673de5c744fbbc9e8eaac29d0fe159477b",
+       "version": "13.4"
+      },
+      {
+       "asset": "llama-b11727-bin-win-openvino-2026.4.1-x64.zip",
+       "backend": "openvino",
+       "extra_mib_vs_default": 76.1,
+       "is_default": false,
+       "mib": 94.9,
+       "sha256": "c87844db6d30e1db8790a80c097a7d490b7d5c7d1e81be36ba943fc6d9146048",
+       "version": "2026.4.1"
+      },
+      {
+       "asset": "llama-b11727-bin-win-rocm-10.0-x64.zip",
+       "backend": "rocm",
+       "extra_mib_vs_default": 228.0,
+       "is_default": false,
+       "mib": 246.8,
+       "sha256": "5d0caf4f3ce3c6210093e8b914e8e321aad42c2f07da7d764279aff228e8b4f2",
+       "version": "10.0"
+      },
+      {
+       "asset": "llama-b11727-bin-win-sycl-x64.zip",
+       "backend": "sycl",
+       "extra_mib_vs_default": 123.5,
+       "is_default": false,
+       "mib": 142.3,
+       "sha256": "71bfe177b690aaacc1944d4ff2757a8410b5dc45656af99c1fd6d947bb157206",
+       "version": null
+      },
+      {
+       "asset": "llama-b11727-bin-win-vulkan-x64.zip",
+       "backend": "vulkan",
+       "extra_mib_vs_default": 12.0,
+       "is_default": false,
+       "mib": 30.8,
+       "sha256": "c373936fb9578ac85d2e5c3d220821eddae4288283237b01d9618419175f127b",
+       "version": null
+      }
+     ]
+    }
+   },
+   "release": "b11727"
+  },
+  "sd": {
+   "os": {
+    "linux-x64": {
+     "acceleration_named": [
+      "rocm",
+      "vulkan"
+     ],
+     "cell_backends": [
+      "cpu",
+      "rocm",
+      "vulkan"
+     ],
+     "cpu_fallback": "named_cpu",
+     "default": "sd-master-95b3090-bin-Linux-Ubuntu-24.04-x86_64.zip",
+     "default_in_cell": true,
+     "default_note": null,
+     "install": "shipped",
+     "options": [
+      {
+       "asset": "sd-master-95b3090-bin-Linux-Ubuntu-24.04-x86_64.zip",
+       "backend": "cpu",
+       "extra_mib_vs_default": 0.0,
+       "is_default": true,
+       "mib": 25.1,
+       "sha256": "23757b2d46edd68ec59ad252e6e3d6c1854ab01d6be5d47a06e0bc751c2eee2a",
+       "version": null
+      },
+      {
+       "asset": "sd-master-95b3090-bin-Linux-Ubuntu-24.04-x86_64-rocm-10.1.0.zip",
+       "backend": "rocm",
+       "extra_mib_vs_default": 256.6,
+       "is_default": false,
+       "mib": 281.7,
+       "sha256": "b0deb148e8f0c05c75b5c8b54876ff97f819e80f57fcf1398ebb5dbb727c7a16",
+       "version": "10.1.0"
+      },
+      {
+       "asset": "sd-master-95b3090-bin-Linux-Ubuntu-24.04-x86_64-vulkan.zip",
+       "backend": "vulkan",
+       "extra_mib_vs_default": 9.8,
+       "is_default": false,
+       "mib": 34.9,
+       "sha256": "703f547a0bbe254979940ec6142a87b4af6acbc01d34e37358f4feabb430a225",
+       "version": null
+      }
+     ]
+    },
+    "macos-arm64": {
+     "acceleration_named": [
+      "unknown_from_name"
+     ],
+     "cell_backends": [
+      "unknown_from_name"
+     ],
+     "cpu_fallback": "name_does_not_say",
+     "default": "sd-master-95b3090-bin-Darwin-macOS-26.6.2-arm64.zip",
+     "default_in_cell": true,
+     "default_note": null,
+     "install": "shipped",
+     "options": [
+      {
+       "asset": "sd-master-95b3090-bin-Darwin-macOS-26.6.2-arm64.zip",
+       "backend": "unknown_from_name",
+       "extra_mib_vs_default": 0.0,
+       "is_default": true,
+       "mib": 34.8,
+       "sha256": "2edf5a21c4b73f448c3a02c87925283b77aa94f1859c0d8e649134da68b40813",
+       "version": null
+      }
+     ]
+    },
+    "win-x64": {
+     "acceleration_named": [
+      "cuda",
+      "rocm",
+      "vulkan"
+     ],
+     "cell_backends": [
+      "cpu",
+      "cuda",
+      "rocm",
+      "vulkan"
+     ],
+     "cpu_fallback": "named_cpu",
+     "default": "sd-master-95b3090-bin-win-cpu-x64.zip",
+     "default_in_cell": true,
+     "default_note": null,
+     "install": "shipped",
+     "options": [
+      {
+       "asset": "sd-master-95b3090-bin-win-cpu-x64.zip",
+       "backend": "cpu",
+       "extra_mib_vs_default": 0.0,
+       "is_default": true,
+       "mib": 16.9,
+       "sha256": "945ed74a22a5c6abbae480201312e439f16ad029166dd94e58cef9a2ecb2dba8",
+       "version": null
+      },
+      {
+       "asset": "sd-master-95b3090-bin-win-cuda12-x64.zip",
+       "backend": "cuda",
+       "cudart": {
+        "asset": "cudart-sd-bin-win-cu12-x64.zip",
+        "mib": 537.3,
+        "sha256": "fe20366827d357c00797eebb58244dddab7fd9a348d70090c3871004c320f38d"
+       },
+       "extra_mib_vs_default": 310.8,
+       "is_default": false,
+       "mib": 327.7,
+       "sha256": "b935f5902fbedefe6db0b68c8930ae3e7c0f3cc778bd5d501a3c7f7ee7336338",
+       "version": "12"
+      },
+      {
+       "asset": "sd-master-95b3090-bin-win-rocm-10.1.0-x64.zip",
+       "backend": "rocm",
+       "extra_mib_vs_default": 234.9,
+       "is_default": false,
+       "mib": 251.8,
+       "sha256": "cecec9f455f4675b4560b0e604f4f852c6e1ecdc9f2d12ce4aee5eb7e9679195",
+       "version": "10.1.0"
+      },
+      {
+       "asset": "sd-master-95b3090-bin-win-vulkan-x64.zip",
+       "backend": "vulkan",
+       "extra_mib_vs_default": 11.1,
+       "is_default": false,
+       "mib": 28.0,
+       "sha256": "17398d07ba89c2fba21b8662db69ecdd917888373e4f82779b7599e97a6b4bd3",
+       "version": null
+      }
+     ]
+    }
+   },
+   "release": "master-975-95b3090"
+  },
+  "whisper": {
+   "os": {
+    "linux-arm64": {
+     "acceleration_named": [],
+     "cell_backends": [
+      "cpu"
+     ],
+     "cpu_fallback": "named_cpu",
+     "default": null,
+     "default_in_cell": false,
+     "default_note": "payload-plan 没覆盖这个 OS（默认档不由这张表决定）",
+     "install": "not_shipped",
+     "options": [
+      {
+       "asset": "whisper-bin-ubuntu-arm64.tar.gz",
+       "backend": "cpu",
+       "extra_mib_vs_default": null,
+       "is_default": false,
+       "mib": 4.4,
+       "sha256": "6b95ebfc60447df48e70ef00a73bdc3f41679ed2d01ef465827206a2ff325149",
+       "version": null
+      }
+     ]
+    },
+    "linux-x64": {
+     "acceleration_named": [],
+     "cell_backends": [
+      "cpu"
+     ],
+     "cpu_fallback": "named_cpu",
+     "default": "whisper-bin-ubuntu-x64.tar.gz",
+     "default_in_cell": true,
+     "default_note": null,
+     "install": "shipped",
+     "options": [
+      {
+       "asset": "whisper-bin-ubuntu-x64.tar.gz",
+       "backend": "cpu",
+       "extra_mib_vs_default": 0.0,
+       "is_default": true,
+       "mib": 9.9,
+       "sha256": "a72becf15d7917f990f6313867a52638b82b7f9ef237fb0c980dac56a135781c",
+       "version": null
+      }
+     ]
+    },
+    "win-arm64": {
+     "acceleration_named": [
+      "cuda",
+      "opencl-adreno"
+     ],
+     "cell_backends": [
+      "cpu",
+      "cuda",
+      "opencl-adreno"
+     ],
+     "cpu_fallback": "named_cpu",
+     "default": null,
+     "default_in_cell": false,
+     "default_note": "payload-plan 没覆盖这个 OS（默认档不由这张表决定）",
+     "install": "not_shipped",
+     "options": [
+      {
+       "asset": "whisper-bin-win-cpu-arm64.zip",
+       "backend": "cpu",
+       "extra_mib_vs_default": null,
+       "is_default": false,
+       "mib": 4.2,
+       "sha256": "28c37e7b598c3d9bbfef94f3bd67f2ee6f12b7c86f3da5edcf5e4308d615ff6d",
+       "version": null
+      },
+      {
+       "asset": "whisper-bin-win-cuda-13.4-arm64.zip",
+       "backend": "cuda",
+       "cudart": null,
+       "cudart_note": "这份 release 的产物表里没有与该档同 (引擎, OS, CUDA 版本) 的 cudart- 伴生包 —— 是「没有」，不是「不需要」",
+       "extra_mib_vs_default": null,
+       "is_default": false,
+       "mib": 277.7,
+       "sha256": "6184ae8887d38ea9add68e883b9c846e7bf562ba1bf619ffc7ee9f8ec7e1699c",
+       "version": "13.4"
+      },
+      {
+       "asset": "whisper-bin-win-opencl-adreno-arm64.zip",
+       "backend": "opencl-adreno",
+       "extra_mib_vs_default": null,
+       "is_default": false,
+       "mib": 4.7,
+       "sha256": "915b48289f362c5f4cf33f3ffdd30f1f43de68f6103a3088858e346635719007",
+       "version": null
+      }
+     ]
+    },
+    "win-x64": {
+     "acceleration_named": [
+      "cuda"
+     ],
+     "cell_backends": [
+      "cuda"
+     ],
+     "cpu_fallback": "only_unnamed_asset",
+     "default": "whisper-bin-x64.zip",
+     "default_in_cell": false,
+     "default_note": null,
+     "install": "shipped",
+     "options": [
+      {
+       "asset": "whisper-bin-win-cuda-11.8.0-x64.zip",
+       "backend": "cuda",
+       "cudart": null,
+       "cudart_note": "这份 release 的产物表里没有与该档同 (引擎, OS, CUDA 版本) 的 cudart- 伴生包 —— 是「没有」，不是「不需要」",
+       "extra_mib_vs_default": 263.1,
+       "is_default": false,
+       "mib": 271.6,
+       "sha256": "e81c86c542be6e3d7b7245392d4e1c52ab6e5c61dbe38721754bc0ab59d4d027",
+       "version": "11.8.0"
+      },
+      {
+       "asset": "whisper-bin-win-cuda-12.4.0-x64.zip",
+       "backend": "cuda",
+       "cudart": null,
+       "cudart_note": "这份 release 的产物表里没有与该档同 (引擎, OS, CUDA 版本) 的 cudart- 伴生包 —— 是「没有」，不是「不需要」",
+       "extra_mib_vs_default": 644.7,
+       "is_default": false,
+       "mib": 653.2,
+       "sha256": "afef0b881c500958921c3f5523b50e59ee2ec9b6f5cbd25b324c51ed308a957a",
+       "version": "12.4.0"
+      }
+     ]
+    },
+    "win-x86": {
+     "acceleration_named": [],
+     "cell_backends": [
+      "blas",
+      "cpu"
+     ],
+     "cpu_fallback": "named_cpu",
+     "default": null,
+     "default_in_cell": false,
+     "default_note": "payload-plan 没覆盖这个 OS（默认档不由这张表决定）",
+     "install": "not_shipped",
+     "options": [
+      {
+       "asset": "whisper-blas-bin-Win32.zip",
+       "backend": "blas",
+       "extra_mib_vs_default": null,
+       "is_default": false,
+       "mib": 12.0,
+       "sha256": "d53f98a031ae73f5f4fff8e134c0c0b5eafe3361f69c660d9fb1c85d102db34a",
+       "version": null
+      },
+      {
+       "asset": "whisper-bin-Win32.zip",
+       "backend": "cpu",
+       "extra_mib_vs_default": null,
+       "is_default": false,
+       "mib": 5.3,
+       "sha256": "b6cb078ee5d4df0f9dcdb4f820210c59bd6534c84fdb13c35bc8a51d1233451f",
+       "version": null
+      }
+     ]
+    }
+   },
+   "release": "b5454"
+  }
+ },
+ "from": "pins/backend-matrix.json（体积与哈希）+ pins/payload-plan.json（默认档）",
+ "missing_cell_default": [
+  {
+   "because": "payload-plan 这一行没有 engine（上游无产物），矩阵里因此没有这一格",
+   "capability": "字幕",
+   "os": "macos-arm64",
+   "status": "上游无产物"
+  }
+ ],
+ "no_acceleration_named": [
+  {
+   "because": "按资产名分不出加速档（上游没发，或名字里不写后端）",
+   "engine": "llama",
+   "os": "linux-s390x"
+  },
+  {
+   "because": "按资产名分不出加速档（上游没发，或名字里不写后端）",
+   "engine": "whisper",
+   "os": "linux-arm64"
+  },
+  {
+   "because": "按资产名分不出加速档（上游没发，或名字里不写后端）",
+   "engine": "whisper",
+   "os": "linux-x64"
+  },
+  {
+   "because": "按资产名分不出加速档（上游没发，或名字里不写后端）",
+   "engine": "whisper",
+   "os": "win-x86"
+  }
+ ],
+ "rule": {
+  "cpu_fallback": "named_cpu=名字里写着 cpu；only_unnamed_asset=CPU 包名字里不写平台，只能靠 payload-plan 的 inferred_platform；name_does_not_say=名字不标后端（macOS），不断言有没有加速；absent=这一格真没有 cpu 档",
+  "default": "默认那颗从 pins/payload-plan.json 读（含 digest），这张表只搬运不重打数字；那一行 status 不是 ok 就是上游没发，原样写出来不替它挑一颗",
+  "driver": "「这台机器的驱动能不能吃到这一档 CUDA」不在这张表里说 —— 要运行时问 nvidia-smi，属外壳 #25；表里只列上游真发了哪些版本",
+  "extra": "extra_mib = 这一颗的 mib - 这一格默认那颗的 mib，两边都取矩阵量出来的数，每次核对重算一遍（手抄的差值会跟着体积漂）",
+  "not_shipped": "payload-plan 没覆盖的 OS（android / linux-s390x / win-x86 …）这里只列档不装，写 install=not_shipped，不假装它是要装的那一档",
+  "pairing": "cudart- 伴生包按 (引擎, OS, CUDA 版本) 与 CUDA runtime 配；配到的行数不是 1 就红，配不上不静默 —— 进 cuda_rows_without_companion 并写明是「这张表里没有对应的伴生包」，不是「不需要」"
+ },
+ "schema": 1,
+ "stats": {
+  "CUDA 档": 10,
+  "伴生包": 7,
+  "可选档": 45,
+  "已装默认档": 8,
+  "引擎×OS": 16,
+  "无加速档可换的引擎×OS": 4,
+  "格子": 41,
+  "格子没有默认档": 8,
+  "配不上的CUDA档": 3,
+  "默认档写在格子外的": 1,
+  "默认档没有格子可换的": 1
+ }
+}
