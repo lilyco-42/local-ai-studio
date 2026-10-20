@@ -111,14 +111,19 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
    3 条 IPC 对表、Rust 分隔符平衡）11、
    `test_toolbelt_pins.py` 工具带钉表 14、
    `test_catalog_snapshot.py` 目录快照与侧表 16、`test_citation_check.py` 出处闸门 22、
-   `test_ocr_build_surface.py` OCR 依赖面 15、`test_file_index.py` 下载层五种状态与首启队列 35、
+   `test_strength_derivation.py` 强度级从 pin 字段推导 19、
+   `test_ocr_build_surface.py` OCR 依赖面 15、`test_ocr_language_pins.py` OCR 语言轴 31、
+   `test_ocr_language_lane.py` 语言车道 9、`test_ocr_pins_augment.py` pin 增量写回 11、
+   `test_file_index.py` 下载层五种状态与首启队列 35、
    `test_payload_plan.py` 装机负载（含 tar 成员表与缺口点名）19、`test_pack_engine.py` 出包逻辑 10、
    `test_stage_payload.py` 出包产物→外壳 runtime 摆位（含真实合同落点与 9 条负向）10、
    `test_make_icons.py` 图标从 ICO 派生（PNG 尺寸 / ICNS chunk 覆盖 / 预乘缩放无黑边 /
    已提交图标可复算 + 篡改与缺件必须红 + 重压缩同一张图必须认、改一个像素必须拒）10、
    `test_establish_verify.py` 字节复核 16、`test_shell_vars.py` shell 变量判据 14、
+   `test_bash_gate.py` `bash -n` 一好一坏双对照 9、
    `test_r2_manifest.py` 镜像清单 6、`test_lane_assertions.py` + `test_image_proof_block.py`
-   车道判据 38 + 6 = 44、`test_recommend_image.py` 生图档位表 31、`test_machine_budget.py` 装机预算 20、
+   车道判据 38 + 6 = 44、`test_png_proof.py` PNG 判据 25、`test_srt_proof.py` SRT 判据 20、
+   `test_recommend_image.py` 生图档位表 31、`test_machine_budget.py` 装机预算 20、
    `test_lane_replay_report.py` 给分段、预跑与 job 数计数 4、`test_engine_probe.py` 产物名解析与 skipped 点名 30、
    `test_recommend_subtitle.py` 字幕四表对账 44、`test_recommend_models.py` 对话档位表 46、
    `test_launch_plan.py` 启动计划（含 16 条源码变异体全部被抓）66、
