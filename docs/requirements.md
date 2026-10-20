@@ -40,6 +40,7 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
 2. **sideload 是必须功能，不是高级选项。** 380–485 MB 一个权重，实测国内 R2 只有 0.82–1.01 MiB/s、
    GitHub 0.10–1.01 MiB/s 波动，一个下载要 6–20 分钟；必然有人选择从别处拿文件。
    所以"导入本地已有 GGUF/ONNX"要进 MVP，且导入后仍按 sha256 认领/提示。
+   **这句话此前只在这里写着**：现在它是一张表（`pins/sideload-index.json`：354 串已钉哈希 →  420 行身份）与一个判据（`tools/sideload_lookup.py`），同名不同字节会被**拒绝认领** —— 见验收第 26 条。
 3. **引擎按 runtime 打包、可替换**，与 ADR-0001 的"上游产物 + sha256 pin"一致，
    并且和 LM Studio 的 LM Runtimes 同形，便于后续对齐习惯。
 4. **对话、字幕、生图三项起常驻 server，而不是一次一进程**：上游包里就有
@@ -80,9 +81,10 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
 
 ## 验收标准（在当前唯一可用验证手段 = GitHub Actions 下）
 
-1. `ci.yml`：672 个单测绿（重数：`python -W error::ResourceWarning -m unittest discover -s tests
+1. `ci.yml`：694 个单测绿（重数：`python -W error::ResourceWarning -m unittest discover -s tests
    -p "test_*.py"`；按文件数就 `python -m unittest tests.<模块名>`。2026-10-20 实测逐文件：
    `test_yaml_gate.py` 闸门自己 14、`test_lane_argv.py` 车道 ↔ 启动表一致（含 9 个 workflow 文本变异）10、
+   `test_sideload.py` sideload 按内容认领（6 条源码变异体 + 三个真上游文件）22、
    `test_toolbelt_pins.py` 工具带钉表 14、
    `test_catalog_snapshot.py` 目录快照与侧表 16、`test_citation_check.py` 出处闸门 22、
    `test_ocr_build_surface.py` OCR 依赖面 15、`test_file_index.py` 下载层五种状态与首启队列 35、
@@ -578,6 +580,27 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     重数：`python3 tools/lane_argv.py --selftest`、`python3 tools/lane_argv.py`、
     `python -m unittest tests.test_lane_argv`。
 
+26. **sideload（用户从别处弄来的文件）按内容认领，不是按名字**：`tools/sideload_lookup.py`
+    → `pins/sideload-index.json`（挂在 `ci.yml` 静态门禁）。约束第 2 条那句"导入后仍按 sha256
+    认领/提示"此前没有任何产物。现在把六张已钉表（`pins/models.json`、`pins/ocr.json`、
+    `pins/ocr-languages.json` 与三张档位表）摊平成 `sha256 → 身份`：**354 串独立哈希、420 行身份、
+    30 个"同名不同哈希"的文件名**（`flux1-schnell-q2_k.gguf` 这类在同一份预研里被两个仓库发过，
+    字节不同 —— 按名字认领一定会认错）。结论只有四种，每种都有反着来的对照：
+    ① `known_by_hash`（认领，并带它属于哪项能力与证据等级）；② `name_matches_hash_differs`
+    （名字钉过、字节不是那颗 → **拒绝认领**）；③ `unknown`（不认领，只给带 `claim:false` 的
+    文件名形态提示）；④ `hash_known_size_differs`（哈希钉过但体积不符 → 先查 pin，不认领）。
+    OCR 认出一颗时还要说清运行时得一起给哪几颗（上游 `requires_all`）。
+    夹具是**三个真实下载的上游文件**（`tests/fixtures/sideload/…`，都 <30 KB）：两颗钉过的字典
+    当正向，`ppocrv5_latin_dict.txt` 在 v0.3.0 是 2,616 B、在 v0.1.0 是 1,634 B —— 同名不同字节
+    不是假想，是上游真的做过，所以 ② 有真负样本可测；三个 sha256 都取自 GitHub API 的
+    `asset.digest`，测试再按 meta 复算一遍字节。
+    **这一层不解读文件头**：`.gguf` 的 `general.architecture` 归 `gguf-parser-go`（CI 或外壳里跑），
+    本机既不编译也不运行，所以这里只保证"按内容寻址"这一句是真的 —— 写在产物 `rule` 里。
+    6 条源码变异体（不按哈希认、把同名闸门关掉、认领位翻掉、hint 当声明、体积不符仍认领、
+    生图 337 行不进表）全被六条探针抓住，另有"不改坏时六条全绿"的正向对照。
+    重数：`python3 tools/sideload_lookup.py --selftest`、`--check`、
+    `python3 tools/sideload_lookup.py --lookup <你的文件>`。
+
 ## 车道判据的出处（全部按**钉住的那个 ref** 核过，不是按 HEAD 记的）
 
 | 车道 | 判据依赖的东西 | 出处 |
@@ -596,6 +619,8 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
 | `machine-budget` | 这一条几乎不依赖上游 file:line —— 它的输入是**已提交那五张表的数字**加一张实测吞吐表；唯一的外部依据是「每个家族在主体之外还要不要外挂权重」 | sd.cpp `95b3090`：`docs/sd.md` 的 txt2img 例子五行 —— `:13` SD1.5 只给 `-m`（`sd-example-sd15-only-model`）、`:14` SDXL 要 `--vae`（`sd-example-sdxl-needs-vae`）、`:15` sd3_medium 那颗文件名自带 clips/t5xxl（`sd-example-sd3-medium-selfcontained`）、`:16` flux 要 `--vae --clip_l --t5xxl`（`sd-flux-needs-companions`）、`:17` sd3.5_large 要 `--clip_l --clip_g --t5xxl`（`sd-sd35-needs-encoders`），五条都由 `citation-drift` 逐行查；吞吐 `4.2 / 0.25 MiB/s` 不是上游声明，是 `tools/r2_manifest.py` 里那次 lain42.top 实测，所以产物里 `measured_at_exit` 写明是哪台机器量的 |
 | `launch-plan` | 外壳起每一项能力该敲哪些旗标、引擎自己有没有鉴权 | llama.cpp `b11727`：`--api-key` = `common/arg.cpp:3513`，`/health` 那行注释 `public endpoint (no API key check)` = `tools/server/server.cpp:263`（相邻的 `/v1/health` :264 注释一模一样，所以 expect 加长到只命中 263）。whisper.cpp `b5454`：只有 `--host`/`--port`（`examples/server/server.cpp:252/251`），默认绑 127.0.0.1（`:59`），整份文件查不到 `--api-key`/`api_key` —— 缺席也是一条被扫出来的判据。stable-diffusion.cpp `95b3090`：`--listen-ip`/`--listen-port` = `examples/server/runtime.cpp:193/198`，四份编码器旗标 = `examples/common/common.cpp:407/411/421/471`。oar-ocr `84817f5`：`name = "oar"` `oar-ocr-cli/src/args.rs:10`、子命令 `Ocr(Ocr),` `:49`、`requires_all = ["rec", "dict"]` `:59`、`conflicts_with_all = ["det", "rec", "dict"]` `:84`、位置参数 `INPUTS` `:90` —— 这份文件里没有 `--port`/`--listen`/`--api-key`。以上九条都进了 `pins/citations.json`（现 82 条），并由 `tools/launch_plan.py` 的 28 条 needle 与 8 条缺席声明在车道里逐条现查 |
 | `install-deps` | 安装包车道第一步该 `apt-get install` 什么、镜像 readme 里在不在 | Tauri `2e513e3f`：`<TabItem label="Debian">` = `src/content/docs/start/prerequisites.mdx:29`，族里最后一颗点名的 `libayatana-appindicator3-dev` = `:40`（整页唯一命中），安装命令首行 `sudo apt install libwebkit2gtk-4.1-dev` = `:33`；**整页搜 `gstreamer` 命中 0 次** —— 旧文档里那句"+ gstreamer 插件族"没有出处，已删。runner-images `b4067e48`：包表形状靠 `| libssl-dev             | 3.0.13-0ubuntu3.16 |` = `images/ubuntu/Ubuntu2404-Readme.md:289` 证明（不然逐字查全是 `not_listed` 只可能是读错了表），工具链 `- Node.js 22.23.3` = `:26`、`- Rust 1.99.1` = `:140`。在场判语只说 `listed / not_listed`，产物 `verdict_legend` 明写"readme 没提到 ≠ 机器上没装"，真要证明装没装得看车道打印 `pkg-config --modversion webkit2gtk-4.1` |
+| `lane-argv` | 车道真敲的那一行是否与 `pins/launch-plan.json` 一致 | **不是上游声明，是本仓库两份产物互相核对**：读 `.github/workflows/engine-live.yml`（pyyaml），按表里的 `binaries` / `bind` / `flags_absent` / `omit` / `subcommand` 查。九种改坏 workflow 文本的对照全被报（含 `$SRV` 换成 `:` 的"只 find 不 exec"）；判据不吃注释与 heredoc 正文，这条本身也有正反对照。上游那五处旗标事实的出处仍归 `launch-plan` 那一行 |
+| `sideload` | 用户手上的文件能不能按内容认领 | 三个**真实下载的上游文件**（`tests/fixtures/sideload/`，都 <30 KB）：两颗钉过的字典 + `ppocrv5_latin_dict.txt` 的另一颗同名不同字节者。同一串 sha256 取自 GitHub API 的 `asset.digest`（复现命令连同两颗 tag 的体积与 digest 一起记在 `tests/fixtures/sideload.meta.json` 的 reproduce 字段 —— 那条 jq 里有竖线，写进这张表会打断一行），meta 记完整串、测试按 meta 复算字节。`.gguf` 文件头不在这一层解读（归 CI/外壳里的 gguf-parser），产物 `rule.header` 写明了这条边界 |
 | 引擎与权重输入 | 上游 `digest` 就是内容哈希 | 五个包整包下回实算相等（llama b11727、whisper b5454、sd 95b3090、qwen 415 MB、SD1.5 1.5 GB），见 `pins/models.json` 的 `bytes_verified` |
 
 写这张表的理由：CI 现在一次都跑不了，而"日志里会出现某串"这类假设一旦错，

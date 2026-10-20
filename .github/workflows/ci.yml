@@ -26,6 +26,8 @@ jobs:
           python tools/action_pins.py --selftest
           python tools/lane_argv.py --selftest
           python tools/lane_argv.py
+          python tools/sideload_lookup.py --selftest
+          python tools/sideload_lookup.py --check
           python - <<'PY'
           import ast,sys
           for f in ("tools/engine_probe.py","tests/test_engine_probe.py",

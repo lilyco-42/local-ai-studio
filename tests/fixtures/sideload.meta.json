@@ -1,0 +1,33 @@
+{
+ "captured_at": "2026-10-20",
+ "how": "curl -sSL https://github.com/GreatV/oar-ocr/releases/download/<tag>/<file>（GitHub release 的官方资产路径，三个文件都 <30 KB）",
+ "why": "产品约束第 2 条（sideload：导入本地已有权重，仍按 sha256 认领/提示）需要一个真实文件当正向对照，还需要一个真实的上游同名不同内容当负向对照 —— 后者不是编出来的：同一个名字在两个 tag 里字节真的不同",
+ "files": {
+  "v0.7.0/ppocrv6_tiny_dict.txt": {
+   "sha256": "c5cbe34ef40c29c4df07ed012bf96569cb69a2d2a01a07027e9f13cb832bd9cd",
+   "size": 27156,
+   "tag": "v0.7.0",
+   "upstream_digest": "sha256:c5cbe34ef40c29c4df07ed012bf96569cb69a2d2a01a07027e9f13cb832bd9cd",
+   "pinned_in": "pins/ocr.json（默认档三颗之一；GitHub digest == ModelScope Sha256 == registry.rs）",
+   "role": "正向对照：真文件、钉过、必须被认出来"
+  },
+  "v0.3.0/ppocrv5_latin_dict.txt": {
+   "sha256": "ccbcc45730b3fbbd9050c5bc74db6a99067141ef1035e3d14889a84a6b9b1aff",
+   "size": 2616,
+   "tag": "v0.3.0",
+   "upstream_digest": "sha256:ccbcc45730b3fbbd9050c5bc74db6a99067141ef1035e3d14889a84a6b9b1aff",
+   "pinned_in": "pins/ocr-languages.json → entries.latin.dict",
+   "role": "正向对照之二，也是同名对照里『钉着的那一颗』"
+  },
+  "v0.1.0/ppocrv5_latin_dict.txt": {
+   "sha256": "3c0a8a79b612653c25f765271714f71281e4e955962c153e272b7b8c1d2b13ff",
+   "size": 1634,
+   "tag": "v0.1.0",
+   "upstream_digest": "sha256:3c0a8a79b612653c25f765271714f71281e4e955962c153e272b7b8c1d2b13ff",
+   "pinned_in": "没有 —— 我们钉的是 v0.3.0 那颗",
+   "role": "负向对照：文件名与 pin 里那颗逐字符相同、字节不同，必须拒绝认领（name_matches_hash_differs）"
+  }
+ },
+ "verification": "三个 sha256 都来自 GitHub API 的 asset.digest（不是我自己算完写上去的）；下载后按同一串比对过才留下，测试再按这份 meta 复算一次字节",
+ "reproduce": "gh api repos/GreatV/oar-ocr/releases --jq '.[] | .tag_name as $t | .assets[] | select(.name==\"ppocrv5_latin_dict.txt\") | \"\\($t) \\(.size) \\(.digest)\"'"
+}

@@ -210,6 +210,15 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   旗标有没有混进来、`omit`/子命令对不对。只吃 shell 那一层（注释与 heredoc 正文先滤掉）。
   实测 4 项能力各一段、问题 0 条；9 种 workflow 文本变异全被报，正向对照是"0 问题必须建立在
   4 段都认出来之上"（重数：`python3 tools/lane_argv.py`，已挂在 `ci.yml` 静态门禁）。
+- `tools/sideload_lookup.py` + `pins/sideload-index.json`：**用户从别处弄来的权重，按内容认领**。
+  六张已钉表摊平成 `sha256 → 身份`（实测 354 串哈希 / 420 行身份 / 30 个同名不同哈希的文件名），
+  结论四种：`known_by_hash`（认领，带能力与证据等级）、`name_matches_hash_differs`（名字钉过但字节
+  不是那颗 → **拒绝**）、`unknown`（只给带 `claim:false` 的形态提示）、`hash_known_size_differs`
+  （哈希对、体积不对 → 先查 pin）。负向对照用真文件：`ppocrv5_latin_dict.txt` 在上游 v0.1.0 是
+  1,634 B、v0.3.0 是 2,616 B —— 同名不同内容不是假想。文件头解读不在这一层（归 CI/外壳里的
+  gguf-parser，本机禁止编译与运行），产物 `rule` 里写明了这条边界。
+  6 条源码变异体 + 六条探针 + 三个真夹具；挂在 `ci.yml` 静态门禁
+  （重数：`python3 tools/sideload_lookup.py --selftest`）。
 - `tools/action_pins.py` + `pins/actions.json`：**出包那只手自己也要钉住**。这一轮之前三个
   workflow 里 4 个 `uses:` 全是浮动大版本 tag（`checkout@v4`、`setup-python@v5`、
   `upload-artifact@v4`、`download-artifact@v4`，共 **45 处**）—— 仓库对引擎/权重/工具带都定了

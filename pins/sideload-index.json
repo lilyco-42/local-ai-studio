@@ -1,0 +1,4601 @@
+{
+ "by_hash": {
+  "01b8bdbf88f5eeb5e9aefdcef82962784083e80942b0901f50fa88b1f02e4bf0": [
+   {
+    "bytes": 2736442944,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "WAI-illustrious-SDXL-v160-Q8_0.gguf",
+    "repo": "nuupy/WAI-illustrious-SDXL-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "02277c4582f7f6b574f3be2761055c9dcae5b4376e7856bf67be423562f1bf8e": [
+   {
+    "bytes": 6609985280,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "sd3.5_large-Q5_1.gguf",
+    "repo": "second-state/stable-diffusion-3.5-large-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "03d57f0b79da05f510b9e80ac464282affec9fee1aee4c8d7b866ba06eb66447": [
+   {
+    "bytes": 5205132320,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "flux1-schnell-Q3_K_S.gguf",
+    "repo": "unsloth/FLUX.1-schnell-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "047fc5baf21cc7e556bc0849316ba10ba0ec98660fe60bc98a34d050e433bbb2": [
+   {
+    "bytes": 4871634720,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "sd3.5_large-q3_k_4_0.gguf",
+    "repo": "stduhpf/SD3.5-Large-GGUF-mixed-sdcpp",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "04db7997cd49368171a02fa0643e4b71f8a22be4ed90b843fbfc0372b5a59f1d": [
+   {
+    "bytes": 2855825856,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "sd3.5_medium-q8_0.gguf",
+    "repo": "calcuis/sd3.5-medium-gguf",
+    "source": "catalog/image-tiers.json"
+   },
+   {
+    "bytes": 2855825856,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "sd3.5_medium-Q8_0.gguf",
+    "repo": "city96/stable-diffusion-3.5-medium-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "058962699804b63ad646d9380f2cb7deb429e15d4aa97abb174f4638e26c1655": [
+   {
+    "bytes": 478215360,
+    "capability": "生图",
+    "detail": "角色 text_encoder",
+    "evidence": "single",
+    "file": "clip_g-Q5_0.gguf",
+    "repo": "second-state/stable-diffusion-3.5-medium-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "0678985268cc46e8b61ae3671dc1909566b8d6d20a2a2e4b10c7402b59c7dd5a": [
+   {
+    "bytes": 738543360,
+    "capability": "生图",
+    "detail": "角色 text_encoder",
+    "evidence": "single",
+    "file": "clip_g-Q8_0.gguf",
+    "repo": "second-state/stable-diffusion-3.5-large-GGUF",
+    "source": "catalog/image-tiers.json"
+   },
+   {
+    "bytes": 738543360,
+    "capability": "生图",
+    "detail": "角色 text_encoder",
+    "evidence": "single",
+    "file": "clip_g-Q8_0.gguf",
+    "repo": "second-state/stable-diffusion-3.5-medium-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "085a98e2777ae53a2761691139adad014c75f8758692d64ce12226291d812ab9": [
+   {
+    "bytes": 6776865824,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "flux-schnell-dev-merge-q4-0.gguf",
+    "repo": "mhnakif/flux-schnell-dev-merge-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "0957fc03425324d30afcd4342a5708687fd0c885a5c0987cae418e96dd761a60": [
+   {
+    "bytes": 7926350,
+    "capability": "文字识别",
+    "detail": "语言 te",
+    "evidence": "4.5",
+    "file": "te_pp-ocrv5_mobile_rec.onnx",
+    "release": "v0.3.0",
+    "source": "pins/ocr-languages.json"
+   }
+  ],
+  "098c424cfa97526d9227da984563ad1509298f7573458ed210cd5ba0220ab635": [
+   {
+    "bytes": 12801721248,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "flux1-schnell-q8_0.gguf",
+    "repo": "leejet/FLUX.1-schnell-gguf",
+    "source": "catalog/image-tiers.json"
+   },
+   {
+    "bytes": 12801721248,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "flux1-schnell-q8_0.gguf",
+    "repo": "Green-Sky/flux.1-schnell-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "098daa07ac5a926ebf2814a8e02ef1221eee53b8268db0d965ecb608603682de": [
+   {
+    "bytes": 2752841312,
+    "capability": "生图",
+    "detail": "角色 text_encoder",
+    "evidence": "single",
+    "file": "t5xxl-Q4_0.gguf",
+    "repo": "second-state/stable-diffusion-3.5-large-GGUF",
+    "source": "catalog/image-tiers.json"
+   },
+   {
+    "bytes": 2752841312,
+    "capability": "生图",
+    "detail": "角色 text_encoder",
+    "evidence": "agree",
+    "file": "t5xxl-Q4_0.gguf",
+    "repo": "second-state/FLUX.1-schnell-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "09c7440bfc5477e5c41052304b6b185aff8c4a5e8b2b4c23c1c706f6fe1ee9fc": [
+   {
+    "bytes": 1943,
+    "capability": "文字识别",
+    "detail": "语言 devanagari；必须与 rec devanagari_pp-ocrv5_mobile_rec.onnx 成对",
+    "evidence": "4.5",
+    "file": "ppocrv5_devanagari_dict.txt",
+    "release": "v0.3.0",
+    "source": "pins/ocr-languages.json"
+   }
+  ],
+  "09f32f18619f6bdb8f199c6bb107f8389429e1711312c36022c452af6866d9fa": [
+   {
+    "bytes": 6911345696,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "flux1-schnell-Q4_K_M.gguf",
+    "repo": "unsloth/FLUX.1-schnell-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "0b507d612856fab14dcb6aaca73981be1beaf57f58c67c3ec152d009dba3545e": [
+   {
+    "bytes": 5773844192,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "sd3.5_large-q5_0.gguf",
+    "repo": "calcuis/sd3.5-large-gguf",
+    "source": "catalog/image-tiers.json"
+   },
+   {
+    "bytes": 5773844192,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "sd3.5_large-Q5_0.gguf",
+    "repo": "city96/stable-diffusion-3.5-large-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "0bd190284ad23a7b1970e7e05386fccbe20dc4c409b2f3e272e37ea0b8753fa9": [
+   {
+    "bytes": 1491356224,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "zavychroma5-xl-Q4_0.gguf",
+    "repo": "hum-ma/SDXL-models-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "0c034a4bab6f0bbbd10f7740ad490257cd1ef73df65b4b19765ab6d5b412fb3d": [
+   {
+    "bytes": 8995783712,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "flux1-schnell-Q5_1.gguf",
+    "repo": "unsloth/FLUX.1-schnell-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "0c7148f5b7e47edaea99a6cec058a8e2bc8ded52e3bba55519c81aa1a38df5d3": [
+   {
+    "bytes": 6884606880,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "flux1-schnell-q4_k.gguf",
+    "repo": "Green-Sky/flux.1-schnell-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "0c8a8a9e1ed865a44f769fa4cf121c4cad72e9cc233f861c2a8fef3bb4dbd0a7": [
+   {
+    "bytes": 5135098944,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "WAI-illustrious-SDXL-v100-F16.gguf",
+    "repo": "nuupy/WAI-illustrious-SDXL-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "0d49005863a914e6636dab5b44d194a60a97716a304a8729a1c8a1a48c2fcbfb": [
+   {
+    "bytes": 1633089344,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "WAI-illustrious-SDXL-v140-Q4_K_M.gguf",
+    "repo": "nuupy/WAI-illustrious-SDXL-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "0d8ea46331d97952b3f542493426d75fb5a95bb25e8545fadf3e151cf862a2aa": [
+   {
+    "bytes": 1744597440,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "sd3.5_medium-q4_k_s.gguf",
+    "repo": "calcuis/sd3.5-medium-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "1001a76e5c86594a68898050095976db0f29ccea7b0d4917d8cd5a44081dba03": [
+   {
+    "bytes": 6938053280,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "stable-diffusion-xl-1.0-turbo-FP16.gguf",
+    "repo": "gpustack/stable-diffusion-xl-1.0-turbo-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "11255684c3f15d9d614e9074517041dffbe65705a53499082a82344808baf0f5": [
+   {
+    "bytes": 1457159744,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "cyberrealistic-xl-v4-sdxl-Q4_0-b3962.gguf",
+    "repo": "hum-ma/SDXL-models-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "11d24423a82716c7c677a6fa4315045b9b95aa37d5c75ee3bb75c25cd0c7fb7f": [
+   {
+    "bytes": 8779212512,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "sd3.5_large-q8_0.gguf",
+    "repo": "calcuis/sd3.5-large-gguf",
+    "source": "catalog/image-tiers.json"
+   },
+   {
+    "bytes": 8779212512,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "sd3.5_large-Q8_0.gguf",
+    "repo": "city96/stable-diffusion-3.5-large-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "120307ba529eb2439d6c430d94104dabd578497bc7bfe7e322b5d9933b449bd4": [
+   {
+    "bytes": 5027784512,
+    "capability": "对话",
+    "detail": "档位 8GB",
+    "evidence": "agree",
+    "file": "Qwen3-8B-Q4_K_M.gguf",
+    "repo": "unsloth/Qwen3-8B-GGUF",
+    "source": "catalog/recommendations.json"
+   }
+  ],
+  "12971c51fff4de6d18cc3bc752d9730ba67ea6948a6a6456abfde82992c6e643": [
+   {
+    "bytes": 1844437824,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "cyberrealistic-xl-v4-sdxl-Q5_K_M.gguf",
+    "repo": "hum-ma/SDXL-models-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "12d51f81039aa956ecf096d1a8b955127cf507724f8ef669aeb690c769e795f6": [
+   {
+    "bytes": 1491356224,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "RealVisXL_V5.0-Q4_0.gguf",
+    "repo": "hum-ma/SDXL-models-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "132a6ac567589ae4ce8a79e77ad3063573e510e47c47f69d40b9a9f80a471f1b": [
+   {
+    "bytes": 18582943296,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "FLUX.1-schnell-Q8_0.gguf",
+    "repo": "Haijun-AI/FLUX.1-schnell-GGUF",
+    "source": "catalog/image-tiers.json"
+   },
+   {
+    "bytes": 18582943296,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "FLUX.1-schnell-Q8_0.gguf",
+    "repo": "gpustack/FLUX.1-schnell-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "1387ded94cc8b627ad985e0b7c4d05eeaef90e7b58934690af9ed402eb9dda89": [
+   {
+    "bytes": 1929903456,
+    "capability": "对话",
+    "detail": "档位 4GB",
+    "evidence": "single",
+    "file": "Qwen2.5-3B-Instruct.Q4_K_M.gguf",
+    "repo": "mradermacher/Qwen2.5-3B-Instruct-GGUF",
+    "source": "catalog/recommendations.json"
+   }
+  ],
+  "13dec282d3ac9a87896248d5f69187102fad7c56315c553d2fab5403121702fe": [
+   {
+    "bytes": 8988110240,
+    "capability": "对话",
+    "detail": "档位 16GB",
+    "evidence": "agree",
+    "file": "Qwen2.5-Coder-14B-Instruct-Q4_K_M.gguf",
+    "repo": "unsloth/Qwen2.5-Coder-14B-Instruct-GGUF",
+    "source": "catalog/recommendations.json"
+   }
+  ],
+  "148a269718917aec66470ed1c83f360908db2447a4421282db1530ad4acb703a": [
+   {
+    "bytes": 3227903840,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "v1-5-pruned_Q8_0.gguf",
+    "repo": "kostakoff/stable-diffusion-v1-5-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "15a38a19cae606bbb5ded7ded38026ef7880e3cfb080b03440c0a5e2a335dbcb": [
+   {
+    "bytes": 8988111136,
+    "capability": "对话",
+    "detail": "档位 16GB",
+    "evidence": "single",
+    "file": "Qwen2.5-14B-Instruct.Q4_K_M.gguf",
+    "repo": "mradermacher/Qwen2.5-14B-Instruct-GGUF",
+    "source": "catalog/recommendations.json"
+   }
+  ],
+  "16d85582c4af69b97df3f3088bfec7230d699070657a93cd5a40c3939d73f47c": [
+   {
+    "bytes": 2102872512,
+    "capability": "生图",
+    "detail": "角色 text_encoder",
+    "evidence": "agree",
+    "file": "t5xxl-Q3_K.gguf",
+    "repo": "second-state/FLUX.1-schnell-GGUF",
+    "source": "catalog/image-tiers.json"
+   },
+   {
+    "bytes": 2102872512,
+    "capability": "生图",
+    "detail": "角色 text_encoder",
+    "evidence": "single",
+    "file": "t5xxl_q3_k.gguf",
+    "repo": "Green-Sky/flux.1-schnell-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "174a3f2384b6f7a1febb0e7fd6242dea6b20e3c615bf472abfc4543ac3f7edc8": [
+   {
+    "bytes": 2067526080,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "sd3.5_medium-q5_k_m.gguf",
+    "repo": "calcuis/sd3.5-medium-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "1827770c959db2da6f231248105050059816776861a8aa3b81c4be28e838034c": [
+   {
+    "bytes": 5272949472,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "sd3.5_large-q4_1.gguf",
+    "repo": "calcuis/sd3.5-large-gguf",
+    "source": "catalog/image-tiers.json"
+   },
+   {
+    "bytes": 5272949472,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "sd3.5_large-Q4_1.gguf",
+    "repo": "city96/stable-diffusion-3.5-large-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "193bab7a04fca699a6c82e6abb5b81bdb28177f0abd4062552b04908dafb19f8": [
+   {
+    "bytes": 1780590,
+    "capability": "文字识别",
+    "detail": "默认档三颗之一，运行时还要一起给：pp-ocrv6_tiny_rec.onnx、ppocrv6_tiny_dict.txt",
+    "file": "pp-ocrv6_tiny_det.onnx",
+    "source": "pins/ocr.json"
+   }
+  ],
+  "19f63562d9a20d2123288dddd9abb3d5560554e5694ded951aaf6bfafe46b5df": [
+   {
+    "bytes": 8263222304,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "flux1-schnell-Q5_K_S.gguf",
+    "repo": "city96/FLUX.1-schnell-gguf",
+    "source": "catalog/image-tiers.json"
+   },
+   {
+    "bytes": 8263222304,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "flux1-schnell-Q5_K_S.gguf",
+    "repo": "lllyasviel/FLUX.1-schnell-gguf",
+    "source": "catalog/image-tiers.json"
+   },
+   {
+    "bytes": 8263222304,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "flux1-schnell-Q5_K_S.gguf",
+    "repo": "vava22684/FLUX.1-schnell-gguf",
+    "source": "catalog/image-tiers.json"
+   },
+   {
+    "bytes": 8263222304,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "flux1-schnell-Q5_K_S.gguf",
+    "repo": "Niansuh/FLUX.1-schnell-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "19fea4b380c3a618ec4723c3eef2eb785ffba0d0538cf43f8f235e7b3b34220f": [
+   {
+    "bytes": 539212467,
+    "capability": "字幕",
+    "evidence": "single",
+    "file": "ggml-medium-q5_0.bin",
+    "repo": "ggerganov/whisper.cpp",
+    "source": "catalog/subtitle-tiers.json"
+   }
+  ],
+  "1a5a311cff84182d4fce95405f28b278cf6115211caaf6ed9872a4adcdeff083": [
+   {
+    "bytes": 8256144416,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "flux1-schnell-Q5_K_S.gguf",
+    "repo": "unsloth/FLUX.1-schnell-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "1be3a9b2063867b937e64e2ec7483364a79917e157fa98c5d94b5c1fffea987b": [
+   {
+    "bytes": 487601967,
+    "capability": "字幕",
+    "evidence": "single",
+    "file": "ggml-small.bin",
+    "repo": "ggerganov/whisper.cpp",
+    "source": "catalog/subtitle-tiers.json"
+   }
+  ],
+  "1be4d45c95132de63f9290a3655e73d5f202c0908aab8cc452dbc6ab6f23e3f3": [
+   {
+    "bytes": 6274738912,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "sd3.5_large_turbo-Q5_1.gguf",
+    "repo": "city96/stable-diffusion-3.5-large-turbo-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "1bed7b05318709e46a8cb9accc211168fc7f0b61ab594661860bbfe4d785cc46": [
+   {
+    "bytes": 167656704,
+    "capability": "生图",
+    "detail": "角色 vae",
+    "evidence": "agree",
+    "file": "ae-f16.gguf",
+    "repo": "second-state/FLUX.1-schnell-GGUF",
+    "source": "catalog/image-tiers.json"
+   },
+   {
+    "bytes": 167656704,
+    "capability": "生图",
+    "detail": "角色 vae",
+    "evidence": "single",
+    "file": "ae-f16.gguf",
+    "repo": "Green-Sky/flux.1-schnell-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "1d95d05b6b3731745cc742bf2503f4e63c8f4af517b1731b26cf699e61e9185c": [
+   {
+    "bytes": 2963387840,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "sdxl_lightning_4step.q5_0.gguf",
+    "repo": "mzwing/SDXL-Lightning-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "1dcfcb41eec90576a945b3084f22ade11ced506e24f14879245b071698f308e8": [
+   {
+    "bytes": 17332,
+    "capability": "文字识别",
+    "detail": "语言 japan；必须与 rec japan_pp-ocrv3_mobile_rec.onnx 成对",
+    "evidence": "自算 + 钉 commit",
+    "file": "japan_dict.txt",
+    "source": "pins/ocr-languages.json"
+   }
+  ],
+  "1f64d77cbd8aee3ee1a0ae6e58ea64ba39308721150f38cfaa5ee57e9d4fd106": [
+   {
+    "bytes": 2709379488,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "sd_xl_base_1.0_0_Q4_0.gguf",
+    "repo": "kostakoff/stable-diffusion-xl-base-1.0-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "1fc70f774d38eb169993ac391eea357ef47c88757ef72ee5943879b7e8e2bc69": [
+   {
+    "bytes": 1624555275,
+    "capability": "字幕",
+    "evidence": "single",
+    "file": "ggml-large-v3-turbo.bin",
+    "repo": "ggerganov/whisper.cpp",
+    "source": "catalog/subtitle-tiers.json"
+   }
+  ],
+  "214d61d06b1f6f9d13fc84dff1b76d4c7bb81e42f693cce39965c7dce6921e93": [
+   {
+    "bytes": 5107297824,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "sd3.5_large_turbo-q4_k_4_0.gguf",
+    "repo": "stduhpf/SD3.5-Large-Turbo-GGUF-mixed-sdcpp",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "21fc5d6f9047f8484765368bd5945883de140913a534f15c690beaa8ff18e6f6": [
+   {
+    "bytes": 2837077280,
+    "capability": "对话",
+    "detail": "档位 4GB",
+    "evidence": "single",
+    "file": "NVIDIA-Nemotron-3-Nano-4B-BF16.Q4_K_M.gguf",
+    "repo": "mradermacher/NVIDIA-Nemotron-3-Nano-4B-BF16-GGUF",
+    "source": "catalog/recommendations.json"
+   }
+  ],
+  "236f86535c1f8102ee1b19f67882f1ca4f965fc9a9785bf363412936a1f47e79": [
+   {
+    "bytes": 1649768928,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "WAI-NSFW-illustrious-SDXL-v110-Q4_1.gguf",
+    "repo": "kekusprod/WAI-NSFW-illustrious-SDXL-v110-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "244586ecec158acc95fee9b8f3244ff9092d1da48ae7eaa3065b32a4bcae0f68": [
+   {
+    "bytes": 1808194528,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "sd_xl_base_1.0_Q5_K_S.gguf",
+    "repo": "HyperX-Sentience/SDXL-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "24bcd54c1d1f0354a1cd19d07ad9a20771d43fde8318d505d71bcd84b078f20a": [
+   {
+    "bytes": 3051366272,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "v1-5-pruned_Q4_0.gguf",
+    "repo": "kostakoff/stable-diffusion-v1-5-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "24d085ddfc8e16454bfab3cfcfa279d0cce1306f32db2a661e92cf834b621174": [
+   {
+    "bytes": 2736442944,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "WAI-illustrious-SDXL-v140-Q8_0.gguf",
+    "repo": "nuupy/WAI-illustrious-SDXL-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "2738e971b53cb006a80d0e8dd102070e4c843813f3ddb6d36bba781d42f0790d": [
+   {
+    "bytes": 4077625728,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "stable-diffusion-xl-1.0-turbo-Q4_1.gguf",
+    "repo": "gpustack/stable-diffusion-xl-1.0-turbo-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "2768206d9a0ce48eba45b59619184e18161dde8f44115f029920ca17a9dc0384": [
+   {
+    "bytes": 8026538,
+    "capability": "文字识别",
+    "detail": "语言 arabic",
+    "evidence": "4.5",
+    "file": "arabic_pp-ocrv5_mobile_rec.onnx",
+    "release": "v0.3.0",
+    "source": "pins/ocr-languages.json"
+   }
+  ],
+  "2803b0d3fa8ae8f885c74a58d6d11366a7ff30d5f62035154956d0f148b63c48": [
+   {
+    "bytes": 4077625728,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "stable-diffusion-xl-base-1.0-Q4_1.gguf",
+    "repo": "gpustack/stable-diffusion-xl-base-1.0-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "2c2dae3edccb8b03e3b9afa00b2e1b30fde5273abfc0f1d950449ea34a23b61a": [
+   {
+    "bytes": 1591364896,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "stable-diffusion-v1-5-pruned-emaonly-Q4_1.gguf",
+    "repo": "second-state/stable-diffusion-v1-5-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "2d30aa9b115ad70ddca447cffd4bfd23ec2f50cf4d56e75cef2f6cd65f80816d": [
+   {
+    "bytes": 5312873376,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "flux1-schnell-q3_k.gguf",
+    "repo": "leejet/FLUX.1-schnell-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "2d7ed96308065a86103325d22af07a88c4d06afc009f21602a4882342c0cc054": [
+   {
+    "bytes": 13446374,
+    "capability": "文字识别",
+    "detail": "语言 korean",
+    "evidence": "4.5",
+    "file": "korean_pp-ocrv5_mobile_rec.onnx",
+    "release": "v0.3.0",
+    "source": "pins/ocr-languages.json"
+   }
+  ],
+  "2ef973152d2fbe27e37e4fd5ec3569dec1f828ee279975e60acc12bc78c9f981": [
+   {
+    "bytes": 5040957760,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "stable-diffusion-xl-base-1.0-Q8_0.gguf",
+    "repo": "gpustack/stable-diffusion-xl-base-1.0-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "30170a70026141d64639cb94bf758e17cd41fbf7fd23633b1408897e74803256": [
+   {
+    "bytes": 1491356224,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "stable-diffusion-xl-base-1.0-Q4_0.gguf",
+    "repo": "hum-ma/SDXL-models-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "30a85c4cd39aaac08e5ddc51edc22a1ba923f2f8ba131e898cf15ae415ee5524": [
+   {
+    "bytes": 2132584864,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "stable-diffusion-v1-5-FP16.gguf",
+    "repo": "gpustack/stable-diffusion-v1-5-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "311177baf106238cbc82e2284d913ecce0aab247239b4a5c3984ec69b8779b04": [
+   {
+    "bytes": 18467670272,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "FLUX.1-schnell-pure-Q8_0.gguf",
+    "repo": "Haijun-AI/FLUX.1-schnell-GGUF",
+    "source": "catalog/image-tiers.json"
+   },
+   {
+    "bytes": 18467670272,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "FLUX.1-schnell-pure-Q8_0.gguf",
+    "repo": "gpustack/FLUX.1-schnell-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "31199afc3d55bf33a5cadcf1e0cdf9b89c396018eb9a310546b99fdf05d4f583": [
+   {
+    "bytes": 5135086048,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "WAI-illustrious-SDXL-v170-F16.gguf",
+    "repo": "nuupy/WAI-illustrious-SDXL-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "317eb69c11673c9de1e1f0d459b253999804ec71ac4c23c17ecf5fbe24e259a1": [
+   {
+    "bytes": 874188075,
+    "capability": "字幕",
+    "evidence": "single",
+    "file": "ggml-large-v3-turbo-q8_0.bin",
+    "repo": "ggerganov/whisper.cpp",
+    "source": "catalog/subtitle-tiers.json"
+   }
+  ],
+  "31defc62c0c3ad3674a82da6192226a2ba98ef4ff014a7045cb88d59f9c3de31": [
+   {
+    "bytes": 1103,
+    "capability": "文字识别",
+    "detail": "语言 el；必须与 rec el_pp-ocrv5_mobile_rec.onnx 成对",
+    "evidence": "4.5",
+    "file": "ppocrv5_el_dict.txt",
+    "release": "v0.3.0",
+    "source": "pins/ocr-languages.json"
+   }
+  ],
+  "32abe33ef76e5432f923277b94a0ae5e56bb6ee0a66bbd4becb9b3c9efae0220": [
+   {
+    "bytes": 1744597440,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "sd3.5-2b-lite-q4_0.gguf",
+    "repo": "calcuis/sd3.5-lite-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "32b5ede87470ff486a5abcff3954cc2650292a2601af1c17724108e0abb5905d": [
+   {
+    "bytes": 5040957760,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "stable-diffusion-xl-1.0-turbo-Q8_0.gguf",
+    "repo": "gpustack/stable-diffusion-xl-1.0-turbo-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "33cc25b6f5dd121ecf3ad28e35eb38cb21427b7794c53527ceafe2dc3b109f4f": [
+   {
+    "bytes": 2584858432,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "sdxl_lightning_4step.q4_0.gguf",
+    "repo": "mzwing/SDXL-Lightning-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "34d1dff7e7358fc657703a078ad3748ab0ca5afeeae6a171767bd660994f8b54": [
+   {
+    "bytes": 167790816,
+    "capability": "生图",
+    "detail": "角色 vae",
+    "evidence": "agree",
+    "file": "pig_sd_vae_fp32-f16.gguf",
+    "repo": "gguf-org/sd3.5-large-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "34dd73230348039590610f94227e19a0279057fbb5e2db959255054ad0a6ad43": [
+   {
+    "bytes": 6937943840,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "sd_xl_base_1.0_0_bf16.gguf",
+    "repo": "kostakoff/stable-diffusion-xl-base-1.0-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "35c2eb28e1bb02eb3e92d6793534058e0c82084d78bcd63d3bf6b634e7ead1b1": [
+   {
+    "bytes": 2736442944,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "WAI-illustrious-SDXL-v100-Q8_0.gguf",
+    "repo": "nuupy/WAI-illustrious-SDXL-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "3605803b982cb64aead44f6c1b2ae36e3acdb41d8e46c8a94c6533bc4c67e597": [
+   {
+    "bytes": 2497281120,
+    "capability": "对话",
+    "detail": "档位 4GB",
+    "evidence": "agree",
+    "file": "Qwen3-4B-Instruct-2507-Q4_K_M.gguf",
+    "repo": "unsloth/Qwen3-4B-Instruct-2507-GGUF",
+    "source": "catalog/recommendations.json"
+   }
+  ],
+  "36a66a68097e88b103e0f60f489e88c7239d3ea79d96fbac2d80ac9d134944cd": [
+   {
+    "bytes": 7915218,
+    "capability": "文字识别",
+    "detail": "语言 eslav",
+    "evidence": "4.5",
+    "file": "eslav_pp-ocrv5_mobile_rec.onnx",
+    "release": "v0.3.0",
+    "source": "pins/ocr-languages.json"
+   }
+  ],
+  "36a92671997f657f812fc651706886e46e444c0b8c16d505364b087671240526": [
+   {
+    "bytes": 9114470368,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "sd3.5_large-Q8_0.gguf",
+    "repo": "second-state/stable-diffusion-3.5-large-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "394221709cd5ad1f40c46e6031ca61bce88931e6e088c188294c6d5a55ffa7e2": [
+   {
+    "bytes": 574041195,
+    "capability": "字幕",
+    "evidence": "single",
+    "file": "ggml-large-v3-turbo-q5_0.bin",
+    "repo": "ggerganov/whisper.cpp",
+    "source": "catalog/subtitle-tiers.json"
+   }
+  ],
+  "394e2f14d9cafc6b61acac8e0c2a8cc77f082e67dead9cd033f7303d3afc81a5": [
+   {
+    "bytes": 1491343328,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "WAI-NSFW-illustrious-SDXL-v110-Q4_0.gguf",
+    "repo": "kekusprod/WAI-NSFW-illustrious-SDXL-v110-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "3a214837221e4530dbc1fe8d734f302af393eb30bd0ed046042ebf4baf70f6f2": [
+   {
+    "bytes": 1080732091,
+    "capability": "字幕",
+    "evidence": "single",
+    "file": "ggml-large-v2-q5_0.bin",
+    "repo": "ggerganov/whisper.cpp",
+    "source": "catalog/subtitle-tiers.json"
+   }
+  ],
+  "3a8b2ea93d0b0c5e72c82ed518aea715203173e2afbf8b7e47335d7f8799ef78": [
+   {
+    "bytes": 4098988672,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "sdxl_lightning_4step.q8_0.gguf",
+    "repo": "mzwing/SDXL-Lightning-GGUF",
+    "source": "catalog/image-tiers.json"
+   },
+   {
+    "bytes": 4098988672,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "sdxl_lightning_4step.q8_0.gguf",
+    "repo": "OlegSkutte/SDXL-Lightning-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "3bb8c5e9ab0a841117089ed4ed81d885bb85161df2a766b812f829bc55b31adf": [
+   {
+    "bytes": 2079836768,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "sd3.5_medium-Q4_0.gguf",
+    "repo": "second-state/stable-diffusion-3.5-medium-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "3cb67a24d5dd6b169e6e2019f52b391ab10f4457fbf6a46c320205b10503627d": [
+   {
+    "bytes": 1491356224,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "cyberrealistic-xl-v4-sdxl-Q4_0.gguf",
+    "repo": "hum-ma/SDXL-models-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "3d67d31e062442042389b83f0a52bd763974df3024a612e5090d54bacc88e507": [
+   {
+    "bytes": 3040509728,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "sdxl-unet-q8.gguf",
+    "repo": "AEUPH/sdxl-unet-q8-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "3dfdae73e67161791178516160ec9b58ebca3fee08465cfb56df10ae7a0b8d2a": [
+   {
+    "bytes": 5608193536,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "sd3.5_large-Q4_1.gguf",
+    "repo": "second-state/stable-diffusion-3.5-large-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "3e95f1581557162870cacdba5af91a4c6be2890710d395b0c3c7578e7ee5e6eb": [
+   {
+    "bytes": 1663,
+    "capability": "文字识别",
+    "detail": "语言 eslav；必须与 rec eslav_pp-ocrv5_mobile_rec.onnx 成对",
+    "evidence": "4.5",
+    "file": "ppocrv5_eslav_dict.txt",
+    "release": "v0.3.0",
+    "source": "pins/ocr-languages.json"
+   }
+  ],
+  "3f3226d0b9e560342c4777e40a1456ebac650dd6a2497d64d71adb1fcfff8261": [
+   {
+    "bytes": 3152636192,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "sdxl_lightning_4step.q5_1.gguf",
+    "repo": "mzwing/SDXL-Lightning-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "410d4bbd853f9765c402e189a89d61d8b9a4c603f6c3d08c3efcf18d06ee7cec": [
+   {
+    "bytes": 2963387840,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "sdxl_lightning_1step_x0.q5_0.gguf",
+    "repo": "mzwing/SDXL-Lightning-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "422f1ae452ade6f30a004d7e5c6a43195e4433bc370bf23fac9cc591f01a8898": [
+   {
+    "bytes": 59707625,
+    "capability": "字幕",
+    "evidence": "single",
+    "file": "ggml-base-q5_1.bin",
+    "repo": "ggerganov/whisper.cpp",
+    "source": "catalog/subtitle-tiers.json"
+   }
+  ],
+  "42a1ffcbe4167d224232443396968db4d02d4e8e87e213d3ee2e03095dea6502": [
+   {
+    "bytes": 823369779,
+    "capability": "字幕",
+    "evidence": "single",
+    "file": "ggml-medium-q8_0.bin",
+    "repo": "ggerganov/whisper.cpp",
+    "source": "catalog/subtitle-tiers.json"
+   }
+  ],
+  "42d1e968a1851060a31ecdd60d5e18eb0f02ac197534c5e34712fb01c068fadd": [
+   {
+    "bytes": 8988110976,
+    "capability": "对话",
+    "detail": "档位 16GB",
+    "evidence": "single",
+    "file": "JiRackUltra_14b.Q4_K_M.gguf",
+    "repo": "mradermacher/JiRackUltra_14b-GGUF",
+    "source": "catalog/recommendations.json"
+   }
+  ],
+  "42e01e2dabe15cfada100d37e13357a53a6def39afda4ff744b82215b5cf2547": [
+   {
+    "bytes": 23788569632,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "flux1-schnell-BF16.gguf",
+    "repo": "unsloth/FLUX.1-schnell-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "42f83f5d3fdb50778e4fa5b66c58d99a59ab7792151c5e74f34b8ffd7b61c9d6": [
+   {
+    "bytes": 1831,
+    "capability": "文字识别",
+    "detail": "语言 te；必须与 rec te_pp-ocrv5_mobile_rec.onnx 成对",
+    "evidence": "4.5",
+    "file": "ppocrv5_te_dict.txt",
+    "release": "v0.3.0",
+    "source": "pins/ocr-languages.json"
+   }
+  ],
+  "4368e93e01946e930490d4ce9e8e406b611fa8872cb0077b7ec57f394f1fcb16": [
+   {
+    "bytes": 1605835296,
+    "capability": "生图",
+    "detail": "角色 text_encoder",
+    "evidence": "agree",
+    "file": "t5xxl-Q2_K.gguf",
+    "repo": "second-state/FLUX.1-schnell-GGUF",
+    "source": "catalog/image-tiers.json"
+   },
+   {
+    "bytes": 1605835296,
+    "capability": "生图",
+    "detail": "角色 text_encoder",
+    "evidence": "single",
+    "file": "t5xxl_q2_k.gguf",
+    "repo": "Green-Sky/flux.1-schnell-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "43fa2cd084de5a04399a896a9a7a786064e221365c01700cea4666005218f11c": [
+   {
+    "bytes": 823382461,
+    "capability": "字幕",
+    "detail": "英文专用",
+    "evidence": "single",
+    "file": "ggml-medium.en-q8_0.bin",
+    "repo": "ggerganov/whisper.cpp",
+    "source": "catalog/subtitle-tiers.json"
+   }
+  ],
+  "4637862204934cfe29d3f3adcb61ad0f679a417cfacdbc495a52e3d7bd64ef04": [
+   {
+    "bytes": 4110959520,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "flux1-schnell-q2_k.gguf",
+    "repo": "Green-Sky/flux.1-schnell-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "47d576252992de5f82f52bc9ec4c13f1f8399289911648add578eebcd03b34c0": [
+   {
+    "bytes": 2855825856,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "sd3.5-2b-lite-q8_0.gguf",
+    "repo": "calcuis/sd3.5-lite-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "4812d20346a0e92da582793937580b408728b190e1cdf91673012e4cc7b446b5": [
+   {
+    "bytes": 8779212512,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "sd3.5-8b-lite-mxfp4_moe.gguf",
+    "repo": "calcuis/sd3.5-lite-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "482dfa677edb6499a689f1936f287351f3c104d5da9094d8c797da527a98323b": [
+   {
+    "bytes": 130864000,
+    "capability": "生图",
+    "detail": "角色 text_encoder",
+    "evidence": "single",
+    "file": "clip_l-Q8_0.gguf",
+    "repo": "second-state/stable-diffusion-3.5-medium-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "49c8fb02b65e6049d5fa6c04f81f53b867b5ec9540406812c643f177317f779f": [
+   {
+    "bytes": 264464607,
+    "capability": "字幕",
+    "evidence": "single",
+    "file": "ggml-small-q8_0.bin",
+    "repo": "ggerganov/whisper.cpp",
+    "source": "catalog/subtitle-tiers.json"
+   }
+  ],
+  "49f7b7f5f07c09f7524ebbad291dfead0ebc71af5db82cd6d78cf1fc1fde1daa": [
+   {
+    "bytes": 1808194528,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "WAI-NSFW-illustrious-SDXL-v110-Q5_K_S.gguf",
+    "repo": "kekusprod/WAI-NSFW-illustrious-SDXL-v110-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "4a72ac02c889708b84c89fa5fae5155fe5ac7557020e2fa59528fab1d890604d": [
+   {
+    "bytes": 8779212512,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "sd3.5-large-fp16-q8_0.gguf",
+    "repo": "gguf-org/sd3.5-large-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "4ab9818c9b3428eca96834c51fe294885608480991463f55bd9be53c822567c3": [
+   {
+    "bytes": 3940010720,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "stable-diffusion-xl-base-1.0-Q4_0.gguf",
+    "repo": "gpustack/stable-diffusion-xl-base-1.0-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "4acff2485788decb0d5d1cb38e27863280051cf7a94f3c89eeef020a53aeaf7a": [
+   {
+    "bytes": 3058710496,
+    "capability": "生图",
+    "detail": "角色 text_encoder",
+    "evidence": "single",
+    "file": "t5xxl-Q4_1.gguf",
+    "repo": "second-state/stable-diffusion-3.5-large-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "4bad0bd19cae5afe198e10025a131efc320b41158a73195e6604eb11d83f49aa": [
+   {
+    "bytes": 4871634720,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "sd3.5_large_turbo-q3_k_4_0.gguf",
+    "repo": "stduhpf/SD3.5-Large-Turbo-GGUF-mixed-sdcpp",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "4baf70dd0d7c4247ba2b81fafd9c01005ac77c2f9ef064e00dcf195d0e2fdd2f": [
+   {
+    "bytes": 59721011,
+    "capability": "字幕",
+    "detail": "英文专用",
+    "evidence": "single",
+    "file": "ggml-base.en-q5_1.bin",
+    "repo": "ggerganov/whisper.cpp",
+    "source": "catalog/subtitle-tiers.json"
+   }
+  ],
+  "4c9faf850ef79f1792d552fc579653657cc53f9afda74515b5d6f564ea73d732": [
+   {
+    "bytes": 5599294464,
+    "capability": "生图",
+    "detail": "角色 text_encoder",
+    "evidence": "agree",
+    "file": "SD3_prompt-llama_8b.Q5_K_S.gguf",
+    "repo": "MaziyarPanahi/SD3_prompt-llama_8b-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "4da1d1ada7f64adea359bc4a572cb6faa6e4fc26993f621a3fec7ed614ca337e": [
+   {
+    "bytes": 5761058880,
+    "capability": "对话",
+    "detail": "档位 16GB",
+    "evidence": "single",
+    "file": "gemma-2-9b-it.Q4_K_M.gguf",
+    "repo": "mradermacher/gemma-2-9b-it-GGUF",
+    "source": "catalog/recommendations.json"
+   }
+  ],
+  "4f30741d2bfc786c92934ce925fcb0a43df3441e76504b797c3d5d5f0878fa6f": [
+   {
+    "bytes": 6884606880,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "flux1-schnell-q4_0.gguf",
+    "repo": "leejet/FLUX.1-schnell-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "4fd16477b3a5296d0cf722c4b92a9fd7f30d09ac7495826e4465d8de9c9fd973": [
+   {
+    "bytes": 6783943712,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "flux1-schnell-Q4_K_S.gguf",
+    "repo": "city96/FLUX.1-schnell-gguf",
+    "source": "catalog/image-tiers.json"
+   },
+   {
+    "bytes": 6783943712,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "flux1-schnell-Q4_K_S.gguf",
+    "repo": "lllyasviel/FLUX.1-schnell-gguf",
+    "source": "catalog/image-tiers.json"
+   },
+   {
+    "bytes": 6783943712,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "flux1-schnell-Q4_K_S.gguf",
+    "repo": "vava22684/FLUX.1-schnell-gguf",
+    "source": "catalog/image-tiers.json"
+   },
+   {
+    "bytes": 6783943712,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "flux1-schnell-Q4_K_S.gguf",
+    "repo": "Niansuh/FLUX.1-schnell-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "504cf1af9d9157bd3cae49c54fed3cc04fc0fcb6798d0c0d394097a30b656897": [
+   {
+    "bytes": 8989625248,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "flux1-schnell-Q5_1.gguf",
+    "repo": "city96/FLUX.1-schnell-gguf",
+    "source": "catalog/image-tiers.json"
+   },
+   {
+    "bytes": 8989625248,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "flux1-schnell-Q5_1.gguf",
+    "repo": "lllyasviel/FLUX.1-schnell-gguf",
+    "source": "catalog/image-tiers.json"
+   },
+   {
+    "bytes": 8989625248,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "flux1-schnell-Q5_1.gguf",
+    "repo": "vava22684/FLUX.1-schnell-gguf",
+    "source": "catalog/image-tiers.json"
+   },
+   {
+    "bytes": 8989625248,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "flux1-schnell-Q5_1.gguf",
+    "repo": "Niansuh/FLUX.1-schnell-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "508d07ac0e1806a8b8857ebf20bd8837d68d962c3fdba030cf0022238ba819b8": [
+   {
+    "bytes": 7913282,
+    "capability": "文字识别",
+    "detail": "语言 ta",
+    "evidence": "4.5",
+    "file": "ta_pp-ocrv5_mobile_rec.onnx",
+    "release": "v0.3.0",
+    "source": "pins/ocr-languages.json"
+   }
+  ],
+  "511fb0de4b823d131f9b33ea63cbe91a60e55a804e8fa999382148113f6b5c20": [
+   {
+    "bytes": 84754624,
+    "capability": "生图",
+    "detail": "角色 text_encoder",
+    "evidence": "single",
+    "file": "clip_l-Q5_0.gguf",
+    "repo": "second-state/stable-diffusion-3.5-medium-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "51ab2be4ec58905b4cbfe5c0d2f3d0cdc5b0192e8e85dbe9a00481858c8389b0": [
+   {
+    "bytes": 2797752960,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "sd_xl_base_1.0_0_Q4_K.gguf",
+    "repo": "kostakoff/stable-diffusion-xl-base-1.0-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "52583387a77ebb5d3bcadf06403e3d4fde117dbb6c6cea6a50a2c7dd3521020a": [
+   {
+    "bytes": 1787064768,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "sd3.5_medium-Q4_K_M.gguf",
+    "repo": "city96/stable-diffusion-3.5-medium-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "526b23e938f7594fd9ca9da9568875a43723fa0c908a083b6dea9348d1721494": [
+   {
+    "bytes": 521602304,
+    "capability": "生图",
+    "detail": "角色 text_encoder",
+    "evidence": "single",
+    "file": "clip_g-Q5_1.gguf",
+    "repo": "second-state/stable-diffusion-3.5-medium-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "5282eec23430ca46de87de984521fbf04e3cf78fa4152b05610089bc71d8a535": [
+   {
+    "bytes": 3940010720,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "stable-diffusion-xl-1.0-turbo-Q4_0.gguf",
+    "repo": "gpustack/stable-diffusion-xl-1.0-turbo-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "52c7ca39d8d48d6f44fa4ff2c44569f3c924d92311108cb38492958350d48ff8": [
+   {
+    "bytes": 4265059488,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "stable-diffusion-v1-5-pruned-emaonly-f32.gguf",
+    "repo": "second-state/stable-diffusion-v1-5-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "5301f65d63dc69e48ee6355a9a2f4cdf049693e2eb8f077f8f4f9ea81c2120ed": [
+   {
+    "bytes": 4691422208,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "sd3.5_large_turbo-q2_k_4_0.gguf",
+    "repo": "stduhpf/SD3.5-Large-Turbo-GGUF-mixed-sdcpp",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "535ec8a5d0207f34b4cc6cca28c0903991df0ec6ecb8bd7eea2f16f4468afc2b": [
+   {
+    "bytes": 11143425,
+    "capability": "文字识别",
+    "detail": "语言 chinese_cht",
+    "evidence": "4.5",
+    "file": "chinese_cht_pp-ocrv3_mobile_rec.onnx",
+    "release": "v0.3.0",
+    "source": "pins/ocr-languages.json"
+   }
+  ],
+  "56a3d119047dafb5243ad6fb3810b3a6fe4bdef27a125b56154a416953311852": [
+   {
+    "bytes": 2963387840,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "sdxl_lightning_2step.q5_0.gguf",
+    "repo": "mzwing/SDXL-Lightning-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "56be3ed5f69244bbf234f27c4f4d189a42bfee0e828adb2ace9427ec45f7bada": [
+   {
+    "bytes": 5773844192,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "sd3.5-large-fp16-q5_0.gguf",
+    "repo": "gguf-org/sd3.5-large-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "56c0c63aed04cb1174d22565cc213351275cef7772eee8810e5f86c1738d1412": [
+   {
+    "bytes": 2022404544,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "sd3.5_medium-q5_0.gguf",
+    "repo": "calcuis/sd3.5-medium-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "57f5406f94bb6688fb7077f7be65f08bbd71cecf48c01ea26c522cb5c4836b7a": [
+   {
+    "bytes": 1767,
+    "capability": "文字识别",
+    "detail": "语言 th；必须与 rec th_pp-ocrv5_mobile_rec.onnx 成对",
+    "evidence": "4.5",
+    "file": "ppocrv5_th_dict.txt",
+    "release": "v0.3.0",
+    "source": "pins/ocr-languages.json"
+   }
+  ],
+  "58128d727e0bc8dd69f8bf56a26f735fefc4d3fbf198517c0e9f7e6d1095e575": [
+   {
+    "bytes": 10042123264,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "FLUX.1-schnell-pure-Q4_0.gguf",
+    "repo": "Haijun-AI/FLUX.1-schnell-GGUF",
+    "source": "catalog/image-tiers.json"
+   },
+   {
+    "bytes": 10042123264,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "FLUX.1-schnell-pure-Q4_0.gguf",
+    "repo": "gpustack/FLUX.1-schnell-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "588ef2eb3c52c1ebdddfa55bd498941a966cff280e2654cc67bd35b4be787d83": [
+   {
+    "bytes": 8995783712,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "fluxunchained-schnell-dev-merge-q5-1.gguf",
+    "repo": "mhnakif/flux-schnell-dev-merge-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "59cbe002c3e75d2b89d38787e81d12fb4e512fd76176884c470737ad87a1d309": [
+   {
+    "bytes": 130769600,
+    "capability": "生图",
+    "detail": "角色 text_encoder",
+    "evidence": "agree",
+    "file": "clip_l-Q8_0.gguf",
+    "repo": "second-state/FLUX.1-schnell-GGUF",
+    "source": "catalog/image-tiers.json"
+   },
+   {
+    "bytes": 130769600,
+    "capability": "生图",
+    "detail": "角色 text_encoder",
+    "evidence": "single",
+    "file": "clip_l-q8_0.gguf",
+    "repo": "Green-Sky/flux.1-schnell-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "59dfb9a4acb36fe2a2affc14bacbee2920ff435cb13cc314a08c13f66ba7860e": [
+   {
+    "bytes": 352078,
+    "capability": "样本/其他",
+    "detail": "只有单一发布方（HF 或 GitHub）；本对照证明的是传输与镜像未改写，不是来源独立",
+    "file": "samples/jfk.wav",
+    "source": "pins/models.json"
+   }
+  ],
+  "5a082339fe2f4bc77a69d5f25000b85693781e02bebac5ee071234ca18353066": [
+   {
+    "bytes": 1844424928,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "WAI-NSFW-illustrious-SDXL-v110-Q5_K_M.gguf",
+    "repo": "kekusprod/WAI-NSFW-illustrious-SDXL-v110-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "5a4a020e48e8783e035e1af135423c2161a363acab9ef16e48238c3d181f0f71": [
+   {
+    "bytes": 7836326,
+    "capability": "文字识别",
+    "detail": "语言 el",
+    "evidence": "4.5",
+    "file": "el_pp-ocrv5_mobile_rec.onnx",
+    "release": "v0.3.0",
+    "source": "pins/ocr-languages.json"
+   }
+  ],
+  "5b6b74d5db577e2b6c358a16f4e2de7da822d4cbfb1fc33220e70dded1d2c25b": [
+   {
+    "bytes": 6938053280,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "stable-diffusion-xl-base-1.0-FP16.gguf",
+    "repo": "gpustack/stable-diffusion-xl-base-1.0-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "5bc2b3860aa151a4c6e7bb095e1fcce7cf12c7b020ca08dcec0c6d018bb7dd94": [
+   {
+    "bytes": 43550795,
+    "capability": "字幕",
+    "detail": "英文专用",
+    "evidence": "single",
+    "file": "ggml-tiny.en-q8_0.bin",
+    "repo": "ggerganov/whisper.cpp",
+    "source": "catalog/subtitle-tiers.json"
+   }
+  ],
+  "5c43cf2fdbbdd6fa135a63ce0ad44bd6907320342208916dd4a21abb4b68ed05": [
+   {
+    "bytes": 1923394240,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "sdxl-unet-q4.gguf",
+    "repo": "AEUPH/sdxl-unet-q8-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "5d0dce31ee69e5c2e8f0e63f42e6da2ab932ce3b7c8799e3dd85c86c7337dff1": [
+   {
+    "bytes": 1615967904,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "stable-diffusion-v1-5-pruned-emaonly-Q5_0.gguf",
+    "repo": "second-state/stable-diffusion-v1-5-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "5d5536e6a183454ff2a3951545f6893200aff70e5a61cb95211cc74c2989abfe": [
+   {
+    "bytes": 5887288864,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "sd3.5_large_turbo-q4_k_5_0.gguf",
+    "repo": "stduhpf/SD3.5-Large-Turbo-GGUF-mixed-sdcpp",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "5f6ee21242691681261fee01bc39867da9cc8ff9b889f2f048b3cb7f74380217": [
+   {
+    "bytes": 7918606,
+    "capability": "文字识别",
+    "detail": "语言 th",
+    "evidence": "4.5",
+    "file": "th_pp-ocrv5_mobile_rec.onnx",
+    "release": "v0.3.0",
+    "source": "pins/ocr-languages.json"
+   }
+  ],
+  "5f9b889b934a2ebe3f4aa3cab4aee24903e419aba3f331ddd9eb5aea2d95f154": [
+   {
+    "bytes": 16292633312,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "sd3.5_large-f16.gguf",
+    "repo": "calcuis/sd3.5-large-gguf",
+    "source": "catalog/image-tiers.json"
+   },
+   {
+    "bytes": 16292633312,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "sd3.5_large-F16.gguf",
+    "repo": "city96/stable-diffusion-3.5-large-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "5ff1fe7a07aebc8d090682d01b17cf268a1b4680c6477050ce75a600aecb9efb": [
+   {
+    "bytes": 9001753376,
+    "capability": "对话",
+    "detail": "档位 16GB",
+    "evidence": "agree",
+    "file": "Qwen3-14B-Q4_K_M.gguf",
+    "repo": "ggml-org/Qwen3-14B-GGUF",
+    "source": "catalog/recommendations.json"
+   }
+  ],
+  "60ed5bc3dd14eea856493d334349b405782ddcaf0028d4b5df4088345fba2efe": [
+   {
+    "bytes": 147951465,
+    "capability": "字幕",
+    "evidence": "single",
+    "file": "ggml-base.bin",
+    "repo": "ggerganov/whisper.cpp",
+    "source": "catalog/subtitle-tiers.json"
+   }
+  ],
+  "619697cc4c2bf587416aa1afa98d474a44c80eb4e3a3f64ea8f99ab0ed9adb7a": [
+   {
+    "bytes": 6884606880,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "flux1-schnell-q4_k.gguf",
+    "repo": "leejet/FLUX.1-schnell-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "6197d26c14b0c54df1e5f167c8233b3aeeb3abf9a8884afc08220a1541699762": [
+   {
+    "bytes": 1494548928,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "sd3.5_medium-q3_k_l.gguf",
+    "repo": "calcuis/sd3.5-medium-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "61d3c1c4dde15e3b20b92a8a46a990032bbb4f2f0343aa6380f4deb883ce7472": [
+   {
+    "bytes": 6776865824,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "flux1-schnell-Q4_K_S.gguf",
+    "repo": "unsloth/FLUX.1-schnell-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "623317ff798d3cb85b22904b14f1374fb1c2b2e407c7137ab5c11cb45b974e1e": [
+   {
+    "bytes": 1844437824,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "stable-diffusion-xl-base-1.0-Q5_K_M.gguf",
+    "repo": "hum-ma/SDXL-models-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "629c25ed347d73a034c6c45189f541fd799393c513a447f54b3694e77a322cc8": [
+   {
+    "bytes": 2022404544,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "sd3.5_medium-Q5_0.gguf",
+    "repo": "city96/stable-diffusion-3.5-medium-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "641675b356a4463677a02a0d703f7b571b39f0b747fbd270b379c848edc29e84": [
+   {
+    "bytes": 5701067872,
+    "capability": "对话",
+    "detail": "档位 8GB",
+    "evidence": "agree",
+    "file": "Ornith-1.0-9B-Q4_K_M.gguf",
+    "repo": "unsloth/Ornith-1.0-9B-GGUF",
+    "source": "catalog/recommendations.json"
+   }
+  ],
+  "64d182b440b98d5203c4f9bd541544d84c605196c4f7b845dfa11fb23594d1e2": [
+   {
+    "bytes": 3095033483,
+    "capability": "字幕",
+    "evidence": "single",
+    "file": "ggml-large-v3.bin",
+    "repo": "ggerganov/whisper.cpp",
+    "source": "catalog/subtitle-tiers.json"
+   }
+  ],
+  "66a6d957cd8edcac630b9d4331a1a8da80d31e5d166b793537484701507db7e7": [
+   {
+    "bytes": 2774106912,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "sdxl_lightning_1step_x0.q4_1.gguf",
+    "repo": "mzwing/SDXL-Lightning-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "67a179f608ea6114bd3fdb9060e762b588a3fb3bd00c4387971be4d177958067": [
+   {
+    "bytes": 264477561,
+    "capability": "字幕",
+    "detail": "英文专用",
+    "evidence": "single",
+    "file": "ggml-small.en-q8_0.bin",
+    "repo": "ggerganov/whisper.cpp",
+    "source": "catalog/subtitle-tiers.json"
+   }
+  ],
+  "69c2166565adc3f808e51008ffa077dfbc455cfa2c2b2e97bc5fd5749902a409": [
+   {
+    "bytes": 1491773408,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "WAI-NSFW-illustrious-SDXL-v110-Q4_K_S.gguf",
+    "repo": "kekusprod/WAI-NSFW-illustrious-SDXL-v110-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "6a0d723d22c7e12dd659502e53dbce1d349f408e674abbfca2e149c76f3a2e19": [
+   {
+    "bytes": 2774106912,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "sdxl_lightning_2step.q4_1.gguf",
+    "repo": "mzwing/SDXL-Lightning-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "6ad271fda44d4eeb49309e466ec600ef08e5650cc9bee5485b6285c4890a1e38": [
+   {
+    "bytes": 1494548928,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "sd3.5_medium-Q3_K_M.gguf",
+    "repo": "city96/stable-diffusion-3.5-medium-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "6b751a6dff696d990a3d215b76c7ed9187241458ad990b471a3c2a66712528b9": [
+   {
+    "bytes": 6776865824,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "flux1-schnell-Q4_0.gguf",
+    "repo": "unsloth/FLUX.1-schnell-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "6b8fc0e4ccb6e503f1e7b4691c4b00acd3453645dce0176ee77dc24ad5152a4f": [
+   {
+    "bytes": 1844437824,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "RealVisXL_V5.0-Q5_K_M.gguf",
+    "repo": "hum-ma/SDXL-models-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "6bbc8077112c3ff5497c40adbe49e261024dda0e89286eeb449540b08c17990e": [
+   {
+    "bytes": 1633076448,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "wai_v12_Q4_K_M.gguf",
+    "repo": "TinyRick1489/WAI-illustrious-SDXL-v12-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "6c14d5adee5f86394037b4e4e8b59f1673b6cee10e3cf0b11bbdbee79c156208": [
+   {
+    "bytes": 1533763059,
+    "capability": "字幕",
+    "evidence": "single",
+    "file": "ggml-medium.bin",
+    "repo": "ggerganov/whisper.cpp",
+    "source": "catalog/subtitle-tiers.json"
+   }
+  ],
+  "6d326bf4775dded598b5c22648903e9ef27315e2b81f440446c232aa6999059d": [
+   {
+    "bytes": 4003218464,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "flux1-schnell-Q2_K.gguf",
+    "repo": "unsloth/FLUX.1-schnell-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "6f153c19191b11ddc4b955a8074996d98be4b6d6ebdaf5e0fd006f8f7c0d48a8": [
+   {
+    "bytes": 2584858432,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "sdxl_lightning_1step_x0.q4_0.gguf",
+    "repo": "mzwing/SDXL-Lightning-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "702b1e0130a1b1c7669f7f4fed01afdaaa896ee20608b8f09a6e619d66df561d": [
+   {
+    "bytes": 8399029280,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "flux1-schnell-Q5_K_M.gguf",
+    "repo": "unsloth/FLUX.1-schnell-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "72a6336b8e2499dc85b311afdcb94480df9e32dfe719d86422bbded1acc4c11f": [
+   {
+    "bytes": 2580038784,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "stable-diffusion-v2-1-FP16.gguf",
+    "repo": "gpustack/stable-diffusion-v2-1-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "7324362f5366f404fbf662357f321d6335a889e3f2030f1788270323eebd9116": [
+   {
+    "bytes": 8175240416,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "flux1-schnell-Q5_0.gguf",
+    "repo": "second-state/FLUX.1-schnell-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "733e8b298b7059a588381e9a11d10dc5bafe6d376c9e4b51200863b7ec553e83": [
+   {
+    "bytes": 3152636192,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "sdxl_lightning_1step_x0.q5_1.gguf",
+    "repo": "mzwing/SDXL-Lightning-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "74417508cfba7cba6e5fa9ff08937f303073ad3dddc15ab30755ab9ff54ff1d4": [
+   {
+    "bytes": 1633089344,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "WAI-illustrious-SDXL-v100-Q4_K_M.gguf",
+    "repo": "nuupy/WAI-illustrious-SDXL-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "765abbe041c7e3e3b64c33a2e15031a723b13b1cf9b6191df0173cb558da33ab": [
+   {
+    "bytes": 2161308096,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "sd3.5-2b-lite-q5_1.gguf",
+    "repo": "calcuis/sd3.5-lite-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "76733e26ad8fe1c7a5bf7531a9d41917b2adc0f20f2e4f5531688a8c6cd88eb0": [
+   {
+    "bytes": 539225533,
+    "capability": "字幕",
+    "detail": "英文专用",
+    "evidence": "single",
+    "file": "ggml-medium.en-q5_0.bin",
+    "repo": "ggerganov/whisper.cpp",
+    "source": "catalog/subtitle-tiers.json"
+   }
+  ],
+  "76c792c7f3bc36bebe62fb785effd62469d7620b580cc4553b90a2debf584c24": [
+   {
+    "bytes": 2758748128,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "sdxl_base_1.0_Q8_0.gguf",
+    "repo": "HyperX-Sentience/SDXL-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "771fd90d1c4651eee59ee85a2ff2111c480037b493552c88fc9572efc9b8acc4": [
+   {
+    "bytes": 1744597440,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "sd3.5-2b-lite-iq4_nl.gguf",
+    "repo": "calcuis/sd3.5-lite-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "7862bc44563477e20a9cb87fe74ea8c06d9a7ad5d4e30e14d9422e384ff1b717": [
+   {
+    "bytes": 1494548928,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "sd3.5_medium-q3_k_m.gguf",
+    "repo": "calcuis/sd3.5-medium-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "788974453e53dec88e00acace0303d055dd832c4796044b91c858f51fed171cf": [
+   {
+    "bytes": 7516505120,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "flux1-schnell-Q4_1.gguf",
+    "repo": "unsloth/FLUX.1-schnell-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "78d27a7a105a6d24168e078dd79de575ceffb30b7bc8a0cf36b711f3d87483dd": [
+   {
+    "bytes": 4777609568,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "sd3.5-large-fp32-q4_0.gguf",
+    "repo": "gguf-org/sd3.5-large-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "798f403be36ab47a7914652a73547ea7e1a2a484f9d85e5a96cc3ea75b4cc568": [
+   {
+    "bytes": 1744597440,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "sd3.5_medium-Q4_0.gguf",
+    "repo": "city96/stable-diffusion-3.5-medium-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "79c3026aecf43af544fbd7ef3419a8d695eff292effab45f92ac3d9259e24198": [
+   {
+    "bytes": 3174685280,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "v1-5-pruned_Q4_K.gguf",
+    "repo": "kostakoff/stable-diffusion-v1-5-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "7a69e56159f17ee4d870d074f2337735392cdfdfd1a60ca0ba7a682bcc345612": [
+   {
+    "bytes": 8918437856,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "flux1-schnell-Q5_1.gguf",
+    "repo": "second-state/FLUX.1-schnell-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "7b73fa47b4d1401bdf3a0898827fac94bced6633bf64ef7fe55492b6115cc74b": [
+   {
+    "bytes": 2322705024,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "stable-diffusion-v2-1-Q8_0.gguf",
+    "repo": "gpustack/stable-diffusion-v2-1-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "7ccdc568ef7d33f37943302c80450a94a59370b48d62440fc2e5a3bf8520bf35": [
+   {
+    "bytes": 12634434816,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "flux1-schnell-Q8_0.gguf",
+    "repo": "second-state/FLUX.1-schnell-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "7d99f41a10525d0206bddadd86760181fa920438b6b33237e3118ff6c83bb53d": [
+   {
+    "bytes": 3094623691,
+    "capability": "字幕",
+    "evidence": "single",
+    "file": "ggml-large-v1.bin",
+    "repo": "ggerganov/whisper.cpp",
+    "source": "catalog/subtitle-tiers.json"
+   }
+  ],
+  "7f92f7dbb9b75a4787a83bfb4f6d14a8ab515525130c9d40a9036f61cf6999e9": [
+   {
+    "bytes": 2369,
+    "capability": "文字识别",
+    "detail": "语言 arabic；必须与 rec arabic_pp-ocrv5_mobile_rec.onnx 成对",
+    "evidence": "4.5",
+    "file": "ppocrv5_arabic_dict.txt",
+    "release": "v0.3.0",
+    "source": "pins/ocr-languages.json"
+   }
+  ],
+  "811f030afe9c325855aa54bcecc3516d1764d44ccafde7ae8ade75bc19ed2eb5": [
+   {
+    "bytes": 6109089568,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "sd3.5_large-Q5_0.gguf",
+    "repo": "second-state/stable-diffusion-3.5-large-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "818710568da3ca15689e31a743197b520007872ff9576237bda97bd1b469c3d7": [
+   {
+    "bytes": 32152673,
+    "capability": "字幕",
+    "evidence": "single",
+    "file": "ggml-tiny-q5_1.bin",
+    "repo": "ggerganov/whisper.cpp",
+    "source": "catalog/subtitle-tiers.json"
+   }
+  ],
+  "8216f717a253e668f924c97299f69c9f01d2b9e81c4bc622ff7b3be3f9c1e85c": [
+   {
+    "bytes": 2144848928,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "WAI-NSFW-illustrious-SDXL-v110-Q6_K.gguf",
+    "repo": "kekusprod/WAI-NSFW-illustrious-SDXL-v110-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "82e961a71364e922e8f4d275f3bc2d7fb70a95129a91825a09fe88cba6c5206a": [
+   {
+    "bytes": 1883500992,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "sd3.5_medium-q4_1.gguf",
+    "repo": "calcuis/sd3.5-medium-gguf",
+    "source": "catalog/image-tiers.json"
+   },
+   {
+    "bytes": 1883500992,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "sd3.5_medium-Q4_1.gguf",
+    "repo": "city96/stable-diffusion-3.5-medium-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "8307465d3c9ef2ba4055c3bd0be55aafe11f518630212b7598b70ccb376028ac": [
+   {
+    "bytes": 7876014,
+    "capability": "文字识别",
+    "detail": "语言 en",
+    "evidence": "4.5",
+    "file": "en_pp-ocrv5_mobile_rec.onnx",
+    "release": "v0.3.0",
+    "source": "pins/ocr-languages.json"
+   }
+  ],
+  "832551fee1f2fbc97508772d81ebdc8dba12c00de97a35c71c9ddf43ddac1a83": [
+   {
+    "bytes": 33443,
+    "capability": "文字识别",
+    "detail": "语言 chinese_cht；必须与 rec chinese_cht_pp-ocrv3_mobile_rec.onnx 成对",
+    "evidence": "自算 + 钉 commit",
+    "file": "chinese_cht_dict.txt",
+    "source": "pins/ocr-languages.json"
+   }
+  ],
+  "83e41f672d11e8fbb071149857e424d987e0cf2e71214333f99ea8f29d57c3a8": [
+   {
+    "bytes": 5773844192,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "sd3.5_large_turbo-Q5_0.gguf",
+    "repo": "city96/stable-diffusion-3.5-large-turbo-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "84da02cb014ba62082cde3a36d2095b3d723b13b81f9ae26e91d4bcbed760c8d": [
+   {
+    "bytes": 8540771328,
+    "capability": "生图",
+    "detail": "角色 text_encoder",
+    "evidence": "agree",
+    "file": "SD3_prompt-llama_8b.Q8_0.gguf",
+    "repo": "MaziyarPanahi/SD3_prompt-llama_8b-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "853b1fdcf959f9df141266fa5238b846154000ecbc26c8fc1c2f97d440ac29ee": [
+   {
+    "bytes": 2855825856,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "sd3.5-2b-lite-mxfp4_moe.gguf",
+    "repo": "calcuis/sd3.5-lite-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "85a008ebc0117fee955ca2b1885f9ccc007b5dccbe6e8f3b0f1fea6a38deed63": [
+   {
+    "bytes": 34265610176,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "FLUX.1-schnell-FP16.gguf",
+    "repo": "Haijun-AI/FLUX.1-schnell-GGUF",
+    "source": "catalog/image-tiers.json"
+   },
+   {
+    "bytes": 34265610176,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "FLUX.1-schnell-FP16.gguf",
+    "repo": "gpustack/FLUX.1-schnell-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "85b541352ae18dc6ba6d47152d8bf8adff6b0266e605d2eef2990c1bf466117b": [
+   {
+    "bytes": 1723,
+    "capability": "文字识别",
+    "detail": "语言 ta；必须与 rec ta_pp-ocrv5_mobile_rec.onnx 成对",
+    "evidence": "4.5",
+    "file": "ppocrv5_ta_dict.txt",
+    "release": "v0.3.0",
+    "source": "pins/ocr-languages.json"
+   }
+  ],
+  "88758aee973fce12b0b7e9096164dcc5efa01fc5e90d5527095d0435a690c977": [
+   {
+    "bytes": 1675145664,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "sd3.5-2b-lite-iq4_xs.gguf",
+    "repo": "calcuis/sd3.5-lite-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "8b19e4c3619a8f3435b8c2ee7b4459a9072069eb2a9307f1c9e49ec3da953c42": [
+   {
+    "bytes": 1491773408,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "sdxl_base_1.0_Q4_K_S.gguf",
+    "repo": "HyperX-Sentience/SDXL-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "8b465525114b89011303969a035ef7e335821f13a32c4f31212912fb6511e128": [
+   {
+    "bytes": 2752844256,
+    "capability": "生图",
+    "detail": "角色 text_encoder",
+    "evidence": "agree",
+    "file": "t5xxl-Q4_K.gguf",
+    "repo": "second-state/FLUX.1-schnell-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "8b6ee1611d864f17de553f97582404c93610ac2d8ca26e4246f0d93f75b61814": [
+   {
+    "bytes": 2758748128,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "WAI-NSFW-illustrious-SDXL-v110-Q8_0.gguf",
+    "repo": "kekusprod/WAI-NSFW-illustrious-SDXL-v110-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "8b70f10e70068815fc69c57ad34d05f946f591eb687b799d46c7b89f34c26e6f": [
+   {
+    "bytes": 2218741312,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "sd3.5_medium-Q4_1.gguf",
+    "repo": "second-state/stable-diffusion-3.5-medium-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "8cea2d0cbc7cdbddf84eb8b2e5950356b9566ee18cbf5b0ace4f8bb1d03f319f": [
+   {
+    "bytes": 6274738912,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "sd3.5_large-q5_1.gguf",
+    "repo": "calcuis/sd3.5-large-gguf",
+    "source": "catalog/image-tiers.json"
+   },
+   {
+    "bytes": 6274738912,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "sd3.5_large-Q5_1.gguf",
+    "repo": "city96/stable-diffusion-3.5-large-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "8d1f245221f29c7191b3d0196d374fdf0e360867d99c09ae9359ac43c251d724": [
+   {
+    "bytes": 5272949472,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "sd3.5_large_turbo-Q4_1.gguf",
+    "repo": "city96/stable-diffusion-3.5-large-turbo-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "8d2a5c8a0b63b8cf69016b5770c06472f107fd12d92b6db1860e7afadc7ca2e5": [
+   {
+    "bytes": 92439104,
+    "capability": "生图",
+    "detail": "角色 text_encoder",
+    "evidence": "single",
+    "file": "clip_l-Q5_1.gguf",
+    "repo": "second-state/stable-diffusion-3.5-medium-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "8d40a1e9bec6b1c727d7b1e5d491e9bda33c9efc0008ba6bdcd9ac860db05607": [
+   {
+    "bytes": 2202614592,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "stable-diffusion-v2-1-Q4_1.gguf",
+    "repo": "gpustack/stable-diffusion-v2-1-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "8dcf183c9467a354286cd3033b4b977f92bf7df8f8e1a408bca15378de614f41": [
+   {
+    "bytes": 3058710496,
+    "capability": "生图",
+    "detail": "角色 text_encoder",
+    "evidence": "single",
+    "file": "t5xxl-Q4_1.gguf",
+    "repo": "second-state/stable-diffusion-3.5-medium-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "8de1c44c6c8cb913dda65a2045d93b810b3bbd32a232fa5ef0b1ac672e46ebd5": [
+   {
+    "bytes": 4691422208,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "sd3.5_large-q2_k_4_0.gguf",
+    "repo": "stduhpf/SD3.5-Large-GGUF-mixed-sdcpp",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "8f06ed63ac10ed1835b694cb6c97f64452ad53d5e0f6be5ff1d80ca3a592315c": [
+   {
+    "bytes": 3364579680,
+    "capability": "生图",
+    "detail": "角色 text_encoder",
+    "evidence": "single",
+    "file": "t5xxl-Q5_0.gguf",
+    "repo": "second-state/stable-diffusion-3.5-medium-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "8f41076885a09b7fa9bf75710ce7af111c77884b2663cf2b0873def5a9ecb321": [
+   {
+    "bytes": 1494548928,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "sd3.5-2b-lite-q3_k_m.gguf",
+    "repo": "calcuis/sd3.5-lite-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "902449c98f64b3007f8afdbee21c16b6392803d92594a139f9ec14d5ee4aff0a": [
+   {
+    "bytes": 5348017184,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "flux1-schnell-Q3_K_M.gguf",
+    "repo": "unsloth/FLUX.1-schnell-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "90a393d3a44bec691c707003f434fdde06064b870bb3c206eb7a4f109b25ff4e": [
+   {
+    "bytes": 6770707360,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "flux1-schnell-Q4_0.gguf",
+    "repo": "city96/FLUX.1-schnell-gguf",
+    "source": "catalog/image-tiers.json"
+   },
+   {
+    "bytes": 6770707360,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "flux1-schnell-Q4_0.gguf",
+    "repo": "lllyasviel/FLUX.1-schnell-gguf",
+    "source": "catalog/image-tiers.json"
+   },
+   {
+    "bytes": 6770707360,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "flux1-schnell-Q4_0.gguf",
+    "repo": "vava22684/FLUX.1-schnell-gguf",
+    "source": "catalog/image-tiers.json"
+   },
+   {
+    "bytes": 6770707360,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "flux1-schnell-Q4_0.gguf",
+    "repo": "Niansuh/FLUX.1-schnell-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "90e485f0078081a535ce74ac72b62dee0ccf4fd7f2bdb49cf2ea20a5a713db4c": [
+   {
+    "bytes": 3152636192,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "sdxl_lightning_2step.q5_1.gguf",
+    "repo": "mzwing/SDXL-Lightning-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "921e4cf8686fdd993dcd081a5da5b6c365bfde1162e72b08d75ac75289920b1f": [
+   {
+    "bytes": 77704715,
+    "capability": "字幕",
+    "detail": "英文专用",
+    "evidence": "single",
+    "file": "ggml-tiny.en.bin",
+    "repo": "ggerganov/whisper.cpp",
+    "source": "catalog/subtitle-tiers.json"
+   }
+  ],
+  "9445c54573695cd5fdf0a86f4756122b7d4a3470691dbfc4a6cf623c77e1fbc4": [
+   {
+    "bytes": 1844437824,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "RealVisXL_V4.0-Q5_K_M.gguf",
+    "repo": "hum-ma/SDXL-models-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "948b1d7568f7e652c9fafcce3f6ef6b7568fd12fb7a59c772c73e8e879c7a152": [
+   {
+    "bytes": 4098988672,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "sdxl_lightning_2step.q8_0.gguf",
+    "repo": "mzwing/SDXL-Lightning-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "9522fa5a77e5d87a5331749625660ab916f319284e74c6c67af71a9a9269a755": [
+   {
+    "bytes": 8779212512,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "sd3.5_large_turbo-Q8_0.gguf",
+    "repo": "city96/stable-diffusion-3.5-large-turbo-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "97583e67e02d22135289a8b9eef15e1c231c027f799186a98b50d20e10e15b4e": [
+   {
+    "bytes": 4772054752,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "sd3.5-8b-lite-iq4_nl.gguf",
+    "repo": "calcuis/sd3.5-lite-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "982471b0e95a40e7c3aebd8fecc8b29b194bc0d625f04b2654efac1e35682e24": [
+   {
+    "bytes": 6407817952,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "sd3.5-8b-lite-q6_k.gguf",
+    "repo": "calcuis/sd3.5-lite-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "984b08ad1636e2ac9f06b361e659ab93a9062f0fe510cb2303b0fe72111a8939": [
+   {
+    "bytes": 1808194528,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "WAI-NSFW-illustrious-SDXL-v110-Q5_0.gguf",
+    "repo": "kekusprod/WAI-NSFW-illustrious-SDXL-v110-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "987ba47c158b890c274f78fd35324419f50941e846a49789f0977e9fe9d97ab7": [
+   {
+    "bytes": 2752841312,
+    "capability": "生图",
+    "detail": "角色 text_encoder",
+    "evidence": "single",
+    "file": "t5xxl-Q4_0.gguf",
+    "repo": "second-state/stable-diffusion-3.5-medium-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "9a423fe4d40c82774b6af34115b8b935f34152246eb19e80e376071d3f999487": [
+   {
+    "bytes": 3094623691,
+    "capability": "字幕",
+    "evidence": "single",
+    "file": "ggml-large-v2.bin",
+    "repo": "ggerganov/whisper.cpp",
+    "source": "catalog/subtitle-tiers.json"
+   }
+  ],
+  "9a562470321fd77b6f85fa8a0807f51e9c1c754ecf7b5854821e8620526b0f67": [
+   {
+    "bytes": 23782411040,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "flux1-schnell-f16.gguf",
+    "repo": "second-state/FLUX.1-schnell-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "9a961bb225cb2b9fd84b2297df0d53089895c049d7d9dc5f5f8aebbcd3247872": [
+   {
+    "bytes": 4683073504,
+    "capability": "对话",
+    "detail": "档位 8GB",
+    "evidence": "agree",
+    "file": "Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf",
+    "repo": "unsloth/Qwen2.5-Coder-7B-Instruct-GGUF",
+    "source": "catalog/recommendations.json"
+   }
+  ],
+  "9aa840c946ff65d3e43b37ef80ce8221f7dbb71f83ed4a3aa6f9e9e55316de0e": [
+   {
+    "bytes": 1449427392,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "sd3.5_medium-q3_k_s.gguf",
+    "repo": "calcuis/sd3.5-medium-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "9b673fc99db70f3977f57910c6441029e3ded3a118f2a236d3185af8fdc136cb": [
+   {
+    "bytes": 5779399008,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "sd3.5-large-fp32-q5_0.gguf",
+    "repo": "gguf-org/sd3.5-large-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "9d25e52a55ef499185c750a032de06cbf53751b0ad5d4556e29acb731a814125": [
+   {
+    "bytes": 1633089344,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "WAI-illustrious-SDXL-v160-Q4_K_M.gguf",
+    "repo": "nuupy/WAI-illustrious-SDXL-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "9d6681995b16d93322c3b7c3953bf2c9df2d81b065ca4fe6c052a36ea8a06060": [
+   {
+    "bytes": 8256144416,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "fluxunchained-schnell-dev-merge-q5-0.gguf",
+    "repo": "mhnakif/flux-schnell-dev-merge-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "9dd9ee34dba9ad15181a3bf340518ec9f66b164f873f3c9daf45fa161b020745": [
+   {
+    "bytes": 16292633312,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "sd3.5_large_turbo-F16.gguf",
+    "repo": "city96/stable-diffusion-3.5-large-turbo-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "9e8ed817f18fcb44da6a7ad93d98149a99c134ad765b951f360252878b706feb": [
+   {
+    "bytes": 2022404544,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "sd3.5-2b-lite-q5_0.gguf",
+    "repo": "calcuis/sd3.5-lite-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "9ee36184e616dfc76df4f5dd66f908dbde6979524ae36e6cefb67f532f798cb8": [
+   {
+    "bytes": 415182688,
+    "capability": "对话",
+    "detail": "两个提供方对总长一致；哈希出自 ModelScope 的两条独立机制，整包字节未经下载校验 —— 首次真正下载时仍要按此 pin 复核",
+    "file": "qwen2.5-0.5b-instruct-q2_k.gguf",
+    "source": "pins/models.json"
+   }
+  ],
+  "9ef676d6ed3c88256a2d92c640c44f25b0c40947e111b14b8be8f594091563e6": [
+   {
+    "bytes": 4462639,
+    "capability": "文字识别",
+    "detail": "默认档三颗之一，运行时还要一起给：pp-ocrv6_tiny_det.onnx、ppocrv6_tiny_dict.txt",
+    "file": "pp-ocrv6_tiny_rec.onnx",
+    "source": "pins/ocr.json"
+   }
+  ],
+  "9fb03ef21c3651e7ad306721237c5770dd0989f89f701d698ba699c519e8416c": [
+   {
+    "bytes": 5887288864,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "sd3.5_large-q4_k_5_0.gguf",
+    "repo": "stduhpf/SD3.5-Large-GGUF-mixed-sdcpp",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "a035168a739b46e91fde754c5517ea1fde6c05bbb00fa2fdf0c78ba14171b632": [
+   {
+    "bytes": 1471988160,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "sd3.5-2b-lite-iq3_s.gguf",
+    "repo": "calcuis/sd3.5-lite-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "a03779c86df3323075f5e796cb2ce5029f00ec8869eee3fdfb897afe36c6d002": [
+   {
+    "bytes": 147964211,
+    "capability": "字幕",
+    "detail": "英文专用",
+    "evidence": "single",
+    "file": "ggml-base.en.bin",
+    "repo": "ggerganov/whisper.cpp",
+    "source": "catalog/subtitle-tiers.json"
+   }
+  ],
+  "a18d96d7c8d73d90f2ed056549caa1de3a8e6cb744cccba16cd593ea8cd2d569": [
+   {
+    "bytes": 8076390,
+    "capability": "文字识别",
+    "detail": "语言 cyrillic",
+    "evidence": "4.5",
+    "file": "cyrillic_pp-ocrv5_mobile_rec.onnx",
+    "release": "v0.3.0",
+    "source": "pins/ocr-languages.json"
+   }
+  ],
+  "a31331148894ea943d88d612806d1d21566cf8d1657c1485be6de4332ea2b3b1": [
+   {
+    "bytes": 1449427392,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "sd3.5_medium-Q3_K_S.gguf",
+    "repo": "city96/stable-diffusion-3.5-medium-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "a385011cab7487d5a04785446e59b405ffb642f0de867b4c8f3a7a0a077599b0": [
+   {
+    "bytes": 4010296352,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "flux1-schnell-Q2_K.gguf",
+    "repo": "city96/FLUX.1-schnell-gguf",
+    "source": "catalog/image-tiers.json"
+   },
+   {
+    "bytes": 4010296352,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "flux1-schnell-Q2_K.gguf",
+    "repo": "lllyasviel/FLUX.1-schnell-gguf",
+    "source": "catalog/image-tiers.json"
+   },
+   {
+    "bytes": 4010296352,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "flux1-schnell-Q2_K.gguf",
+    "repo": "vava22684/FLUX.1-schnell-gguf",
+    "source": "catalog/image-tiers.json"
+   },
+   {
+    "bytes": 4010296352,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "flux1-schnell-Q2_K.gguf",
+    "repo": "Niansuh/FLUX.1-schnell-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "a42fd143cec4d7194da281dc8d23a8fe54b16875a13423c042cb545d1da6fa50": [
+   {
+    "bytes": 9834955808,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "flux1-schnell-Q6_K.gguf",
+    "repo": "city96/FLUX.1-schnell-gguf",
+    "source": "catalog/image-tiers.json"
+   },
+   {
+    "bytes": 9834955808,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "flux1-schnell-Q6_K.gguf",
+    "repo": "lllyasviel/FLUX.1-schnell-gguf",
+    "source": "catalog/image-tiers.json"
+   },
+   {
+    "bytes": 9834955808,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "flux1-schnell-Q6_K.gguf",
+    "repo": "vava22684/FLUX.1-schnell-gguf",
+    "source": "catalog/image-tiers.json"
+   },
+   {
+    "bytes": 9834955808,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "flux1-schnell-Q6_K.gguf",
+    "repo": "Niansuh/FLUX.1-schnell-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "a43001676e5e07c6ffc4aef349e028dd3bb1c0c4703a0eabc7b617cf01e711d1": [
+   {
+    "bytes": 1844437824,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "zavychroma5-xl-Q5_K_M.gguf",
+    "repo": "hum-ma/SDXL-models-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "a4d4a0768075e13cfd7e19df3ae2dbc4a68d37d36a7dad45e8410c9a34f8c87e": [
+   {
+    "bytes": 81781811,
+    "capability": "字幕",
+    "detail": "英文专用",
+    "evidence": "single",
+    "file": "ggml-base.en-q8_0.bin",
+    "repo": "ggerganov/whisper.cpp",
+    "source": "catalog/subtitle-tiers.json"
+   }
+  ],
+  "a51037fac577d133fe3b83a4a0c2a7605615786f07bdec397378143fe0361f32": [
+   {
+    "bytes": 1881241504,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "stable-diffusion-v1-5-Q8_0.gguf",
+    "repo": "gpustack/stable-diffusion-v1-5-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "a5dbb7a222cf8dde1d9b35c2652b4979130b780314c91b5ed207cba74643f2d7": [
+   {
+    "bytes": 963264960,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "sd3.5_medium-q1_0.gguf",
+    "repo": "calcuis/sd3.5-medium-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "a6b803078e4e17bbc49982c045c98222b1d59575a0aaf8d872e79beb3bda5747": [
+   {
+    "bytes": 1844424928,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "juggernautXL_juggXIByRundiffusion-Q5_K_M.gguf",
+    "repo": "hum-ma/SDXL-models-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "a75b8645741ff1af8f02dcab86ee9b1c371705bebcdeee501b80e7aa61d418d8": [
+   {
+    "bytes": 5135098944,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "WAI-illustrious-SDXL-v140-F16.gguf",
+    "repo": "nuupy/WAI-illustrious-SDXL-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "a798b7196d2fe614cf9bae9a617dbd9f2c14673e454c7f2f6a500347274630b5": [
+   {
+    "bytes": 7510346656,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "flux1-schnell-Q4_1.gguf",
+    "repo": "city96/FLUX.1-schnell-gguf",
+    "source": "catalog/image-tiers.json"
+   },
+   {
+    "bytes": 7510346656,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "flux1-schnell-Q4_1.gguf",
+    "repo": "lllyasviel/FLUX.1-schnell-gguf",
+    "source": "catalog/image-tiers.json"
+   },
+   {
+    "bytes": 7510346656,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "flux1-schnell-Q4_1.gguf",
+    "repo": "vava22684/FLUX.1-schnell-gguf",
+    "source": "catalog/image-tiers.json"
+   },
+   {
+    "bytes": 7510346656,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "flux1-schnell-Q4_1.gguf",
+    "repo": "Niansuh/FLUX.1-schnell-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "a88071c68c01707489baa79ebe0405b7beb5cca229f4fc94cc3ef992328802d7": [
+   {
+    "bytes": 47451,
+    "capability": "文字识别",
+    "detail": "语言 korean；必须与 rec korean_pp-ocrv5_mobile_rec.onnx 成对",
+    "evidence": "4.5",
+    "file": "ppocrv5_korean_dict.txt",
+    "release": "v0.3.0",
+    "source": "pins/ocr-languages.json"
+   }
+  ],
+  "a9b7a7094dafe2f737fec43f5b0641251becbbe4634b13ae39ebda50d98c9970": [
+   {
+    "bytes": 77069312,
+    "capability": "生图",
+    "detail": "角色 text_encoder",
+    "evidence": "single",
+    "file": "clip_l-Q4_1.gguf",
+    "repo": "second-state/stable-diffusion-3.5-medium-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "aaede998c8daa211e6ea6dc956426deb80c521c32b0e9011603f4f452e04427f": [
+   {
+    "bytes": 1763946592,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "stable-diffusion-v1-5-Q4_1.gguf",
+    "repo": "gpustack/stable-diffusion-v1-5-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "ac5e330d0e37a95771cee03efe50370dce79bf08119b6a74c5739196b9906678": [
+   {
+    "bytes": 4772054752,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "sd3.5_large_turbo-Q4_0.gguf",
+    "repo": "city96/stable-diffusion-3.5-large-turbo-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "ae85e4a935d7a567bd102fe55afc16bb595bdb618e11b2fc7591bc08120411bb": [
+   {
+    "bytes": 190085487,
+    "capability": "字幕",
+    "evidence": "single",
+    "file": "ggml-small-q5_1.bin",
+    "repo": "ggerganov/whisper.cpp",
+    "source": "catalog/subtitle-tiers.json"
+   }
+  ],
+  "aed31c080ada49acbe0f0464a529d99f24e540fa239897a9cbf7404b869d42f5": [
+   {
+    "bytes": 2067526080,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "sd3.5-2b-lite-q5_k_m.gguf",
+    "repo": "calcuis/sd3.5-lite-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "aed75163caec667e87a67cdafe3e85b4642a186fb8357610db55e2db2760309f": [
+   {
+    "bytes": 2022404544,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "sd3.5-2b-lite-q5_k_s.gguf",
+    "repo": "calcuis/sd3.5-lite-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "aee2200b865c329850cf7e4c8276bf025869e64062fac5cd06cb94857bd0af34": [
+   {
+    "bytes": 1449427392,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "sd3.5-2b-lite-iq3_xxs.gguf",
+    "repo": "calcuis/sd3.5-lite-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "afd4575a7e537f9e058cb3d1c25db32960c23036d360bdabea3c010507d5aad4": [
+   {
+    "bytes": 3670448864,
+    "capability": "生图",
+    "detail": "角色 text_encoder",
+    "evidence": "single",
+    "file": "t5xxl-Q5_1.gguf",
+    "repo": "second-state/stable-diffusion-3.5-large-GGUF",
+    "source": "catalog/image-tiers.json"
+   },
+   {
+    "bytes": 3670448864,
+    "capability": "生图",
+    "detail": "角色 text_encoder",
+    "evidence": "agree",
+    "file": "t5xxl-Q5_1.gguf",
+    "repo": "second-state/FLUX.1-schnell-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "b13240f9c0af04e4ada4a44672987c6474815d31cc923436d6ecf65a2b5cbd36": [
+   {
+    "bytes": 5135086048,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "WAI-NSFW-illustrious-SDXL-v110-F16.gguf",
+    "repo": "kekusprod/WAI-NSFW-illustrious-SDXL-v110-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "b1342857c5d5ba796b7f4e8b23ed45981afe71e3ce440f226b51e7df5d9c1dd9": [
+   {
+    "bytes": 1640564256,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "stable-diffusion-v1-5-pruned-emaonly-Q5_1.gguf",
+    "repo": "second-state/stable-diffusion-v1-5-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "b1d63743408393c3d2a66c3f05ecf42df3bffd4a8bce3b9bfc464eef0b2ae941": [
+   {
+    "bytes": 1449427392,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "sd3.5-2b-lite-q3_k_s.gguf",
+    "repo": "calcuis/sd3.5-lite-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "b235e9a108ccc1803c576464e937cf5ec4d8eb34d83776e5199450400d4e0bcb": [
+   {
+    "bytes": 2752844256,
+    "capability": "生图",
+    "detail": "角色 text_encoder",
+    "evidence": "single",
+    "file": "t5xxl_q4_k.gguf",
+    "repo": "Green-Sky/flux.1-schnell-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "b338a7ab5c81600a54be46c4cf950edb3761a52ae163e419beafd250976fb566": [
+   {
+    "bytes": 6688845536,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "flux1-schnell-Q4_0.gguf",
+    "repo": "second-state/FLUX.1-schnell-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "b3bdbf23b47d7e6bb791c99b206deb169cd5a96362a9e3399028df2faacdc506": [
+   {
+    "bytes": 4920739200,
+    "capability": "对话",
+    "detail": "档位 8GB",
+    "evidence": "agree",
+    "file": "Llama-3.1-8B-Instruct-Q4_K_M.gguf",
+    "repo": "unsloth/Llama-3.1-8B-Instruct-GGUF",
+    "source": "catalog/recommendations.json"
+   }
+  ],
+  "b3d50774dfbec6ae02249ff79a925431a4381c8c6f86d342ff6e7b63e5fefa77": [
+   {
+    "bytes": 7939902,
+    "capability": "文字识别",
+    "detail": "语言 devanagari",
+    "evidence": "4.5",
+    "file": "devanagari_pp-ocrv5_mobile_rec.onnx",
+    "release": "v0.3.0",
+    "source": "pins/ocr-languages.json"
+   }
+  ],
+  "b518517b0c2edd211d8110233587c378bc18c4f8442fe37ed9d0154bcbc206aa": [
+   {
+    "bytes": 4772054752,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "sd3.5-8b-lite-q4_0.gguf",
+    "repo": "calcuis/sd3.5-lite-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "b5a7f6ed5df97c17a11f5dfc11001502e13e40b6d1114f8c4ce5cfc9c2d4e3c6": [
+   {
+    "bytes": 1883500992,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "sd3.5-2b-lite-q4_1.gguf",
+    "repo": "calcuis/sd3.5-lite-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "b5fe74b613436747acf83405e896a338ded690037ab77581d1177829dc19f680": [
+   {
+    "bytes": 4683074400,
+    "capability": "对话",
+    "detail": "档位 8GB",
+    "evidence": "single",
+    "file": "Qwen2.5-7B-Instruct.Q4_K_M.gguf",
+    "repo": "mradermacher/Qwen2.5-7B-Instruct-GGUF",
+    "source": "catalog/recommendations.json"
+   }
+  ],
+  "b6f7375341fea90962c5c5704180f1080fda2674cc94d7897ae04e0d022fe448": [
+   {
+    "bytes": 1844437824,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "zavychromaxl_v100-Q5_K_M.gguf",
+    "repo": "hum-ma/SDXL-models-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "b8944e9fe0b69b36ae1b5bb0185b3a7b8ef14347fe0fa9af6c64c4829022261f": [
+   {
+    "bytes": 1566768416,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "stable-diffusion-v1-5-pruned-emaonly-Q4_0.gguf",
+    "repo": "second-state/stable-diffusion-v1-5-GGUF",
+    "source": "catalog/image-tiers.json"
+   },
+   {
+    "bytes": 1566768416,
+    "capability": "生图",
+    "detail": "两个提供方对总长一致；哈希出自 ModelScope 的两条独立机制，整包字节未经下载校验 —— 首次真正下载时仍要按此 pin 复核",
+    "file": "stable-diffusion-v1-5-pruned-emaonly-Q4_0.gguf",
+    "source": "pins/models.json"
+   }
+  ],
+  "ba66d0bf6b4eff34decdb55af2758da7b18c929bd82271997141a3e3d7e24f0a": [
+   {
+    "bytes": 16068891424,
+    "capability": "生图",
+    "detail": "角色 text_encoder",
+    "evidence": "agree",
+    "file": "SD3_prompt-llama_8b.fp16.gguf",
+    "repo": "MaziyarPanahi/SD3_prompt-llama_8b-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "bb01a73c659012275d336fabde09fd7213c98a295851e4560d76a376e0e755b2": [
+   {
+    "bytes": 7432042976,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "flux1-schnell-Q4_1.gguf",
+    "repo": "second-state/FLUX.1-schnell-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "bc821dd40df6433baa53a368254b6c50f88fe939c000795cb6e106493f738e2c": [
+   {
+    "bytes": 4098988672,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "sdxl_lightning_1step_x0.q8_0.gguf",
+    "repo": "mzwing/SDXL-Lightning-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "be07e048e1e599ad46341c8d2a135645097a538221678b7acdd1b1919c6e1b21": [
+   {
+    "bytes": 77691713,
+    "capability": "字幕",
+    "evidence": "single",
+    "file": "ggml-tiny.bin",
+    "repo": "ggerganov/whisper.cpp",
+    "source": "catalog/subtitle-tiers.json"
+   },
+   {
+    "bytes": 77691713,
+    "capability": "字幕",
+    "detail": "只有单一发布方（HF 或 GitHub）；本对照证明的是传输与镜像未改写，不是来源独立",
+    "file": "ggml-tiny.bin",
+    "source": "pins/models.json"
+   }
+  ],
+  "bea213124ab48b5e44b03c7fa3377740a87aa7b44f798050d9ea16be9de14b58": [
+   {
+    "bytes": 2213675712,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "v1-5-pruned_bf16.gguf",
+    "repo": "kostakoff/stable-diffusion-v1-5-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "bf5b114ad38d91c821342ae11f2a1f04b5735e000cf7b6072084d8bdb53a2f47": [
+   {
+    "bytes": 8256144416,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "flux-schnell-dev-merge-q5-0.gguf",
+    "repo": "mhnakif/flux-schnell-dev-merge-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "bfdff4894dcb76bbf647d56263ea2a96645423f1669176f4844a1bf8e478ad30": [
+   {
+    "bytes": 190098681,
+    "capability": "字幕",
+    "detail": "英文专用",
+    "evidence": "single",
+    "file": "ggml-small.en-q5_1.bin",
+    "repo": "ggerganov/whisper.cpp",
+    "source": "catalog/subtitle-tiers.json"
+   }
+  ],
+  "bfe19081ad4ebb0cb847fb5437e409a48f3d8edfd7206b2a7f96ed22b6ed3e9d": [
+   {
+    "bytes": 8256144416,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "flux1-schnell-Q5_0.gguf",
+    "repo": "unsloth/FLUX.1-schnell-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "bff57d5b6e8ab73693d941da8452b872d734ce7f2211aaed9c8cf23ca1fcf96f": [
+   {
+    "bytes": 8784767328,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "sd3.5-large-fp32-q8_0.gguf",
+    "repo": "gguf-org/sd3.5-large-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "c142411147e16b7c4b9cc1f5d977cbe596104435d76fde47172d3d35c5e58bb8": [
+   {
+    "bytes": 391439360,
+    "capability": "生图",
+    "detail": "角色 text_encoder",
+    "evidence": "single",
+    "file": "clip_g-Q4_0.gguf",
+    "repo": "second-state/stable-diffusion-3.5-medium-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "c1c83436ce65f2b9427877737373dff16dea662a36fa4e3c7f35d766b33c31fa": [
+   {
+    "bytes": 1767366848,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "wai-illustrious-sdxl.Q5_K_M.gguf",
+    "repo": "void-gryph/wai-illustrious-sdxl-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "c1dbf6f6531632d1e4c24b1cca8fbbe487cfba18471dd59e1eadb6f7b0edac24": [
+   {
+    "bytes": 9787832544,
+    "capability": "生图",
+    "detail": "角色 text_encoder",
+    "evidence": "agree",
+    "file": "t5xxl-f16.gguf",
+    "repo": "second-state/FLUX.1-schnell-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "c2085835d3f50733e2ff6e4b41ae8a2b8d8110461e18821b09a15c40c42d1cca": [
+   {
+    "bytes": 43537433,
+    "capability": "字幕",
+    "evidence": "single",
+    "file": "ggml-tiny-q8_0.bin",
+    "repo": "ggerganov/whisper.cpp",
+    "source": "catalog/subtitle-tiers.json"
+   }
+  ],
+  "c25a143954d00f6eed6235cbe0f26d2a4e68c9f3452bef33bc6ffa3b3073856b": [
+   {
+    "bytes": 4180186816,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "sd_xl_base_1.0_0_Q8_0.gguf",
+    "repo": "kostakoff/stable-diffusion-xl-base-1.0-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "c2f6e92f9d08d69cc673a1003528ac8199274b3c0eaec88d5fbefe5af67bd42b": [
+   {
+    "bytes": 1747190784,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "stable-diffusion-v1-5-Q4_0.gguf",
+    "repo": "gpustack/stable-diffusion-v1-5-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "c577b9a86e7e048a0b7eada054f4dd79a56bbfa911fbdacf900ac5b567cbb7d9": [
+   {
+    "bytes": 81768585,
+    "capability": "字幕",
+    "evidence": "single",
+    "file": "ggml-base-q8_0.bin",
+    "repo": "ggerganov/whisper.cpp",
+    "source": "catalog/subtitle-tiers.json"
+   }
+  ],
+  "c5cbe34ef40c29c4df07ed012bf96569cb69a2d2a01a07027e9f13cb832bd9cd": [
+   {
+    "bytes": 27156,
+    "capability": "文字识别",
+    "detail": "默认档三颗之一，运行时还要一起给：pp-ocrv6_tiny_det.onnx、pp-ocrv6_tiny_rec.onnx",
+    "file": "ppocrv6_tiny_dict.txt",
+    "source": "pins/ocr.json"
+   }
+  ],
+  "c608ca1f3d94c4cf1cee5e2691e045dc542f0cc7f7434cd6273aa1ca028f08ee": [
+   {
+    "bytes": 5732987904,
+    "capability": "生图",
+    "detail": "角色 text_encoder",
+    "evidence": "agree",
+    "file": "SD3_prompt-llama_8b.Q5_K_M.gguf",
+    "repo": "MaziyarPanahi/SD3_prompt-llama_8b-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "c6138d6d58ecc8322097e0f987c32f1be8bb0a18532a3f88f734d1bbf9c41e5d": [
+   {
+    "bytes": 487614201,
+    "capability": "字幕",
+    "detail": "英文专用",
+    "evidence": "single",
+    "file": "ggml-small.en.bin",
+    "repo": "ggerganov/whisper.cpp",
+    "source": "catalog/subtitle-tiers.json"
+   }
+  ],
+  "c6c289174b7ca41ee3c0a6dea8749a863bff73a6c701bea17ed35f149a0de4f7": [
+   {
+    "bytes": 5312873376,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "flux1-schnell-q3_k.gguf",
+    "repo": "Green-Sky/flux.1-schnell-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "c6dcddd9040254ddc49d9b80388c7c8617263a121a9dad5c5b2593cca83f76b7": [
+   {
+    "bytes": 2357646176,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "sd3.5_medium-Q5_0.gguf",
+    "repo": "second-state/stable-diffusion-3.5-medium-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "c77c5766f1cef09b6b7d47f21b546cbddd4157886b3b5d6d4f709e91e66c7c2b": [
+   {
+    "bytes": 32166155,
+    "capability": "字幕",
+    "detail": "英文专用",
+    "evidence": "single",
+    "file": "ggml-tiny.en-q5_1.bin",
+    "repo": "ggerganov/whisper.cpp",
+    "source": "catalog/subtitle-tiers.json"
+   }
+  ],
+  "c79ed6cdaa7decaca6b05ccc636b956b37c47de9b104c56315ca8ed086347b00": [
+   {
+    "bytes": 5107297824,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "sd3.5_large-Q4_0.gguf",
+    "repo": "second-state/stable-diffusion-3.5-large-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "c7ac5c1a7e54d55b07f6c974c69f9effd62cc2764974257f0ae6f6b3f062b653": [
+   {
+    "bytes": 1491356224,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "RealVisXL_V4.0-Q4_0.gguf",
+    "repo": "hum-ma/SDXL-models-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "cab2137c287973accc806334f2ed0e64317d6df68d27c5411c2c35d0b2c3762d": [
+   {
+    "bytes": 5773844192,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "sd3.5-8b-lite-q5_0.gguf",
+    "repo": "calcuis/sd3.5-lite-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "cb625ce72ff8b8e29c7a2ca86009e5ac715173d83b09c71381d07fa2a659249d": [
+   {
+    "bytes": 1744597440,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "sd3.5_medium-Q4_K_S.gguf",
+    "repo": "city96/stable-diffusion-3.5-medium-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "cbb136a8380f777f6b9429071d709fa956a8e48fc33250f4e0229aa11d75e366": [
+   {
+    "bytes": 1633076448,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "WAI-illustrious-SDXL-v170-Q4_K_M.gguf",
+    "repo": "nuupy/WAI-illustrious-SDXL-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "cc37e93478338ec7700281a7ac30a10128929eb8f427dda2e865faa8f6da4356": [
+   {
+    "bytes": 1533774781,
+    "capability": "字幕",
+    "detail": "英文专用",
+    "evidence": "single",
+    "file": "ggml-medium.en.bin",
+    "repo": "ggerganov/whisper.cpp",
+    "source": "catalog/subtitle-tiers.json"
+   }
+  ],
+  "ccbcc45730b3fbbd9050c5bc74db6a99067141ef1035e3d14889a84a6b9b1aff": [
+   {
+    "bytes": 2616,
+    "capability": "文字识别",
+    "detail": "语言 latin；必须与 rec latin_pp-ocrv5_mobile_rec.onnx 成对",
+    "evidence": "4.5",
+    "file": "ppocrv5_latin_dict.txt",
+    "release": "v0.3.0",
+    "source": "pins/ocr-languages.json"
+   }
+  ],
+  "cd12639231e6026ada6e593e6c043ce99be1829e3502f18478b859ccbd16e084": [
+   {
+    "bytes": 2496550720,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "sd3.5_medium-Q5_1.gguf",
+    "repo": "second-state/stable-diffusion-3.5-medium-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "cdd25e42fdd76f676f4a668c2ec0d9150a3ad1038ddb571373dedc55aa9f244f": [
+   {
+    "bytes": 1744597440,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "sd3.5-2b-lite-q4_k_s.gguf",
+    "repo": "calcuis/sd3.5-lite-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "cdfac82c3c81d3a4946c355d33e13f518ca1017205ad3f46eb0c4004170bac89": [
+   {
+    "bytes": 12693980192,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "fluxunchained-schnell-dev-merge-q8-0.gguf",
+    "repo": "mhnakif/flux-schnell-dev-merge-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "d0555243938c62faeefb4ac93f6c7a053ad373a4290c5256bce229aeb193bf94": [
+   {
+    "bytes": 1763578176,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "stable-diffusion-v1-5-pruned-emaonly-Q8_0.gguf",
+    "repo": "second-state/stable-diffusion-v1-5-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "d0d0f0fb578ecdc4a03cd547fd0899749096cb4965b803d6a8223d05af0943b5": [
+   {
+    "bytes": 1491356224,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "zavychromaxl_v100-Q4_0.gguf",
+    "repo": "hum-ma/SDXL-models-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "d0fa5a08c0b158b1df6904987e71eff3669e737e33d63d86277249ad49becc08": [
+   {
+    "bytes": 2161308096,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "sd3.5_medium-q5_1.gguf",
+    "repo": "calcuis/sd3.5-medium-gguf",
+    "source": "catalog/image-tiers.json"
+   },
+   {
+    "bytes": 2161308096,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "sd3.5_medium-Q5_1.gguf",
+    "repo": "city96/stable-diffusion-3.5-medium-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "d20819fe5a92d3b4b3ed7ef966a92a82b95c1c6282bc5958ad6f24cff797c754": [
+   {
+    "bytes": 2317574592,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "sd3.5_medium-Q6_K.gguf",
+    "repo": "city96/stable-diffusion-3.5-medium-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "d355914d984fa504ed01a877baf7364fb341d3ede9f82eaf2d0544d793767f66": [
+   {
+    "bytes": 4939379136,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "sd3.5_medium-f16.gguf",
+    "repo": "calcuis/sd3.5-medium-gguf",
+    "source": "catalog/image-tiers.json"
+   },
+   {
+    "bytes": 4939379136,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "sd3.5_medium-F16.gguf",
+    "repo": "city96/stable-diffusion-3.5-medium-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "d397213d520384e2839342d6d057c367f49d197af65d742d502206e5c8f03921": [
+   {
+    "bytes": 12693980192,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "flux1-schnell-Q8_0.gguf",
+    "repo": "unsloth/FLUX.1-schnell-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "d41231770f742f2a11bcaa8e4833e6d566aebdeb91c454d61fe3b63f88d48880": [
+   {
+    "bytes": 246379840,
+    "capability": "生图",
+    "detail": "角色 text_encoder",
+    "evidence": "agree",
+    "file": "clip_l_fp32-f16.gguf",
+    "repo": "gguf-org/sd3.5-large-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "d42399afdf6cbef9d358c59d29e7fd395b45177fdc7680f09278d91dae83234f": [
+   {
+    "bytes": 2584858432,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "sdxl_lightning_2step.q4_0.gguf",
+    "repo": "mzwing/SDXL-Lightning-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "d43be1ba39cfba4b4adfeb10a4a1234911e798c16dedc6778c863808adbe30f0": [
+   {
+    "bytes": 2736430048,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "WAI-illustrious-SDXL-v170-Q8_0.gguf",
+    "repo": "nuupy/WAI-illustrious-SDXL-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "d59aa31f4ec70fa0189f8baaeacbb91048a80bf289b5cd958795f62988e4aa48": [
+   {
+    "bytes": 3191079008,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "sd3.5_medium-Q8_0.gguf",
+    "repo": "second-state/stable-diffusion-3.5-medium-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "d653d8e2dee27f043413ec5198d09cabec660062101734c5b21eedf91d529ad9": [
+   {
+    "bytes": 434826304,
+    "capability": "生图",
+    "detail": "角色 text_encoder",
+    "evidence": "single",
+    "file": "clip_g-Q4_1.gguf",
+    "repo": "second-state/stable-diffusion-3.5-medium-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "d7278b51f83ecd7c62b440bd68f27ca13dca7372b30ec49431f6f7b750025c17": [
+   {
+    "bytes": 5107297824,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "sd3.5_large-q4_k_4_0.gguf",
+    "repo": "stduhpf/SD3.5-Large-GGUF-mixed-sdcpp",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "d75795ecff3f83b5faa89d1900604ad8c780abd5739fae406de19f23ecd98ad1": [
+   {
+    "bytes": 1081140203,
+    "capability": "字幕",
+    "evidence": "single",
+    "file": "ggml-large-v3-q5_0.bin",
+    "repo": "ggerganov/whisper.cpp",
+    "source": "catalog/subtitle-tiers.json"
+   }
+  ],
+  "d7dcbd091e13dfd32e01c26556bcc71ef63db695af8eb8f1e313b2c1d8e35942": [
+   {
+    "bytes": 7516505120,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "fluxunchained-schnell-dev-merge-q4-1.gguf",
+    "repo": "mhnakif/flux-schnell-dev-merge-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "d7e3bb60170edaea8359fe4f464e96e0f139dbf49f24e5db44d14b321e96f323": [
+   {
+    "bytes": 1457159744,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "stable-diffusion-xl-base-1.0-Q4_0-b3962.gguf",
+    "repo": "hum-ma/SDXL-models-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "d8150f1bf860f91097070b9aaccf7bc9da3f8e06513dfcbf6374d475361e2a5c": [
+   {
+    "bytes": 8995783712,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "flux-schnell-dev-merge-q5-1.gguf",
+    "repo": "mhnakif/flux-schnell-dev-merge-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "d9f0d30fdec2ac7fd703a85ffc794270e6eac97e80bfbb1d8715f9f20e8923b8": [
+   {
+    "bytes": 5135087424,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "sdxl-unet-f16.gguf",
+    "repo": "AEUPH/sdxl-unet-q8-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "da017009aa86a3f46468857d95833435fe55e4a2856afab76ba7722ef8ee4d8b": [
+   {
+    "bytes": 2132586944,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "stable-diffusion-v1-5-pruned-emaonly-f16.gguf",
+    "repo": "second-state/stable-diffusion-v1-5-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "da59d4dbb6786a92a3823c32b3f48179d18e29903d61462842aad9eb422a77a1": [
+   {
+    "bytes": 10097703,
+    "capability": "文字识别",
+    "detail": "语言 japan",
+    "evidence": "4.5",
+    "file": "japan_pp-ocrv3_mobile_rec.onnx",
+    "release": "v0.3.0",
+    "source": "pins/ocr-languages.json"
+   }
+  ],
+  "da68cf0db4bc71a9a2fb1b357521eb37f04c06c59025ce487d061ec4652905be": [
+   {
+    "bytes": 5212210208,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "flux1-schnell-Q3_K_S.gguf",
+    "repo": "city96/FLUX.1-schnell-gguf",
+    "source": "catalog/image-tiers.json"
+   },
+   {
+    "bytes": 5212210208,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "flux1-schnell-Q3_K_S.gguf",
+    "repo": "lllyasviel/FLUX.1-schnell-gguf",
+    "source": "catalog/image-tiers.json"
+   },
+   {
+    "bytes": 5212210208,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "flux1-schnell-Q3_K_S.gguf",
+    "repo": "vava22684/FLUX.1-schnell-gguf",
+    "source": "catalog/image-tiers.json"
+   },
+   {
+    "bytes": 5212210208,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "flux1-schnell-Q3_K_S.gguf",
+    "repo": "Niansuh/FLUX.1-schnell-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "dad0073b1630ad0ebda927caa5ce017bfab49ae2e0254b99bf3060bac69a06e9": [
+   {
+    "bytes": 1491343328,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "juggernautXL_juggXIByRundiffusion-Q4_0.gguf",
+    "repo": "hum-ma/SDXL-models-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "db40aa52ceb112055be80c694afdf655d5d2c4f7873704524cc16a447ca913ba": [
+   {
+    "bytes": 2781,
+    "capability": "文字识别",
+    "detail": "语言 cyrillic；必须与 rec cyrillic_pp-ocrv5_mobile_rec.onnx 成对",
+    "evidence": "4.5",
+    "file": "ppocrv5_cyrillic_dict.txt",
+    "release": "v0.3.0",
+    "source": "pins/ocr-languages.json"
+   }
+  ],
+  "db6f98546348bee237e790e5e98675bce66c36f92ddc7b73cd6c9d64ffd967d1": [
+   {
+    "bytes": 23788569632,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "flux1-schnell-F16.gguf",
+    "repo": "unsloth/FLUX.1-schnell-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "dd519b3d199cebe881b2abba89bc9111e875549756044dcdbf8dfdcf7b4d3b5f": [
+   {
+    "bytes": 10218875456,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "FLUX.1-schnell-Q4_0.gguf",
+    "repo": "Haijun-AI/FLUX.1-schnell-GGUF",
+    "source": "catalog/image-tiers.json"
+   },
+   {
+    "bytes": 10218875456,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "FLUX.1-schnell-Q4_0.gguf",
+    "repo": "gpustack/FLUX.1-schnell-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "ddd5f07dd86da1e3d1d27475e038a566ca9efcbd6a379af5389a1053ec38385f": [
+   {
+    "bytes": 2022404544,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "sd3.5_medium-Q5_K_S.gguf",
+    "repo": "city96/stable-diffusion-3.5-medium-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "de72b7c32e6d5e78a6268ea18fc10fae2cfcb5a042784ead4c5ac28e71ac82a9": [
+   {
+    "bytes": 12693980192,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "flux-schnell-dev-merge-q8-0.gguf",
+    "repo": "mhnakif/flux-schnell-dev-merge-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "e0245757ba5e3ad32aa8ff4a05026d3f47d7bc699506ade0b3e72eb097740ba2": [
+   {
+    "bytes": 11264383936,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "FLUX.1-schnell-Q4_1.gguf",
+    "repo": "Haijun-AI/FLUX.1-schnell-GGUF",
+    "source": "catalog/image-tiers.json"
+   },
+   {
+    "bytes": 11264383936,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "FLUX.1-schnell-Q4_1.gguf",
+    "repo": "gpustack/FLUX.1-schnell-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "e025a66d31f327ba0c232e03f407ae8d105e1e709e7ccb3f408aa778c24e70d6": [
+   {
+    "bytes": 1416,
+    "capability": "文字识别",
+    "detail": "语言 en；必须与 rec en_pp-ocrv5_mobile_rec.onnx 成对",
+    "evidence": "4.5",
+    "file": "ppocrv5_en_dict.txt",
+    "release": "v0.3.0",
+    "source": "pins/ocr-languages.json"
+   }
+  ],
+  "e0783bcfbad34efe37b67549a5337caa49258ccf35b943a6b7a2a3d49209adb3": [
+   {
+    "bytes": 8249985952,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "flux1-schnell-Q5_0.gguf",
+    "repo": "city96/FLUX.1-schnell-gguf",
+    "source": "catalog/image-tiers.json"
+   },
+   {
+    "bytes": 8249985952,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "flux1-schnell-Q5_0.gguf",
+    "repo": "lllyasviel/FLUX.1-schnell-gguf",
+    "source": "catalog/image-tiers.json"
+   },
+   {
+    "bytes": 8249985952,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "flux1-schnell-Q5_0.gguf",
+    "repo": "vava22684/FLUX.1-schnell-gguf",
+    "source": "catalog/image-tiers.json"
+   },
+   {
+    "bytes": 8249985952,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "flux1-schnell-Q5_0.gguf",
+    "repo": "Niansuh/FLUX.1-schnell-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "e0b5777dc483909d047afc52835b7b5540cfd66b55f97186190a93730d932dbd": [
+   {
+    "bytes": 1446631808,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "wai-illustrious-sdxl.Q4_K_M.gguf",
+    "repo": "void-gryph/wai-illustrious-sdxl-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "e13384dbdeff6dd236cdaad13345e138364f22d090fb93280865bd034c7df12b": [
+   {
+    "bytes": 23782411168,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "flux1-schnell-F16.gguf",
+    "repo": "city96/FLUX.1-schnell-gguf",
+    "source": "catalog/image-tiers.json"
+   },
+   {
+    "bytes": 23782411168,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "flux1-schnell-F16.gguf",
+    "repo": "lllyasviel/FLUX.1-schnell-gguf",
+    "source": "catalog/image-tiers.json"
+   },
+   {
+    "bytes": 23782411168,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "flux1-schnell-F16.gguf",
+    "repo": "vava22684/FLUX.1-schnell-gguf",
+    "source": "catalog/image-tiers.json"
+   },
+   {
+    "bytes": 23782411168,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "flux1-schnell-F16.gguf",
+    "repo": "Niansuh/FLUX.1-schnell-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "e23c3c58b5475937419dd34ec0ccac301d8348ceadd7838eb367e6ce9329c836": [
+   {
+    "bytes": 4110959520,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "flux1-schnell-q2_k.gguf",
+    "repo": "leejet/FLUX.1-schnell-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "e33c8974e30dea1c6f6f6016c9dfd3586438702a5e4c85413af522c4d7934c67": [
+   {
+    "bytes": 2753531360,
+    "capability": "生图",
+    "detail": "角色 text_encoder",
+    "evidence": "agree",
+    "file": "t5xxl_fp32-q4_0.gguf",
+    "repo": "gguf-org/sd3.5-large-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "e3a6bfeea1c8a01d6fccfd480a0bd363fd907f8c65931e228bb2736f5c3e142f": [
+   {
+    "bytes": 8069614,
+    "capability": "文字识别",
+    "detail": "语言 latin",
+    "evidence": "4.5",
+    "file": "latin_pp-ocrv5_mobile_rec.onnx",
+    "release": "v0.3.0",
+    "source": "pins/ocr-languages.json"
+   }
+  ],
+  "e3c28e4ebc2203f23ea1324db1d0dc841c047256c4541e420f8c92bfc606e726": [
+   {
+    "bytes": 4772054752,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "sd3.5_large-q4_0.gguf",
+    "repo": "calcuis/sd3.5-large-gguf",
+    "source": "catalog/image-tiers.json"
+   },
+   {
+    "bytes": 4772054752,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "sd3.5_large-Q4_0.gguf",
+    "repo": "city96/stable-diffusion-3.5-large-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "e5f04ee87a3a53a2ca15ed94de3ef80a0b805d83ad3105fc4baa3c6ea2e32c24": [
+   {
+    "bytes": 1787064768,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "sd3.5_medium-q4_k_m.gguf",
+    "repo": "calcuis/sd3.5-medium-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "e6b666d9a629ff624c374c03de508d8bab666e0527527004e9d0bc36895cf5b9": [
+   {
+    "bytes": 2022404544,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "sd3.5_medium-q5_k_s.gguf",
+    "repo": "calcuis/sd3.5-medium-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "e6cc4f0c24f51d81d06fbf1026b84e4a1bf2cefb4bf80c117f0071cff3986d4c": [
+   {
+    "bytes": 6596006912,
+    "capability": "生图",
+    "detail": "角色 text_encoder",
+    "evidence": "agree",
+    "file": "SD3_prompt-llama_8b.Q6_K.gguf",
+    "repo": "MaziyarPanahi/SD3_prompt-llama_8b-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "e73ab9b09679ceef1459d3acdafad8a646e01dde934da24b600d614bb6b933bc": [
+   {
+    "bytes": 2729571968,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "wai-illustrious-sdxl.Q8_0.gguf",
+    "repo": "void-gryph/wai-illustrious-sdxl-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "e8a08744cacf067de7ce67e6e550ce328b3fc33511c95c3aee2b26efd4d7f3b6": [
+   {
+    "bytes": 2067526080,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "sd3.5_medium-Q5_K_M.gguf",
+    "repo": "city96/stable-diffusion-3.5-medium-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "e9592deee670c7ae3b21a7f6ad5d73f080628a30d8f00d26c668cfa3b493de04": [
+   {
+    "bytes": 8993741,
+    "capability": "文字识别",
+    "detail": "语言 ka",
+    "evidence": "4.5",
+    "file": "ka_pp-ocrv3_mobile_rec.onnx",
+    "release": "v0.3.0",
+    "source": "pins/ocr-languages.json"
+   }
+  ],
+  "ef0f9a6db833112f5580fa7032d85a7c6817f4dff2269ef7e43ea6d144c55e0c": [
+   {
+    "bytes": 5497293344,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "sd3.5_large-q4_k_4_1.gguf",
+    "repo": "stduhpf/SD3.5-Large-GGUF-mixed-sdcpp",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "ef54b3d718d159630d83d67440216b5eb5d156d99de401b3ad60d6ce63c0fcf5": [
+   {
+    "bytes": 8779212512,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "sd3.5-8b-lite-q8_0.gguf",
+    "repo": "calcuis/sd3.5-lite-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "f02ed3a055e3d3b1f7fbe2a2a7719179726ae8948f835f70a4f55757dd03ad61": [
+   {
+    "bytes": 2317574592,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "sd3.5_medium-q6_k.gguf",
+    "repo": "calcuis/sd3.5-medium-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "f1c996a4bc1ce27547d52e47fc9bde4f649605cf3986807155de36f42971d142": [
+   {
+    "bytes": 5135098944,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "WAI-illustrious-SDXL-v160-F16.gguf",
+    "repo": "nuupy/WAI-illustrious-SDXL-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "f32ace1cbc1449a5c39e6598e3d9d46e0af501ae753463510e06b6f1ecef9824": [
+   {
+    "bytes": 9827877920,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "flux1-schnell-Q6_K.gguf",
+    "repo": "unsloth/FLUX.1-schnell-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "f3541873a1f4214c06f70add326655dd3348dcf2f536df7e7de94bbdbc6081be": [
+   {
+    "bytes": 2317574592,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "sd3.5-2b-lite-q6_k.gguf",
+    "repo": "calcuis/sd3.5-lite-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "f3d2bfefe08b4694c221691ce65f860e5ff6beab9a81262f2b09caf407066784": [
+   {
+    "bytes": 3048578880,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "wai-ani-nsfw-ponyxl-v140-sdxl-q8_0.gguf",
+    "repo": "HappyAcc/wai-ani-nsfw-ponyxl-v140-sdxl-q8_0.gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "f47798827418682d3e4f478308f5eb089206a7602fcbbe7f49c8729c703909d6": [
+   {
+    "bytes": 1390432480,
+    "capability": "生图",
+    "detail": "角色 text_encoder",
+    "evidence": "agree",
+    "file": "clip_g_fp32-f16.gguf",
+    "repo": "gguf-org/sd3.5-large-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "f4c2df04eac1506f9442f2aa9f280bb6b4725168b123dd80c29390e6453878a9": [
+   {
+    "bytes": 1223709120,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "sd3.5_medium-q2_k.gguf",
+    "repo": "calcuis/sd3.5-medium-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "f4df16c641a05c4a6ca717068ba3ee312875000f6fac0efbd152915553b5fc3e": [
+   {
+    "bytes": 3364579680,
+    "capability": "生图",
+    "detail": "角色 text_encoder",
+    "evidence": "single",
+    "file": "t5xxl-Q5_0.gguf",
+    "repo": "second-state/stable-diffusion-3.5-large-GGUF",
+    "source": "catalog/image-tiers.json"
+   },
+   {
+    "bytes": 3364579680,
+    "capability": "生图",
+    "detail": "角色 text_encoder",
+    "evidence": "agree",
+    "file": "t5xxl-Q5_0.gguf",
+    "repo": "second-state/FLUX.1-schnell-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "f5659e6cdad699b1432870cc9fe811359e45c8a331687be505d0ba05c8364720": [
+   {
+    "bytes": 4098988672,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "sd_xl_turbo_1.0.q8_0.gguf",
+    "repo": "OlegSkutte/sdxl-turbo-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "f5a0653f933c634a3ed408b2a521cae49f4949715fa31ddd0e0ad7d48a12bde1": [
+   {
+    "bytes": 3670448864,
+    "capability": "生图",
+    "detail": "角色 text_encoder",
+    "evidence": "single",
+    "file": "t5xxl-Q5_1.gguf",
+    "repo": "second-state/stable-diffusion-3.5-medium-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "f5ad88ae2ac924eb4ac0298b77afa304b5e6014fc0c4128f0e3df40fdfcc0f8a": [
+   {
+    "bytes": 69384832,
+    "capability": "生图",
+    "detail": "角色 text_encoder",
+    "evidence": "single",
+    "file": "clip_l-Q4_0.gguf",
+    "repo": "second-state/stable-diffusion-3.5-medium-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "f6694941193b10148dbf1f0f498d4ccd3e9875c127fc53946213b68580c66f10": [
+   {
+    "bytes": 12687821728,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "flux1-schnell-Q8_0.gguf",
+    "repo": "city96/FLUX.1-schnell-gguf",
+    "source": "catalog/image-tiers.json"
+   },
+   {
+    "bytes": 12687821728,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "flux1-schnell-Q8_0.gguf",
+    "repo": "lllyasviel/FLUX.1-schnell-gguf",
+    "source": "catalog/image-tiers.json"
+   },
+   {
+    "bytes": 12687821728,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "flux1-schnell-Q8_0.gguf",
+    "repo": "vava22684/FLUX.1-schnell-gguf",
+    "source": "catalog/image-tiers.json"
+   },
+   {
+    "bytes": 12687821728,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "flux1-schnell-Q8_0.gguf",
+    "repo": "Niansuh/FLUX.1-schnell-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "f6f851777709861056efcdad3af01da38b31223a3ba26e61a4f8bf3a2195813a": [
+   {
+    "bytes": 2497281312,
+    "capability": "对话",
+    "detail": "档位 4GB",
+    "evidence": "agree",
+    "file": "Qwen3-4B-Q4_K_M.gguf",
+    "repo": "unsloth/Qwen3-4B-GGUF",
+    "source": "catalog/recommendations.json"
+   }
+  ],
+  "f70c3bf3fd7ec61ffde742be5dc9d0aac6b71f116bba37f5dceb0cf587cbb4d2": [
+   {
+    "bytes": 2497281088,
+    "capability": "对话",
+    "detail": "档位 4GB",
+    "evidence": "single",
+    "file": "Rio-3.0-Open-Mini.Q4_K_M.gguf",
+    "repo": "mradermacher/Rio-3.0-Open-Mini-GGUF",
+    "source": "catalog/recommendations.json"
+   }
+  ],
+  "f7a0ea3c93df480dd540de7ae43baed723c8bc1f36f43a55eb4a089ba39dabe9": [
+   {
+    "bytes": 1744597440,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "sd3.5_medium-q4_0.gguf",
+    "repo": "calcuis/sd3.5-medium-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "f7c1deeb105cbb9e4737405de71759df14a494a04935a623037a05b6791a4ae9": [
+   {
+    "bytes": 246137024,
+    "capability": "生图",
+    "detail": "角色 text_encoder",
+    "evidence": "single",
+    "file": "clip_l-f16.gguf",
+    "repo": "second-state/stable-diffusion-3.5-medium-GGUF",
+    "source": "catalog/image-tiers.json"
+   },
+   {
+    "bytes": 246137024,
+    "capability": "生图",
+    "detail": "角色 text_encoder",
+    "evidence": "agree",
+    "file": "clip_l-f16.gguf",
+    "repo": "second-state/FLUX.1-schnell-GGUF",
+    "source": "catalog/image-tiers.json"
+   },
+   {
+    "bytes": 246137024,
+    "capability": "生图",
+    "detail": "角色 text_encoder",
+    "evidence": "single",
+    "file": "clip_l-f16.gguf",
+    "repo": "Green-Sky/flux.1-schnell-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "f81e01ce1dbac9626ab6b4e20bb276619b2fa53125bc6f95455eb101f2d8ce35": [
+   {
+    "bytes": 7516505120,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "flux-schnell-dev-merge-q4-1.gguf",
+    "repo": "mhnakif/flux-schnell-dev-merge-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "f905ed6dc6568fc5d1f8ee53a9200bad930523bdc77e5327fafee11e5baf196e": [
+   {
+    "bytes": 1389362304,
+    "capability": "生图",
+    "detail": "角色 text_encoder",
+    "evidence": "single",
+    "file": "clip_g-f16.gguf",
+    "repo": "second-state/stable-diffusion-3.5-medium-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "fa3e552976848ac15074c239229eae82802ea3070000ee38f75bc65474bf5a1f": [
+   {
+    "bytes": 1787064768,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "sd3.5-2b-lite-q4_k_m.gguf",
+    "repo": "calcuis/sd3.5-lite-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "fad3f765943275eec2134a6fbc9b52785426641104d4e7db3a159dc73f341dde": [
+   {
+    "bytes": 452,
+    "capability": "文字识别",
+    "detail": "语言 ka；必须与 rec ka_pp-ocrv3_mobile_rec.onnx 成对",
+    "evidence": "自算 + 钉 commit",
+    "file": "ka_dict.txt",
+    "source": "pins/ocr-languages.json"
+   }
+  ],
+  "fc07757bf7ad40eaf612acc7ed0c0a7ab71189979e0b8b4d14601017baca22de": [
+   {
+    "bytes": 5199794784,
+    "capability": "生图",
+    "detail": "角色 text_encoder",
+    "evidence": "single",
+    "file": "t5xxl-Q8_0.gguf",
+    "repo": "second-state/stable-diffusion-3.5-large-GGUF",
+    "source": "catalog/image-tiers.json"
+   },
+   {
+    "bytes": 5199794784,
+    "capability": "生图",
+    "detail": "角色 text_encoder",
+    "evidence": "single",
+    "file": "t5xxl-Q8_0.gguf",
+    "repo": "second-state/stable-diffusion-3.5-medium-GGUF",
+    "source": "catalog/image-tiers.json"
+   },
+   {
+    "bytes": 5199794784,
+    "capability": "生图",
+    "detail": "角色 text_encoder",
+    "evidence": "agree",
+    "file": "t5xxl-Q8_0.gguf",
+    "repo": "second-state/FLUX.1-schnell-GGUF",
+    "source": "catalog/image-tiers.json"
+   },
+   {
+    "bytes": 5199794784,
+    "capability": "生图",
+    "detail": "角色 text_encoder",
+    "evidence": "single",
+    "file": "t5xxl_q8_0.gguf",
+    "repo": "Green-Sky/flux.1-schnell-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "fd6c8fc20de32c2d4fd266a6f23a2b94bc1eaebfb22a2ab0001bf22df7b898ad": [
+   {
+    "bytes": 5497293344,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "sd3.5_large_turbo-q4_k_4_1.gguf",
+    "repo": "stduhpf/SD3.5-Large-Turbo-GGUF-mixed-sdcpp",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "fd90cd553574cbf1a4fa15ff627e93e51cfb488cd39f67047f6bc0bb9306da0b": [
+   {
+    "bytes": 4772054752,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "sd3.5-large-fp16-q4_0.gguf",
+    "repo": "gguf-org/sd3.5-large-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "fe55e0e728e3fbd3daeb0de21c6962fae1ac04a693ae527add55a76af2f1c6bf": [
+   {
+    "bytes": 2774106912,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "single",
+    "file": "sdxl_lightning_4step.q4_1.gguf",
+    "repo": "mzwing/SDXL-Lightning-GGUF",
+    "source": "catalog/image-tiers.json"
+   }
+  ],
+  "fef54e6d898246a65c8285bfa83bd1807e27fadf54d5d4e81754c47634737e8c": [
+   {
+    "bytes": 1656129691,
+    "capability": "字幕",
+    "evidence": "single",
+    "file": "ggml-large-v2-q8_0.bin",
+    "repo": "ggerganov/whisper.cpp",
+    "source": "catalog/subtitle-tiers.json"
+   }
+  ],
+  "ffda99ca35956e39182ec70fb748070f368d6ac9e66c490e5cbfdf2ebaf24d93": [
+   {
+    "bytes": 1067442624,
+    "capability": "生图",
+    "detail": "角色 unet",
+    "evidence": "agree",
+    "file": "sd3.5_medium-q2_0.gguf",
+    "repo": "calcuis/sd3.5-medium-gguf",
+    "source": "catalog/image-tiers.json"
+   }
+  ]
+ },
+ "from": [
+  "pins/models.json",
+  "pins/ocr.json",
+  "pins/ocr-languages.json",
+  "catalog/recommendations.json",
+  "catalog/subtitle-tiers.json",
+  "catalog/image-tiers.json"
+ ],
+ "names_with_multiple_hashes": {
+  "clip_l-Q8_0.gguf": [
+   "482dfa677edb6499a689f1936f287351f3c104d5da9094d8c797da527a98323b",
+   "59cbe002c3e75d2b89d38787e81d12fb4e512fd76176884c470737ad87a1d309"
+  ],
+  "flux1-schnell-F16.gguf": [
+   "db6f98546348bee237e790e5e98675bce66c36f92ddc7b73cd6c9d64ffd967d1",
+   "e13384dbdeff6dd236cdaad13345e138364f22d090fb93280865bd034c7df12b"
+  ],
+  "flux1-schnell-Q2_K.gguf": [
+   "6d326bf4775dded598b5c22648903e9ef27315e2b81f440446c232aa6999059d",
+   "a385011cab7487d5a04785446e59b405ffb642f0de867b4c8f3a7a0a077599b0"
+  ],
+  "flux1-schnell-Q3_K_S.gguf": [
+   "03d57f0b79da05f510b9e80ac464282affec9fee1aee4c8d7b866ba06eb66447",
+   "da68cf0db4bc71a9a2fb1b357521eb37f04c06c59025ce487d061ec4652905be"
+  ],
+  "flux1-schnell-Q4_0.gguf": [
+   "6b751a6dff696d990a3d215b76c7ed9187241458ad990b471a3c2a66712528b9",
+   "90a393d3a44bec691c707003f434fdde06064b870bb3c206eb7a4f109b25ff4e",
+   "b338a7ab5c81600a54be46c4cf950edb3761a52ae163e419beafd250976fb566"
+  ],
+  "flux1-schnell-Q4_1.gguf": [
+   "788974453e53dec88e00acace0303d055dd832c4796044b91c858f51fed171cf",
+   "a798b7196d2fe614cf9bae9a617dbd9f2c14673e454c7f2f6a500347274630b5",
+   "bb01a73c659012275d336fabde09fd7213c98a295851e4560d76a376e0e755b2"
+  ],
+  "flux1-schnell-Q4_K_S.gguf": [
+   "4fd16477b3a5296d0cf722c4b92a9fd7f30d09ac7495826e4465d8de9c9fd973",
+   "61d3c1c4dde15e3b20b92a8a46a990032bbb4f2f0343aa6380f4deb883ce7472"
+  ],
+  "flux1-schnell-Q5_0.gguf": [
+   "7324362f5366f404fbf662357f321d6335a889e3f2030f1788270323eebd9116",
+   "bfe19081ad4ebb0cb847fb5437e409a48f3d8edfd7206b2a7f96ed22b6ed3e9d",
+   "e0783bcfbad34efe37b67549a5337caa49258ccf35b943a6b7a2a3d49209adb3"
+  ],
+  "flux1-schnell-Q5_1.gguf": [
+   "0c034a4bab6f0bbbd10f7740ad490257cd1ef73df65b4b19765ab6d5b412fb3d",
+   "504cf1af9d9157bd3cae49c54fed3cc04fc0fcb6798d0c0d394097a30b656897",
+   "7a69e56159f17ee4d870d074f2337735392cdfdfd1a60ca0ba7a682bcc345612"
+  ],
+  "flux1-schnell-Q5_K_S.gguf": [
+   "19f63562d9a20d2123288dddd9abb3d5560554e5694ded951aaf6bfafe46b5df",
+   "1a5a311cff84182d4fce95405f28b278cf6115211caaf6ed9872a4adcdeff083"
+  ],
+  "flux1-schnell-Q6_K.gguf": [
+   "a42fd143cec4d7194da281dc8d23a8fe54b16875a13423c042cb545d1da6fa50",
+   "f32ace1cbc1449a5c39e6598e3d9d46e0af501ae753463510e06b6f1ecef9824"
+  ],
+  "flux1-schnell-Q8_0.gguf": [
+   "7ccdc568ef7d33f37943302c80450a94a59370b48d62440fc2e5a3bf8520bf35",
+   "d397213d520384e2839342d6d057c367f49d197af65d742d502206e5c8f03921",
+   "f6694941193b10148dbf1f0f498d4ccd3e9875c127fc53946213b68580c66f10"
+  ],
+  "flux1-schnell-q2_k.gguf": [
+   "4637862204934cfe29d3f3adcb61ad0f679a417cfacdbc495a52e3d7bd64ef04",
+   "e23c3c58b5475937419dd34ec0ccac301d8348ceadd7838eb367e6ce9329c836"
+  ],
+  "flux1-schnell-q3_k.gguf": [
+   "2d30aa9b115ad70ddca447cffd4bfd23ec2f50cf4d56e75cef2f6cd65f80816d",
+   "c6c289174b7ca41ee3c0a6dea8749a863bff73a6c701bea17ed35f149a0de4f7"
+  ],
+  "flux1-schnell-q4_k.gguf": [
+   "0c7148f5b7e47edaea99a6cec058a8e2bc8ded52e3bba55519c81aa1a38df5d3",
+   "619697cc4c2bf587416aa1afa98d474a44c80eb4e3a3f64ea8f99ab0ed9adb7a"
+  ],
+  "sd3.5_large-Q4_0.gguf": [
+   "c79ed6cdaa7decaca6b05ccc636b956b37c47de9b104c56315ca8ed086347b00",
+   "e3c28e4ebc2203f23ea1324db1d0dc841c047256c4541e420f8c92bfc606e726"
+  ],
+  "sd3.5_large-Q4_1.gguf": [
+   "1827770c959db2da6f231248105050059816776861a8aa3b81c4be28e838034c",
+   "3dfdae73e67161791178516160ec9b58ebca3fee08465cfb56df10ae7a0b8d2a"
+  ],
+  "sd3.5_large-Q5_0.gguf": [
+   "0b507d612856fab14dcb6aaca73981be1beaf57f58c67c3ec152d009dba3545e",
+   "811f030afe9c325855aa54bcecc3516d1764d44ccafde7ae8ade75bc19ed2eb5"
+  ],
+  "sd3.5_large-Q5_1.gguf": [
+   "02277c4582f7f6b574f3be2761055c9dcae5b4376e7856bf67be423562f1bf8e",
+   "8cea2d0cbc7cdbddf84eb8b2e5950356b9566ee18cbf5b0ace4f8bb1d03f319f"
+  ],
+  "sd3.5_large-Q8_0.gguf": [
+   "11d24423a82716c7c677a6fa4315045b9b95aa37d5c75ee3bb75c25cd0c7fb7f",
+   "36a92671997f657f812fc651706886e46e444c0b8c16d505364b087671240526"
+  ],
+  "sd3.5_medium-Q4_0.gguf": [
+   "3bb8c5e9ab0a841117089ed4ed81d885bb85161df2a766b812f829bc55b31adf",
+   "798f403be36ab47a7914652a73547ea7e1a2a484f9d85e5a96cc3ea75b4cc568"
+  ],
+  "sd3.5_medium-Q4_1.gguf": [
+   "82e961a71364e922e8f4d275f3bc2d7fb70a95129a91825a09fe88cba6c5206a",
+   "8b70f10e70068815fc69c57ad34d05f946f591eb687b799d46c7b89f34c26e6f"
+  ],
+  "sd3.5_medium-Q5_0.gguf": [
+   "629c25ed347d73a034c6c45189f541fd799393c513a447f54b3694e77a322cc8",
+   "c6dcddd9040254ddc49d9b80388c7c8617263a121a9dad5c5b2593cca83f76b7"
+  ],
+  "sd3.5_medium-Q5_1.gguf": [
+   "cd12639231e6026ada6e593e6c043ce99be1829e3502f18478b859ccbd16e084",
+   "d0fa5a08c0b158b1df6904987e71eff3669e737e33d63d86277249ad49becc08"
+  ],
+  "sd3.5_medium-Q8_0.gguf": [
+   "04db7997cd49368171a02fa0643e4b71f8a22be4ed90b843fbfc0372b5a59f1d",
+   "d59aa31f4ec70fa0189f8baaeacbb91048a80bf289b5cd958795f62988e4aa48"
+  ],
+  "stable-diffusion-xl-base-1.0-Q4_0.gguf": [
+   "30170a70026141d64639cb94bf758e17cd41fbf7fd23633b1408897e74803256",
+   "4ab9818c9b3428eca96834c51fe294885608480991463f55bd9be53c822567c3"
+  ],
+  "t5xxl-Q4_0.gguf": [
+   "098daa07ac5a926ebf2814a8e02ef1221eee53b8268db0d965ecb608603682de",
+   "987ba47c158b890c274f78fd35324419f50941e846a49789f0977e9fe9d97ab7"
+  ],
+  "t5xxl-Q4_1.gguf": [
+   "4acff2485788decb0d5d1cb38e27863280051cf7a94f3c89eeef020a53aeaf7a",
+   "8dcf183c9467a354286cd3033b4b977f92bf7df8f8e1a408bca15378de614f41"
+  ],
+  "t5xxl-Q5_0.gguf": [
+   "8f06ed63ac10ed1835b694cb6c97f64452ad53d5e0f6be5ff1d80ca3a592315c",
+   "f4df16c641a05c4a6ca717068ba3ee312875000f6fac0efbd152915553b5fc3e"
+  ],
+  "t5xxl-Q5_1.gguf": [
+   "afd4575a7e537f9e058cb3d1c25db32960c23036d360bdabea3c010507d5aad4",
+   "f5a0653f933c634a3ed408b2a521cae49f4949715fa31ddd0e0ad7d48a12bde1"
+  ]
+ },
+ "rule": {
+  "claim": "认领只看 sha256；文件名相同而字节不同**不算**认出（上游真有同名不同内容的两颗）",
+  "header": "这一层不解读 .gguf/.onnx 文件头：那由 gguf-parser-go 在 CI 或外壳里做（本机禁止编译与运行），所以这里只保证『按内容寻址』这一句是真的",
+  "hint": "name_shape_hint 是从文件名形态猜的，带 claim:false，UI 不许当认领",
+  "pairing": "OCR 的 rec 与 *_dict.txt 必须成对；认出一半时要说清缺哪一半"
+ },
+ "schema": 1,
+ "stats": {
+  "同名不同哈希的文件名": 30,
+  "独立哈希": 354,
+  "身份行": 420
+ }
+}
