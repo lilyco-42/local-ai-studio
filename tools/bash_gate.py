@@ -17,6 +17,9 @@ import subprocess
 import sys
 import tempfile
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from workflow_files import WORKFLOW_FILES  # noqa: E402
+
 GOOD_SRC = "if [ x ]; then\n  echo ok\nfi\n"
 BAD_SRC = "if [ x ]\n"                    # 少了 then/fi：bash -n 必须报
 CANDIDATES = ("bash", "/bin/bash",
@@ -104,11 +107,13 @@ def step_bodies(files: list[str]) -> list[tuple[str, str]]:
     return out
 
 
+def default_workflows(root: str) -> list[str]:
+    return [os.path.join(root, ".github", "workflows", f) for f in WORKFLOW_FILES]
+
+
 def main(argv: list[str]) -> int:
     root = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
-    files = argv or [os.path.join(root, ".github", "workflows", f)
-                     for f in ("ci.yml", "engine-live.yml", "package.yml",
-                               "shell.yml", "installer.yml")]
+    files = argv or default_workflows(root)
     for f in files:
         if not os.path.exists(f):
             print(f"BAD: 要检查的 workflow 不存在：{f}")

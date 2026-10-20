@@ -35,14 +35,14 @@ import urllib.request
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, ".."))
+sys.path.insert(0, HERE)
+from workflow_files import WORKFLOW_FILES  # noqa: E402
 
 OUT = os.path.join(ROOT, "pins", "actions.json")
 USES_RX = re.compile(r"^\s*(?:-\s+)?uses:\s*([^\s@]+)@(\S+)(?:\s+#\s*([A-Za-z0-9._-]+))?\s*$",
                      re.M)
 SHA_RX = re.compile(r"^[0-9a-f]{40}$")
-WORKFLOWS = (".github/workflows/ci.yml", ".github/workflows/engine-live.yml",
-             ".github/workflows/package.yml", ".github/workflows/installer.yml",
-             ".github/workflows/shell.yml")
+WORKFLOWS = tuple(f".github/workflows/{f}" for f in WORKFLOW_FILES)
 # 已经由 installer.yml 用上；这行留着是为了让 release 名与 tag 名不一致这件事每次都被复核。
 RESERVED = {"tauri-apps/tauri-action": ("v1.0.0", "1deb371b0cd8bd54025b384f1cd735e725c4060f")}
 

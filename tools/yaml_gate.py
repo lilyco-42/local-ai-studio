@@ -12,6 +12,7 @@ import yaml
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)          # 被 import 时 sys.path[0] 不是 tools/，显式加上
 import shell_vars  # noqa: E402
+from workflow_files import WORKFLOW_FILES  # noqa: E402
 spec = importlib.util.spec_from_file_location("engine_probe", os.path.join(HERE, "engine_probe.py"))
 probe = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(probe)
@@ -20,9 +21,7 @@ ROOT = os.path.abspath(os.path.join(HERE, ".."))
 # 默认查两条，但允许传路径：这样"闸门本身会不会红"能被单测用临时文件证明，
 # 而不是只能靠我手工掺假再手工还原。
 FILES = (sys.argv[1:] or
-         [os.path.join(ROOT, ".github", "workflows", f)
-          for f in ("ci.yml", "engine-live.yml", "package.yml", "shell.yml",
-                    "installer.yml")])
+         [os.path.join(ROOT, ".github", "workflows", f) for f in WORKFLOW_FILES])
 rel = {e: json.load(open(os.path.join(HERE, "..", "tests", "fixtures", f"{e}.json"), encoding="utf-8"))
        for e in probe.UPSTREAM}
 keys = set(probe.manifest_of(probe.plan(rel))["targets"])

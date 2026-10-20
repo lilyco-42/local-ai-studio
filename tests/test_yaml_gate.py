@@ -4,6 +4,7 @@
 而当时那版闸门只查 heredoc 是否闭合，放它过去了。所以现在闸门会 compile 每段 PY，
 这里就钉住这件事：好文件必须 0 BAD，坏文件必须非零退出并指名道姓。
 """
+import glob
 import os
 import subprocess
 import sys
@@ -13,6 +14,10 @@ import unittest
 HERE = os.path.dirname(os.path.abspath(__file__))
 GATE = os.path.join(HERE, "..", "tools", "yaml_gate.py")
 ROOT = os.path.abspath(os.path.join(HERE, ".."))
+sys.path.insert(0, os.path.join(ROOT, "tools"))
+import action_pins  # noqa: E402
+import bash_gate  # noqa: E402
+import workflow_files  # noqa: E402
 WORKFLOWS = [os.path.join(ROOT, ".github", "workflows", "ci.yml"),
              os.path.join(ROOT, ".github", "workflows", "engine-live.yml")]
 
@@ -206,6 +211,40 @@ class TestGate(unittest.TestCase):
             r = run_gate([p])
         self.assertEqual(r.returncode, 1, f"体积不符必须红：{r.stdout[-400:]}")
         self.assertIn("体积不符", r.stdout)
+
+
+class TestWorkflowCoverage(unittest.TestCase):
+    """三份手抄清单各自漏过：shell.yml 的 4 处 uses 从未被审计、总数还是 49。"""
+
+    @staticmethod
+    def on_disk() -> set[str]:
+        names: set[str] = set()
+        for ext in ("*.yml", "*.yaml"):
+            names |= {os.path.basename(p) for p in
+                      glob.glob(os.path.join(ROOT, ".github", "workflows", ext))}
+        return names
+
+    def test_shared_list_matches_disk_and_every_consumer_reads_it(self) -> None:
+        disk = self.on_disk()
+        self.assertTrue(disk)
+        self.assertEqual(set(workflow_files.WORKFLOW_FILES), disk)
+        for name in workflow_files.WORKFLOW_FILES:
+            self.assertTrue(os.path.isfile(
+                os.path.join(ROOT, ".github", "workflows", name)), name)
+        self.assertEqual({os.path.basename(p) for p in action_pins.WORKFLOWS}, disk)
+        self.assertEqual({os.path.basename(p) for p in bash_gate.default_workflows(ROOT)}, disk)
+
+    def test_yaml_gate_default_covers_every_workflow(self) -> None:
+        """不带参数跑闸门：它打印的每个文件名必须覆盖磁盘上的每一条。"""
+        r = subprocess.run([sys.executable, GATE], capture_output=True, text=True)
+        self.assertEqual(r.returncode, 0, r.stdout[-900:] + r.stderr[-400:])
+        for name in self.on_disk():
+            self.assertIn(name + ":", r.stdout, f"{name} 没被默认闸门读到")
+
+    def test_dropping_one_file_is_visible(self) -> None:
+        """负向对照：判据不是拿同一份表自比 —— 少一条必须看得出来。"""
+        dropped = set(workflow_files.WORKFLOW_FILES) - {workflow_files.WORKFLOW_FILES[0]}
+        self.assertNotEqual(dropped, self.on_disk())
 
 
 if __name__ == "__main__":
