@@ -1,0 +1,350 @@
+{
+ "ggml-org/llama.cpp@b11727": [
+  {
+   "name": "cudart-llama-b11727-bin-ubuntu-cuda-12.8-x64.tar.gz",
+   "size": 594377568,
+   "sha256": "82e05f993613f6f1cbdd64c3373ddfa06428e1c77abc4768a424d95cf0ce2824",
+   "id": 655943759
+  },
+  {
+   "name": "cudart-llama-b11727-bin-ubuntu-cuda-13.4-arm64.tar.gz",
+   "size": 552522171,
+   "sha256": "2aa75f00740b4fc80301dcff8f51fafc4c47babd2c434feb75482787da6ca383",
+   "id": 655944728
+  },
+  {
+   "name": "cudart-llama-b11727-bin-ubuntu-cuda-13.4-x64.tar.gz",
+   "size": 440236559,
+   "sha256": "06581ea1fd042556549ecfd7882ff7c2b798a63d86cb621923f95c1d50aaaf44",
+   "id": 655945454
+  },
+  {
+   "name": "cudart-llama-bin-win-cuda-12.4-x64.zip",
+   "size": 391443627,
+   "sha256": "8c79a9b226de4b3cacfd1f83d24f962d0773be79f1e7b75c6af4ded7e32ae1d6",
+   "id": 655946221
+  },
+  {
+   "name": "cudart-llama-bin-win-cuda-13.4-arm64.zip",
+   "size": 153262407,
+   "sha256": "642dcde8805b3e3165ca710a5443b3b4044b27d96bd3ee3132473988c9bcb774",
+   "id": 655946787
+  },
+  {
+   "name": "cudart-llama-bin-win-cuda-13.4-x64.zip",
+   "size": 423535356,
+   "sha256": "738f8c251ac22b70c3ae6f83a10cf222725df0395246a2cf58f32bdb85fbe668",
+   "id": 655947099
+  },
+  {
+   "name": "llama-b11727-bin-android-arm64-snapdragon.tar.gz",
+   "size": 60173517,
+   "sha256": "419878707d40cbeda5b87cda3f6b4c378227450468114aadfd430b6edd93d826",
+   "id": 655948163
+  },
+  {
+   "name": "llama-b11727-bin-android-arm64.tar.gz",
+   "size": 76299120,
+   "sha256": "9336df533c31d30300c52c5dae29f66104a276880d77152311074b09f1c64337",
+   "id": 655948340
+  },
+  {
+   "name": "llama-b11727-bin-linux-arm64-snapdragon.tar.gz",
+   "size": 19678198,
+   "sha256": "b02e56815ba273164af26422c8dbbf599875f0aab5307e966f326df930fce00b",
+   "id": 655948582
+  },
+  {
+   "name": "llama-b11727-bin-macos-arm64.tar.gz",
+   "size": 12292958,
+   "sha256": "46d40093b6946854525682ce4ac53dcf4fd4b2e94ee03dd24e7b4f64ed039b95",
+   "id": 655948700
+  },
+  {
+   "name": "llama-b11727-bin-macos-x64.tar.gz",
+   "size": 11781674,
+   "sha256": "c6567bdcc0ae81221ecfe87e87b651fd9d70b4edc0edaedcf7b95b1742972eaf",
+   "id": 655948760
+  },
+  {
+   "name": "llama-b11727-bin-ubuntu-arm64.tar.gz",
+   "size": 14022570,
+   "sha256": "cabe1c5db0a9ef28e6979031fda3b27be62a5e9ae8ff3897c6db560505f7b687",
+   "id": 655948821
+  },
+  {
+   "name": "llama-b11727-bin-ubuntu-cuda-12.8-x64.tar.gz",
+   "size": 173370492,
+   "sha256": "987ed7efac16e9157877c80d14a7f2f5f34a7a96bcc1a602683e3e9d1e39cb84",
+   "id": 655948883
+  },
+  {
+   "name": "llama-b11727-bin-ubuntu-cuda-13.4-arm64.tar.gz",
+   "size": 149749743,
+   "sha256": "cf85ec8afab7a7dea8f9336fa295b342cbbab77a8babd2dc6810925e68d21119",
+   "id": 655949291
+  },
+  {
+   "name": "llama-b11727-bin-ubuntu-cuda-13.4-x64.tar.gz",
+   "size": 154236793,
+   "sha256": "5f2b3fe0e9833324e872749a05d9464a1628826c37ad7d19994a11c407754ae3",
+   "id": 655949588
+  },
+  {
+   "name": "llama-b11727-bin-ubuntu-openvino-2026.4.1-x64.tar.gz",
+   "size": 117495168,
+   "sha256": "50159c2d67487ddc840f4f28db2cbfb05651ecb505021c85a2b7b1e84bace097",
+   "id": 655949850
+  },
+  {
+   "name": "llama-b11727-bin-ubuntu-rocm-10.0-x64.tar.gz",
+   "size": 245364322,
+   "sha256": "c7b77952c514f8c5f0472e698c1d0f4dd20509d78c9951139d4e475580e640ce",
+   "id": 655950036
+  },
+  {
+   "name": "llama-b11727-bin-ubuntu-s390x.tar.gz",
+   "size": 16471678,
+   "sha256": "6f3c84e026ff3a574e6755fbb2caa8245dd3e8c3763607c0c4d9d0a597b7a163",
+   "id": 655950350
+  },
+  {
+   "name": "llama-b11727-bin-ubuntu-sycl-fp16-x64.tar.gz",
+   "size": 57839810,
+   "sha256": "a489244c3d29d79926c8954db6436fab4ecdb7bbcfd68651c3d97274c6162511",
+   "id": 655950404
+  },
+  {
+   "name": "llama-b11727-bin-ubuntu-sycl-fp32-x64.tar.gz",
+   "size": 57737484,
+   "sha256": "bde8184985957dc8f8bd134a0eb97e0dbb09d10be91e75c872e06b614f46070f",
+   "id": 655950480
+  },
+  {
+   "name": "llama-b11727-bin-ubuntu-vulkan-arm64.tar.gz",
+   "size": 24310252,
+   "sha256": "7c5a071545a9eada489dee9b47993b7307f7b1f98e3d19ae704c5bdfbb09a081",
+   "id": 655950583
+  },
+  {
+   "name": "llama-b11727-bin-ubuntu-vulkan-x64.tar.gz",
+   "size": 30615507,
+   "sha256": "7d301bce1b63afd6ef1673b2c9668ac7beda392a0ff4faf2402a2c1a43e68a78",
+   "id": 655950684
+  },
+  {
+   "name": "llama-b11727-bin-ubuntu-x64.tar.gz",
+   "size": 17971994,
+   "sha256": "17bfcf2217ab5168888dd629a833e264babd488c0512fe18bc66e49632f00241",
+   "id": 655950783
+  },
+  {
+   "name": "llama-b11727-bin-win-cpu-arm64.zip",
+   "size": 12549814,
+   "sha256": "6761c4ca85aca0922dcb4cce6b8b3fc64062ebc5ae89bed88c4b98f961ac4f98",
+   "id": 655950853
+  },
+  {
+   "name": "llama-b11727-bin-win-cpu-x64.zip",
+   "size": 19667754,
+   "sha256": "d71a767fd77b2509cc4698d1017d9820b49b0bfaabf5aef7d1ea7e0696d80a71",
+   "id": 655950922
+  },
+  {
+   "name": "llama-b11727-bin-win-cuda-12.4-x64.zip",
+   "size": 267490918,
+   "sha256": "1b11ccb85226318c3a6037e9ba2f1772c0823e6bcb8dd65a17c1137a0d04e4a8",
+   "id": 655951035
+  },
+  {
+   "name": "llama-b11727-bin-win-cuda-13.4-arm64.zip",
+   "size": 147331861,
+   "sha256": "09efb4f0a3037b67445585015db157606b2d220810e88c1f87d4e8e2976b0653",
+   "id": 655951439
+  },
+  {
+   "name": "llama-b11727-bin-win-cuda-13.4-x64.zip",
+   "size": 155124867,
+   "sha256": "8fa05f3fb392f8cfb3aef5ce231910673de5c744fbbc9e8eaac29d0fe159477b",
+   "id": 655951648
+  },
+  {
+   "name": "llama-b11727-bin-win-opencl-adreno-arm64.zip",
+   "size": 13389227,
+   "sha256": "71da4f560d75070cf2df050b5f638e8a6e91403975810b50348f48b09e937ace",
+   "id": 655951873
+  },
+  {
+   "name": "llama-b11727-bin-win-openvino-2026.4.1-x64.zip",
+   "size": 99488754,
+   "sha256": "c87844db6d30e1db8790a80c097a7d490b7d5c7d1e81be36ba943fc6d9146048",
+   "id": 655951913
+  },
+  {
+   "name": "llama-b11727-bin-win-rocm-10.0-x64.zip",
+   "size": 258821746,
+   "sha256": "5d0caf4f3ce3c6210093e8b914e8e321aad42c2f07da7d764279aff228e8b4f2",
+   "id": 655952105
+  },
+  {
+   "name": "llama-b11727-bin-win-sycl-x64.zip",
+   "size": 149204409,
+   "sha256": "71bfe177b690aaacc1944d4ff2757a8410b5dc45656af99c1fd6d947bb157206",
+   "id": 655952511
+  },
+  {
+   "name": "llama-b11727-bin-win-vulkan-arm64.zip",
+   "size": 24930867,
+   "sha256": "e55636aaeb720b0989573448a9fb33056b5fb818203741cd50ce12659176725a",
+   "id": 655953001
+  },
+  {
+   "name": "llama-b11727-bin-win-vulkan-x64.zip",
+   "size": 32317342,
+   "sha256": "c373936fb9578ac85d2e5c3d220821eddae4288283237b01d9618419175f127b",
+   "id": 655953095
+  },
+  {
+   "name": "llama-b11727-ui.tar.gz",
+   "size": 3155981,
+   "sha256": "4cd692160a01e1816a58010ebe89a2a9818be10cd2579eb626db0eb7ff92116c",
+   "id": 655953183
+  },
+  {
+   "name": "llama-b11727-xcframework.zip",
+   "size": 66819126,
+   "sha256": "efe3f716c06fd602d663a72d70ad72becef1259208639c31299dcb5c81370a44",
+   "id": 655953227
+  }
+ ],
+ "ggml-org/whisper.cpp@b5454": [
+  {
+   "name": "whisper-b5454-xcframework.zip",
+   "size": 65816082,
+   "sha256": "e57f8c48933000acabc13bb913fbe82805d483a2deff692cc6738836bd92393b",
+   "id": 616095279
+  },
+  {
+   "name": "whisper-bin-ubuntu-arm64.tar.gz",
+   "size": 4608377,
+   "sha256": "6b95ebfc60447df48e70ef00a73bdc3f41679ed2d01ef465827206a2ff325149",
+   "id": 616095460
+  },
+  {
+   "name": "whisper-bin-ubuntu-x64.tar.gz",
+   "size": 10364195,
+   "sha256": "a72becf15d7917f990f6313867a52638b82b7f9ef237fb0c980dac56a135781c",
+   "id": 616095496
+  },
+  {
+   "name": "whisper-bin-win-cpu-arm64.zip",
+   "size": 4371193,
+   "sha256": "28c37e7b598c3d9bbfef94f3bd67f2ee6f12b7c86f3da5edcf5e4308d615ff6d",
+   "id": 616095531
+  },
+  {
+   "name": "whisper-bin-win-cuda-11.8.0-x64.zip",
+   "size": 284761231,
+   "sha256": "e81c86c542be6e3d7b7245392d4e1c52ab6e5c61dbe38721754bc0ab59d4d027",
+   "id": 616095571
+  },
+  {
+   "name": "whisper-bin-win-cuda-12.4.0-x64.zip",
+   "size": 684913404,
+   "sha256": "afef0b881c500958921c3f5523b50e59ee2ec9b6f5cbd25b324c51ed308a957a",
+   "id": 616095911
+  },
+  {
+   "name": "whisper-bin-win-cuda-13.4-arm64.zip",
+   "size": 291157544,
+   "sha256": "6184ae8887d38ea9add68e883b9c846e7bf562ba1bf619ffc7ee9f8ec7e1699c",
+   "id": 616096593
+  },
+  {
+   "name": "whisper-bin-win-opencl-adreno-arm64.zip",
+   "size": 4944716,
+   "sha256": "915b48289f362c5f4cf33f3ffdd30f1f43de68f6103a3088858e346635719007",
+   "id": 616096903
+  },
+  {
+   "name": "whisper-bin-Win32.zip",
+   "size": 5523979,
+   "sha256": "b6cb078ee5d4df0f9dcdb4f820210c59bd6534c84fdb13c35bc8a51d1233451f",
+   "id": 616095395
+  },
+  {
+   "name": "whisper-bin-x64.zip",
+   "size": 8928640,
+   "sha256": "6ba69e3482d7826214f90a6a9c84ca07782aec1e1d0c6a7c30c994fd5d816ccb",
+   "id": 616096933
+  },
+  {
+   "name": "whisper-blas-bin-Win32.zip",
+   "size": 12555466,
+   "sha256": "d53f98a031ae73f5f4fff8e134c0c0b5eafe3361f69c660d9fb1c85d102db34a",
+   "id": 616096987
+  },
+  {
+   "name": "whisper-blas-bin-x64.zip",
+   "size": 21715607,
+   "sha256": "b1158bd10edf92c9799149a6fc5d3e58da3f495241d6fb3423088130e88ffbf3",
+   "id": 616097038
+  }
+ ],
+ "leejet/stable-diffusion.cpp@master-975-95b3090": [
+  {
+   "name": "cudart-sd-bin-win-cu12-x64.zip",
+   "size": 563452046,
+   "sha256": "fe20366827d357c00797eebb58244dddab7fd9a348d70090c3871004c320f38d",
+   "id": 653192175
+  },
+  {
+   "name": "sd-master-95b3090-bin-Darwin-macOS-26.6.2-arm64.zip",
+   "size": 36488395,
+   "sha256": "2edf5a21c4b73f448c3a02c87925283b77aa94f1859c0d8e649134da68b40813",
+   "id": 653192686
+  },
+  {
+   "name": "sd-master-95b3090-bin-Linux-Ubuntu-24.04-x86_64-rocm-10.1.0.zip",
+   "size": 295415674,
+   "sha256": "b0deb148e8f0c05c75b5c8b54876ff97f819e80f57fcf1398ebb5dbb727c7a16",
+   "id": 653192782
+  },
+  {
+   "name": "sd-master-95b3090-bin-Linux-Ubuntu-24.04-x86_64-vulkan.zip",
+   "size": 36612523,
+   "sha256": "703f547a0bbe254979940ec6142a87b4af6acbc01d34e37358f4feabb430a225",
+   "id": 653193155
+  },
+  {
+   "name": "sd-master-95b3090-bin-Linux-Ubuntu-24.04-x86_64.zip",
+   "size": 26289165,
+   "sha256": "23757b2d46edd68ec59ad252e6e3d6c1854ab01d6be5d47a06e0bc751c2eee2a",
+   "id": 653193217
+  },
+  {
+   "name": "sd-master-95b3090-bin-win-cpu-x64.zip",
+   "size": 17706677,
+   "sha256": "945ed74a22a5c6abbae480201312e439f16ad029166dd94e58cef9a2ecb2dba8",
+   "id": 653193252
+  },
+  {
+   "name": "sd-master-95b3090-bin-win-cuda12-x64.zip",
+   "size": 343630973,
+   "sha256": "b935f5902fbedefe6db0b68c8930ae3e7c0f3cc778bd5d501a3c7f7ee7336338",
+   "id": 653193302
+  },
+  {
+   "name": "sd-master-95b3090-bin-win-rocm-10.1.0-x64.zip",
+   "size": 263997742,
+   "sha256": "cecec9f455f4675b4560b0e604f4f852c6e1ecdc9f2d12ce4aee5eb7e9679195",
+   "id": 653193653
+  },
+  {
+   "name": "sd-master-95b3090-bin-win-vulkan-x64.zip",
+   "size": 29371165,
+   "sha256": "17398d07ba89c2fba21b8662db69ecdd917888373e4f82779b7599e97a6b4bd3",
+   "id": 653193992
+  }
+ ]
+}

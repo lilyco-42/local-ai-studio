@@ -219,9 +219,24 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   gguf-parser，本机禁止编译与运行），产物 `rule` 里写明了这条边界。
   6 条源码变异体 + 六条探针 + 三个真夹具；挂在 `ci.yml` 静态门禁
   （重数：`python3 tools/sideload_lookup.py --selftest`）。
+- `tools/backends.py` + `pins/backend-matrix.json`：**分层与"runtime 可替换"这两句话的数据面**。
+  按 `payload-plan` 钉的三个 ref 现取 release 的 asset 表（`name / size / digest`），分成
+  引擎 × OS × 后端：实测 **57 个资产 = 47 个 runtime + 10 个不是 runtime**（7 个 `cudart-` 伴生包、
+  2 个 xcframework、1 个 webUI），后端 10 种（cpu / cuda / vulkan / rocm / sycl / openvino /
+  opencl-adreno / qnn-snapdragon / blas / `unknown_from_name`）。体积差是真的：
+  sd 在 win-x64 是 CPU **16.9 MiB** 对 CUDA **327.7 MiB**，llama 在 linux-x64 是 CPU 17.1 对
+  vulkan 29.2 —— 集显笔记本那条路有产物可换，不再是一句推测。
+  三处**不许猜**的边界记在 `gaps` 里：macOS 的资产名不标后端（只能写 `unknown_from_name`，
+  不断言 Metal）；whisper 的 `bin-x64` / `blas-bin-x64` 名字里不写平台，于是按名字挑后端
+  对它做不到（`payload-plan` 那侧已标 `inferred_platform=true`，这里原样记账）；
+  oar-ocr 没有预编译产物，它的加速轴是 Cargo feature，不在这张表里。
+  认不出的词（上游加一档 hip/mtl）一律报 `unknown_token` 并红，**不许静默归成 cpu**；
+  5 条源码变异体 × 8 条探针 + 真实夹具字节校验；离线那层在 `ci.yml` 静态门禁，
+  车道 `backends` 第四步还回现取一次再对表（重数：`python3 tools/backends.py --selftest`、
+  `python3 tools/backends.py --check`）。
 - `tools/action_pins.py` + `pins/actions.json`：**出包那只手自己也要钉住**。这一轮之前三个
   workflow 里 4 个 `uses:` 全是浮动大版本 tag（`checkout@v4`、`setup-python@v5`、
-  `upload-artifact@v4`、`download-artifact@v4`，共 **45 处**）—— 仓库对引擎/权重/工具带都定了
+  `upload-artifact@v4`、`download-artifact@v4`，共 **47 处**）—— 仓库对引擎/权重/工具带都定了
   "release + sha256"，唯独真正跑包的东西跟着别人随时会移动的 tag 走。现在全部改成 40 位 commit
   SHA 并把尾注留着记它来自哪个 tag：`checkout 11d5960a…`(v4.4.0)、`setup-python a26af69b…`(v5.6.0)、
   `upload-artifact ea165f8d…`(v4.6.2)、`download-artifact d3f86a10…`(v4.3.0)，都是 MIT、`node20`。
@@ -273,7 +288,7 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
 
 能证明：上游产物可发现、可下载、校验对得上、在无 GPU 的 runner 上真能产出 token。
 **注意：这些车道至今一次都没跑过。** 2026-10-20 在 `4202ef0` 上又量了一次，得到的形状是：
-run 建出来了、`engine-live.yml` 的 **21 个 job 全部登记**（包括新加的 `launch-plan`），
+run 建出来了、`engine-live.yml` 的 **21 个 job 全部登记**（包括新加的 `launch-plan`；现在是 22 个，新加了 `backends` 那条），
 可每一个都是 `runner_name` 为空、`steps: 0`、2-3 秒 conclusion=failure。
 `3781953` 上再量一次还是 21 个 job，但多了一种形状：**带 `needs:` 的那个 job 是 `skipped`**
 （`launch-plan` 等的是失败的 `file-index`）—— skipped 什么都不说，所以吃别人产物的那两步现在

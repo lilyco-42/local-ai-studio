@@ -43,6 +43,8 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
    **这句话此前只在这里写着**：现在它是一张表（`pins/sideload-index.json`：354 串已钉哈希 →  420 行身份）与一个判据（`tools/sideload_lookup.py`），同名不同字节会被**拒绝认领** —— 见验收第 26 条。
 3. **引擎按 runtime 打包、可替换**，与 ADR-0001 的"上游产物 + sha256 pin"一致，
    并且和 LM Studio 的 LM Runtimes 同形，便于后续对齐习惯。
+   **可替换的对象现在有表可查了**（验收第 27 条）。那张表同时也说清了三处换不了的地方：
+   macOS 的资产名不标后端、whisper 有两颗包名里不写平台、oar-ocr 没有预编译产物。
 4. **对话、字幕、生图三项起常驻 server，而不是一次一进程**：上游包里就有
    `llama-server` / `whisper-server` / `sd-server`（见 ADR-0001"包内到底有什么"）。
    400 MB 权重每次重载不可接受。`llama-bench` 也在包里，"这台机器多少 tok/s"不用自研。
@@ -62,6 +64,8 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
    含着用户根本没点的 2,033.8 MiB（16GB 档是 9,612.6 MiB）。现在它是一张机器读的表
    （`machine-budget.json` 的 `default_install` + `first_run_*` / `download_*` 两组数，
    `pins/launch-plan.json` 每项能力的 `install_stage`），半装半不装直接红 —— 见验收第 20 条。
+   **"有哪些后端可换"这一半也已经有产物**（`pins/backend-matrix.json`，验收第 27 条）；
+   "这台机器检测到哪个后端"那一半仍属外壳（#25），要等 CI 能跑或真机 —— 这两句不许混着说。
 
 ## MVP / MVP+ 切分
 
@@ -81,10 +85,11 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
 
 ## 验收标准（在当前唯一可用验证手段 = GitHub Actions 下）
 
-1. `ci.yml`：694 个单测绿（重数：`python -W error::ResourceWarning -m unittest discover -s tests
+1. `ci.yml`：713 个单测绿（重数：`python -W error::ResourceWarning -m unittest discover -s tests
    -p "test_*.py"`；按文件数就 `python -m unittest tests.<模块名>`。2026-10-20 实测逐文件：
    `test_yaml_gate.py` 闸门自己 14、`test_lane_argv.py` 车道 ↔ 启动表一致（含 9 个 workflow 文本变异）10、
    `test_sideload.py` sideload 按内容认领（6 条源码变异体 + 三个真上游文件）22、
+   `test_backends.py` 后端矩阵（5 条源码变异体 + 真实 release 捕获）19、
    `test_toolbelt_pins.py` 工具带钉表 14、
    `test_catalog_snapshot.py` 目录快照与侧表 16、`test_citation_check.py` 出处闸门 22、
    `test_ocr_build_surface.py` OCR 依赖面 15、`test_file_index.py` 下载层五种状态与首启队列 35、
@@ -547,8 +552,9 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
 
 24. **出包那只手自己也要钉住**（`tools/action_pins.py` → `pins/actions.json`）：
     硬约束是"只能靠 GitHub Actions 出包"，那么 workflow 里每个 `uses:` 就是那条路径本身。
-    这一轮之前它们全是**浮动大版本 tag**（4 个 action、当时 44 处；现在这张表记 45 处，因为 `launch-plan`
-    又加了一处 `download-artifact` 去吃队列报告 —— 重数：`python3 tools/action_pins.py --check`），
+    这一轮之前它们全是**浮动大版本 tag**（4 个 action、当时 44 处；现在这张表记 47 处：
+    `launch-plan` 加了一处 `download-artifact` 去吃队列报告，`backends` 那条新车道又带进
+    `checkout` 与 `setup-python` 各一处 —— 重数：`python3 tools/action_pins.py --check`），
     今天全部改成 40 位 commit SHA，
     尾注保留它来自哪个 tag；判据三件：形状必须是 SHA、尾注 tag 重新解析后**漂了就红但不自动跟**
     （重钉必须是显式动作）、`action.yml` 的 `runs.using` 与 `inputs` 键集合必须与表一致。
@@ -601,6 +607,32 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     重数：`python3 tools/sideload_lookup.py --selftest`、`--check`、
     `python3 tools/sideload_lookup.py --lookup <你的文件>`。
 
+27. **"有哪些后端可换"必须是一张表，不是 ADR 里的一句回忆**：`tools/backends.py`
+    → `pins/backend-matrix.json`。产品约束第 5 条（按检测到的后端分层）与第 3 条（runtime 可替换）
+    在此之前只在 ADR-0001 里写着"36 个产物含 win-cuda / ubuntu-vulkan …"—— 那句话这次被**逐 asset
+    复核了**（按 `pins/payload-plan.json` 钉的三个 ref 现取 release 表，name / size / digest 三项照抄）。
+    实测：三个 ref 共 **57 个资产 = 47 个 runtime + 10 个不是 runtime**（7 个 `cudart-` 伴生包、
+    2 个 xcframework、1 个 webUI），后端 10 种：cpu / cuda / vulkan / rocm / sycl / openvino /
+    opencl-adreno / qnn-snapdragon / blas / `unknown_from_name`。分层能用的证据是体积：
+    sd 在 win-x64 是 CPU **16.9** vs CUDA **327.7** MiB、llama 在 linux-x64 是 CPU 17.1 vs
+    vulkan 29.2 MiB —— 带集显的普通笔记本那条路确实有产物可换，不再靠推测。
+    **三处不猜**（都写进 `gaps`，不是脚注）：① macOS 的资产名不标后端，所以 mac 上有没有加速
+    这张表只能说 `unknown_from_name`（不许为了表格好看写 metal，也不许当 cpu）；
+    ② whisper 的 `bin-x64` / `blas-bin-x64` 名字里不写平台，于是"按资产名挑后端"对它做不到 ——
+    `payload-plan` 那侧按包内条目推断并标了 `inferred_platform=true`，这张表原样记账；
+    没标就红（推断被写成事实是这一路最常犯的那类错）；③ oar-ocr 没有预编译产物，加速轴是
+    Cargo feature / EP，不在这张表的范围里。
+    两个真实的拼法坑被分类器吃下：同一个 CUDA 在 sd 那里既写 `cuda12` 又写 `cu12`（后者只在
+    `cudart-` 伴生包里），`Darwin` 里含 `win` 子串 —— 不给词界就会把 macOS 的包分到 Windows 那一列。
+    认不出的词（上游哪天加 hip / mtl）一律 `unknown_token` 并红，不许静默归成 cpu。
+    判据的承重：5 条源码变异体（关掉哨兵、关掉与 payload-plan 的钉值比对、不要求标注推断、
+    清空后端地板、去掉词界）× 8 条探针全被抓，另有"真实捕获必须 0 问题且格子逐个对得上"的正向对照；
+    夹具是 GitHub API 的真实产物表（`tests/fixtures/backend_assets.json`，57 行 name/size/digest，
+    sha256 记在 `.meta.json` 并由测试复算）。车道 `backends`（engine-live 第 22 个 job）第四步
+    现取一次再对表：上游加档、撤档、改拼法都会红。
+    重数：`python3 tools/backends.py --selftest`、`--check`、
+    `python3 tools/backends.py --fetch --captures <路径> --check --captures <路径>`。
+
 ## 车道判据的出处（全部按**钉住的那个 ref** 核过，不是按 HEAD 记的）
 
 | 车道 | 判据依赖的东西 | 出处 |
@@ -621,6 +653,7 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
 | `install-deps` | 安装包车道第一步该 `apt-get install` 什么、镜像 readme 里在不在 | Tauri `2e513e3f`：`<TabItem label="Debian">` = `src/content/docs/start/prerequisites.mdx:29`，族里最后一颗点名的 `libayatana-appindicator3-dev` = `:40`（整页唯一命中），安装命令首行 `sudo apt install libwebkit2gtk-4.1-dev` = `:33`；**整页搜 `gstreamer` 命中 0 次** —— 旧文档里那句"+ gstreamer 插件族"没有出处，已删。runner-images `b4067e48`：包表形状靠 `| libssl-dev             | 3.0.13-0ubuntu3.16 |` = `images/ubuntu/Ubuntu2404-Readme.md:289` 证明（不然逐字查全是 `not_listed` 只可能是读错了表），工具链 `- Node.js 22.23.3` = `:26`、`- Rust 1.99.1` = `:140`。在场判语只说 `listed / not_listed`，产物 `verdict_legend` 明写"readme 没提到 ≠ 机器上没装"，真要证明装没装得看车道打印 `pkg-config --modversion webkit2gtk-4.1` |
 | `lane-argv` | 车道真敲的那一行是否与 `pins/launch-plan.json` 一致 | **不是上游声明，是本仓库两份产物互相核对**：读 `.github/workflows/engine-live.yml`（pyyaml），按表里的 `binaries` / `bind` / `flags_absent` / `omit` / `subcommand` 查。九种改坏 workflow 文本的对照全被报（含 `$SRV` 换成 `:` 的"只 find 不 exec"）；判据不吃注释与 heredoc 正文，这条本身也有正反对照。上游那五处旗标事实的出处仍归 `launch-plan` 那一行 |
 | `sideload` | 用户手上的文件能不能按内容认领 | 三个**真实下载的上游文件**（`tests/fixtures/sideload/`，都 <30 KB）：两颗钉过的字典 + `ppocrv5_latin_dict.txt` 的另一颗同名不同字节者。同一串 sha256 取自 GitHub API 的 `asset.digest`（复现命令连同两颗 tag 的体积与 digest 一起记在 `tests/fixtures/sideload.meta.json` 的 reproduce 字段 —— 那条 jq 里有竖线，写进这张表会打断一行），meta 记完整串、测试按 meta 复算字节。`.gguf` 文件头不在这一层解读（归 CI/外壳里的 gguf-parser），产物 `rule.header` 写明了这条边界 |
+| `backends` | 分层与 runtime 可替换这两句有多少可选面 | 三个 ref 的 release 表按 `pins/payload-plan.json` 钉的那一个现取（`gh api repos/<repo>/releases/tags/<tag>` 的 name / size / digest）：llama `b11727` 36 个、whisper `b5454` 12 个、sd `master-975-95b3090` 9 个 = 57，与 ADR-0001 那句"36 个产物"逐条对得上。真实捕获钉在 `tests/fixtures/backend_assets.json`（sha256 记在 `.meta.json`，测试复算字节），车道 `backends` 第四步再现取一次对表 |
 | 引擎与权重输入 | 上游 `digest` 就是内容哈希 | 五个包整包下回实算相等（llama b11727、whisper b5454、sd 95b3090、qwen 415 MB、SD1.5 1.5 GB），见 `pins/models.json` 的 `bytes_verified` |
 
 写这张表的理由：CI 现在一次都跑不了，而"日志里会出现某串"这类假设一旦错，

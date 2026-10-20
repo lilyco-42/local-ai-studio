@@ -36,6 +36,9 @@ on:
       - "pins/launch-plan.json"
       # 队列报告那份夹具是跨生产者核对的输入：重抓一次捕获也要能触发这条道
       - "tests/fixtures/first-run-queue*"
+      - "tools/backends.py"
+      - "pins/backend-matrix.json"
+      - "tests/fixtures/backend_assets*"
       - "tools/install_deps.py"
       - "pins/install-deps.json"
       - "tools/action_pins.py"
@@ -718,6 +721,33 @@ jobs:
           name: launch-plan-refs
           path: .cache/refs
           if-no-files-found: error
+
+  backends:
+    # 约束第 5 条（按检测到的后端分层）与第 3 条（runtime 可替换）的数据面：
+    # 三项引擎在这个 ref 上到底发了哪几档加速包、各多大、digest 是多少。
+    # 前三步离线（判据自身 / 单测 / 与已提交那张比漂移），第四步才现取一次 release 表 ——
+    # 上游加档、撤档、改拼法（sd 的 CUDA 同时写 cuda12 与 cu12 就是例子）都会在这里红，
+    # 而不是等外壳按一张过期表去挑后端。认不出来的词必须人来认一次，不许静默归成 cpu。
+    timeout-minutes: 6
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4.4.0
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5.6.0
+        with:
+          python-version: "3.12"
+      - name: 判据本身（假后端词必须报、mac 不许被猜成 metal、Darwin 不许被分到 win）
+        run: python3 tools/backends.py --selftest
+      - name: 判据单测（含把源码改坏的 5 个变异体与真实夹具的字节校验）
+        run: python -m unittest tests.test_backends -v
+      - name: 离线：与已提交那张比漂移
+        run: python3 tools/backends.py --check
+      - name: 现取三个 release 的产物表再比一次（上游动过就红）
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 tools/backends.py --fetch --captures .cache/live-assets.json
+             --out .cache/backend-matrix-live.json
+      - name: 现取的那份与已提交那张对表（这一步才是"分层还能用吗"的答案）
+        run: python3 tools/backends.py --check --captures .cache/live-assets.json
 
   ocr-build-surface:
     # 四项能力里只有 OCR 要现场编译，而"钉 commit"对它**并不等于钉住构建输入**：
