@@ -98,14 +98,15 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
 
 ## 验收标准（在当前唯一可用验证手段 = GitHub Actions 下）
 
-1. `ci.yml`：783 个单测绿（重数：`python -W error::ResourceWarning -m unittest discover -s tests
+1. `ci.yml`：799 个单测绿（重数：`python -W error::ResourceWarning -m unittest discover -s tests
    -p "test_*.py"`；按文件数就 `python -m unittest tests.<模块名>`。2026-10-20 实测逐文件：
-   `test_yaml_gate.py` 闸门自己 14、`test_lane_argv.py` 车道 ↔ 启动表一致（含 9 个 workflow 文本变异）10、
+   `test_yaml_gate.py` 闸门自己 14、`test_lane_argv.py` 车道 ↔ 启动表一致（含 15 个 workflow 文本变异）10、
    `test_sideload.py` sideload 按内容认领（6 条源码变异体 + 三个真上游文件）22、
    `test_backends.py` 后端矩阵（7 条源码变异体 + 真实 release 捕获）22、
    `test_backend_choice.py` 换档表（12 条源码变异体 × 16 条探针，输入是三份已钉产物）25、
    `test_runtime_parity.py` server 在场表（11 条源码变异体 × 15 条探针 + 捕获夹具字节复核）21、
    `test_runtime_versions.py` runtime 版本轴（18 条源码变异体 × 24 条探针 + 窗口元数据夹具）21、
+   `test_shell_contract.py` 外壳合同（12 条源码变异体 × 23 条探针，输入是五张已钉产物）16、
    `test_toolbelt_pins.py` 工具带钉表 14、
    `test_catalog_snapshot.py` 目录快照与侧表 16、`test_citation_check.py` 出处闸门 22、
    `test_ocr_build_surface.py` OCR 依赖面 15、`test_file_index.py` 下载层五种状态与首启队列 35、
@@ -234,7 +235,12 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
    这项目标是必须防的。验收动作因此不是"能起服务"而是三条：① llama 起来时必须带 `--api-key` 且
    `--cors-origins` 收窄到应用来源；② whisper / sd **没有 key 可给**，只能按需起、用完停，或由外壳反代
    （外壳持有唯一端口并自己发 token）；③ UI 永不直连引擎端口。
-   这一条现在只有源码级证据，实现与验证都还没做 —— 列在验收里是为了别等写外壳时才发现架构选错了。
+   这一条现在有**源码级**与**表级**两层证据：`pins/launch-plan.json` 的每一行都写出了旗标
+   （llama 那行是 `--cors-origins localhost --api-key {token}`），`pins/shell-contract.json`
+   把"谁有钥匙、没钥匙的引擎怎么活"钉成合同，`engine-live` 车道也加了运行时探针
+   （无钥匙请求 `/props` 必须 401；`Origin: http://localhost:1420` 必须被反射；`https://evil.example`
+   必须没有 ACAO）。但**外壳本身还没写**，所以 UI 那一半 `ui_checked=false`；这些探针与车道
+   在 #19 解除前一次都没真跑过 —— 写了不等于验了。
 11. **每条 `file:line` 出处本身要能被查**：`pins/citations.json` 82 条声明（其中 1 条是 `absent`
     型缺席断言：runner 镜像 readme 里没有 `webkit2gtk`），每条记
    `repo/ref/path/line/expect/claim`；`tools/citation_check.py` 按 pin 住的 ref 取回那份文件，
@@ -473,7 +479,7 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
 
     | 能力 | 起法 | 引擎自己有没有鉴权 | 上游出处 |
     |---|---|---|---|
-    | 对话 | `llama-server -m … --host 127.0.0.1 --port … --api-key …` | **有** `--api-key` | `common/arg.cpp:3513`；`/health` 那行明写 "public endpoint (no API key check)"（`tools/server/server.cpp:263`），所以带着钥匙也能探活 |
+    | 对话 | `llama-server -m … --host 127.0.0.1 --port … --cors-origins localhost --api-key …` | **有** `--api-key`；CORS 可收窄 | `common/arg.cpp:3513`；`--cors-origins` = `common/arg.cpp:3372`、默认 `*` = `common/common.h:652`、`localhost` 只反射本机来源 = `tools/server/server-http.cpp:73-80`；`/health` 那行明写 "public endpoint (no API key check)"（`tools/server/server.cpp:263`），所以带着钥匙也能探活 |
     | 字幕 | `whisper-server -m … --host 127.0.0.1 --port …` | **没有**（整份 server.cpp 里 `--api-key` 与 `api_key` 都查不到） | `examples/server/server.cpp:251/252`；默认就绑 127.0.0.1（`:59`） |
     | 生图 | `sd-server --diffusion-model … --clip_l … --t5xxl … --vae … --listen-ip 127.0.0.1 --listen-port …` | **没有** | `examples/server/runtime.cpp:193/198`；四份额外权重的旗标逐个在 `examples/common/common.cpp:407/411/421/471` 查到 |
     | 文字识别 | `oar ocr --det … --rec … --dict … --device … --format json --output <目录> <图片…>` | 没有服务形态，一次任务一个进程 | `oar-ocr-cli/src/args.rs:10/49/59/84/90`（这份文件里没有 `--port/--listen/--api-key`） |
@@ -587,18 +593,23 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     第 22 条那张表是**按上游源码**核对出来的，可四条执行车道里的命令一直是手写的，两边从没对过 ——
     "表对了"与"跑的那行对了"是两句不同的话。现在读 `engine-live.yml`（用 pyyaml 取每个步骤的 `run`，
     不自写正则切块：上一版按 `- name:` 切，最后一步会一路吞进下一个 job，把别人的旗标算到这一段头上），
-    认出每项能力真起进程的那几步，再用表里的四条规矩量：
+    认出每项能力真起进程的那几步，再用表里的六条规矩量：
     ① 定位到的二进制必须就是表里那颗（`whisper-cli` 与 `whisper-server` 是两个文件，而且
     `chmod/ldd` 那种"提到过"不算执行 —— 只看一行的开头）；
     ② `--host` / `--listen-ip` 必须出现，且值**逐字**是 `127.0.0.1` —— `$ADDR`、`0.0.0.0`、
     "没写所以靠上游默认"三种都算不合格（验收第 10 条讲的是我们传了什么，不是引擎默认什么）；
-    ③ 表里声明"上游查不到"的旗标不许出现在车道里；④ `omit`（OCR 的 `--size`）与子命令 `oar ocr` 同样各查一遍。
+    ③ 表里声明"上游查不到"的旗标不许出现在车道里；④ `omit`（OCR 的 `--size`）与子命令 `oar ocr` 同样各查一遍；
+    ⑤ 表里说引擎有钥匙的（llama），车道那行必须真带 `--api-key`：变量必须在同一步被赋成非空值，
+    `"{token}"` 原样传进去算不合格；⑥ CORS 也不能只写在表里：必须带 `--cors-origins localhost`，
+    同一段还要有**无钥匙访问得 401** 的断言和**两个不同 Origin**（本机被反射 / 非本机无 ACAO）——
+    只带旗标、不做运行时对照，证明不了门禁真的生效。
     判据只吃 shell 那一层：`#` 注释与 heredoc 正文都先滤掉（本仓库真出过一次"判据钉着注释"的事故），
     并且注释里带 `--api-key`、heredoc 里打印 `--api-key` 都不许让它红 —— 这两条各有一组对照。
     实测（2026-10-20）：四项能力各认出一段常驻 server 的步骤，**问题 0 条**；把 workflow 文本改坏
-    9 种（绑 0.0.0.0 / 绑变量 / 不传绑地址 / 给 whisper 或 sd 加 `--api-key` / 把 llama 的常驻那步改成
-    找 CLI / 去掉 `oar` 子命令 / 带 `--size` / 只 find 不 exec / 改掉二进制名）9 种全被报出来，
-    正向对照"真实 workflow 必须 0 问题且认出 4 段"防止"0 问题"其实是"什么都没认出来"。
+    15 种（绑 0.0.0.0 / 绑变量 / 不传绑地址 / 给 whisper 或 sd 加 `--api-key` / 把 llama 的常驻那步改成
+    找 CLI / 去掉 `oar` 子命令 / 带 `--size` / 只 find 不 exec / 改掉二进制名 / llama 丢钥匙 /
+    钥匙传占位符 / 钥匙变量没赋值 / llama 丢 CORS / 401 被改成 200 / 非本机来源被换成同一来源）
+    15 种全被报出来，正向对照"真实 workflow 必须 0 问题且认出 4 段"防止"0 问题"其实是"什么都没认出来"。
     重数：`python3 tools/lane_argv.py --selftest`、`python3 tools/lane_argv.py`、
     `python -m unittest tests.test_lane_argv`。
 
@@ -781,6 +792,27 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     新版本只在下一次显式重抓时进表（漂移只报不跟）。
     重数：`python3 tools/runtime_versions.py --selftest`、`--check`、
     `python3 tools/runtime_versions.py --fetch --captures <路径> --check --live --captures <路径>`。
+
+31. **外壳的合同也得是表：谁有钥匙、没钥匙的引擎怎么活、runtime 放哪**：`tools/shell_contract.py`
+    → `pins/shell-contract.json`。验收第 10 条的"三条"如果只停在上一条的启动表里，写外壳的人
+    仍然要自己决定"字幕要不要常驻""端口谁来挑""目录里放版本还是放 latest"——于是同一件事
+    会有第二种答案。这张表只从**已提交的五张表**推导（launch-plan / backend-choice /
+    runtime-versions / payload-plan / ocr-build-surface），不读外壳源码，也不引入新事实：
+    ① **入口**：外壳自己不监听任何端口（0 个），UI 只走 Tauri IPC，引擎 HTTP 只由外壳进程发；
+    ② **鉴权**：只有 llama 有 `--api-key`；token 每次起引擎现生成（32 字节 OS 随机数转 hex），
+    只存内存；whisper / sd 上游没有钥匙可给，所以**不许常驻** ——
+    `on_demand` 且 `idle_timeout_secs=300`，关窗即停；OCR 是 `one_shot`（一次任务一个进程）；
+    ③ **起的正是下的那一颗**：exec 前逐文件对 `payload-manifest.json` 的 sha256，不符拒绝启动；
+    ④ **runtime 目录**：`<data>/runtime/<os>/<engine>/<version>/<asset-stem>/`，版本取版本轴的钉值，
+    换后端只是换 asset 目录，回退只是换 version，标签里的非安全字符统一替换成 `_`。
+    默认档不是抄来的：三个 server 能力 × 各自 OS 格 = **8 颗**，逐颗与 `payload-plan` 的行、
+    钉住 release 的产物名与 digest 三方对表；后端选项逐格来自 `backend-choice`；OCR 的版本
+    取自 `ocr-build-surface.json` 的 `ref`（`84817f58`），而不是另写一个常量。
+    **没做的照实写**：UI 源码还不存在，所以 `ui_checked=false`；OCR 的二进制由 CI 现编，
+    出包车道还没把它写进 `payload-manifest.json`，这条缺口以 `ocr-manifest` 记在产物里，
+    不删也不当成已覆盖。12 条源码变异体 × 23 条探针（每条判据都能被单独改坏：常驻不带钥匙、
+    llama 丢 CORS、OCR ref 不是 commit、默认档不在 release、digest 对不上、check 不看鉴权/缺口、
+    runtime 目录不写版本……），16 条单测，CI 静态门禁跑 `--selftest` 与 `--check`。
 
 ## 车道判据的出处（全部按**钉住的那个 ref** 核过，不是按 HEAD 记的）
 

@@ -1,0 +1,792 @@
+{
+ "capabilities": {
+  "字幕": {
+   "auth": {
+    "flag": null,
+    "generated": null,
+    "header": null,
+    "mode": "none",
+    "persisted": false,
+    "token_bytes": null
+   },
+   "bind": "127.0.0.1",
+   "cors": null,
+   "engine": "whisper",
+   "install_stage": "first_run",
+   "lifecycle": {
+    "because": "上游没有鉴权旗标且默认回 Access-Control-Allow-Origin: * —— 常驻等于对任意本地网页开放，只能缩短暴露窗口",
+    "idle_timeout_secs": 300,
+    "mode": "on_demand"
+   },
+   "mode": "server",
+   "os": {
+    "linux-x64": {
+     "argv_by_tier": {
+      "16GB": [
+       "{bin}",
+       "-m",
+       "{ggml-large-v1.bin}",
+       "--host",
+       "127.0.0.1",
+       "--port",
+       "{port}"
+      ],
+      "4GB": [
+       "{bin}",
+       "-m",
+       "{ggml-medium.bin}",
+       "--host",
+       "127.0.0.1",
+       "--port",
+       "{port}"
+      ],
+      "8GB": [
+       "{bin}",
+       "-m",
+       "{ggml-large-v1.bin}",
+       "--host",
+       "127.0.0.1",
+       "--port",
+       "{port}"
+      ]
+     },
+     "asset_dir": "<data>/runtime/linux-x64/whisper/b5454/whisper-bin-ubuntu-x64",
+     "backends": {
+      "default": "whisper-bin-ubuntu-x64.tar.gz",
+      "options": [
+       {
+        "asset": "whisper-bin-ubuntu-x64.tar.gz",
+        "backend": "cpu",
+        "is_default": true
+       }
+      ]
+     },
+     "binary": "whisper-server",
+     "default_asset": "whisper-bin-ubuntu-x64.tar.gz",
+     "version_dir": "<data>/runtime/linux-x64/whisper/b5454"
+    },
+    "win-x64": {
+     "argv_by_tier": {
+      "16GB": [
+       "{bin}",
+       "-m",
+       "{ggml-large-v1.bin}",
+       "--host",
+       "127.0.0.1",
+       "--port",
+       "{port}"
+      ],
+      "4GB": [
+       "{bin}",
+       "-m",
+       "{ggml-medium.bin}",
+       "--host",
+       "127.0.0.1",
+       "--port",
+       "{port}"
+      ],
+      "8GB": [
+       "{bin}",
+       "-m",
+       "{ggml-large-v1.bin}",
+       "--host",
+       "127.0.0.1",
+       "--port",
+       "{port}"
+      ]
+     },
+     "asset_dir": "<data>/runtime/win-x64/whisper/b5454/whisper-bin-x64",
+     "backends": {
+      "default": null,
+      "options": [
+       {
+        "asset": "whisper-bin-win-cuda-11.8.0-x64.zip",
+        "backend": "cuda",
+        "is_default": false
+       },
+       {
+        "asset": "whisper-bin-win-cuda-12.4.0-x64.zip",
+        "backend": "cuda",
+        "is_default": false
+       }
+      ]
+     },
+     "binary": "whisper-server.exe",
+     "default_asset": "whisper-bin-x64.zip",
+     "version_dir": "<data>/runtime/win-x64/whisper/b5454"
+    }
+   },
+   "readiness": {
+    "cite": [
+     "ws-health-loading",
+     "ws-health-ok"
+    ],
+    "expect_status": 200,
+    "method": "GET",
+    "note": "加载期回 503 + loading model，就绪体才是 {\"status\":\"ok\"}",
+    "path": "/health"
+   },
+   "request": {
+    "cite": [
+     "whisper-inference-route",
+     "ws-file-field"
+    ],
+    "method": "POST",
+    "multipart_field": "file",
+    "path": "/inference"
+   },
+   "version": {
+    "oldest_verifiable": "v1.7.6",
+    "pinned": "b5454",
+    "verifiable_count": 16
+   }
+  },
+  "对话": {
+   "auth": {
+    "flag": "--api-key",
+    "generated": "per engine start",
+    "header": "Authorization: Bearer {token}",
+    "mode": "api-key",
+    "persisted": false,
+    "token_bytes": 32
+   },
+   "bind": "127.0.0.1",
+   "cors": {
+    "flag": "--cors-origins",
+    "upstream_default": "*",
+    "value": "localhost"
+   },
+   "engine": "llama",
+   "install_stage": "first_run",
+   "lifecycle": {
+    "because": "引擎自带 --api-key，且 CORS 已从上游默认的 * 收窄到 localhost",
+    "idle_timeout_secs": null,
+    "mode": "resident"
+   },
+   "mode": "server",
+   "os": {
+    "linux-x64": {
+     "argv_by_tier": {
+      "16GB": [
+       "{bin}",
+       "-m",
+       "{Qwen3-14B-Q4_K_M.gguf}",
+       "--host",
+       "127.0.0.1",
+       "--port",
+       "{port}",
+       "--cors-origins",
+       "localhost",
+       "--api-key",
+       "{token}"
+      ],
+      "4GB": [
+       "{bin}",
+       "-m",
+       "{Qwen3-4B-Q4_K_M.gguf}",
+       "--host",
+       "127.0.0.1",
+       "--port",
+       "{port}",
+       "--cors-origins",
+       "localhost",
+       "--api-key",
+       "{token}"
+      ],
+      "8GB": [
+       "{bin}",
+       "-m",
+       "{Qwen3-8B-Q4_K_M.gguf}",
+       "--host",
+       "127.0.0.1",
+       "--port",
+       "{port}",
+       "--cors-origins",
+       "localhost",
+       "--api-key",
+       "{token}"
+      ]
+     },
+     "asset_dir": "<data>/runtime/linux-x64/llama/b11727/llama-b11727-bin-ubuntu-x64",
+     "backends": {
+      "default": "llama-b11727-bin-ubuntu-x64.tar.gz",
+      "options": [
+       {
+        "asset": "llama-b11727-bin-ubuntu-x64.tar.gz",
+        "backend": "cpu",
+        "is_default": true
+       },
+       {
+        "asset": "llama-b11727-bin-ubuntu-cuda-12.8-x64.tar.gz",
+        "backend": "cuda",
+        "is_default": false
+       },
+       {
+        "asset": "llama-b11727-bin-ubuntu-cuda-13.4-x64.tar.gz",
+        "backend": "cuda",
+        "is_default": false
+       },
+       {
+        "asset": "llama-b11727-bin-ubuntu-openvino-2026.4.1-x64.tar.gz",
+        "backend": "openvino",
+        "is_default": false
+       },
+       {
+        "asset": "llama-b11727-bin-ubuntu-rocm-10.0-x64.tar.gz",
+        "backend": "rocm",
+        "is_default": false
+       },
+       {
+        "asset": "llama-b11727-bin-ubuntu-sycl-fp16-x64.tar.gz",
+        "backend": "sycl",
+        "is_default": false
+       },
+       {
+        "asset": "llama-b11727-bin-ubuntu-sycl-fp32-x64.tar.gz",
+        "backend": "sycl",
+        "is_default": false
+       },
+       {
+        "asset": "llama-b11727-bin-ubuntu-vulkan-x64.tar.gz",
+        "backend": "vulkan",
+        "is_default": false
+       }
+      ]
+     },
+     "binary": "llama-server",
+     "default_asset": "llama-b11727-bin-ubuntu-x64.tar.gz",
+     "version_dir": "<data>/runtime/linux-x64/llama/b11727"
+    },
+    "macos-arm64": {
+     "argv_by_tier": {
+      "16GB": [
+       "{bin}",
+       "-m",
+       "{Qwen3-14B-Q4_K_M.gguf}",
+       "--host",
+       "127.0.0.1",
+       "--port",
+       "{port}",
+       "--cors-origins",
+       "localhost",
+       "--api-key",
+       "{token}"
+      ],
+      "4GB": [
+       "{bin}",
+       "-m",
+       "{Qwen3-4B-Q4_K_M.gguf}",
+       "--host",
+       "127.0.0.1",
+       "--port",
+       "{port}",
+       "--cors-origins",
+       "localhost",
+       "--api-key",
+       "{token}"
+      ],
+      "8GB": [
+       "{bin}",
+       "-m",
+       "{Qwen3-8B-Q4_K_M.gguf}",
+       "--host",
+       "127.0.0.1",
+       "--port",
+       "{port}",
+       "--cors-origins",
+       "localhost",
+       "--api-key",
+       "{token}"
+      ]
+     },
+     "asset_dir": "<data>/runtime/macos-arm64/llama/b11727/llama-b11727-bin-macos-arm64",
+     "backends": {
+      "default": "llama-b11727-bin-macos-arm64.tar.gz",
+      "options": [
+       {
+        "asset": "llama-b11727-bin-macos-arm64.tar.gz",
+        "backend": "unknown_from_name",
+        "is_default": true
+       }
+      ]
+     },
+     "binary": "llama-server",
+     "default_asset": "llama-b11727-bin-macos-arm64.tar.gz",
+     "version_dir": "<data>/runtime/macos-arm64/llama/b11727"
+    },
+    "win-x64": {
+     "argv_by_tier": {
+      "16GB": [
+       "{bin}",
+       "-m",
+       "{Qwen3-14B-Q4_K_M.gguf}",
+       "--host",
+       "127.0.0.1",
+       "--port",
+       "{port}",
+       "--cors-origins",
+       "localhost",
+       "--api-key",
+       "{token}"
+      ],
+      "4GB": [
+       "{bin}",
+       "-m",
+       "{Qwen3-4B-Q4_K_M.gguf}",
+       "--host",
+       "127.0.0.1",
+       "--port",
+       "{port}",
+       "--cors-origins",
+       "localhost",
+       "--api-key",
+       "{token}"
+      ],
+      "8GB": [
+       "{bin}",
+       "-m",
+       "{Qwen3-8B-Q4_K_M.gguf}",
+       "--host",
+       "127.0.0.1",
+       "--port",
+       "{port}",
+       "--cors-origins",
+       "localhost",
+       "--api-key",
+       "{token}"
+      ]
+     },
+     "asset_dir": "<data>/runtime/win-x64/llama/b11727/llama-b11727-bin-win-cpu-x64",
+     "backends": {
+      "default": "llama-b11727-bin-win-cpu-x64.zip",
+      "options": [
+       {
+        "asset": "llama-b11727-bin-win-cpu-x64.zip",
+        "backend": "cpu",
+        "is_default": true
+       },
+       {
+        "asset": "llama-b11727-bin-win-cuda-12.4-x64.zip",
+        "backend": "cuda",
+        "is_default": false
+       },
+       {
+        "asset": "llama-b11727-bin-win-cuda-13.4-x64.zip",
+        "backend": "cuda",
+        "is_default": false
+       },
+       {
+        "asset": "llama-b11727-bin-win-openvino-2026.4.1-x64.zip",
+        "backend": "openvino",
+        "is_default": false
+       },
+       {
+        "asset": "llama-b11727-bin-win-rocm-10.0-x64.zip",
+        "backend": "rocm",
+        "is_default": false
+       },
+       {
+        "asset": "llama-b11727-bin-win-sycl-x64.zip",
+        "backend": "sycl",
+        "is_default": false
+       },
+       {
+        "asset": "llama-b11727-bin-win-vulkan-x64.zip",
+        "backend": "vulkan",
+        "is_default": false
+       }
+      ]
+     },
+     "binary": "llama-server.exe",
+     "default_asset": "llama-b11727-bin-win-cpu-x64.zip",
+     "version_dir": "<data>/runtime/win-x64/llama/b11727"
+    }
+   },
+   "readiness": {
+    "cite": "llama-health-is-public",
+    "expect_status": 200,
+    "method": "GET",
+    "note": "上游明写这是 public endpoint（不查 api-key），所以带钥匙也能探活",
+    "path": "/health"
+   },
+   "request": {
+    "cite": "llama-chat-completions-route",
+    "method": "POST",
+    "path": "/v1/chat/completions"
+   },
+   "version": {
+    "oldest_verifiable": "b11713",
+    "pinned": "b11727",
+    "verifiable_count": 25
+   }
+  },
+  "文字识别": {
+   "auth": {
+    "flag": null,
+    "generated": null,
+    "header": null,
+    "mode": "none",
+    "persisted": false,
+    "token_bytes": null
+   },
+   "bind": null,
+   "cors": null,
+   "engine": "oar-ocr",
+   "install_stage": "first_run",
+   "lifecycle": {
+    "because": "上游只有 CLI，没有服务形态，一次任务一个进程",
+    "idle_timeout_secs": null,
+    "mode": "one_shot"
+   },
+   "mode": "subprocess",
+   "os": {
+    "linux-x64": {
+     "argv": [
+      "{bin}",
+      "ocr",
+      "--det",
+      "{det}",
+      "--rec",
+      "{rec}",
+      "--dict",
+      "{dict}",
+      "--device",
+      "{device}",
+      "--format",
+      "json",
+      "--output",
+      "{out_dir}",
+      "{image}"
+     ],
+     "asset_dir": null,
+     "backends": {
+      "default": null,
+      "options": []
+     },
+     "binary": "oar",
+     "default_asset": null,
+     "version_dir": "<data>/runtime/linux-x64/oar-ocr/84817f58"
+    },
+    "macos-arm64": {
+     "argv": [
+      "{bin}",
+      "ocr",
+      "--det",
+      "{det}",
+      "--rec",
+      "{rec}",
+      "--dict",
+      "{dict}",
+      "--device",
+      "{device}",
+      "--format",
+      "json",
+      "--output",
+      "{out_dir}",
+      "{image}"
+     ],
+     "asset_dir": null,
+     "backends": {
+      "default": null,
+      "options": []
+     },
+     "binary": "oar",
+     "default_asset": null,
+     "version_dir": "<data>/runtime/macos-arm64/oar-ocr/84817f58"
+    },
+    "win-x64": {
+     "argv": [
+      "{bin}",
+      "ocr",
+      "--det",
+      "{det}",
+      "--rec",
+      "{rec}",
+      "--dict",
+      "{dict}",
+      "--device",
+      "{device}",
+      "--format",
+      "json",
+      "--output",
+      "{out_dir}",
+      "{image}"
+     ],
+     "asset_dir": null,
+     "backends": {
+      "default": null,
+      "options": []
+     },
+     "binary": "oar.exe",
+     "default_asset": null,
+     "version_dir": "<data>/runtime/win-x64/oar-ocr/84817f58"
+    }
+   },
+   "readiness": null,
+   "request": {
+    "argv": [
+     "--device",
+     "{device}",
+     "--format",
+     "json",
+     "--output",
+     "{out_dir}",
+     "{image}"
+    ],
+    "cite": [
+     "oar-images-positional-required",
+     "oar-output-is-dir",
+     "oar-device-default-auto",
+     "oar-subcommand-ocr"
+    ],
+    "note": "位置参数是图片/PDF（num_args=1..，可多张）；--output 是目录，每张写一个 .md/.json；不给才打到 stdout"
+   },
+   "version": {
+    "oldest_verifiable": null,
+    "pinned": "84817f58",
+    "verifiable_count": null
+   }
+  },
+  "生图": {
+   "auth": {
+    "flag": null,
+    "generated": null,
+    "header": null,
+    "mode": "none",
+    "persisted": false,
+    "token_bytes": null
+   },
+   "bind": "127.0.0.1",
+   "cors": null,
+   "engine": "sd",
+   "install_stage": "on_demand",
+   "lifecycle": {
+    "because": "同字幕：没有钥匙可给；生图是显式触发，任务结束就该停",
+    "idle_timeout_secs": 300,
+    "mode": "on_demand"
+   },
+   "mode": "server",
+   "os": {
+    "linux-x64": {
+     "argv_by_tier": {
+      "16GB": [
+       "{bin}",
+       "--diffusion-model",
+       "{flux1-schnell-Q5_0.gguf}",
+       "--clip_l",
+       "{clip_l-Q8_0.gguf}",
+       "--t5xxl",
+       "{t5xxl-Q2_K.gguf}",
+       "--vae",
+       "{ae-f16.gguf}",
+       "--listen-ip",
+       "127.0.0.1",
+       "--listen-port",
+       "{port}"
+      ],
+      "4GB": [
+       "{bin}",
+       "-m",
+       "{stable-diffusion-v1-5-pruned-emaonly-f16.gguf}",
+       "--listen-ip",
+       "127.0.0.1",
+       "--listen-port",
+       "{port}"
+      ],
+      "8GB": [
+       "{bin}",
+       "-m",
+       "{stable-diffusion-v1-5-pruned-emaonly-f32.gguf}",
+       "--listen-ip",
+       "127.0.0.1",
+       "--listen-port",
+       "{port}"
+      ]
+     },
+     "asset_dir": "<data>/runtime/linux-x64/sd/master-975-95b3090/sd-master-95b3090-bin-Linux-Ubuntu-24.04-x86_64",
+     "backends": {
+      "default": "sd-master-95b3090-bin-Linux-Ubuntu-24.04-x86_64.zip",
+      "options": [
+       {
+        "asset": "sd-master-95b3090-bin-Linux-Ubuntu-24.04-x86_64.zip",
+        "backend": "cpu",
+        "is_default": true
+       },
+       {
+        "asset": "sd-master-95b3090-bin-Linux-Ubuntu-24.04-x86_64-rocm-10.1.0.zip",
+        "backend": "rocm",
+        "is_default": false
+       },
+       {
+        "asset": "sd-master-95b3090-bin-Linux-Ubuntu-24.04-x86_64-vulkan.zip",
+        "backend": "vulkan",
+        "is_default": false
+       }
+      ]
+     },
+     "binary": "sd-server",
+     "default_asset": "sd-master-95b3090-bin-Linux-Ubuntu-24.04-x86_64.zip",
+     "version_dir": "<data>/runtime/linux-x64/sd/master-975-95b3090"
+    },
+    "macos-arm64": {
+     "argv_by_tier": {
+      "16GB": [
+       "{bin}",
+       "--diffusion-model",
+       "{flux1-schnell-Q5_0.gguf}",
+       "--clip_l",
+       "{clip_l-Q8_0.gguf}",
+       "--t5xxl",
+       "{t5xxl-Q2_K.gguf}",
+       "--vae",
+       "{ae-f16.gguf}",
+       "--listen-ip",
+       "127.0.0.1",
+       "--listen-port",
+       "{port}"
+      ],
+      "4GB": [
+       "{bin}",
+       "-m",
+       "{stable-diffusion-v1-5-pruned-emaonly-f16.gguf}",
+       "--listen-ip",
+       "127.0.0.1",
+       "--listen-port",
+       "{port}"
+      ],
+      "8GB": [
+       "{bin}",
+       "-m",
+       "{stable-diffusion-v1-5-pruned-emaonly-f32.gguf}",
+       "--listen-ip",
+       "127.0.0.1",
+       "--listen-port",
+       "{port}"
+      ]
+     },
+     "asset_dir": "<data>/runtime/macos-arm64/sd/master-975-95b3090/sd-master-95b3090-bin-Darwin-macOS-26.6.2-arm64",
+     "backends": {
+      "default": "sd-master-95b3090-bin-Darwin-macOS-26.6.2-arm64.zip",
+      "options": [
+       {
+        "asset": "sd-master-95b3090-bin-Darwin-macOS-26.6.2-arm64.zip",
+        "backend": "unknown_from_name",
+        "is_default": true
+       }
+      ]
+     },
+     "binary": "sd-server",
+     "default_asset": "sd-master-95b3090-bin-Darwin-macOS-26.6.2-arm64.zip",
+     "version_dir": "<data>/runtime/macos-arm64/sd/master-975-95b3090"
+    },
+    "win-x64": {
+     "argv_by_tier": {
+      "16GB": [
+       "{bin}",
+       "--diffusion-model",
+       "{flux1-schnell-Q5_0.gguf}",
+       "--clip_l",
+       "{clip_l-Q8_0.gguf}",
+       "--t5xxl",
+       "{t5xxl-Q2_K.gguf}",
+       "--vae",
+       "{ae-f16.gguf}",
+       "--listen-ip",
+       "127.0.0.1",
+       "--listen-port",
+       "{port}"
+      ],
+      "4GB": [
+       "{bin}",
+       "-m",
+       "{stable-diffusion-v1-5-pruned-emaonly-f16.gguf}",
+       "--listen-ip",
+       "127.0.0.1",
+       "--listen-port",
+       "{port}"
+      ],
+      "8GB": [
+       "{bin}",
+       "-m",
+       "{stable-diffusion-v1-5-pruned-emaonly-f32.gguf}",
+       "--listen-ip",
+       "127.0.0.1",
+       "--listen-port",
+       "{port}"
+      ]
+     },
+     "asset_dir": "<data>/runtime/win-x64/sd/master-975-95b3090/sd-master-95b3090-bin-win-cpu-x64",
+     "backends": {
+      "default": "sd-master-95b3090-bin-win-cpu-x64.zip",
+      "options": [
+       {
+        "asset": "sd-master-95b3090-bin-win-cpu-x64.zip",
+        "backend": "cpu",
+        "is_default": true
+       },
+       {
+        "asset": "sd-master-95b3090-bin-win-cuda12-x64.zip",
+        "backend": "cuda",
+        "is_default": false
+       },
+       {
+        "asset": "sd-master-95b3090-bin-win-rocm-10.1.0-x64.zip",
+        "backend": "rocm",
+        "is_default": false
+       },
+       {
+        "asset": "sd-master-95b3090-bin-win-vulkan-x64.zip",
+        "backend": "vulkan",
+        "is_default": false
+       }
+      ]
+     },
+     "binary": "sd-server.exe",
+     "default_asset": "sd-master-95b3090-bin-win-cpu-x64.zip",
+     "version_dir": "<data>/runtime/win-x64/sd/master-975-95b3090"
+    }
+   },
+   "readiness": {
+    "cite": "sd-listen-after-load",
+    "expect_status": 200,
+    "method": "GET",
+    "note": "与 whisper 相反：模型先加载完才 listen，能答就是就绪",
+    "path": "/v1/models"
+   },
+   "request": {
+    "cite": "sd-imggen-202",
+    "expect_status": 202,
+    "method": "POST",
+    "path": "/sdcpp/v1/img_gen",
+    "poll": "poll_url"
+   },
+   "version": {
+    "oldest_verifiable": "master-944-8cc5ad8",
+    "pinned": "master-975-95b3090",
+    "verifiable_count": 25
+   }
+  }
+ },
+ "gaps": [
+  {
+   "id": "ocr-manifest",
+   "until": "出包车道产出包含 OCR 的载荷清单",
+   "what": "OCR 的二进制由 CI 现编，出包车道还没有把 oar 写进 payload-manifest.json",
+   "why_it_matters": "第三条验收（起的正是下的那一颗）对 OCR 还只能靠构建 artifact 的哈希，外壳拿不到随包清单"
+  }
+ ],
+ "rule": {
+  "entry": "外壳自己不监听任何端口（0 个）；UI 只走 Tauri IPC；引擎的 HTTP 只由外壳进程发",
+  "lifecycle": "没有引擎鉴权的能力不许常驻：on_demand 且 idle_timeout_secs <= 300；关窗即停",
+  "manifest": "payload-manifest.json（出包车道产出，随 runtime 一起装）",
+  "port": "bind 127.0.0.1:0 取临时端口，立刻释放，再把端口交给引擎；不写死端口",
+  "runtime_dir": "<data>/runtime/<os>/<engine>/<version>/<asset-stem>/",
+  "spawn": "执行前把要 exec 的文件与同目录的运行库逐文件对 payload-manifest.json 的 sha256；不符拒绝启动",
+  "token": "32 字节 OS 随机数转 hex；每次起引擎现生成；只在内存里，不落日志",
+  "ui": "UI 源码只许出现 invoke*；以下串一个都不许出现：['fetch(', 'XMLHttpRequest', 'WebSocket', 'EventSource', '127.0.0.1', 'localhost:']",
+  "version_sanitize": "[^A-Za-z0-9._-] → _"
+ },
+ "schema": 1,
+ "ui_checked": false,
+ "ui_dir": null
+}

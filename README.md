@@ -180,7 +180,9 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
 - `tools/launch_plan.py` + `pins/launch-plan.json`：**外壳该敲哪一行**，按钉住的 ref 读上游源码查。
   验收第 10 条（外壳持有唯一监听口、自己发 token、UI 永不直连引擎端口）能不能成立，取决于引擎
   自己支持什么开关，这是事实不是设计选择。量清楚的四件事：`llama-server` **有** `--api-key`
-  （`common/arg.cpp:3513`）且 `/health` 明写不查钥匙（`server.cpp:263`）；`whisper-server` 只有
+  （`common/arg.cpp:3513`）且 `/health` 明写不查钥匙（`server.cpp:263`），CORS 默认 `*`
+  （`common.h:652`）但可以 `--cors-origins localhost` 只反射本机来源（`server-http.cpp:73-80`）；
+  `whisper-server` 只有
   `--host/--port`（`:251/252`），整份文件查不到 `--api-key`/`api_key`；`sd-server` 只有
   `--listen-ip/--listen-port`（`runtime.cpp:193/198`）；`oar` 根本没有服务形态，而且必须带子命令
   `oar ocr`，`--det/--rec/--dict` 是 `requires_all`（三颗一起给），默认档 `--size` 与它们
@@ -208,7 +210,12 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   认出每项能力真起进程的那几步，再按表查四件事：二进制名对不对（`chmod/ldd` 那种"提到过"不算执行）、
   `--host`/`--listen-ip` 有没有逐字给 `127.0.0.1`（`$ADDR` 与"靠上游默认"都不算）、表里说上游查不到的
   旗标有没有混进来、`omit`/子命令对不对。只吃 shell 那一层（注释与 heredoc 正文先滤掉）。
-  实测 4 项能力各一段、问题 0 条；9 种 workflow 文本变异全被报，正向对照是"0 问题必须建立在
+  **验收第 10 条第①句在车道里是两截**：llama 那行必须真带 `--api-key`（变量必须在同一步被赋成
+  非空，`"{token}"` 原样传进去算不合格）与 `--cors-origins localhost`；同一段还必须有
+  **无钥匙访问 `/props` 得 401** 的断言和**两个不同 Origin**（本机被反射 / 非本机拿不到 ACAO）
+  的对照 —— 旗标传对了不等于门禁生效。
+  实测 4 项能力各一段、问题 0 条；15 种 workflow 文本变异全被报（含丢钥匙、占位符、变量未赋值、
+  丢 CORS、401 被改成 200、只剩一个来源），正向对照是"0 问题必须建立在
   4 段都认出来之上"（重数：`python3 tools/lane_argv.py`，已挂在 `ci.yml` 静态门禁）。
 - `tools/sideload_lookup.py` + `pins/sideload-index.json`：**用户从别处弄来的权重，按内容认领**。
   六张已钉表摊平成 `sha256 → 身份`（实测 354 串哈希 / 420 行身份 / 30 个同名不同哈希的文件名），
@@ -288,6 +295,17 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   漂移只报不跟。现取车道用 `--live` 口径：只核对钉住那颗还在、产物没被重打包；上游又发新版
   不算红（实测抓完半小时后 llama 又发了 5 个版本 —— 按"有新版本"红会让这条道永远红）。
   重数：`python3 tools/runtime_versions.py --selftest`、`--check`。
+- `tools/shell_contract.py` + `pins/shell-contract.json`：**外壳还没写，先把它必须遵守的合同钉成表**。
+  只从已提交的五张表推导（launch-plan / backend-choice / runtime-versions / payload-plan /
+  ocr-build-surface），不读外壳源码：入口（外壳 0 个监听口，UI 只走 Tauri IPC）、
+  鉴权（只有 llama 有 `--api-key`，token 每次现生成、只存内存）、
+  **生命周期**（没钥匙的 whisper / sd 不许常驻：`on_demand` + 空闲 300s 即停；OCR 一次任务一个进程）、
+  spawn（exec 前逐文件对 `payload-manifest.json` 的 sha256）、
+  runtime 目录（`<data>/runtime/<os>/<engine>/<version>/<asset-stem>/`）。
+  三个 server 能力 × 各自 OS 格 = 8 颗默认档，逐颗与 payload-plan 的行、钉住 release 的产物名
+  与 digest 三方对表。**UI 源码不存在就写 `ui_checked=false`**；OCR 的二进制还没进出包清单，
+  这条缺口以 `ocr-manifest` 留在产物里。12 条源码变异体 × 23 条探针、16 条单测。
+  重数：`python3 tools/shell_contract.py --selftest`、`--check`。
 - `tools/action_pins.py` + `pins/actions.json`：**出包那只手自己也要钉住**。这一轮之前三个
   workflow 里 4 个 `uses:` 全是浮动大版本 tag（`checkout@v4`、`setup-python@v5`、
   `upload-artifact@v4`、`download-artifact@v4`，共 **47 处**）—— 仓库对引擎/权重/工具带都定了

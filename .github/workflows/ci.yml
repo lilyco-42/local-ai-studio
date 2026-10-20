@@ -36,6 +36,8 @@ jobs:
           python tools/runtime_parity.py --check
           python tools/runtime_versions.py --selftest
           python tools/runtime_versions.py --check
+          python tools/shell_contract.py --selftest
+          python tools/shell_contract.py --check
           python - <<'PY'
           import ast,sys
           for f in ("tools/engine_probe.py","tests/test_engine_probe.py",
