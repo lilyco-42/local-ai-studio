@@ -97,12 +97,12 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
 
 ## 验收标准（在当前唯一可用验证手段 = GitHub Actions 下）
 
-1. `ci.yml`：759 个单测绿（重数：`python -W error::ResourceWarning -m unittest discover -s tests
+1. `ci.yml`：762 个单测绿（重数：`python -W error::ResourceWarning -m unittest discover -s tests
    -p "test_*.py"`；按文件数就 `python -m unittest tests.<模块名>`。2026-10-20 实测逐文件：
    `test_yaml_gate.py` 闸门自己 14、`test_lane_argv.py` 车道 ↔ 启动表一致（含 9 个 workflow 文本变异）10、
    `test_sideload.py` sideload 按内容认领（6 条源码变异体 + 三个真上游文件）22、
    `test_backends.py` 后端矩阵（7 条源码变异体 + 真实 release 捕获）22、
-   `test_backend_choice.py` 换档表（10 条源码变异体 × 13 条探针，输入是两份已钉产物）22、
+   `test_backend_choice.py` 换档表（12 条源码变异体 × 16 条探针，输入是三份已钉产物）25、
    `test_runtime_parity.py` server 在场表（11 条源码变异体 × 15 条探针 + 捕获夹具字节复核）21、
    `test_toolbelt_pins.py` 工具带钉表 14、
    `test_catalog_snapshot.py` 目录快照与侧表 16、`test_citation_check.py` 出处闸门 22、
@@ -662,10 +662,11 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     重数：`python3 tools/backends.py --selftest`、`--check`、
     `python3 tools/backends.py --fetch --captures <路径> --check --captures <路径>`。
 
-28. **"换哪一档、要多下多少"也得是表，不能等外壳里凭估计**：`tools/backend_choice.py`
-    → `pins/backend-choice.json`。它的两份输入都是**别家已经落盘的产物**（矩阵给体积与哈希、
-    `payload-plan` 给默认档），所以这张表不许自己挑默认档 —— 逐行等于 `payload-plan` 那三行才算对
-    （探针「默认档搬对」钉这条，把"改成自己挑一颗"那个变异体当场抓住）。
+28. **"换哪一档、要多下多少、要多占多少盘"都得是表，不能等外壳里凭估计**：`tools/backend_choice.py`
+    → `pins/backend-choice.json`。它有三份输入，全是**别家已经落盘的产物**（矩阵给有哪些档、
+    `payload-plan` 给默认档、`runtime-parity` 给落地体积），所以这张表不许自己挑默认档、
+    也不许自己估体积 —— 逐行等于上游那三张表才算对（探针「默认档搬对」钉这条，
+    把"改成自己挑一颗"那个变异体当场抓住）。
     实测 **16 个 引擎×OS / 41 个格子 / 45 个可选档 / 10 档 CUDA / 7 份 `cudart-` 伴生包**。
     三条只有把两张表并起来才看得见的数：
     ① llama 在 win-x64 从 CPU 默认档换 CUDA 12.4 是 **+236.3 MiB 本体，另加 373.3 MiB 伴生包**
@@ -685,10 +686,19 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     而 llama 与 sd 在 win-x64 / linux-x64 有没有加速档是**硬地板**（把那一格的加速档撤光就红）。
     这张表**故意不说**的写在 `rule.driver`：这台机器的驱动能不能吃到某一档 CUDA，要运行时问
     `nvidia-smi`，属外壳 #25 —— 与"有哪些档可换"仍是两句话。
-    判据的承重：**10 条源码变异体**（配不上的伴生包被静默吸收、一档对上两颗、没哈希的档进表、
+    **落地体积这一列是第四个会骗人的数**：下载量小不等于占盘小。逐颗从 `runtime-parity` 取
+    （那颗包成员解压后大小相加），默认那颗作减法基准，实测 llama 在 win-x64：
+    CPU 落 **47.9** MiB → Vulkan **87.5**（+39.6）→ CUDA 13.4 **190.7**（+142.8）→
+    CUDA 12.4 **598.3**（+550.4）→ ROCm **1148.7**（+1100.8 MiB）—— 换 ROCm 是多占 1.1 GiB，
+    不是"多下 228 MiB"那么简单；whisper 在 win-x64 换 CUDA 12.4.0 落 **1161.2** MiB（+1139.1）。
+    45 个可选档里 **29 个有数、16 个未知**（都是没读整包的 tar.gz 可选档）：未知的写
+    `landed_mib: null` + `landed_note`，**不许写成 0**，也不许出现第三种来源（既没登记读到、
+    也没登记未读 = 两份产者对不上，直接红）；真装的默认档必须有落地体积，那是减法的基准。
+    判据的承重：**12 条源码变异体**（配不上的伴生包被静默吸收、一档对上两颗、没哈希的档进表、
     默认档凭空消失、把推断写成事实、CPU 退路没了不报、默认档改成自己挑一颗、输入形状漂了不报、
-    分层地板清空、体积差不进比对表）× **13 条探针**全被抓；另有一条链式核对：这张表的输入本身
-    还能从重算的 release 夹具复现（夹具 → 矩阵 → 换档表，三环各自 0 问题）。
+    分层地板清空、体积差不进比对表、落地体积未知被写成 0、默认档缺落地体积不报）×
+    **16 条探针**全被抓；另有一条链式核对：这张表的输入本身还能从重算的 release 夹具复现
+    （夹具 → 矩阵 → 换档表，三环各自 0 问题）。
     车道 `backends`（engine-live 第 22 个 job，现在 **15 步**）里那四步换档步骤会拿**现取**那份矩阵重算一遍：
     上游补发或撤掉某个 CUDA 版本时，先红的会是伴生包配对而不是体积。
     重数：`python3 tools/backend_choice.py --selftest`、`--check`、
@@ -720,6 +730,10 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     那个包形状只在 llama 上被量过，套上去就是替上游编判据。
     另一条独立证据顺手落进表里：**sd 在 macOS 有 `sd-server` + 1 个 `.dylib`**（Darwin 包 5 条成员），
     与"whisper 在 macOS 只有 xcframework、没有可执行产物"（#29）形成对照 —— 生图在这台机器上有路，字幕没有。
+    同一份成员表还量出**落地体积**（`landed_mib` = 各成员解压后大小之和，不含目录项）——
+    换档要多占多少盘就取这个数。它与 `payload-plan` 独立量过的 `uncompressed_mib` 逐颗对表
+    （8 颗真装的默认档全在 0.2 MiB 内）：**两个生产者各量一遍再对表**，比只信自己强；
+    读到的 zip 还要满足"落地 ≥ 压缩后"，反过来就是读法坏了。
     可执行名**只有一个来源**（`launch_plan.SERVER_BASE`，Windows 加 `.exe`），源码里出现字面量
     由一条 ast 扫描拒绝（docstring 允许解释，代码常量不允许）；中央目录压缩后合计与矩阵声明的
     体积逐颗对表（30 颗全在 1.5 MiB 内），差太远=量的不是同一份东西。

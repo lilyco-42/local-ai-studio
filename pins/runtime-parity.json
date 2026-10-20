@@ -138,6 +138,7 @@
    "expect_server": "llama-server",
    "has_server": true,
    "is_default": true,
+   "landed_mib": 44.3,
    "libs": {
     ".so": 28
    },
@@ -294,6 +295,7 @@
    "expect_server": "llama-server",
    "has_server": true,
    "is_default": true,
+   "landed_mib": 31.0,
    "libs": {
     ".dylib": 35
    },
@@ -361,6 +363,7 @@
    "expect_server": "llama-server.exe",
    "has_server": true,
    "is_default": false,
+   "landed_mib": 26.5,
    "libs": {
     ".dll": 16
    },
@@ -409,6 +412,7 @@
    "expect_server": "llama-server.exe",
    "has_server": true,
    "is_default": false,
+   "landed_mib": 166.9,
    "libs": {
     ".dll": 17
    },
@@ -457,6 +461,7 @@
    "expect_server": "llama-server.exe",
    "has_server": true,
    "is_default": false,
+   "landed_mib": 29.5,
    "libs": {
     ".dll": 17
    },
@@ -505,6 +510,7 @@
    "expect_server": "llama-server.exe",
    "has_server": true,
    "is_default": false,
+   "landed_mib": 66.3,
    "libs": {
     ".dll": 17
    },
@@ -553,6 +559,7 @@
    "expect_server": "llama-server.exe",
    "has_server": true,
    "is_default": true,
+   "landed_mib": 47.9,
    "libs": {
     ".dll": 29
    },
@@ -601,6 +608,7 @@
    "expect_server": "llama-server.exe",
    "has_server": true,
    "is_default": false,
+   "landed_mib": 598.3,
    "libs": {
     ".dll": 30
    },
@@ -649,6 +657,7 @@
    "expect_server": "llama-server.exe",
    "has_server": true,
    "is_default": false,
+   "landed_mib": 190.7,
    "libs": {
     ".dll": 30
    },
@@ -697,6 +706,7 @@
    "expect_server": "llama-server.exe",
    "has_server": true,
    "is_default": false,
+   "landed_mib": 275.8,
    "libs": {
     ".dll": 57
    },
@@ -745,6 +755,7 @@
    "expect_server": "llama-server.exe",
    "has_server": true,
    "is_default": false,
+   "landed_mib": 1148.7,
    "libs": {
     ".dll": 33
    },
@@ -794,6 +805,7 @@
    "expect_server": "llama-server.exe",
    "has_server": true,
    "is_default": false,
+   "landed_mib": 446.8,
    "libs": {
     ".dll": 49
    },
@@ -842,6 +854,7 @@
    "expect_server": "llama-server.exe",
    "has_server": true,
    "is_default": false,
+   "landed_mib": 87.5,
    "libs": {
     ".dll": 30
    },
@@ -870,6 +883,7 @@
    "expect_server": "sd-server",
    "has_server": true,
    "is_default": true,
+   "landed_mib": 65.0,
    "libs": {
     ".so": 21
    },
@@ -898,6 +912,7 @@
    "expect_server": "sd-server",
    "has_server": true,
    "is_default": false,
+   "landed_mib": 1383.8,
    "libs": {
     ".so": 22
    },
@@ -926,6 +941,7 @@
    "expect_server": "sd-server",
    "has_server": true,
    "is_default": false,
+   "landed_mib": 96.4,
    "libs": {
     ".so": 22
    },
@@ -954,6 +970,7 @@
    "expect_server": "sd-server",
    "has_server": true,
    "is_default": true,
+   "landed_mib": 93.9,
    "libs": {
     ".dylib": 1
    },
@@ -983,6 +1000,7 @@
    "expect_server": "sd-server.exe",
    "has_server": true,
    "is_default": true,
+   "landed_mib": 45.6,
    "libs": {
     ".dll": 16
    },
@@ -1012,6 +1030,7 @@
    "expect_server": "sd-server.exe",
    "has_server": true,
    "is_default": false,
+   "landed_mib": 370.4,
    "libs": {
     ".dll": 17
    },
@@ -1041,6 +1060,7 @@
    "expect_server": "sd-server.exe",
    "has_server": true,
    "is_default": false,
+   "landed_mib": 1162.6,
    "libs": {
     ".dll": 4
    },
@@ -1070,6 +1090,7 @@
    "expect_server": "sd-server.exe",
    "has_server": true,
    "is_default": false,
+   "landed_mib": 83.8,
    "libs": {
     ".dll": 17
    },
@@ -1141,6 +1162,7 @@
    "expect_server": "whisper-server.exe",
    "has_server": true,
    "is_default": true,
+   "landed_mib": 22.1,
    "libs": {
     ".dll": 15
    },
@@ -1199,6 +1221,7 @@
    "expect_server": "whisper-server",
    "has_server": true,
    "is_default": true,
+   "landed_mib": 26.8,
    "libs": {
     ".so": 18
    },
@@ -1257,6 +1280,7 @@
    "expect_server": "whisper-server.exe",
    "has_server": true,
    "is_default": false,
+   "landed_mib": 8.7,
    "libs": {
     ".dll": 6
    },
@@ -1314,6 +1338,7 @@
    "expect_server": "whisper-server.exe",
    "has_server": true,
    "is_default": false,
+   "landed_mib": 355.2,
    "libs": {
     ".dll": 10
    },
@@ -1371,6 +1396,7 @@
    "expect_server": "whisper-server.exe",
    "has_server": true,
    "is_default": false,
+   "landed_mib": 11.6,
    "libs": {
     ".dll": 7
    },
@@ -1435,6 +1461,7 @@
    "expect_server": "whisper-server.exe",
    "has_server": true,
    "is_default": false,
+   "landed_mib": 615.5,
    "libs": {
     ".dll": 21
    },
@@ -1499,6 +1526,7 @@
    "expect_server": "whisper-server.exe",
    "has_server": true,
    "is_default": false,
+   "landed_mib": 1161.2,
    "libs": {
     ".dll": 22
    },
@@ -1563,6 +1591,7 @@
    "expect_server": "whisper-server.exe",
    "has_server": true,
    "is_default": false,
+   "landed_mib": 37.2,
    "libs": {
     ".dll": 9
    },
@@ -1627,6 +1656,7 @@
    "expect_server": "whisper-server.exe",
    "has_server": true,
    "is_default": false,
+   "landed_mib": 13.0,
    "libs": {
     ".dll": 7
    },
@@ -1800,6 +1830,7 @@
   "cost": "16 颗可选档的 tar.gz 不读：不为没人会下载的那一颗付整包流量，如实标未证（要证就走出包车道解包后点名）",
   "hard": "payload-plan 真装的那几颗必须有 server —— 装上起不来就是红",
   "impl_pair": "llama 的 Windows 包是 x.exe + x-impl.dll 成对的（条目表量出来的），这一列只对 llama 求值；whisper/sd 的依赖形状没被这样量过，写 null 不写 false",
+  "landed": "landed_mib 是成员表里逐个成员解压后大小之和（不含目录项）——换后端要多占多少盘就取这一列；它与 payload-plan 独立量过的 uncompressed_mib 逐颗对表，差过 0.2 MiB 就红",
   "reader": "zip 用 Range 读中央目录（约 1 MiB 尾部，不整包下载、不解压、不运行）；tar.gz 不可随机寻址，只能取整包读成员表 —— 这一层只为 payload-plan 真装的默认档付那份流量，且取回的字节数与整包 sha256 都按 payload-plan 已量过的数复核",
   "server_name": "可执行文件名只从 tools/launch_plan.py 的 SERVER_BASE 取，Windows 加 .exe；这张表里没有第二个定义"
  },

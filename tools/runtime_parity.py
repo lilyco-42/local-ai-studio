@@ -102,6 +102,10 @@ def build(captures: dict, matrix: dict, plan: dict) -> tuple[dict, list[str]]:
     problems: list[str] = []
     defaults = shipped_defaults(plan)
     os_of_asset = {r["asset"]: o for o, rows in plan["os"].items() for r in rows}
+    # 落地体积这件事 payload-plan 早就单独量过一次（那 8 颗默认档的 uncompressed_mib）。
+    # 两个生产者各量一遍再对表，比只信自己强。
+    landed_expected = {r["asset"]: r["uncompressed_mib"] for rows in plan["os"].values()
+                       for r in rows if r.get("asset") and r.get("uncompressed_mib")}
     rows = rows_from_matrix(matrix)
     assets: list[dict] = []
     for r in rows:
@@ -135,24 +139,45 @@ def build(captures: dict, matrix: dict, plan: dict) -> tuple[dict, list[str]]:
                                          "不知道该按哪个 OS 的可执行文件名去找"})
             assets.append(item)
             continue
+        if "unpacked_total" not in cap:
+            problems.append(f"{r['asset']}: 捕获里没有 unpacked_total —— 那是旧版 --fetch 读的，"
+                            "只有名字与压缩后合计，量不出落地体积。重跑 --fetch 再对表")
+            item["read"] = False
+            item["read_via"] = "capture_missing_sizes"
+            item["why_not_read"] = "捕获缺解压后大小这一项；不假装知道落地体积"
+            assets.append(item)
+            continue
         s = summarize(cap["names"], r["engine"], os_key)
         item.update(s)
         if cap.get("reader") == "tar_stream":
             size_mib = round(cap["bytes"] / 1048576, 1)
             item.update({"read": True, "read_via": "tar_stream", "archive_bytes": cap["bytes"],
-                         "sha256_verified": bool(cap["digest_matches"]), "packed_sum_mib": None})
+                         "sha256_verified": bool(cap["digest_matches"]), "packed_sum_mib": None,
+                         "landed_mib": round(cap["unpacked_total"] / 1048576, 1)})
             if not cap["digest_matches"]:
                 problems.append(f"{r['asset']}: 整包 sha256 与上游 release digest 不等 —— "
                                 "成员表是从另一个包读的，不能算这一档的证据")
         else:
             size_mib = round(cap["packed_total"] / 1048576, 1)
             item.update({"read": True, "read_via": "zip_central_directory",
-                         "packed_sum_mib": size_mib})
+                         "packed_sum_mib": size_mib,
+                         "landed_mib": round(cap["unpacked_total"] / 1048576, 1)})
         if s["entries"] == 0:
             problems.append(f"{r['asset']}: 解析出 0 条成员 —— 读法坏了，不是包空了")
         if r["mib"] is not None and abs(size_mib - r["mib"]) > 1.5:
             problems.append(f"{r['asset']}: 读到的体积 {size_mib} MiB 与矩阵声明的 "
                             f"{r['mib']} MiB 差过 1.5 —— 量的不是同一份东西")
+        landed = item.get("landed_mib")
+        if landed is not None:
+            if landed <= 0:
+                problems.append(f"{r['asset']}: 落地体积 {landed} MiB 不是正数 —— 成员表里的解压后大小读坏了")
+            if item["read_via"] == "zip_central_directory" and landed < item["packed_sum_mib"]:
+                problems.append(f"{r['asset']}: 落地体积 {landed} MiB 比压缩后 {item['packed_sum_mib']} MiB 还小"
+                                " —— 这两件事不可能同时成立，读法坏了")
+            want = landed_expected.get(r["asset"])
+            if want is not None and abs(landed - want) > 0.2:
+                problems.append(f"{r['asset']}: 这张表量到落地 {landed} MiB，payload-plan 量的是 {want} MiB "
+                                "—— 两份产者对同一个包的成员表不一致，先查谁读坏了")
         if not s["has_server"] and item["is_default"]:
             problems.append(f"{r['asset']}: 这是 payload-plan 真装的那一颗，可成员表里没有 "
                             f"{s['expect_server']} —— 装上起不来")
@@ -186,6 +211,9 @@ def build(captures: dict, matrix: dict, plan: dict) -> tuple[dict, list[str]]:
                             "如实标未证（要证就走出包车道解包后点名）",
                     "absent_vs_unknown": "读到成员表而里面没 server = 缺（进 gaps 点名）；"
                                          "没读到 = 未知（进 not_read），两者不许混",
+                    "landed": "landed_mib 是成员表里逐个成员解压后大小之和（不含目录项）——"
+                              "换后端要多占多少盘就取这一列；它与 payload-plan 独立量过的 "
+                              "uncompressed_mib 逐颗对表，差过 0.2 MiB 就红",
                     "hard": "payload-plan 真装的那几颗必须有 server —— 装上起不来就是红",
                     "impl_pair": "llama 的 Windows 包是 x.exe + x-impl.dll 成对的（条目表量出来的），"
                                  "这一列只对 llama 求值；whisper/sd 的依赖形状没被这样量过，写 null 不写 false"},
@@ -214,7 +242,7 @@ def drift(committed: dict, fresh: dict) -> list[str]:
             continue
         for f in ("expect_server", "has_server", "read", "read_via", "entries",
                   "server_sibling_lib", "packed_sum_mib", "archive_bytes", "sha256_verified",
-                  "libs", "is_default", "os_resolved"):
+                  "landed_mib", "libs", "is_default", "os_resolved"):
             if o.get(f) != a.get(f):
                 bad.append(f"{a['asset']}: {f} 变了 {o.get(f)} → {a.get(f)}")
     return bad
@@ -235,19 +263,22 @@ def fetch(rows: list[dict], path: str, plan: dict) -> None:
     for r in rows:
         asset = r["asset"]
         url = f"https://github.com/{r['repo']}/releases/download/{r['release']}/{asset}"
-        if asset in cap:
+        if asset in cap and "unpacked_total" in cap[asset]:
             continue
         if asset.endswith(".zip"):
             entries = zp.entries(url)
             cap[asset] = {"url": url, "reader": "zip_central_directory",
                           "names": [x["name"] for x in entries],
-                          "packed_total": sum(x["packed"] for x in entries if not x["dir"])}
+                          "packed_total": sum(x["packed"] for x in entries if not x["dir"]),
+                          "unpacked_total": sum(x["size"] for x in entries if not x["dir"])}
             print("捕获", asset, len(entries), "条")
         elif asset in defaults and asset in verified:
             got, meta = pp.read_tar_entries(url, verified[asset]["bytes"],
                                             verified[asset]["sha256"])
             cap[asset] = {"url": url, "reader": "tar_stream",
-                          "names": [x["name"] for x in got], "bytes": meta["bytes"],
+                          "names": [x["name"] for x in got],
+                          "unpacked_total": sum(x["size"] for x in got if not x["isdir"]),
+                          "bytes": meta["bytes"],
                           "sha256": meta["sha256"], "digest_matches": meta["digest_matches"],
                           "packed_total": None}
             print("捕获(tar)", asset, len(got), "条", meta["bytes"], "B",
@@ -363,6 +394,24 @@ def selftest() -> int:
             v["bytes"] = 1000
     if not any("差过 1.5" in x for x in build(c11, matrix, plan)[1]):
         bad.append("tar 体积对不上时没红")
+    # ⑫ 落地体积与 payload-plan 独立量过的那次不一致，必须红（两份产者读的是同一个包）。
+    c12 = json.loads(json.dumps(caps))
+    for v in c12.values():
+        v["unpacked_total"] = v["packed_total"] if v.get("packed_total") else v["bytes"]
+    if not any("两份产者对同一个包的成员表不一致" in x for x in build(c12, matrix, plan)[1]):
+        bad.append("落地体积与 payload-plan 对不上时没红")
+    # ⑬ 落地比压缩后还小 = 读法坏了，必须红。
+    c13 = json.loads(json.dumps(caps))
+    for k, v in c13.items():
+        if v.get("reader") == "zip_central_directory":
+            v["unpacked_total"] = v["packed_total"] // 100
+    if not any("还小" in x for x in build(c13, matrix, plan)[1]):
+        bad.append("落地体积小于压缩后时没红")
+    # ⑭ 三颗 tar 的落地体积也必须与 payload-plan 对得上（正向对照：真输入 0 问题已经覆盖了，
+    #    这里数一下到底有几颗被两个生产者各量过一次）。
+    both = [a for a in doc["assets"] if a.get("landed_mib") and a["is_default"]]
+    if len(both) != 8:
+        bad.append(f"8 颗默认档都该有两个生产者量的落地体积，现在 {len(both)}")
     print("---- 结论 ----", doc["stats"], f"BAD 数量 = {len(bad)}")
     for x in bad:
         print("BAD:", x)

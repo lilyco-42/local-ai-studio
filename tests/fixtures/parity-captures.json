@@ -68,6 +68,7 @@
   "packed_total": null,
   "reader": "tar_stream",
   "sha256": "46d40093b6946854525682ce4ac53dcf4fd4b2e94ee03dd24e7b4f64ed039b95",
+  "unpacked_total": 32483638,
   "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11727/llama-b11727-bin-macos-arm64.tar.gz"
  },
  "llama-b11727-bin-ubuntu-x64.tar.gz": {
@@ -139,6 +140,7 @@
   "packed_total": null,
   "reader": "tar_stream",
   "sha256": "17bfcf2217ab5168888dd629a833e264babd488c0512fe18bc66e49632f00241",
+  "unpacked_total": 46419782,
   "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11727/llama-b11727-bin-ubuntu-x64.tar.gz"
  },
  "llama-b11727-bin-win-cpu-arm64.zip": {
@@ -183,6 +185,8 @@
    "mtmd.dll"
   ],
   "packed_total": 12544196,
+  "reader": "zip_central_directory",
+  "unpacked_total": 27780893,
   "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11727/llama-b11727-bin-win-cpu-arm64.zip"
  },
  "llama-b11727-bin-win-cpu-x64.zip": {
@@ -240,6 +244,8 @@
    "mtmd.dll"
   ],
   "packed_total": 19660104,
+  "reader": "zip_central_directory",
+  "unpacked_total": 50256669,
   "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11727/llama-b11727-bin-win-cpu-x64.zip"
  },
  "llama-b11727-bin-win-cuda-12.4-x64.zip": {
@@ -298,6 +304,8 @@
    "llama-quantize.exe"
   ],
   "packed_total": 267482314,
+  "reader": "zip_central_directory",
+  "unpacked_total": 627350813,
   "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11727/llama-b11727-bin-win-cuda-12.4-x64.zip"
  },
  "llama-b11727-bin-win-cuda-13.4-arm64.zip": {
@@ -343,6 +351,8 @@
    "llama-quantize.exe"
   ],
   "packed_total": 147325497,
+  "reader": "zip_central_directory",
+  "unpacked_total": 175044381,
   "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11727/llama-b11727-bin-win-cuda-13.4-arm64.zip"
  },
  "llama-b11727-bin-win-cuda-13.4-x64.zip": {
@@ -401,6 +411,8 @@
    "llama-quantize.exe"
   ],
   "packed_total": 155116263,
+  "reader": "zip_central_directory",
+  "unpacked_total": 199938333,
   "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11727/llama-b11727-bin-win-cuda-13.4-x64.zip"
  },
  "llama-b11727-bin-win-opencl-adreno-arm64.zip": {
@@ -446,6 +458,8 @@
    "llama-quantize.exe"
   ],
   "packed_total": 13382859,
+  "reader": "zip_central_directory",
+  "unpacked_total": 30901021,
   "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11727/llama-b11727-bin-win-opencl-adreno-arm64.zip"
  },
  "llama-b11727-bin-win-openvino-2026.4.1-x64.zip": {
@@ -546,6 +560,8 @@
    "llama-quantize.exe"
   ],
   "packed_total": 99473184,
+  "reader": "zip_central_directory",
+  "unpacked_total": 289145079,
   "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11727/llama-b11727-bin-win-openvino-2026.4.1-x64.zip"
  },
  "llama-b11727-bin-win-rocm-10.0-x64.zip": {
@@ -607,6 +623,8 @@
    "llama-quantize.exe"
   ],
   "packed_total": 258812726,
+  "reader": "zip_central_directory",
+  "unpacked_total": 1204551453,
   "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11727/llama-b11727-bin-win-rocm-10.0-x64.zip"
  },
  "llama-b11727-bin-win-sycl-x64.zip": {
@@ -685,6 +703,8 @@
    "llama-quantize.exe"
   ],
   "packed_total": 149192975,
+  "reader": "zip_central_directory",
+  "unpacked_total": 468474813,
   "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11727/llama-b11727-bin-win-sycl-x64.zip"
  },
  "llama-b11727-bin-win-vulkan-arm64.zip": {
@@ -730,6 +750,8 @@
    "llama-quantize.exe"
   ],
   "packed_total": 24924499,
+  "reader": "zip_central_directory",
+  "unpacked_total": 69535005,
   "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11727/llama-b11727-bin-win-vulkan-arm64.zip"
  },
  "llama-b11727-bin-win-vulkan-x64.zip": {
@@ -788,6 +810,8 @@
    "llama-quantize.exe"
   ],
   "packed_total": 32308734,
+  "reader": "zip_central_directory",
+  "unpacked_total": 91787037,
   "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11727/llama-b11727-bin-win-vulkan-x64.zip"
  },
  "sd-master-95b3090-bin-Darwin-macOS-26.6.2-arm64.zip": {
@@ -799,6 +823,8 @@
    "stable-diffusion.cpp.txt"
   ],
   "packed_total": 36487589,
+  "reader": "zip_central_directory",
+  "unpacked_total": 98427924,
   "url": "https://github.com/leejet/stable-diffusion.cpp/releases/download/master-975-95b3090/sd-master-95b3090-bin-Darwin-macOS-26.6.2-arm64.zip"
  },
  "sd-master-95b3090-bin-Linux-Ubuntu-24.04-x86_64-rocm-10.1.0.zip": {
@@ -842,6 +868,8 @@
    "build/bin/libwebp.so.7"
   ],
   "packed_total": 295408878,
+  "reader": "zip_central_directory",
+  "unpacked_total": 1451065506,
   "url": "https://github.com/leejet/stable-diffusion.cpp/releases/download/master-975-95b3090/sd-master-95b3090-bin-Linux-Ubuntu-24.04-x86_64-rocm-10.1.0.zip"
  },
  "sd-master-95b3090-bin-Linux-Ubuntu-24.04-x86_64-vulkan.zip": {
@@ -884,6 +912,8 @@
    "stable-diffusion.cpp.txt"
   ],
   "packed_total": 36606589,
+  "reader": "zip_central_directory",
+  "unpacked_total": 101104844,
   "url": "https://github.com/leejet/stable-diffusion.cpp/releases/download/master-975-95b3090/sd-master-95b3090-bin-Linux-Ubuntu-24.04-x86_64-vulkan.zip"
  },
  "sd-master-95b3090-bin-Linux-Ubuntu-24.04-x86_64.zip": {
@@ -925,6 +955,8 @@
    "stable-diffusion.cpp.txt"
   ],
   "packed_total": 26283393,
+  "reader": "zip_central_directory",
+  "unpacked_total": 68150756,
   "url": "https://github.com/leejet/stable-diffusion.cpp/releases/download/master-975-95b3090/sd-master-95b3090-bin-Linux-Ubuntu-24.04-x86_64.zip"
  },
  "sd-master-95b3090-bin-win-cpu-x64.zip": {
@@ -951,6 +983,8 @@
    "webm.dll"
   ],
   "packed_total": 17703751,
+  "reader": "zip_central_directory",
+  "unpacked_total": 47849605,
   "url": "https://github.com/leejet/stable-diffusion.cpp/releases/download/master-975-95b3090/sd-master-95b3090-bin-win-cpu-x64.zip"
  },
  "sd-master-95b3090-bin-win-cuda12-x64.zip": {
@@ -978,6 +1012,8 @@
    "webm.dll"
   ],
   "packed_total": 343627909,
+  "reader": "zip_central_directory",
+  "unpacked_total": 388403333,
   "url": "https://github.com/leejet/stable-diffusion.cpp/releases/download/master-975-95b3090/sd-master-95b3090-bin-win-cuda12-x64.zip"
  },
  "sd-master-95b3090-bin-win-rocm-10.1.0-x64.zip": {
@@ -990,6 +1026,8 @@
    "stable-diffusion.dll"
   ],
   "packed_total": 263996880,
+  "reader": "zip_central_directory",
+  "unpacked_total": 1219059712,
   "url": "https://github.com/leejet/stable-diffusion.cpp/releases/download/master-975-95b3090/sd-master-95b3090-bin-win-rocm-10.1.0-x64.zip"
  },
  "sd-master-95b3090-bin-win-vulkan-x64.zip": {
@@ -1017,6 +1055,8 @@
    "webm.dll"
   ],
   "packed_total": 29368097,
+  "reader": "zip_central_directory",
+  "unpacked_total": 87882885,
   "url": "https://github.com/leejet/stable-diffusion.cpp/releases/download/master-975-95b3090/sd-master-95b3090-bin-win-vulkan-x64.zip"
  },
  "whisper-bin-Win32.zip": {
@@ -1056,6 +1096,8 @@
    "Release/whisper.dll"
   ],
   "packed_total": 5519769,
+  "reader": "zip_central_directory",
+  "unpacked_total": 13591552,
   "url": "https://github.com/ggml-org/whisper.cpp/releases/download/b5454/whisper-bin-Win32.zip"
  },
  "whisper-bin-ubuntu-x64.tar.gz": {
@@ -1113,6 +1155,7 @@
   "packed_total": null,
   "reader": "tar_stream",
   "sha256": "a72becf15d7917f990f6313867a52638b82b7f9ef237fb0c980dac56a135781c",
+  "unpacked_total": 28128870,
   "url": "https://github.com/ggml-org/whisper.cpp/releases/download/b5454/whisper-bin-ubuntu-x64.tar.gz"
  },
  "whisper-bin-win-cpu-arm64.zip": {
@@ -1144,6 +1187,8 @@
    "Release/whisper.dll"
   ],
   "packed_total": 4367921,
+  "reader": "zip_central_directory",
+  "unpacked_total": 9128400,
   "url": "https://github.com/ggml-org/whisper.cpp/releases/download/b5454/whisper-bin-win-cpu-arm64.zip"
  },
  "whisper-bin-win-cuda-11.8.0-x64.zip": {
@@ -1197,6 +1242,8 @@
    "Release/whisper.dll"
   ],
   "packed_total": 284755179,
+  "reader": "zip_central_directory",
+  "unpacked_total": 645381120,
   "url": "https://github.com/ggml-org/whisper.cpp/releases/download/b5454/whisper-bin-win-cuda-11.8.0-x64.zip"
  },
  "whisper-bin-win-cuda-12.4.0-x64.zip": {
@@ -1251,6 +1298,8 @@
    "Release/whisper.dll"
   ],
   "packed_total": 684907230,
+  "reader": "zip_central_directory",
+  "unpacked_total": 1217620480,
   "url": "https://github.com/ggml-org/whisper.cpp/releases/download/b5454/whisper-bin-win-cuda-12.4.0-x64.zip"
  },
  "whisper-bin-win-cuda-13.4-arm64.zip": {
@@ -1286,6 +1335,8 @@
    "Release/whisper.dll"
   ],
   "packed_total": 291153784,
+  "reader": "zip_central_directory",
+  "unpacked_total": 372423968,
   "url": "https://github.com/ggml-org/whisper.cpp/releases/download/b5454/whisper-bin-win-cuda-13.4-arm64.zip"
  },
  "whisper-bin-win-opencl-adreno-arm64.zip": {
@@ -1318,6 +1369,8 @@
    "Release/whisper.dll"
   ],
   "packed_total": 4941322,
+  "reader": "zip_central_directory",
+  "unpacked_total": 12205008,
   "url": "https://github.com/ggml-org/whisper.cpp/releases/download/b5454/whisper-bin-win-opencl-adreno-arm64.zip"
  },
  "whisper-bin-x64.zip": {
@@ -1365,6 +1418,8 @@
    "Release/whisper.dll"
   ],
   "packed_total": 8923342,
+  "reader": "zip_central_directory",
+  "unpacked_total": 23147520,
   "url": "https://github.com/ggml-org/whisper.cpp/releases/download/b5454/whisper-bin-x64.zip"
  },
  "whisper-blas-bin-Win32.zip": {
@@ -1406,6 +1461,8 @@
    "Release/whisper.dll"
   ],
   "packed_total": 12551016,
+  "reader": "zip_central_directory",
+  "unpacked_total": 38955538,
   "url": "https://github.com/ggml-org/whisper.cpp/releases/download/b5454/whisper-blas-bin-Win32.zip"
  },
  "whisper-blas-bin-x64.zip": {
@@ -1455,6 +1512,8 @@
    "Release/whisper.dll"
   ],
   "packed_total": 21710069,
+  "reader": "zip_central_directory",
+  "unpacked_total": 74328966,
   "url": "https://github.com/ggml-org/whisper.cpp/releases/download/b5454/whisper-blas-bin-x64.zip"
  }
 }

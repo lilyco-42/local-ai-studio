@@ -239,9 +239,9 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   7 条源码变异体 × 10 条探针 + 真实夹具字节校验；离线那层在 `ci.yml` 静态门禁，
   车道 `backends` 的现取步骤还回现取一次再对表（重数：`python3 tools/backends.py --selftest`、
   `python3 tools/backends.py --check`）。
-- `tools/backend_choice.py` + `pins/backend-choice.json`：**"换哪一档、要多下多少"也是表**。
+- `tools/backend_choice.py` + `pins/backend-choice.json`：**"换哪一档、要多下多少、要多占多少盘"也是表**。
   矩阵说有哪些档，这张表说外壳该下哪一颗：默认档从 `payload-plan` 逐行搬（不许自己挑，有探针钉着）、
-  体积差每次重算、CUDA 档必须连 `cudart-` 伴生包一起算 —— 实测 llama 在 win-x64 换 CUDA 12.4 是
+  体积差每次重算、落地体积从 `runtime-parity` 取、CUDA 档必须连 `cudart-` 伴生包一起算 —— 实测 llama 在 win-x64 换 CUDA 12.4 是
   **+236.3 MiB 本体 + 373.3 MiB 伴生包**（伴生包比本体还大），而换 **Vulkan 只 +12.0 MiB 且没有伴生包**：
   "有独显的普通笔记本最便宜的加速路是 Vulkan"这句话，此前没有任何产物撑得住。
   10 档 CUDA 对 7 份伴生包，剩下 whisper 那 3 档**没有**伴生包 → 写进 `cuda_rows_without_companion`
@@ -250,6 +250,10 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   macOS 两个引擎是 `name_does_not_say`（不断言 Metal）。sd 的伴生包写 `cu12` 而 runtime 写 `cuda12`，
   拼法不同也必须配上同一颗。**这张表不说"这台机器的驱动能吃到哪一档"** —— 那要运行时问 `nvidia-smi`，
   属外壳（#25）。10 条源码变异体 × 13 条探针，外加一条链式核对（release 夹具 → 矩阵 → 换档表）；
+  **下载量小不等于占盘小**：llama 在 win-x64 的默认档落 47.9 MiB，换 Vulkan 87.5（+39.6）、
+  换 CUDA 12.4 598.3（+550.4）、换 ROCm 1148.7（+1100.8 MiB）—— 45 个可选档里 29 个有数、
+  16 个（没读整包的 tar）写 `null` + 说明，**不许写成 0**。
+  12 条源码变异体 × 16 条探针（新增"落地体积未知被写成 0"与"默认档缺落地体积不报"）；
   离线那层在 `ci.yml` 静态门禁，车道 `backends` 最后一步拿现取那份矩阵重算
   （重数：`python3 tools/backend_choice.py --selftest`、`--check`）。
 - `tools/runtime_parity.py` + `pins/runtime-parity.json`：**换后端那句的前提也得有表**。
@@ -265,8 +269,10 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   plan 又没装它 → 停在未知，而 whisper 那颗 CPU 默认包的 OS 是**从 payload-plan 取的、不是猜的**
   （把它改成"猜 win-x64"的变异体被探针抓住）。`server_sibling_lib` 只对 llama 求值，whisper/sd 写
   `null` 不写 `false`。可执行名**只有一个来源**（`launch_plan.SERVER_BASE`），源码里出现字面量由
-  一条 ast 扫描拒绝。11 条源码变异体 × 15 条探针 + 捕获夹具字节复核（`tests/fixtures/parity-captures.json`，
-  31 颗 / 44,548 B）。顺带落下一条独立证据：**sd 在 macOS 有 `sd-server` + 1 个 `.dylib`**，
+  一条 ast 扫描拒绝。同一份成员表还量出**落地体积**（各成员解压后大小之和），与 `payload-plan` 独立量过的
+  `uncompressed_mib` 逐颗对表（8 颗默认档全在 0.2 MiB 内），并要求「落地 ≥ 压缩后」。
+  11 条源码变异体 × 15 条探针 + 捕获夹具字节复核（`tests/fixtures/parity-captures.json`，
+  31 颗 / 46,530 B）。顺带落下一条独立证据：**sd 在 macOS 有 `sd-server` + 1 个 `.dylib`**，
   而 whisper 在 macOS 只有 xcframework（#29）—— 生图在这台机器上有路，字幕没有。
   重数：`python3 tools/runtime_parity.py --selftest`、`--check`。
 - `tools/action_pins.py` + `pins/actions.json`：**出包那只手自己也要钉住**。这一轮之前三个

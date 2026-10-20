@@ -234,11 +234,11 @@ OLD_DEFAULT_FLOOR = '        if a is None:'
 OLD_DRIFT_TUPLE = '\n'.join([
     '        for f in ("expect_server", "has_server", "read", "read_via", "entries",',
     '                  "server_sibling_lib", "packed_sum_mib", "archive_bytes", "sha256_verified",',
-    '                  "libs", "is_default", "os_resolved"):'])
+    '                  "landed_mib", "libs", "is_default", "os_resolved"):'])
 NEW_DRIFT_TUPLE = '\n'.join([
     '        for f in ("expect_server", "read", "read_via", "entries",',
     '                  "packed_sum_mib", "archive_bytes", "sha256_verified",',
-    '                  "libs", "is_default", "os_resolved"):'])
+    '                  "landed_mib", "libs", "is_default", "os_resolved"):'])
 
 
 class TestSourceMutants(unittest.TestCase):
