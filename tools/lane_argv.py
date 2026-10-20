@@ -102,6 +102,21 @@ def launches(b: str, text: str) -> bool:
     return False
 
 
+def flag_values(text: str, flag: str) -> list[str]:
+    """`--flag 值` / `--flag=值` 两种写法都收，去掉一层引号。"""
+    return [v.strip("\"'") for v in
+            re.findall(rf"(?<![\w-]){re.escape(flag)}(?:[\s=]+)([^\s;&]+)", text)]
+
+
+def assigned(text: str, var: str) -> str | None:
+    """这一段里这个变量有没有被赋成非空值；`$(...)` 只要不是空串就算。"""
+    m = re.search(rf"(?m)^\s*(?:export\s+)?{re.escape(var)}=(.*)$", text)
+    if not m:
+        return None
+    rhs = m.group(1).strip().strip("\"'")
+    return rhs or None
+
+
 def check_cap(cap: str, spec: dict, blocks: list[tuple[str, str]]) -> list[str]:
     bad = []
     b = spec["binaries"].get(OS_RUN)
@@ -123,6 +138,44 @@ def check_cap(cap: str, spec: dict, blocks: list[tuple[str, str]]) -> list[str]:
                 if got != "127.0.0.1":
                     bad.append(f"{cap}「{name}」: {flag} 给的是 {got!r}，不是 127.0.0.1 —— "
                                "变量与 0.0.0.0 都算不合格")
+        # 验收第 10 条第①句：llama 起来时必须带钥匙。表里写了不算，车道真敲出来才算。
+        auth_argv = (spec.get("engine_auth") or {}).get("argv") or []
+        for i in range(0, len(auth_argv) - 1, 2):
+            flag, tpl = auth_argv[i], auth_argv[i + 1]
+            vals = flag_values(text, flag)
+            if not vals:
+                bad.append(f"{cap}「{name}」: 表里说上游有 {flag}，这一段却没带 —— "
+                           "引擎的门禁没被打开（/health 之外的路由会直接对本地进程开放）")
+                continue
+            for v in vals:
+                if v == tpl:
+                    bad.append(f"{cap}「{name}」: 把占位符 {tpl} 原样交给了引擎 —— "
+                               "车道里必须换成一个真值，否则等于把钥匙写成字面量")
+                elif v.startswith("$"):
+                    var = v[2:].split("}", 1)[0] if v.startswith("${") else v[1:]
+                    if not assigned(text, var):
+                        bad.append(f"{cap}「{name}」: {flag} 给的是变量 {var}，"
+                                   "可这一段里没有把它赋成非空值 —— 起进程时会传空钥匙")
+        cors_argv = (spec.get("cors") or {}).get("argv") or []
+        for i in range(0, len(cors_argv) - 1, 2):
+            flag, want = cors_argv[i], cors_argv[i + 1]
+            vals = flag_values(text, flag)
+            if not vals:
+                bad.append(f"{cap}「{name}」: 表里写了 {flag} {want}，车道没带 —— "
+                           "上游默认 * 会让任意网页读本地端口")
+                continue
+            for v in vals:
+                if v != want:
+                    bad.append(f"{cap}「{name}」: {flag} 给的是 {v!r}，表里要求逐字 {want!r}")
+        if auth_argv:
+            # 旗标传对了 ≠ 门禁生效：必须有"不带钥匙被拒"与"非本机来源拿不到 ACAO"两个负向对照。
+            if not re.search(r'test\s+"?\$[A-Za-z_]\w*"?\s*=\s*"?401"?', text):
+                bad.append(f"{cap}「{name}」: 带钥匙之后没有 401 负向对照 —— "
+                           "旗标传对了不等于门禁真的生效")
+            origins = set(re.findall(r"Origin:\s*([^\s'\"]+)", text))
+            if len(origins) < 2:
+                bad.append(f"{cap}「{name}」: CORS 只测了 {sorted(origins)} 一个来源 —— "
+                           "没有非本机来源的负向对照，收窄与否无法区分")
         for f in spec.get("flags_absent") or []:
             if re.search(rf"(?<![\w-]){re.escape(f)}(?![\w-])", text):
                 bad.append(f"{cap}「{name}」: 出现了 {f} —— 表里这条是按上游全文**查不到**才写的"
@@ -173,6 +226,34 @@ def selftest() -> int:
     commented = shell_lines(good + "# 上游没有 --api-key，所以只能绑 127.0.0.1\n")
     if check_cap("字幕", whisper, [("带注释", commented)]):
         bad.append("注释里的旗标被当成车道真的敲了它")
+
+    # 验收第 10 条第①句的判据：llama 必须真带钥匙与收窄的 CORS。
+    llama = doc["capabilities"]["对话"]
+    llama_ok = ('TOK=$(python3 -c "import secrets;print(secrets.token_hex(16))")\n'
+                'SRV=$(find w -type f -name llama-server | head -1)\n'
+                '"$SRV" -m model.gguf --host 127.0.0.1 --port 9009 '
+                '--cors-origins localhost --api-key "$TOK" > srv.log 2>&1 &\n'
+                'noauth=$(curl -sS -o /dev/null -w "%{http_code}" http://127.0.0.1:9009/props)\n'
+                'test "$noauth" = "401" || exit 1\n'
+                "curl -sS -D - -o /dev/null -H 'Origin: http://localhost:1420' "
+                "http://127.0.0.1:9009/health\n"
+                "curl -sS -D - -o /dev/null -H 'Origin: https://evil.example' "
+                "http://127.0.0.1:9009/health\n")
+    if check_cap("对话", llama, [("起常驻 llama-server", llama_ok)]):
+        bad.append(f"llama 正向对照不过：{check_cap('对话', llama, [('x', llama_ok)])}")
+    for label, text in [
+        ("没带 --api-key", llama_ok.replace(' --api-key "$TOK"', "")),
+        ("钥匙是占位符", llama_ok.replace('"$TOK"', "{token}")),
+        ("钥匙变量没赋值", llama_ok.replace(
+            'TOK=$(python3 -c "import secrets;print(secrets.token_hex(16))")\n', "")),
+        ("没带 --cors-origins", llama_ok.replace("--cors-origins localhost ", "")),
+        ("CORS 还是 *", llama_ok.replace("--cors-origins localhost", "--cors-origins *")),
+        ("CORS 给了变量", llama_ok.replace("--cors-origins localhost", "--cors-origins $ORIGIN")),
+        ("没有 401 对照", llama_ok.replace('test "$noauth" = "401" || exit 1\n', "")),
+        ("CORS 只有一个来源", llama_ok.replace("https://evil.example", "http://localhost:1420")),
+    ]:
+        if not check_cap("对话", llama, [("一步", text)]):
+            bad.append(f"llama 负向对照「{label}」没被认成错 —— 验收第 10 条第①句是装饰")
     inpy = shell_lines(good + ("python3 - <<'PY'\n"
                                "print('--api-key 0.0.0.0 在 python 里只是字符串')\n"
                                "PY\n"))

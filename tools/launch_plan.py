@@ -87,6 +87,13 @@ SPEC = {
         "auth": {"engine_supports_api_key": True,
                  "argv": ["--api-key", "{token}"],
                  "note": "llama 有 --api-key；即便这样外壳仍是唯一监听口"},
+        # 上游默认 CORS 是 `*`（common/common.h:652）。验收第 10 条第①句要的是"收窄到应用来源"，
+        # 而 llama 对 special value `localhost` 的语义是：只反射 host 为 localhost/127.0.0.1/::1
+        # 的 Origin（tools/server/server-http.cpp:335-342，`origin_is_localhost` 在 :73-80）。
+        # 外壳自己反代时不发 Origin、UI 也不直连，所以这一层是纵深防御而不是主防线。
+        "cors": {"argv": ["--cors-origins", "localhost"],
+                 "cite": ["llama-cors-flag", "llama-cors-star", "llama-cors-warn"],
+                 "note": "默认 * 会让任意网页直接读本地端口；localhost 只反射本机来源"},
         "readiness": {"method": "GET", "path": "/health", "expect_status": 200,
                       "cite": "llama-health-is-public",
                       "note": "上游明写这是 public endpoint（不查 api-key），所以带钥匙也能探活"},
@@ -285,7 +292,7 @@ def model_argv(cap: str, tier: str, image: dict, budget: dict) -> tuple[list[str
 def cites_of(spec: dict) -> list[str]:
     """把 readiness/request 引用的出处 id 收平（写成 str 或 list 都行）。"""
     out = []
-    for block in (spec.get("readiness"), spec.get("request")):
+    for block in (spec.get("readiness"), spec.get("request"), spec.get("cors")):
         c = (block or {}).get("cite")
         out += c if isinstance(c, list) else ([c] if c else [])
     return sorted(set(out))
@@ -333,6 +340,7 @@ def build(os_labels: list[str], tiers: list[str], cache: str = "", fill: bool = 
                  # 谁改了产物就把规格改了（测试先撞上过一次，这里当场焊死）。
                  "binaries": copy.deepcopy(spec["binary"]), "bind": list(spec["bind"]),
                  "engine_auth": copy.deepcopy(spec["auth"]),
+                 "cors": copy.deepcopy(spec.get("cors")),
                  "readiness": copy.deepcopy(spec["readiness"]),
                  "request": copy.deepcopy(spec["request"]),
                  "subcommand": spec.get("subcommand"), "omit": list(spec.get("omit") or []),
@@ -349,8 +357,9 @@ def build(os_labels: list[str], tiers: list[str], cache: str = "", fill: bool = 
                     argv, p = model_argv(cap, tier, image, budget)
                     problems += p
                     tail = (spec["auth"]["argv"] if spec["auth"]["argv"] else [])
+                    cors = (spec.get("cors") or {}).get("argv") or []
                     entry["by_tier"][f"{tier}/{os_label}"] = \
-                        ["{bin}"] + argv + spec["bind"] + tail
+                        ["{bin}"] + argv + spec["bind"] + cors + tail
             if cap == "字幕":
                 entry["macos_note"] = ("上游 Apple 侧只有 xcframework（无 whisper-cli 可执行文件）："
                                        "要么 CI 自己编，要么这台机器不做字幕（#29）")
@@ -409,7 +418,8 @@ def build(os_labels: list[str], tiers: list[str], cache: str = "", fill: bool = 
             entry["install_stage"] = None
         plan[cap] = entry
     doc = {"schema": 1, "bind_address": BIND,
-           "rule": {"listener": "每一项能力都只绑 127.0.0.1；外壳是唯一监听口，UI 只连外壳",
+           "rule": {"listener": "每一项能力都只绑 127.0.0.1；外壳自己不新增监听口（UI 只走 Tauri IPC），"
+                               "引擎的 HTTP 只由外壳进程发 —— UI 永不直连引擎端口",
                     "auth": "engine_auth 是上游事实：只有 llama 有 --api-key，whisper/sd 没有，"
                             "所以那两项的隔离只能靠绑地址，不能指望引擎自带门禁",
                     "image_model_args": "生图给主体还是主体+编码器，两处一起读：image-tiers 的 "
@@ -435,7 +445,7 @@ def check(committed: dict, fresh: dict) -> list[str]:
         if not old:
             bad.append(f"{cap}: 新增了一项能力，但已提交那张表里没有")
             continue
-        for key in ("mode", "bind", "engine_auth", "readiness", "request", "by_tier",
+        for key in ("mode", "bind", "engine_auth", "cors", "readiness", "request", "by_tier",
                     "argv_template", "subcommand", "omit", "companion_flags", "cites",
                     "named_files", "queue_link", "install_stage", "flags_verified", "flags_absent"):
             if key in spec and old.get(key) != spec[key]:
@@ -464,6 +474,10 @@ def selftest() -> int:
         bad.append("cites_of 对没有引用的规格返回了东西 —— 空与有会混在一起")
     if SPEC["对话"]["auth"]["argv"][:1] != ["--api-key"]:
         bad.append("llama 的 --api-key 没进 argv 模板 —— 验收第 10 条第 ② 步就落不了地")
+    if (SPEC["对话"].get("cors") or {}).get("argv") != ["--cors-origins", "localhost"]:
+        bad.append("llama 的 CORS 没收窄到 localhost —— 上游默认 * 会让任意网页读本地端口")
+    if any((SPEC[c].get("cors") or {}).get("argv") for c in SPEC if c != "对话"):
+        bad.append("给上游没有该旗标的引擎写了 --cors-origins —— 这是替上游编事实")
     argv, problems = model_argv("生图", "16GB",
                                 {"tiers_rows": {}},
                                 {"per_tier": {"16GB": {

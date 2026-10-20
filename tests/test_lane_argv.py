@@ -87,6 +87,23 @@ class TestMutants(unittest.TestCase):
         ("OCR 带了 --size", "--dict dict.txt page.png", "--dict dict.txt --size tiny page.png"),
         ("只 find 不 exec", '"$SRV" -m model.bin --host 127.0.0.1 --port 9009',
          'echo "找到了但没起" && : -m model.bin --host 127.0.0.1 --port 9009'),
+        ("llama 没带 --api-key",
+         '--cors-origins localhost --api-key "$TOK" > server.log 2>&1 &',
+         '--cors-origins localhost > server.log 2>&1 &'),
+        ("llama 把占位符原样传进去",
+         '--api-key "$TOK" > server.log 2>&1 &',
+         "--api-key '{token}' > server.log 2>&1 &"),
+        ("llama 的钥匙变量没赋值",
+         "TOK=$(python3 -c 'import secrets; print(secrets.token_hex(16))')",
+         'TOK=""'),
+        ("llama 丢了 --cors-origins",
+         '--cors-origins localhost --api-key "$TOK" > server.log 2>&1 &',
+         '--api-key "$TOK" > server.log 2>&1 &'),
+        ("llama 不再验 401",
+         'test "$noauth" = "401" ||', 'test "$noauth" = "200" ||'),
+        ("CORS 只剩一个来源",
+         "-H 'Origin: https://evil.example' \\",
+         "-H 'Origin: http://localhost:1420' \\"),
     ]
 
     def test_baseline_has_no_mutant_applied(self) -> None:
@@ -103,7 +120,7 @@ class TestMutants(unittest.TestCase):
         self.assertEqual(missed, [], "这些坏形状没人报：对应判据是装饰")
 
     def test_mutant_count(self) -> None:
-        self.assertEqual(len(self.MUTANTS), 9)
+        self.assertEqual(len(self.MUTANTS), 15)
 
 
 class TestCli(unittest.TestCase):

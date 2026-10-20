@@ -1312,7 +1312,11 @@ jobs:
           chmod +x "$SRV"
           export LD_LIBRARY_PATH="$(dirname "$SRV")${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
           ldd "$SRV" | grep -i "not found" && { echo "llama-server 动态库缺失"; exit 1; } || echo "llama-server 动态库齐全"
-          "$SRV" -m model.gguf --host 127.0.0.1 --port 8080 -ngl 0 -c 1024 > server.log 2>&1 &
+          # 验收第 10 条第①句：llama 起来时必须带钥匙，并把 CORS 从上游默认的 * 收窄到 localhost。
+          # 钥匙每跑一次现生成，不进日志、不落盘 —— 外壳里的做法与此相同，只是换成 32 字节。
+          TOK=$(python3 -c 'import secrets; print(secrets.token_hex(16))')
+          "$SRV" -m model.gguf --host 127.0.0.1 --port 8080 -ngl 0 -c 1024 \
+            --cors-origins localhost --api-key "$TOK" > server.log 2>&1 &
           SRV_PID=$!
           trap 'kill $SRV_PID 2>/dev/null || true' EXIT
           ready=""
@@ -1324,8 +1328,20 @@ jobs:
           done
           test -n "$ready" || { echo "server 60 次探测（约 2 分钟）内没就绪"; tail -40 server.log; exit 1; }
           echo "::notice::llama-server 第 $i 次探测就绪"
-          curl -fsS --max-time 20 "http://127.0.0.1:8080/props" > props.json
-          curl -fsS --max-time 300 -H 'Content-Type: application/json' \
+          # 负向对照：钥匙设了以后，/props 不带头必须是 401（/health 与 /v1/health 是公开端点）
+          noauth=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 10 "http://127.0.0.1:8080/props")
+          test "$noauth" = "401" || { echo "带钥匙起来后，不带头访问 /props 得到 $noauth，不是 401"; tail -20 server.log; exit 1; }
+          echo "::notice::不带头访问 /props 得到 401（门禁真的生效）"
+          # CORS 正负对照：localhost 来源被反射，非本机来源拿不到 Access-Control-Allow-Origin。
+          acao_local=$(curl -sS -D - -o /dev/null --max-time 10 -H 'Origin: http://localhost:1420' \
+            "http://127.0.0.1:8080/health" | tr -d '\r' | awk -F': ' 'tolower($1)=="access-control-allow-origin"{print $2}')
+          test "$acao_local" = "http://localhost:1420" || { echo "localhost 来源没被反射，ACAO=$acao_local"; exit 1; }
+          acao_evil=$(curl -sS -D - -o /dev/null --max-time 10 -H 'Origin: https://evil.example' \
+            "http://127.0.0.1:8080/health" | tr -d '\r' | awk -F': ' 'tolower($1)=="access-control-allow-origin"{print $2}')
+          test -z "$acao_evil" || { echo "非本机来源拿到了 ACAO=$acao_evil —— CORS 没收窄"; exit 1; }
+          echo "::notice::CORS 只反射本机来源（evil.example 无 ACAO）"
+          curl -fsS --max-time 20 -H "Authorization: Bearer $TOK" "http://127.0.0.1:8080/props" > props.json
+          curl -fsS --max-time 300 -H "Authorization: Bearer $TOK" -H 'Content-Type: application/json' \
             -d '{"messages":[{"role":"user","content":"Reply with exactly one word: hello"}],"max_tokens":16,"temperature":0}' \
             "http://127.0.0.1:8080/v1/chat/completions" > chat.json
           python3 - <<'PY'
