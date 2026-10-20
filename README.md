@@ -364,6 +364,14 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   （`$ORIGIN` 找运行库的前提）→ 逐文件哈希与体积写 `payload-manifest.json` 上传为 artifact。
   同名不同目录的成员不许静默覆盖；主二进制缺席、清单里残留被排除的东西、目录里留着压缩包都会红。
   10 条离线对照（合成 zip 与 tar.gz，含"digest 不符"与"下载失败"）。
+- `tools/stage_payload.py` + `package.yml` 里的摆位步：把上面那份**扁平**的 `dist/<os>/<engine>/`
+  摆成外壳真会去读的 `runtime/<os>/<engine>/<version>/<asset-stem>/`，并在数据根写根清单
+  （外壳的 `verify_payload` 要的就是这个）。目标只从 `pins/shell-contract.json` 的能力行派生，
+  脚本里没有引擎/版本字面量；OS 不符、引擎不在合同里、asset 与合同默认档不同都直接停；
+  逐文件按清单的 bytes + sha256 复制并复核；目标目录里多一个清单外文件也停（不覆盖、不删除）。
+  根清单**最后写**（临时文件 + `os.replace`），中途任何失败都不会留下"看似齐全"的根清单；
+  `--check` 再解析两份清单逐键相等并重算每个文件。包里没有的能力（OCR、macOS 字幕）记进
+  `not_in_manifest` 点名，不当作失败。13 条合成自测 + 10 条离线对照。**这一步至今 0 次执行**（#19）。
 - `.github/workflows/ci.yml`：静态门禁（含 yaml_gate）+ 单测（夹具是真实 API 捕获）+ 离线跑发现器
   与离线回放工具带钉表。
 - `.github/workflows/engine-live.yml`：打真实 API 发现产物 → 下载 linux 引擎（不编译）→ 下载 pin 住的

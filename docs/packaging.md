@@ -99,13 +99,39 @@ setup-python 各一处。计数不靠这句话自证：
 （下载层契约见 [model-catalog.md](model-catalog.md) 与 `tools/file_index.py`）。
 LM Studio 也是这个形态（壳先装好、模型首启下载），所以"安装包小、首启下载"不是妥协，是同类产品的共同选择。
 
+## ⑤ 出包产物怎么变成外壳认的目录？—— 一步摆位，根清单最后写
+
+`pack_engine.py` 的产物是扁平的 `dist/<os>/<engine>/` + `dist/<os>/payload-manifest.json`；
+外壳（`shell/core/src/supervisor.rs` 的 `verify_payload`）要的却是
+`<data>/runtime/<os>/<engine>/<version>/<asset-stem>/` 和**数据根**上的 `payload-manifest.json`。
+两者之间原来没有工具，装出来外壳会报"清单不在"。`tools/stage_payload.py` 就补这一步，
+规则全部可离线复算：
+
+- **目标只从合同派生**：按 `pins/shell-contract.json` 的能力行（能力 × OS 指向哪个引擎、
+  哪个目录模板、默认 asset）算落点，脚本里没有一条引擎/版本字面量；同一引擎在合同里
+  出现两个不同模板直接报错。
+- **进门前先对账**：源清单的 os 与 `--os` 不符、引擎不在合同里、asset 与合同的 `default_asset`
+  不同 → 停。目标目录已存在时必须**恰好**是清单里那些文件，多一个都拒绝覆盖/删除（用户的东西不碰）。
+- **逐文件证据**：按源清单的 bytes + sha256 复制，复制后再算一次；目标文件名带 `..`、`/`、`\`
+  或重名一律拒。
+- **根清单最后写**：先写临时文件再 `os.replace`，任何中途失败都不会留下"看似齐全"的根清单；
+  写完与源清单按字节比一次。`--check` 解析两份清单逐键相等，再把每个文件重算一遍。
+- **缺席要点名，不是报错**：包里没有的合同能力（OCR；macOS 的 whisper 上游没有可执行产物）
+  记进 `not_in_manifest`，装的时候看得到，不会假装装了。
+
+证据边界：`--selftest` 用合成合同/合成包证明 13 条判据会红（篡改、脏目录、路径逃逸、
+asset/OS/引擎不符等）；`tests/test_stage_payload.py` 10 条离线对照，其中一条走**真实合同**
+（whisper 落在 `runtime/win-x64/whisper/b5454/whisper-bin-x64`）。`package.yml` 里是
+`--json` 出报告 + `--check` 复核两步。**车道至今 0 次执行**（#19），所以"CI 上真摆对"仍未证；
+权重不在这一步，它们按 [model-catalog.md](model-catalog.md) 首启下载。
+
 ## 还欠什么（都在等一个决定，不是技术问题）
 
 - **CI 本身没跑过**：2026-10-20 在 `4202ef0` 上量到的形状是 run 建了、`engine-live.yml` 的 21 个
   job 全部登记，但每个都 `runner_name` 空、`steps: 0`、2-3 秒 failure；原因只在 check-run
   annotation 里，写的是**账单/支出上限**（"recent account payments have failed or your spending
   limit needs to be increased"），不是"private 没有免费额度"一句话。逐条复现命令与完整观察
-  记在 README 末段"这套 CI 能证明什么"。上面 ①②④ 都是本机读公共来源量的，
+  记在 README 末段"这套 CI 能证明什么"。上面 ①②④⑤ 都是本机读公共来源量的，
   **唯独"车道真跑一遍装出包"必须等解锁**（#19）。
 - **签名**：macOS 要 Apple 证书 + notarization secrets；Windows 签名要代码签名证书，不签就吃 SmartScreen 提示。
   这两件都要花钱/要账号，由他定；不签名也能出包，只是首启有警告。

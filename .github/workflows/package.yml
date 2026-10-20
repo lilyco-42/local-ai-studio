@@ -1,5 +1,5 @@
 name: 出包（引擎负载与逐文件清单）
-# 这一条只做"引擎负载"，不是最终的桌面安装包 —— 外壳还没写。
+# 这一条只做"引擎负载"，不是最终的桌面安装包 —— 外壳已写（shell.yml），但安装包车道还没写。
 # 但它把两件必须先有真东西的东西产出来：
 # ① 每个 OS 默认档实际要带的文件清单（含逐文件 sha256 与体积），外壳运行时按这份清单校验引擎；
 # ② `payload_plan` 里那些 `needs_extract` 的行（llama/whisper 的 Linux/macOS 包是 tar.gz，
@@ -69,6 +69,13 @@ jobs:
               raise SystemExit(f"负载目录里还留着压缩包 {leftover} —— 装机包里不该有二次解包")
           print("  每个引擎都有主二进制与逐文件 sha256，目录里没有残留压缩包")
           PY
+      - name: 摆进外壳认的 runtime 目录（目标只从合同派生，不执行任何二进制）
+        env:
+          OS_TAG: ${{ matrix.os_tag }}
+        run: |
+          set -euo pipefail
+          python3 tools/stage_payload.py --package "dist/${OS_TAG}" --data "/tmp/root-${OS_TAG}" --os "${OS_TAG}" --json "/tmp/stage-${OS_TAG}.json"
+          python3 tools/stage_payload.py --check --package "dist/${OS_TAG}" --data "/tmp/root-${OS_TAG}" --os "${OS_TAG}"
       - name: 上传引擎负载
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4.6.2
         with:

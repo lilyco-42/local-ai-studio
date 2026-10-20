@@ -98,7 +98,7 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
 
 ## 验收标准（在当前唯一可用验证手段 = GitHub Actions 下）
 
-1. `ci.yml`：812 个单测绿（重数：`python -W error::ResourceWarning -m unittest discover -s tests
+1. `ci.yml`：822 个单测绿（重数：`python -W error::ResourceWarning -m unittest discover -s tests
    -p "test_*.py"`；按文件数就 `python -m unittest tests.<模块名>`。2026-10-20 实测逐文件：
    `test_yaml_gate.py` 闸门自己 14、`test_lane_argv.py` 车道 ↔ 启动表一致（含 15 个 workflow 文本变异）10、
    `test_sideload.py` sideload 按内容认领（6 条源码变异体 + 三个真上游文件）22、
@@ -113,6 +113,7 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
    `test_catalog_snapshot.py` 目录快照与侧表 16、`test_citation_check.py` 出处闸门 22、
    `test_ocr_build_surface.py` OCR 依赖面 15、`test_file_index.py` 下载层五种状态与首启队列 35、
    `test_payload_plan.py` 装机负载（含 tar 成员表与缺口点名）19、`test_pack_engine.py` 出包逻辑 10、
+   `test_stage_payload.py` 出包产物→外壳 runtime 摆位（含真实合同落点与 9 条负向）10、
    `test_establish_verify.py` 字节复核 16、`test_shell_vars.py` shell 变量判据 14、
    `test_r2_manifest.py` 镜像清单 6、`test_lane_assertions.py` + `test_image_proof_block.py`
    车道判据 38 + 6 = 44、`test_recommend_image.py` 生图档位表 31、`test_machine_budget.py` 装机预算 20、
@@ -841,6 +842,18 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     所以两个 crate 的编译与单测**至今 0 次执行**，`Cargo.lock` 也还没提交；离线能证的只有
     `python tools/shell_source.py --check`（问题 0 条）、Rust 分隔符平衡与那 11 条 Python 单测。
     这次不把"写了"说成"过了"。
+33. **出包产物到外壳目录之间的那一步补上了**：出包车道的产物是平铺的 `dist/<os>/<engine>/`，
+    外壳只认 `<data>/runtime/<os>/<engine>/<version>/<asset-stem>/` + 根部的 `payload-manifest.json`，
+    此前没有工具把两者接起来。`tools/stage_payload.py` 只从 `pins/shell-contract.json` 的
+    `asset_dir`（没有就 `version_dir`）推导落点，逐文件复核体积与 sha256 后复制，
+    目标目录已有清单外文件时**拒绝而不是覆盖**，文件名带 `/` `\` `..` 一律拒绝，
+    `payload-manifest.json` **最后**才落盘（半套目录不会配上一份完整清单）；`--check` 复核已摆放目录，
+    `--selftest` 用合成合同/合成包证明 13 条判据会红，`tests/test_stage_payload.py` 10 条
+    （含真实合同里 whisper 的落点、改合同落点必须跟着改、第二条引擎失败时根部无清单）。
+    CI：`package.yml` 在三档负载解包后、上传前各摆一次并 `--check`（不执行任何二进制）。
+    **证据边界**：全部是本机 Python 证据；`package.yml` 至今 0 次执行，所以"真实上游包能按合同落位"
+    只有逻辑证据。OCR 仍不在出包清单里，`not_in_manifest` 会点名 `文字识别/oar-ocr` —— 已知缺口，
+    不是这一步的失败。
 
 ## 车道判据的出处（全部按**钉住的那个 ref** 核过，不是按 HEAD 记的）
 
