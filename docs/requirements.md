@@ -273,12 +273,13 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
    证过它承重：临时改一条 expect → **1 条红**并打印上游实际那一行；
    行号整体 +1 → **81 条红**（82 条里除 1 条 `absent` 型之外全部，那条本来就不看行号），
    也就是说这张表里没有一条"永远绿"的摆设。这件事现在**不必联网也能重跑**：
-   `python tools/citation_check.py --cache .cache/refs --fill` 抓一次原文（30 份、1,236 KB，
-   目录已 .gitignore），之后 `--cache .cache/refs` 离线复算就是"78 条真查了、0 条跳过"；
+   `python tools/citation_check.py --cache .cache/refs --fill` 抓一次原文（29 份、1,234,254 B，
+   目录已 .gitignore），之后 `--cache .cache/refs` 离线复算就是"82 条真查了、0 条跳过"；
    跳过的那些会被点名说"不是通过，是没查"，这条本身有单测守着。
    重数这三句：`python tools/citation_check.py --cache .cache/refs`（计数行）与
    「把每条 line 加一再核对」那段（`tests/test_citation_check.py` 里有同形状的用例）。
-   2026-10-20 全部 65 条按 pin ref 联网实跑过一次（0 问题），车道 `citation-drift` 本身仍是 0 次执行。
+   2026-10-20 清空缓存重抓 29 份原文，全部 82 条按 pin ref 联网实跑过一次（0 问题、0 跳过），
+   车道 `citation-drift` 本身仍是 0 次执行。
 12. **OCR 的依赖图要真的被钉住**（这条目前是**未达成**状态，写在这里是为了不让它被"车道绿了"蒙过去）：
    上游 oar-ocr 不发 `Cargo.lock`（实测 404，正向对照 206），而 40 个外部包里只有 `ort` 是 `=` 精确钉的、
    其余 37 个是 caret → `cargo build` 会在构建时重新解析。所以：
