@@ -85,11 +85,11 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
 
 ## 验收标准（在当前唯一可用验证手段 = GitHub Actions 下）
 
-1. `ci.yml`：713 个单测绿（重数：`python -W error::ResourceWarning -m unittest discover -s tests
+1. `ci.yml`：716 个单测绿（重数：`python -W error::ResourceWarning -m unittest discover -s tests
    -p "test_*.py"`；按文件数就 `python -m unittest tests.<模块名>`。2026-10-20 实测逐文件：
    `test_yaml_gate.py` 闸门自己 14、`test_lane_argv.py` 车道 ↔ 启动表一致（含 9 个 workflow 文本变异）10、
    `test_sideload.py` sideload 按内容认领（6 条源码变异体 + 三个真上游文件）22、
-   `test_backends.py` 后端矩阵（5 条源码变异体 + 真实 release 捕获）19、
+   `test_backends.py` 后端矩阵（7 条源码变异体 + 真实 release 捕获）22、
    `test_toolbelt_pins.py` 工具带钉表 14、
    `test_catalog_snapshot.py` 目录快照与侧表 16、`test_citation_check.py` 出处闸门 22、
    `test_ocr_build_surface.py` OCR 依赖面 15、`test_file_index.py` 下载层五种状态与首启队列 35、
@@ -625,8 +625,23 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     两个真实的拼法坑被分类器吃下：同一个 CUDA 在 sd 那里既写 `cuda12` 又写 `cu12`（后者只在
     `cudart-` 伴生包里），`Darwin` 里含 `win` 子串 —— 不给词界就会把 macOS 的包分到 Windows 那一列。
     认不出的词（上游哪天加 hip / mtl）一律 `unknown_token` 并红，不许静默归成 cpu。
-    判据的承重：5 条源码变异体（关掉哨兵、关掉与 payload-plan 的钉值比对、不要求标注推断、
-    清空后端地板、去掉词界）× 8 条探针全被抓，另有"真实捕获必须 0 问题且格子逐个对得上"的正向对照；
+    **一格必须装着这一档后端的全部资产**（41 个格子 / 45 个格子条目 / 47 个 runtime 行——
+    差的 2 个正是 whisper 那两颗名字里不写平台的包）。第一版写成 `cell[后端] = 一行`，
+    `llama-…-win-cuda-12.4-x64.zip` 被同档的 `cuda-13.4` 静默覆盖 —— 而"57 个资产 = 47 个 runtime"
+    那个总数照样数得对，所以**总数一致不代表格子没丢东西**。现在每格是按版本+资产名排序的列表，
+    `格子条目` 单独计数并进了漂移判据（条目数变了就红）；实测 4 个格子各装着两颗：
+    llama win-x64 cuda `12.4`+`13.4`、llama linux-x64 cuda `12.8`+`13.4`、
+    llama linux-x64 sycl `fp16`+`fp32`、whisper win-x64 cuda `11.8.0`+`12.4.0` ——
+    驱动只到 12.x 的那台机器需要的恰恰是被覆盖掉的那一颗。同一版内层循环还借用了 `rows`
+    这个名字，把产物里的全表换成了一格（`rows` 从 47 行缩成 1 行）：现在工具里有一条
+    "rows 必须逐个等于分类出来的 runtime 名字"的自洽检查（车道现取那一步的保险），
+    产物形状另由单测钉住，两道不是同一件事，所以两道都要留。
+    **缺口点的是颗，不是点名次数**：行侧（这张表里所有名字不写平台的 runtime）与 payload-plan
+    那侧（选中且名字不写平台的那些）会点名同一颗，第一版把两次的点名直接拼起来，
+    于是 2 颗写成 3 颗 —— 而格子数、总行数那几格都看不出来。现在按 `(引擎, 资产)` 去重，
+    `test_gap_names_each_asset_once` 钉住产物里那一格只有两颗。
+    判据的承重：7 条源码变异体（关掉哨兵、关掉与 payload-plan 的钉值比对、不要求标注推断、
+    清空后端地板、一格只留最后一行、去掉词界、缺口点名不去重）× 10 条探针全被抓，另有"真实捕获必须 0 问题且格子逐个对得上"的正向对照；
     夹具是 GitHub API 的真实产物表（`tests/fixtures/backend_assets.json`，57 行 name/size/digest，
     sha256 记在 `.meta.json` 并由测试复算）。车道 `backends`（engine-live 第 22 个 job）第四步
     现取一次再对表：上游加档、撤档、改拼法都会红。

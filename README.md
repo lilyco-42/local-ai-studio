@@ -223,15 +223,20 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   按 `payload-plan` 钉的三个 ref 现取 release 的 asset 表（`name / size / digest`），分成
   引擎 × OS × 后端：实测 **57 个资产 = 47 个 runtime + 10 个不是 runtime**（7 个 `cudart-` 伴生包、
   2 个 xcframework、1 个 webUI），后端 10 种（cpu / cuda / vulkan / rocm / sycl / openvino /
-  opencl-adreno / qnn-snapdragon / blas / `unknown_from_name`）。体积差是真的：
+  opencl-adreno / qnn-snapdragon / blas / `unknown_from_name`）。**一格是一列不是一行**：
+  llama 在 win-x64 同时留着 CUDA **12.4 与 13.4** 两颗、whisper 在 win-x64 留着 11.8.0 与 12.4.0、
+  ubuntu 的 sycl 留着 fp16 与 fp32 —— 上一版一格只装得下字典序最后那颗，而"36 个产物"照样数得出 36，被自己的测试抓回来了（少掉的那几颗恰恰是驱动较旧那台机器要的）。
+  体积差是真的：
   sd 在 win-x64 是 CPU **16.9 MiB** 对 CUDA **327.7 MiB**，llama 在 linux-x64 是 CPU 17.1 对
   vulkan 29.2 —— 集显笔记本那条路有产物可换，不再是一句推测。
   三处**不许猜**的边界记在 `gaps` 里：macOS 的资产名不标后端（只能写 `unknown_from_name`，
   不断言 Metal）；whisper 的 `bin-x64` / `blas-bin-x64` 名字里不写平台，于是按名字挑后端
   对它做不到（`payload-plan` 那侧已标 `inferred_platform=true`，这里原样记账）；
   oar-ocr 没有预编译产物，它的加速轴是 Cargo feature，不在这张表里。
+  缺口那一格点的是**颗**、不是点名次数：行侧与 payload-plan 都会点名同一颗，第一版 2 颗写成
+  3 颗（格子数与总行数那几格都看不出来），现在按 `(引擎, 资产)` 去重。
   认不出的词（上游加一档 hip/mtl）一律报 `unknown_token` 并红，**不许静默归成 cpu**；
-  5 条源码变异体 × 8 条探针 + 真实夹具字节校验；离线那层在 `ci.yml` 静态门禁，
+  7 条源码变异体 × 10 条探针 + 真实夹具字节校验；离线那层在 `ci.yml` 静态门禁，
   车道 `backends` 第四步还回现取一次再对表（重数：`python3 tools/backends.py --selftest`、
   `python3 tools/backends.py --check`）。
 - `tools/action_pins.py` + `pins/actions.json`：**出包那只手自己也要钉住**。这一轮之前三个

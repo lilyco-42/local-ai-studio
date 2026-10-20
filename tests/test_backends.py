@@ -47,6 +47,13 @@ def repos() -> dict:
             "sd": "leejet/stable-diffusion.cpp"}
 
 
+def one(engines: dict, engine: str, os_key: str, backend: str) -> dict:
+    """格子里现在是一列资产；测试里取"那一档唯一那颗"的写法收进一个函数。"""
+    rows = engines[engine]["by_os"][os_key][backend]
+    assert len(rows) == 1, (engine, os_key, backend, rows)
+    return rows[0]
+
+
 def rebuild(capt=None) -> tuple:
     return bd.build(capt or captures(), payload_picks(), repos())
 
@@ -124,11 +131,37 @@ class TestArtifact(unittest.TestCase):
     def test_the_cells_the_shell_will_read(self) -> None:
         """分层要能用，前提是这些格子真在，而且体积差是真的（CPU 16.9 vs CUDA 327.7）。"""
         e = artifact()["engines"]
-        self.assertEqual(e["llama"]["by_os"]["win-x64"]["cpu"]["mib"], 18.8)
-        self.assertEqual(e["llama"]["by_os"]["win-x64"]["vulkan"]["mib"], 30.8)
-        self.assertEqual(e["sd"]["by_os"]["win-x64"]["cpu"]["mib"], 16.9)
-        self.assertEqual(e["sd"]["by_os"]["win-x64"]["cuda"]["mib"], 327.7)
-        self.assertEqual(e["sd"]["by_os"]["linux-x64"]["vulkan"]["mib"], 34.9)
+        self.assertEqual(one(e, "llama", "win-x64", "cpu")["mib"], 18.8)
+        self.assertEqual(one(e, "llama", "win-x64", "vulkan")["mib"], 30.8)
+        self.assertEqual(one(e, "sd", "win-x64", "cpu")["mib"], 16.9)
+        self.assertEqual(one(e, "sd", "win-x64", "cuda")["mib"], 327.7)
+        self.assertEqual(one(e, "sd", "linux-x64", "vulkan")["mib"], 34.9)
+
+    def test_every_runtime_row_is_listed_per_engine(self) -> None:
+        """`rows` 必须还是全部 runtime 行 —— 上一版内层循环借用了同名变量，把它换成了一格。
+
+        这条钉的是**产物形状**；工具里那条同名自洽检查是车道现取那一步的保险
+        （那条路没有单测在跑）。两者不是同一件事，所以两道都要留。
+        """
+        for e, body in artifact()["engines"].items():
+            self.assertEqual(len(body["rows"]), body["runtimes"], e)
+            self.assertEqual(len(body["not_runtime"]) + body["runtimes"], body["assets_total"], e)
+
+    def test_one_cell_holds_every_version_upstream_shipped(self) -> None:
+        """一格不是一个资产，是**这一档后端的全部资产**。
+
+        上一版写成 `cell[backend] = 一行`，于是 llama 在 win-x64 只剩 cuda-13.4，
+        cuda-12.4 静默消失；而"驱动只到 12.x"那台机器恰恰需要它。
+        """
+        e = artifact()["engines"]
+        self.assertEqual(sorted(x["version"] for x in e["llama"]["by_os"]["win-x64"]["cuda"]),
+                         ["12.4", "13.4"])
+        self.assertEqual(sorted(x["version"] for x in e["llama"]["by_os"]["linux-x64"]["sycl"]),
+                         ["16", "32"])
+        self.assertEqual(sorted(x["version"] for x in e["whisper"]["by_os"]["win-x64"]["cuda"]),
+                         ["11.8.0", "12.4.0"])
+        self.assertEqual(sum(v["格子条目"] for v in e.values()), 45,
+                         "47 个 runtime 减 2 个名字里不写平台的")
 
     def test_whisper_win_x64_has_only_cuda_by_name(self) -> None:
         """这条最难看：whisper 在 win-x64 那一格里只剩 CUDA。
@@ -141,6 +174,16 @@ class TestArtifact(unittest.TestCase):
         self.assertEqual([r["asset"] for r in e["platform_not_in_name"]],
                          ["whisper-bin-x64.zip", "whisper-blas-bin-x64.zip"])
 
+    def test_gap_names_each_asset_once(self) -> None:
+        """缺口点的是**颗**，不是点名次数。
+
+        行侧与 payload-plan 那侧会点名同一颗（whisper-bin-x64.zip 两边都有），
+        第一版直接把两次的点名拼一起，于是 2 颗写成 3 颗 —— 而总数那格照样对。
+        """
+        for g in artifact()["gaps"]:
+            if g.get("kind") == "platform_not_in_name":
+                self.assertEqual(g["assets"], sorted(set(g["assets"])), g)
+
     def test_dropping_two_backend_rows_is_caught(self) -> None:
         cap = copy.deepcopy(captures())
         for ref in cap:
@@ -148,6 +191,7 @@ class TestArtifact(unittest.TestCase):
                         if "vulkan" not in a["name"] and "cuda" not in a["name"]]
         fresh, problems = rebuild(cap)
         self.assertTrue(any("地板" in p for p in problems), problems)
+        self.assertTrue(any("条目数变了" in x for x in bd.check(artifact(), fresh)), problems)
         self.assertTrue(any("后端种类变了" in x for x in bd.check(artifact(), fresh)), problems)
 
     def test_a_pick_with_a_stale_digest_is_reported(self) -> None:
@@ -196,6 +240,21 @@ class TestCli(unittest.TestCase):
         self.assertIn("问题 0 条", r.stdout)
 
 
+# 变异锚点里带真换行，写成字面量拼串最容易看错；这里明确 join 一次。
+OLD_CELL = "\n".join([
+    '            matrix.setdefault(r["os"], {}).setdefault(r["backend"], []).append(',
+    '                {"asset": r["asset"], "version": r["version"], "mib": r["mib"],',
+    '                 "sha256": r["sha256"]})'])
+NEW_CELL = "\n".join([
+    '            matrix.setdefault(r["os"], {})[r["backend"]] = [',
+    '                {"asset": r["asset"], "version": r["version"], "mib": r["mib"],',
+    '                 "sha256": r["sha256"]}]'])
+OLD_DEDUP = "\n".join([
+    '    unassigned = [{(r["engine"], r["asset"]): r for r in unassigned}[k]',
+    '                  for k in sorted({(r["engine"], r["asset"]) for r in unassigned})]'])
+NEW_DEDUP = "    unassigned = list(unassigned)"
+
+
 class TestSourceMutants(unittest.TestCase):
     @staticmethod
     def src() -> str:
@@ -213,10 +272,12 @@ class TestSourceMutants(unittest.TestCase):
          '            if False and p.get("inferred_platform"):'),
         ("后端地板清空（上游撤档看不见）",
          'BACKEND_FLOOR = {"llama": 5, "whisper": 3, "sd": 4}', "BACKEND_FLOOR = {}"),
+        ("一格只留最后一行（同后端的别的版本静默消失）", OLD_CELL, NEW_CELL),
         ("Darwin 的词界去掉（mac 会被分到 win 那一列）",
          '(re.compile(r"(?:macos|darwin).*arm64|arm64.*(?:macos|darwin)", re.IGNORECASE), '
          '"macos-arm64"),',
          '(re.compile(r"arm64", re.IGNORECASE), "win-arm64"),'),
+        ("两个产者的点名不去重（2 颗写成 3 颗）", OLD_DEDUP, NEW_DEDUP),
     ]
 
     def load(self, text: str):
@@ -258,12 +319,21 @@ class TestSourceMutants(unittest.TestCase):
             fresh3, pr3 = mod.build(cap, payload_picks(), repos())
             out["f 撤两档后被地板拦"] = any("地板" in x for x in pr3)
             out["g 撤两档也被漂移拦"] = mod.check(committed, fresh3) != []
-            out["h mac 不被分错"] = mod.classify(
+            out["h 一格留着所有版本"] = len(
+                mod.build(captures(), payload_picks(), repos())[0]["engines"]["llama"]
+                ["by_os"]["win-x64"]["cuda"]) == 2
+            out["i mac 不被分错"] = mod.classify(
                 "sd-master-95b3090-bin-Darwin-macOS-26.6.2-arm64.zip",
                 "master-975-95b3090")["os"] == "macos-arm64"
+            doc4, _p4 = mod.build(captures(), payload_picks(), repos())
+            plats = [g["assets"] for g in doc4["gaps"]
+                     if g.get("kind") == "platform_not_in_name"]
+            out["j 缺口不重复点名"] = (
+                plats == [["whisper-bin-x64.zip", "whisper-blas-bin-x64.zip"]])
         except Exception as exc:                     # noqa: BLE001
             for k in ("b 重算与漂移", "c 新后端词被报", "d 钉值不符被报", "e 未标注的推断被报",
-                      "f 撤两档后被地板拦", "g 撤两档也被漂移拦", "h mac 不被分错"):
+                      "f 撤两档后被地板拦", "g 撤两档也被漂移拦", "h 一格留着所有版本",
+                      "i mac 不被分错", "j 缺口不重复点名"):
                 out.setdefault(k, False)
             out["_b 异常"] = str(exc)[:60]
         return out
@@ -273,7 +343,8 @@ class TestSourceMutants(unittest.TestCase):
                          {"a 离线对照": True, "b 重算与漂移": True, "c 新后端词被报": True,
                           "d 钉值不符被报": True, "e 未标注的推断被报": True,
                           "f 撤两档后被地板拦": True, "g 撤两档也被漂移拦": True,
-                          "h mac 不被分错": True})
+                          "h 一格留着所有版本": True, "i mac 不被分错": True,
+                          "j 缺口不重复点名": True})
 
     def test_every_mutant_is_caught(self) -> None:
         missed = []
@@ -286,7 +357,7 @@ class TestSourceMutants(unittest.TestCase):
         self.assertEqual(missed, [], "这些变异没人报：对应判据是装饰\n" + "\n".join(missed))
 
     def test_mutant_count(self) -> None:
-        self.assertEqual(len(self.MUTANTS), 5)
+        self.assertEqual(len(self.MUTANTS), 7)
 
 
 if __name__ == "__main__":

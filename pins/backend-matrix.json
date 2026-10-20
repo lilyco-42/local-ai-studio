@@ -15,145 +15,238 @@
    ],
    "by_os": {
     "android-arm64": {
-     "cpu": {
-      "asset": "llama-b11727-bin-android-arm64.tar.gz",
-      "mib": 72.8,
-      "version": null
-     },
-     "qnn-snapdragon": {
-      "asset": "llama-b11727-bin-android-arm64-snapdragon.tar.gz",
-      "mib": 57.4,
-      "version": null
-     }
+     "cpu": [
+      {
+       "asset": "llama-b11727-bin-android-arm64.tar.gz",
+       "mib": 72.8,
+       "sha256": "9336df533c31d30300c52c5dae29f66104a276880d77152311074b09f1c64337",
+       "version": null
+      }
+     ],
+     "qnn-snapdragon": [
+      {
+       "asset": "llama-b11727-bin-android-arm64-snapdragon.tar.gz",
+       "mib": 57.4,
+       "sha256": "419878707d40cbeda5b87cda3f6b4c378227450468114aadfd430b6edd93d826",
+       "version": null
+      }
+     ]
     },
     "linux-arm64": {
-     "cpu": {
-      "asset": "llama-b11727-bin-ubuntu-arm64.tar.gz",
-      "mib": 13.4,
-      "version": null
-     },
-     "cuda": {
-      "asset": "llama-b11727-bin-ubuntu-cuda-13.4-arm64.tar.gz",
-      "mib": 142.8,
-      "version": "13.4"
-     },
-     "qnn-snapdragon": {
-      "asset": "llama-b11727-bin-linux-arm64-snapdragon.tar.gz",
-      "mib": 18.8,
-      "version": null
-     },
-     "vulkan": {
-      "asset": "llama-b11727-bin-ubuntu-vulkan-arm64.tar.gz",
-      "mib": 23.2,
-      "version": null
-     }
+     "cpu": [
+      {
+       "asset": "llama-b11727-bin-ubuntu-arm64.tar.gz",
+       "mib": 13.4,
+       "sha256": "cabe1c5db0a9ef28e6979031fda3b27be62a5e9ae8ff3897c6db560505f7b687",
+       "version": null
+      }
+     ],
+     "cuda": [
+      {
+       "asset": "llama-b11727-bin-ubuntu-cuda-13.4-arm64.tar.gz",
+       "mib": 142.8,
+       "sha256": "cf85ec8afab7a7dea8f9336fa295b342cbbab77a8babd2dc6810925e68d21119",
+       "version": "13.4"
+      }
+     ],
+     "qnn-snapdragon": [
+      {
+       "asset": "llama-b11727-bin-linux-arm64-snapdragon.tar.gz",
+       "mib": 18.8,
+       "sha256": "b02e56815ba273164af26422c8dbbf599875f0aab5307e966f326df930fce00b",
+       "version": null
+      }
+     ],
+     "vulkan": [
+      {
+       "asset": "llama-b11727-bin-ubuntu-vulkan-arm64.tar.gz",
+       "mib": 23.2,
+       "sha256": "7c5a071545a9eada489dee9b47993b7307f7b1f98e3d19ae704c5bdfbb09a081",
+       "version": null
+      }
+     ]
     },
     "linux-s390x": {
-     "cpu": {
-      "asset": "llama-b11727-bin-ubuntu-s390x.tar.gz",
-      "mib": 15.7,
-      "version": null
-     }
+     "cpu": [
+      {
+       "asset": "llama-b11727-bin-ubuntu-s390x.tar.gz",
+       "mib": 15.7,
+       "sha256": "6f3c84e026ff3a574e6755fbb2caa8245dd3e8c3763607c0c4d9d0a597b7a163",
+       "version": null
+      }
+     ]
     },
     "linux-x64": {
-     "cpu": {
-      "asset": "llama-b11727-bin-ubuntu-x64.tar.gz",
-      "mib": 17.1,
-      "version": null
-     },
-     "cuda": {
-      "asset": "llama-b11727-bin-ubuntu-cuda-13.4-x64.tar.gz",
-      "mib": 147.1,
-      "version": "13.4"
-     },
-     "openvino": {
-      "asset": "llama-b11727-bin-ubuntu-openvino-2026.4.1-x64.tar.gz",
-      "mib": 112.1,
-      "version": "2026.4.1"
-     },
-     "rocm": {
-      "asset": "llama-b11727-bin-ubuntu-rocm-10.0-x64.tar.gz",
-      "mib": 234.0,
-      "version": "10.0"
-     },
-     "sycl": {
-      "asset": "llama-b11727-bin-ubuntu-sycl-fp32-x64.tar.gz",
-      "mib": 55.1,
-      "version": "32"
-     },
-     "vulkan": {
-      "asset": "llama-b11727-bin-ubuntu-vulkan-x64.tar.gz",
-      "mib": 29.2,
-      "version": null
-     }
+     "cpu": [
+      {
+       "asset": "llama-b11727-bin-ubuntu-x64.tar.gz",
+       "mib": 17.1,
+       "sha256": "17bfcf2217ab5168888dd629a833e264babd488c0512fe18bc66e49632f00241",
+       "version": null
+      }
+     ],
+     "cuda": [
+      {
+       "asset": "llama-b11727-bin-ubuntu-cuda-12.8-x64.tar.gz",
+       "mib": 165.3,
+       "sha256": "987ed7efac16e9157877c80d14a7f2f5f34a7a96bcc1a602683e3e9d1e39cb84",
+       "version": "12.8"
+      },
+      {
+       "asset": "llama-b11727-bin-ubuntu-cuda-13.4-x64.tar.gz",
+       "mib": 147.1,
+       "sha256": "5f2b3fe0e9833324e872749a05d9464a1628826c37ad7d19994a11c407754ae3",
+       "version": "13.4"
+      }
+     ],
+     "openvino": [
+      {
+       "asset": "llama-b11727-bin-ubuntu-openvino-2026.4.1-x64.tar.gz",
+       "mib": 112.1,
+       "sha256": "50159c2d67487ddc840f4f28db2cbfb05651ecb505021c85a2b7b1e84bace097",
+       "version": "2026.4.1"
+      }
+     ],
+     "rocm": [
+      {
+       "asset": "llama-b11727-bin-ubuntu-rocm-10.0-x64.tar.gz",
+       "mib": 234.0,
+       "sha256": "c7b77952c514f8c5f0472e698c1d0f4dd20509d78c9951139d4e475580e640ce",
+       "version": "10.0"
+      }
+     ],
+     "sycl": [
+      {
+       "asset": "llama-b11727-bin-ubuntu-sycl-fp16-x64.tar.gz",
+       "mib": 55.2,
+       "sha256": "a489244c3d29d79926c8954db6436fab4ecdb7bbcfd68651c3d97274c6162511",
+       "version": "16"
+      },
+      {
+       "asset": "llama-b11727-bin-ubuntu-sycl-fp32-x64.tar.gz",
+       "mib": 55.1,
+       "sha256": "bde8184985957dc8f8bd134a0eb97e0dbb09d10be91e75c872e06b614f46070f",
+       "version": "32"
+      }
+     ],
+     "vulkan": [
+      {
+       "asset": "llama-b11727-bin-ubuntu-vulkan-x64.tar.gz",
+       "mib": 29.2,
+       "sha256": "7d301bce1b63afd6ef1673b2c9668ac7beda392a0ff4faf2402a2c1a43e68a78",
+       "version": null
+      }
+     ]
     },
     "macos-arm64": {
-     "unknown_from_name": {
-      "asset": "llama-b11727-bin-macos-arm64.tar.gz",
-      "mib": 11.7,
-      "version": null
-     }
+     "unknown_from_name": [
+      {
+       "asset": "llama-b11727-bin-macos-arm64.tar.gz",
+       "mib": 11.7,
+       "sha256": "46d40093b6946854525682ce4ac53dcf4fd4b2e94ee03dd24e7b4f64ed039b95",
+       "version": null
+      }
+     ]
     },
     "macos-x64": {
-     "unknown_from_name": {
-      "asset": "llama-b11727-bin-macos-x64.tar.gz",
-      "mib": 11.2,
-      "version": null
-     }
+     "unknown_from_name": [
+      {
+       "asset": "llama-b11727-bin-macos-x64.tar.gz",
+       "mib": 11.2,
+       "sha256": "c6567bdcc0ae81221ecfe87e87b651fd9d70b4edc0edaedcf7b95b1742972eaf",
+       "version": null
+      }
+     ]
     },
     "win-arm64": {
-     "cpu": {
-      "asset": "llama-b11727-bin-win-cpu-arm64.zip",
-      "mib": 12.0,
-      "version": null
-     },
-     "cuda": {
-      "asset": "llama-b11727-bin-win-cuda-13.4-arm64.zip",
-      "mib": 140.5,
-      "version": "13.4"
-     },
-     "opencl-adreno": {
-      "asset": "llama-b11727-bin-win-opencl-adreno-arm64.zip",
-      "mib": 12.8,
-      "version": null
-     },
-     "vulkan": {
-      "asset": "llama-b11727-bin-win-vulkan-arm64.zip",
-      "mib": 23.8,
-      "version": null
-     }
+     "cpu": [
+      {
+       "asset": "llama-b11727-bin-win-cpu-arm64.zip",
+       "mib": 12.0,
+       "sha256": "6761c4ca85aca0922dcb4cce6b8b3fc64062ebc5ae89bed88c4b98f961ac4f98",
+       "version": null
+      }
+     ],
+     "cuda": [
+      {
+       "asset": "llama-b11727-bin-win-cuda-13.4-arm64.zip",
+       "mib": 140.5,
+       "sha256": "09efb4f0a3037b67445585015db157606b2d220810e88c1f87d4e8e2976b0653",
+       "version": "13.4"
+      }
+     ],
+     "opencl-adreno": [
+      {
+       "asset": "llama-b11727-bin-win-opencl-adreno-arm64.zip",
+       "mib": 12.8,
+       "sha256": "71da4f560d75070cf2df050b5f638e8a6e91403975810b50348f48b09e937ace",
+       "version": null
+      }
+     ],
+     "vulkan": [
+      {
+       "asset": "llama-b11727-bin-win-vulkan-arm64.zip",
+       "mib": 23.8,
+       "sha256": "e55636aaeb720b0989573448a9fb33056b5fb818203741cd50ce12659176725a",
+       "version": null
+      }
+     ]
     },
     "win-x64": {
-     "cpu": {
-      "asset": "llama-b11727-bin-win-cpu-x64.zip",
-      "mib": 18.8,
-      "version": null
-     },
-     "cuda": {
-      "asset": "llama-b11727-bin-win-cuda-13.4-x64.zip",
-      "mib": 147.9,
-      "version": "13.4"
-     },
-     "openvino": {
-      "asset": "llama-b11727-bin-win-openvino-2026.4.1-x64.zip",
-      "mib": 94.9,
-      "version": "2026.4.1"
-     },
-     "rocm": {
-      "asset": "llama-b11727-bin-win-rocm-10.0-x64.zip",
-      "mib": 246.8,
-      "version": "10.0"
-     },
-     "sycl": {
-      "asset": "llama-b11727-bin-win-sycl-x64.zip",
-      "mib": 142.3,
-      "version": null
-     },
-     "vulkan": {
-      "asset": "llama-b11727-bin-win-vulkan-x64.zip",
-      "mib": 30.8,
-      "version": null
-     }
+     "cpu": [
+      {
+       "asset": "llama-b11727-bin-win-cpu-x64.zip",
+       "mib": 18.8,
+       "sha256": "d71a767fd77b2509cc4698d1017d9820b49b0bfaabf5aef7d1ea7e0696d80a71",
+       "version": null
+      }
+     ],
+     "cuda": [
+      {
+       "asset": "llama-b11727-bin-win-cuda-12.4-x64.zip",
+       "mib": 255.1,
+       "sha256": "1b11ccb85226318c3a6037e9ba2f1772c0823e6bcb8dd65a17c1137a0d04e4a8",
+       "version": "12.4"
+      },
+      {
+       "asset": "llama-b11727-bin-win-cuda-13.4-x64.zip",
+       "mib": 147.9,
+       "sha256": "8fa05f3fb392f8cfb3aef5ce231910673de5c744fbbc9e8eaac29d0fe159477b",
+       "version": "13.4"
+      }
+     ],
+     "openvino": [
+      {
+       "asset": "llama-b11727-bin-win-openvino-2026.4.1-x64.zip",
+       "mib": 94.9,
+       "sha256": "c87844db6d30e1db8790a80c097a7d490b7d5c7d1e81be36ba943fc6d9146048",
+       "version": "2026.4.1"
+      }
+     ],
+     "rocm": [
+      {
+       "asset": "llama-b11727-bin-win-rocm-10.0-x64.zip",
+       "mib": 246.8,
+       "sha256": "5d0caf4f3ce3c6210093e8b914e8e321aad42c2f07da7d764279aff228e8b4f2",
+       "version": "10.0"
+      }
+     ],
+     "sycl": [
+      {
+       "asset": "llama-b11727-bin-win-sycl-x64.zip",
+       "mib": 142.3,
+       "sha256": "71bfe177b690aaacc1944d4ff2757a8410b5dc45656af99c1fd6d947bb157206",
+       "version": null
+      }
+     ],
+     "vulkan": [
+      {
+       "asset": "llama-b11727-bin-win-vulkan-x64.zip",
+       "mib": 30.8,
+       "sha256": "c373936fb9578ac85d2e5c3d220821eddae4288283237b01d9618419175f127b",
+       "version": null
+      }
+     ]
     }
    },
    "not_runtime": [
@@ -499,7 +592,8 @@
      "version": null
     }
    ],
-   "runtimes": 28
+   "runtimes": 28,
+   "格子条目": 28
   },
   "sd": {
    "assets_total": 9,
@@ -512,50 +606,74 @@
    ],
    "by_os": {
     "linux-x64": {
-     "cpu": {
-      "asset": "sd-master-95b3090-bin-Linux-Ubuntu-24.04-x86_64.zip",
-      "mib": 25.1,
-      "version": null
-     },
-     "rocm": {
-      "asset": "sd-master-95b3090-bin-Linux-Ubuntu-24.04-x86_64-rocm-10.1.0.zip",
-      "mib": 281.7,
-      "version": "10.1.0"
-     },
-     "vulkan": {
-      "asset": "sd-master-95b3090-bin-Linux-Ubuntu-24.04-x86_64-vulkan.zip",
-      "mib": 34.9,
-      "version": null
-     }
+     "cpu": [
+      {
+       "asset": "sd-master-95b3090-bin-Linux-Ubuntu-24.04-x86_64.zip",
+       "mib": 25.1,
+       "sha256": "23757b2d46edd68ec59ad252e6e3d6c1854ab01d6be5d47a06e0bc751c2eee2a",
+       "version": null
+      }
+     ],
+     "rocm": [
+      {
+       "asset": "sd-master-95b3090-bin-Linux-Ubuntu-24.04-x86_64-rocm-10.1.0.zip",
+       "mib": 281.7,
+       "sha256": "b0deb148e8f0c05c75b5c8b54876ff97f819e80f57fcf1398ebb5dbb727c7a16",
+       "version": "10.1.0"
+      }
+     ],
+     "vulkan": [
+      {
+       "asset": "sd-master-95b3090-bin-Linux-Ubuntu-24.04-x86_64-vulkan.zip",
+       "mib": 34.9,
+       "sha256": "703f547a0bbe254979940ec6142a87b4af6acbc01d34e37358f4feabb430a225",
+       "version": null
+      }
+     ]
     },
     "macos-arm64": {
-     "unknown_from_name": {
-      "asset": "sd-master-95b3090-bin-Darwin-macOS-26.6.2-arm64.zip",
-      "mib": 34.8,
-      "version": null
-     }
+     "unknown_from_name": [
+      {
+       "asset": "sd-master-95b3090-bin-Darwin-macOS-26.6.2-arm64.zip",
+       "mib": 34.8,
+       "sha256": "2edf5a21c4b73f448c3a02c87925283b77aa94f1859c0d8e649134da68b40813",
+       "version": null
+      }
+     ]
     },
     "win-x64": {
-     "cpu": {
-      "asset": "sd-master-95b3090-bin-win-cpu-x64.zip",
-      "mib": 16.9,
-      "version": null
-     },
-     "cuda": {
-      "asset": "sd-master-95b3090-bin-win-cuda12-x64.zip",
-      "mib": 327.7,
-      "version": "12"
-     },
-     "rocm": {
-      "asset": "sd-master-95b3090-bin-win-rocm-10.1.0-x64.zip",
-      "mib": 251.8,
-      "version": "10.1.0"
-     },
-     "vulkan": {
-      "asset": "sd-master-95b3090-bin-win-vulkan-x64.zip",
-      "mib": 28.0,
-      "version": null
-     }
+     "cpu": [
+      {
+       "asset": "sd-master-95b3090-bin-win-cpu-x64.zip",
+       "mib": 16.9,
+       "sha256": "945ed74a22a5c6abbae480201312e439f16ad029166dd94e58cef9a2ecb2dba8",
+       "version": null
+      }
+     ],
+     "cuda": [
+      {
+       "asset": "sd-master-95b3090-bin-win-cuda12-x64.zip",
+       "mib": 327.7,
+       "sha256": "b935f5902fbedefe6db0b68c8930ae3e7c0f3cc778bd5d501a3c7f7ee7336338",
+       "version": "12"
+      }
+     ],
+     "rocm": [
+      {
+       "asset": "sd-master-95b3090-bin-win-rocm-10.1.0-x64.zip",
+       "mib": 251.8,
+       "sha256": "cecec9f455f4675b4560b0e604f4f852c6e1ecdc9f2d12ce4aee5eb7e9679195",
+       "version": "10.1.0"
+      }
+     ],
+     "vulkan": [
+      {
+       "asset": "sd-master-95b3090-bin-win-vulkan-x64.zip",
+       "mib": 28.0,
+       "sha256": "17398d07ba89c2fba21b8662db69ecdd917888373e4f82779b7599e97a6b4bd3",
+       "version": null
+      }
+     ]
     }
    },
    "not_runtime": [
@@ -652,7 +770,8 @@
      "version": null
     }
    ],
-   "runtimes": 8
+   "runtimes": 8,
+   "格子条目": 8
   },
   "whisper": {
    "assets_total": 12,
@@ -664,54 +783,84 @@
    ],
    "by_os": {
     "linux-arm64": {
-     "cpu": {
-      "asset": "whisper-bin-ubuntu-arm64.tar.gz",
-      "mib": 4.4,
-      "version": null
-     }
+     "cpu": [
+      {
+       "asset": "whisper-bin-ubuntu-arm64.tar.gz",
+       "mib": 4.4,
+       "sha256": "6b95ebfc60447df48e70ef00a73bdc3f41679ed2d01ef465827206a2ff325149",
+       "version": null
+      }
+     ]
     },
     "linux-x64": {
-     "cpu": {
-      "asset": "whisper-bin-ubuntu-x64.tar.gz",
-      "mib": 9.9,
-      "version": null
-     }
+     "cpu": [
+      {
+       "asset": "whisper-bin-ubuntu-x64.tar.gz",
+       "mib": 9.9,
+       "sha256": "a72becf15d7917f990f6313867a52638b82b7f9ef237fb0c980dac56a135781c",
+       "version": null
+      }
+     ]
     },
     "win-arm64": {
-     "cpu": {
-      "asset": "whisper-bin-win-cpu-arm64.zip",
-      "mib": 4.2,
-      "version": null
-     },
-     "cuda": {
-      "asset": "whisper-bin-win-cuda-13.4-arm64.zip",
-      "mib": 277.7,
-      "version": "13.4"
-     },
-     "opencl-adreno": {
-      "asset": "whisper-bin-win-opencl-adreno-arm64.zip",
-      "mib": 4.7,
-      "version": null
-     }
+     "cpu": [
+      {
+       "asset": "whisper-bin-win-cpu-arm64.zip",
+       "mib": 4.2,
+       "sha256": "28c37e7b598c3d9bbfef94f3bd67f2ee6f12b7c86f3da5edcf5e4308d615ff6d",
+       "version": null
+      }
+     ],
+     "cuda": [
+      {
+       "asset": "whisper-bin-win-cuda-13.4-arm64.zip",
+       "mib": 277.7,
+       "sha256": "6184ae8887d38ea9add68e883b9c846e7bf562ba1bf619ffc7ee9f8ec7e1699c",
+       "version": "13.4"
+      }
+     ],
+     "opencl-adreno": [
+      {
+       "asset": "whisper-bin-win-opencl-adreno-arm64.zip",
+       "mib": 4.7,
+       "sha256": "915b48289f362c5f4cf33f3ffdd30f1f43de68f6103a3088858e346635719007",
+       "version": null
+      }
+     ]
     },
     "win-x64": {
-     "cuda": {
-      "asset": "whisper-bin-win-cuda-12.4.0-x64.zip",
-      "mib": 653.2,
-      "version": "12.4.0"
-     }
+     "cuda": [
+      {
+       "asset": "whisper-bin-win-cuda-11.8.0-x64.zip",
+       "mib": 271.6,
+       "sha256": "e81c86c542be6e3d7b7245392d4e1c52ab6e5c61dbe38721754bc0ab59d4d027",
+       "version": "11.8.0"
+      },
+      {
+       "asset": "whisper-bin-win-cuda-12.4.0-x64.zip",
+       "mib": 653.2,
+       "sha256": "afef0b881c500958921c3f5523b50e59ee2ec9b6f5cbd25b324c51ed308a957a",
+       "version": "12.4.0"
+      }
+     ]
     },
     "win-x86": {
-     "blas": {
-      "asset": "whisper-blas-bin-Win32.zip",
-      "mib": 12.0,
-      "version": null
-     },
-     "cpu": {
-      "asset": "whisper-bin-Win32.zip",
-      "mib": 5.3,
-      "version": null
-     }
+     "blas": [
+      {
+       "asset": "whisper-blas-bin-Win32.zip",
+       "mib": 12.0,
+       "sha256": "d53f98a031ae73f5f4fff8e134c0c0b5eafe3361f69c660d9fb1c85d102db34a",
+       "version": null
+      }
+     ],
+     "cpu": [
+      {
+       "asset": "whisper-bin-Win32.zip",
+       "mib": 5.3,
+       "sha256": "b6cb078ee5d4df0f9dcdb4f820210c59bd6534c84fdb13c35bc8a51d1233451f",
+       "version": null
+      }
+     ]
     }
    },
    "not_runtime": [
@@ -849,7 +998,8 @@
      "version": null
     }
    ],
-   "runtimes": 11
+   "runtimes": 11,
+   "格子条目": 9
   }
  },
  "from": "GitHub release 的 asset 表（name / size / digest=sha256），按 payload-plan 钉的 ref 取",
@@ -883,7 +1033,6 @@
   },
   {
    "assets": [
-    "whisper-bin-x64.zip",
     "whisper-bin-x64.zip",
     "whisper-blas-bin-x64.zip"
    ],

@@ -159,14 +159,36 @@ def build(captures: dict, picks: list[dict], repos: dict) -> tuple[dict, list[st
                 # 空键会让读的人以为那一格是"没有"，而真相是"看不出来"。
                 no_platform.append({"asset": r["asset"], "backend": r["backend"], "mib": r["mib"]})
                 continue
-            matrix.setdefault(r["os"], {})[r["backend"]] = {
-                "asset": r["asset"], "version": r["version"], "mib": r["mib"]}
+            # 一格是**一个列表**，不是一个：同一个后端可以有好几个版本
+            # （llama 在 win-x64 同时发 cuda-12.4 与 cuda-13.4，ubuntu 的 sycl 有 fp16/fp32，
+            # whisper 在 win-x64 有 cuda 11.8.0 与 12.4.0）。上一版写成 dict[key]=一行，
+            # 于是每格只剩字典序最后那颗，而"36 个产物"数着 36、格子只装得下十来个 ——
+            # 少掉那几颗不会红，只会让选择表以为上游没发。
+            matrix.setdefault(r["os"], {}).setdefault(r["backend"], []).append(
+                {"asset": r["asset"], "version": r["version"], "mib": r["mib"],
+                 "sha256": r["sha256"]})
+        for cells in matrix.values():
+            for same_backend in cells.values():        # 别叫 rows：会把外层的 rows 换掉
+                same_backend.sort(key=lambda x: (x["version"] or "", x["asset"]))
+        if sum(len(rows) for cells in matrix.values() for rows in cells.values()) != len(runtimes)                 - len(no_platform):
+            problems.append("有 runtime 行没进任何格子 —— 一格一行的写法会把同后端的多个版本吃掉")
         engines[engine] = {"repo": repo, "release": release, "assets_total": len(assets),
                            "runtimes": len(runtimes), "backends": sorted(
                                {r["backend"] for r in runtimes}),
-                           "by_os": matrix, "rows": sorted(rows, key=lambda r: r["asset"]),
+                           "by_os": matrix, "格子条目": sum(
+                               len(v) for c in matrix.values() for v in c.values()),
+                           "rows": sorted(rows, key=lambda r: r["asset"]),
                            "not_runtime": sorted(others, key=lambda r: r["asset"]),
                            "platform_not_in_name": sorted(no_platform, key=lambda r: r["asset"])}
+        # 自洽检查：这张表里留下的 runtime 行，必须**逐个等于**分类出来的那些名字。
+        # 上一版内层循环借用了 rows 这个名字，把它换成了"最后一格的列表"，
+        # 于是产物里的 rows 少到 1 行，而格子看起来一切正常。
+        named_runtime = sorted(a["name"] for a in assets
+                               if classify(a["name"], release)["kind"] == "runtime")
+        if sorted(r["asset"] for r in engines[engine]["rows"]) != named_runtime:
+            problems.append(f"{engine}: rows 与分类出来的 runtime 名字对不上"
+                            f"（{len(engines[engine]['rows'])} 行 vs {len(named_runtime)} 个）"
+                            " —— 有变量被内层循环换了名，或某条分支漏了")
         floor = BACKEND_FLOOR[engine]
         have = len(engines[engine]["backends"])
         if have < floor:
@@ -194,6 +216,11 @@ def build(captures: dict, picks: list[dict], repos: dict) -> tuple[dict, list[st
             continue
         if got["os"] != p["os"]:
             problems.append(f"{p['asset']}: 分出的 OS 是 {got['os']}，payload-plan 却把它当 {p['os']} 用")
+    # 两个产者会点名同一颗：行侧（这张表里所有名字不写平台的 runtime）与 pick 侧
+    # （payload-plan 选中且名字不写平台的那些）。缺口是"哪几颗不能靠名字挑"，
+    # 数的是颗，不是点名次数 —— 不去重就会把 2 颗写成 3 颗。
+    unassigned = [{(r["engine"], r["asset"]): r for r in unassigned}[k]
+                  for k in sorted({(r["engine"], r["asset"]) for r in unassigned})]
     if unassigned:
         gaps_seed.append({"engine": "whisper", "os": "win-x64 与 win-x86",
                           "kind": "platform_not_in_name",
@@ -268,6 +295,9 @@ def check(committed: dict, fresh: dict) -> list[str]:
         if old.get("backends") != body["backends"]:
             bad.append(f"{e}: 后端种类变了 {old.get('backends')} → {body['backends']}"
                        " —— 分层那句话的可选面跟着变")
+        if old.get("格子条目") != body["格子条目"]:
+            bad.append(f"{e}: 格子里的条目数变了 {old.get('格子条目')} → {body['格子条目']}"
+                       "（一格一行的写法会静默丢同后端的其它版本）")
         if old.get("rows") != body["rows"]:
             bad.append(f"{e}: 资产表内容变了（体积或 digest 有出入），重看 payload-plan 的选择")
     return bad
@@ -315,6 +345,17 @@ def selftest() -> int:
         bad += problems
     if len(cases) and doc["stats"]["捕获资产"] != 57:
         bad.append(f"捕获里的资产数不再是 57（{doc['stats']['捕获资产']}）—— 上游动过 release，重看这张表")
+    # 同一个格子里有多个版本时必须都在，不是"最后一个赢"。
+    win_cuda = [r["version"] for r in doc["engines"]["llama"]["by_os"]["win-x64"]["cuda"]]
+    if sorted(win_cuda) != ["12.4", "13.4"]:
+        bad.append(f"llama/win-x64 的 CUDA 版本应当两颗都在，现在是 {win_cuda}")
+    if doc["engines"]["whisper"]["by_os"]["win-x64"]["cuda"]:
+        wc = sorted(r["version"] for r in doc["engines"]["whisper"]["by_os"]["win-x64"]["cuda"])
+        if wc != ["11.8.0", "12.4.0"]:
+            bad.append(f"whisper/win-x64 的 CUDA 版本不对：{wc}")
+    entries = sum(v["格子条目"] for v in doc["engines"].values())
+    if entries != 45:
+        bad.append(f"格子条目总数应是 45（47 个 runtime 减 2 个名字里不写平台的），现在 {entries}")
     # ④ 每个引擎的后端地板 + mac 那句不许被写成有后端。
     for e, floor in BACKEND_FLOOR.items():
         have = len(doc["engines"][e]["backends"])
