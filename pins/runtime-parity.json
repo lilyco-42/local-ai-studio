@@ -16,7 +16,7 @@
    "repo": "ggml-org/llama.cpp",
    "sha256": "9336df533c31d30300c52c5dae29f66104a276880d77152311074b09f1c64337",
    "version": null,
-   "why_not_read": "gzip 流不可随机寻址，整包流式读是计费流量；这一颗的 server 在场与否要由出包车道（pack_engine 解包后点名）证"
+   "why_not_read": "gzip 流不可随机寻址，读成员表要付整包流量；这一档不是真装的那一颗，所以不为它付 —— server 在场与否未证，要证就出包车道解包后点名"
   },
   {
    "asset": "llama-b11727-bin-android-arm64-snapdragon.tar.gz",
@@ -34,7 +34,7 @@
    "repo": "ggml-org/llama.cpp",
    "sha256": "419878707d40cbeda5b87cda3f6b4c378227450468114aadfd430b6edd93d826",
    "version": null,
-   "why_not_read": "gzip 流不可随机寻址，整包流式读是计费流量；这一颗的 server 在场与否要由出包车道（pack_engine 解包后点名）证"
+   "why_not_read": "gzip 流不可随机寻址，读成员表要付整包流量；这一档不是真装的那一颗，所以不为它付 —— server 在场与否未证，要证就出包车道解包后点名"
   },
   {
    "asset": "llama-b11727-bin-ubuntu-arm64.tar.gz",
@@ -52,7 +52,7 @@
    "repo": "ggml-org/llama.cpp",
    "sha256": "cabe1c5db0a9ef28e6979031fda3b27be62a5e9ae8ff3897c6db560505f7b687",
    "version": null,
-   "why_not_read": "gzip 流不可随机寻址，整包流式读是计费流量；这一颗的 server 在场与否要由出包车道（pack_engine 解包后点名）证"
+   "why_not_read": "gzip 流不可随机寻址，读成员表要付整包流量；这一档不是真装的那一颗，所以不为它付 —— server 在场与否未证，要证就出包车道解包后点名"
   },
   {
    "asset": "llama-b11727-bin-ubuntu-cuda-13.4-arm64.tar.gz",
@@ -70,7 +70,7 @@
    "repo": "ggml-org/llama.cpp",
    "sha256": "cf85ec8afab7a7dea8f9336fa295b342cbbab77a8babd2dc6810925e68d21119",
    "version": "13.4",
-   "why_not_read": "gzip 流不可随机寻址，整包流式读是计费流量；这一颗的 server 在场与否要由出包车道（pack_engine 解包后点名）证"
+   "why_not_read": "gzip 流不可随机寻址，读成员表要付整包流量；这一档不是真装的那一颗，所以不为它付 —— server 在场与否未证，要证就出包车道解包后点名"
   },
   {
    "asset": "llama-b11727-bin-linux-arm64-snapdragon.tar.gz",
@@ -88,7 +88,7 @@
    "repo": "ggml-org/llama.cpp",
    "sha256": "b02e56815ba273164af26422c8dbbf599875f0aab5307e966f326df930fce00b",
    "version": null,
-   "why_not_read": "gzip 流不可随机寻址，整包流式读是计费流量；这一颗的 server 在场与否要由出包车道（pack_engine 解包后点名）证"
+   "why_not_read": "gzip 流不可随机寻址，读成员表要付整包流量；这一档不是真装的那一颗，所以不为它付 —— server 在场与否未证，要证就出包车道解包后点名"
   },
   {
    "asset": "llama-b11727-bin-ubuntu-vulkan-arm64.tar.gz",
@@ -106,7 +106,7 @@
    "repo": "ggml-org/llama.cpp",
    "sha256": "7c5a071545a9eada489dee9b47993b7307f7b1f98e3d19ae704c5bdfbb09a081",
    "version": null,
-   "why_not_read": "gzip 流不可随机寻址，整包流式读是计费流量；这一颗的 server 在场与否要由出包车道（pack_engine 解包后点名）证"
+   "why_not_read": "gzip 流不可随机寻址，读成员表要付整包流量；这一档不是真装的那一颗，所以不为它付 —— server 在场与否未证，要证就出包车道解包后点名"
   },
   {
    "asset": "llama-b11727-bin-ubuntu-s390x.tar.gz",
@@ -124,25 +124,37 @@
    "repo": "ggml-org/llama.cpp",
    "sha256": "6f3c84e026ff3a574e6755fbb2caa8245dd3e8c3763607c0c4d9d0a597b7a163",
    "version": null,
-   "why_not_read": "gzip 流不可随机寻址，整包流式读是计费流量；这一颗的 server 在场与否要由出包车道（pack_engine 解包后点名）证"
+   "why_not_read": "gzip 流不可随机寻址，读成员表要付整包流量；这一档不是真装的那一颗，所以不为它付 —— server 在场与否未证，要证就出包车道解包后点名"
   },
   {
+   "archive_bytes": 17971994,
    "asset": "llama-b11727-bin-ubuntu-x64.tar.gz",
    "backend": "cpu",
    "engine": "llama",
+   "entries": 61,
+   "executables": [
+    "llama-server"
+   ],
    "expect_server": "llama-server",
+   "has_server": true,
    "is_default": true,
+   "libs": {
+    ".so": 28
+   },
    "mib": 17.1,
    "os": "linux-x64",
    "os_named": true,
    "os_resolved": "linux-x64",
-   "read": false,
+   "packed_sum_mib": null,
+   "read": true,
    "read_via": "tar_stream",
    "release": "b11727",
    "repo": "ggml-org/llama.cpp",
+   "server_sibling_lib": false,
    "sha256": "17bfcf2217ab5168888dd629a833e264babd488c0512fe18bc66e49632f00241",
-   "version": null,
-   "why_not_read": "gzip 流不可随机寻址，整包流式读是计费流量；这一颗的 server 在场与否要由出包车道（pack_engine 解包后点名）证"
+   "sha256_verified": true,
+   "test_hits": [],
+   "version": null
   },
   {
    "asset": "llama-b11727-bin-ubuntu-cuda-12.8-x64.tar.gz",
@@ -160,7 +172,7 @@
    "repo": "ggml-org/llama.cpp",
    "sha256": "987ed7efac16e9157877c80d14a7f2f5f34a7a96bcc1a602683e3e9d1e39cb84",
    "version": "12.8",
-   "why_not_read": "gzip 流不可随机寻址，整包流式读是计费流量；这一颗的 server 在场与否要由出包车道（pack_engine 解包后点名）证"
+   "why_not_read": "gzip 流不可随机寻址，读成员表要付整包流量；这一档不是真装的那一颗，所以不为它付 —— server 在场与否未证，要证就出包车道解包后点名"
   },
   {
    "asset": "llama-b11727-bin-ubuntu-cuda-13.4-x64.tar.gz",
@@ -178,7 +190,7 @@
    "repo": "ggml-org/llama.cpp",
    "sha256": "5f2b3fe0e9833324e872749a05d9464a1628826c37ad7d19994a11c407754ae3",
    "version": "13.4",
-   "why_not_read": "gzip 流不可随机寻址，整包流式读是计费流量；这一颗的 server 在场与否要由出包车道（pack_engine 解包后点名）证"
+   "why_not_read": "gzip 流不可随机寻址，读成员表要付整包流量；这一档不是真装的那一颗，所以不为它付 —— server 在场与否未证，要证就出包车道解包后点名"
   },
   {
    "asset": "llama-b11727-bin-ubuntu-openvino-2026.4.1-x64.tar.gz",
@@ -196,7 +208,7 @@
    "repo": "ggml-org/llama.cpp",
    "sha256": "50159c2d67487ddc840f4f28db2cbfb05651ecb505021c85a2b7b1e84bace097",
    "version": "2026.4.1",
-   "why_not_read": "gzip 流不可随机寻址，整包流式读是计费流量；这一颗的 server 在场与否要由出包车道（pack_engine 解包后点名）证"
+   "why_not_read": "gzip 流不可随机寻址，读成员表要付整包流量；这一档不是真装的那一颗，所以不为它付 —— server 在场与否未证，要证就出包车道解包后点名"
   },
   {
    "asset": "llama-b11727-bin-ubuntu-rocm-10.0-x64.tar.gz",
@@ -214,7 +226,7 @@
    "repo": "ggml-org/llama.cpp",
    "sha256": "c7b77952c514f8c5f0472e698c1d0f4dd20509d78c9951139d4e475580e640ce",
    "version": "10.0",
-   "why_not_read": "gzip 流不可随机寻址，整包流式读是计费流量；这一颗的 server 在场与否要由出包车道（pack_engine 解包后点名）证"
+   "why_not_read": "gzip 流不可随机寻址，读成员表要付整包流量；这一档不是真装的那一颗，所以不为它付 —— server 在场与否未证，要证就出包车道解包后点名"
   },
   {
    "asset": "llama-b11727-bin-ubuntu-sycl-fp16-x64.tar.gz",
@@ -232,7 +244,7 @@
    "repo": "ggml-org/llama.cpp",
    "sha256": "a489244c3d29d79926c8954db6436fab4ecdb7bbcfd68651c3d97274c6162511",
    "version": "16",
-   "why_not_read": "gzip 流不可随机寻址，整包流式读是计费流量；这一颗的 server 在场与否要由出包车道（pack_engine 解包后点名）证"
+   "why_not_read": "gzip 流不可随机寻址，读成员表要付整包流量；这一档不是真装的那一颗，所以不为它付 —— server 在场与否未证，要证就出包车道解包后点名"
   },
   {
    "asset": "llama-b11727-bin-ubuntu-sycl-fp32-x64.tar.gz",
@@ -250,7 +262,7 @@
    "repo": "ggml-org/llama.cpp",
    "sha256": "bde8184985957dc8f8bd134a0eb97e0dbb09d10be91e75c872e06b614f46070f",
    "version": "32",
-   "why_not_read": "gzip 流不可随机寻址，整包流式读是计费流量；这一颗的 server 在场与否要由出包车道（pack_engine 解包后点名）证"
+   "why_not_read": "gzip 流不可随机寻址，读成员表要付整包流量；这一档不是真装的那一颗，所以不为它付 —— server 在场与否未证，要证就出包车道解包后点名"
   },
   {
    "asset": "llama-b11727-bin-ubuntu-vulkan-x64.tar.gz",
@@ -268,25 +280,37 @@
    "repo": "ggml-org/llama.cpp",
    "sha256": "7d301bce1b63afd6ef1673b2c9668ac7beda392a0ff4faf2402a2c1a43e68a78",
    "version": null,
-   "why_not_read": "gzip 流不可随机寻址，整包流式读是计费流量；这一颗的 server 在场与否要由出包车道（pack_engine 解包后点名）证"
+   "why_not_read": "gzip 流不可随机寻址，读成员表要付整包流量；这一档不是真装的那一颗，所以不为它付 —— server 在场与否未证，要证就出包车道解包后点名"
   },
   {
+   "archive_bytes": 12292958,
    "asset": "llama-b11727-bin-macos-arm64.tar.gz",
    "backend": "unknown_from_name",
    "engine": "llama",
+   "entries": 61,
+   "executables": [
+    "llama-server"
+   ],
    "expect_server": "llama-server",
+   "has_server": true,
    "is_default": true,
+   "libs": {
+    ".dylib": 35
+   },
    "mib": 11.7,
    "os": "macos-arm64",
    "os_named": true,
    "os_resolved": "macos-arm64",
-   "read": false,
+   "packed_sum_mib": null,
+   "read": true,
    "read_via": "tar_stream",
    "release": "b11727",
    "repo": "ggml-org/llama.cpp",
+   "server_sibling_lib": false,
    "sha256": "46d40093b6946854525682ce4ac53dcf4fd4b2e94ee03dd24e7b4f64ed039b95",
-   "version": null,
-   "why_not_read": "gzip 流不可随机寻址，整包流式读是计费流量；这一颗的 server 在场与否要由出包车道（pack_engine 解包后点名）证"
+   "sha256_verified": true,
+   "test_hits": [],
+   "version": null
   },
   {
    "asset": "llama-b11727-bin-macos-x64.tar.gz",
@@ -304,7 +328,7 @@
    "repo": "ggml-org/llama.cpp",
    "sha256": "c6567bdcc0ae81221ecfe87e87b651fd9d70b4edc0edaedcf7b95b1742972eaf",
    "version": null,
-   "why_not_read": "gzip 流不可随机寻址，整包流式读是计费流量；这一颗的 server 在场与否要由出包车道（pack_engine 解包后点名）证"
+   "why_not_read": "gzip 流不可随机寻址，读成员表要付整包流量；这一档不是真装的那一颗，所以不为它付 —— server 在场与否未证，要证就出包车道解包后点名"
   },
   {
    "asset": "llama-b11727-bin-win-cpu-arm64.zip",
@@ -1161,25 +1185,48 @@
    "repo": "ggml-org/whisper.cpp",
    "sha256": "6b95ebfc60447df48e70ef00a73bdc3f41679ed2d01ef465827206a2ff325149",
    "version": null,
-   "why_not_read": "gzip 流不可随机寻址，整包流式读是计费流量；这一颗的 server 在场与否要由出包车道（pack_engine 解包后点名）证"
+   "why_not_read": "gzip 流不可随机寻址，读成员表要付整包流量；这一档不是真装的那一颗，所以不为它付 —— server 在场与否未证，要证就出包车道解包后点名"
   },
   {
+   "archive_bytes": 10364195,
    "asset": "whisper-bin-ubuntu-x64.tar.gz",
    "backend": "cpu",
    "engine": "whisper",
+   "entries": 47,
+   "executables": [
+    "whisper-server"
+   ],
    "expect_server": "whisper-server",
+   "has_server": true,
    "is_default": true,
+   "libs": {
+    ".so": 18
+   },
    "mib": 9.9,
    "os": "linux-x64",
    "os_named": true,
    "os_resolved": "linux-x64",
-   "read": false,
+   "packed_sum_mib": null,
+   "read": true,
    "read_via": "tar_stream",
    "release": "b5454",
    "repo": "ggml-org/whisper.cpp",
+   "server_sibling_lib": null,
    "sha256": "a72becf15d7917f990f6313867a52638b82b7f9ef237fb0c980dac56a135781c",
-   "version": null,
-   "why_not_read": "gzip 流不可随机寻址，整包流式读是计费流量；这一颗的 server 在场与否要由出包车道（pack_engine 解包后点名）证"
+   "sha256_verified": true,
+   "test_hits": [
+    "test-common-utf8",
+    "test-parakeet",
+    "test-parakeet-full-diffusion",
+    "test-parakeet-full-gb1",
+    "test-parakeet-full-jfk",
+    "test-vad",
+    "test-vad-full",
+    "test-whisper-buffer-loader",
+    "test-whisper-lang-detect-abort",
+    "test-whisper-zero-samples"
+   ],
+   "version": null
   },
   {
    "asset": "whisper-bin-win-cpu-arm64.zip",
@@ -1668,14 +1715,6 @@
    "read_via": "tar_stream"
   },
   {
-   "asset": "llama-b11727-bin-ubuntu-x64.tar.gz",
-   "backend": "cpu",
-   "engine": "llama",
-   "expect_server": "llama-server",
-   "os": "linux-x64",
-   "read_via": "tar_stream"
-  },
-  {
    "asset": "llama-b11727-bin-ubuntu-cuda-12.8-x64.tar.gz",
    "backend": "cuda",
    "engine": "llama",
@@ -1732,14 +1771,6 @@
    "read_via": "tar_stream"
   },
   {
-   "asset": "llama-b11727-bin-macos-arm64.tar.gz",
-   "backend": "unknown_from_name",
-   "engine": "llama",
-   "expect_server": "llama-server",
-   "os": "macos-arm64",
-   "read_via": "tar_stream"
-  },
-  {
    "asset": "llama-b11727-bin-macos-x64.tar.gz",
    "backend": "unknown_from_name",
    "engine": "llama",
@@ -1762,21 +1793,14 @@
    "expect_server": "whisper-server",
    "os": "linux-arm64",
    "read_via": "tar_stream"
-  },
-  {
-   "asset": "whisper-bin-ubuntu-x64.tar.gz",
-   "backend": "cpu",
-   "engine": "whisper",
-   "expect_server": "whisper-server",
-   "os": "linux-x64",
-   "read_via": "tar_stream"
   }
  ],
  "rule": {
   "absent_vs_unknown": "读到成员表而里面没 server = 缺（进 gaps 点名）；没读到 = 未知（进 not_read），两者不许混",
+  "cost": "16 颗可选档的 tar.gz 不读：不为没人会下载的那一颗付整包流量，如实标未证（要证就走出包车道解包后点名）",
   "hard": "payload-plan 真装的那几颗必须有 server —— 装上起不来就是红",
   "impl_pair": "llama 的 Windows 包是 x.exe + x-impl.dll 成对的（条目表量出来的），这一列只对 llama 求值；whisper/sd 的依赖形状没被这样量过，写 null 不写 false",
-  "reader": "zip 用 Range 读中央目录（约 1 MiB 尾部，不整包下载、不解压、不运行）；tar.gz 不可随机寻址 → 一律 not_read 并写明该由谁证",
+  "reader": "zip 用 Range 读中央目录（约 1 MiB 尾部，不整包下载、不解压、不运行）；tar.gz 不可随机寻址，只能取整包读成员表 —— 这一层只为 payload-plan 真装的默认档付那份流量，且取回的字节数与整包 sha256 都按 payload-plan 已量过的数复核",
   "server_name": "可执行文件名只从 tools/launch_plan.py 的 SERVER_BASE 取，Windows 加 .exe；这张表里没有第二个定义"
  },
  "schema": 1,
@@ -1784,10 +1808,10 @@
  "stats": {
   "runtime 资产": 47,
   "包名不写平台": 2,
-  "有 server": 27,
-  "没读要走出包车道": 20,
+  "有 server": 30,
+  "没读要走出包车道": 17,
   "缺 server 的可选档": 0,
-  "读到成员表": 27,
+  "读到成员表": 30,
   "默认档": 8
  }
 }

@@ -1,9 +1,9 @@
 {
- "sha256": "5bc5c8871b76185b3ed1cd8a02ced2015011ae54137a9a69436e9c52d2acca7b",
- "bytes": 36628,
- "lines": 1261,
+ "sha256": "b56c705e3b92017be09231665e2864c782ef0db874d461cf474320efe5bdf630",
+ "bytes": 44548,
+ "lines": 1460,
  "crlf": 0,
- "assets": 28,
+ "assets": 31,
  "captured_at": "2026-10-20",
- "how": "tools/runtime_parity.py --fetch：tools/zip_peek.py 用 HTTP Range 读 zip 中央目录（每颗约 1 MiB 尾部），不整包下载、不解压、不运行"
+ "how": "zip 28 颗：zip_peek 用 HTTP Range 读中央目录（每颗约 1 MiB 尾部）；tar.gz 3 颗（真装的默认档）：payload_plan.read_tar_entries 取整包并复核字节与上游 digest。都不解包、不运行。"
 }

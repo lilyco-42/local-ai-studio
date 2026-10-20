@@ -76,8 +76,8 @@ class TestArtifact(unittest.TestCase):
 
     def test_stats_literals(self) -> None:
         s = artifact()["stats"]
-        self.assertEqual(s, {"runtime 资产": 47, "读到成员表": 27, "没读要走出包车道": 20,
-                             "有 server": 27, "缺 server 的可选档": 0, "默认档": 8,
+        self.assertEqual(s, {"runtime 资产": 47, "读到成员表": 30, "没读要走出包车道": 17,
+                             "有 server": 30, "缺 server 的可选档": 0, "默认档": 8,
                              "包名不写平台": 2})
 
     def test_assets_equal_matrix_runtime_rows(self) -> None:
@@ -85,26 +85,48 @@ class TestArtifact(unittest.TestCase):
 
     def test_every_read_asset_has_the_server(self) -> None:
         read = [a for a in artifact()["assets"] if a["read"]]
-        self.assertEqual(len(read), 27)
+        self.assertEqual(len(read), 30)
         self.assertTrue(all(a["has_server"] for a in read),
                         [a["asset"] for a in read if not a["has_server"]])
         self.assertEqual(artifact()["server_gaps"], [])
 
-    def test_defaults_split_five_proven_three_not(self) -> None:
+    def test_all_eight_defaults_are_proven_to_carry_the_server(self) -> None:
+        """真装的 8 颗必须逐颗证过。3 颗 tar.gz 是取整包读成员表证的，
+        而取整包只有在字节与上游 digest 都对得上时才算证据。"""
         df = [a for a in artifact()["assets"] if a["is_default"]]
         self.assertEqual(len(df), 8)
-        self.assertEqual(sorted(a["asset"] for a in df if not a["read"]),
-                         ["llama-b11727-bin-macos-arm64.tar.gz",
-                          "llama-b11727-bin-ubuntu-x64.tar.gz",
-                          "whisper-bin-ubuntu-x64.tar.gz"])
-        self.assertTrue(all(a["has_server"] for a in df if a["read"]))
+        self.assertEqual([a["asset"] for a in df if not a["read"]], [])
+        self.assertTrue(all(a["has_server"] for a in df),
+                        [a["asset"] for a in df if not a["has_server"]])
+
+    def test_tar_read_is_pinned_to_payload_plan_bytes(self) -> None:
+        """tar 那一族的字节数与哈希都从 payload-plan 已量过的数来，不是这张表自己说的。"""
+        verified = {r["asset"]: (r["verified_bytes"], r["digest"])
+                    for rows in plan()["os"].values() for r in rows if r.get("verified_bytes")}
+        read_tar = [a for a in artifact()["assets"]
+                    if a.get("read_via") == "tar_stream" and a["read"]]
+        self.assertEqual(len(read_tar), 3)
+        for a in read_tar:
+            self.assertTrue(a["sha256_verified"], a["asset"])
+            vb, digest = verified[a["asset"]]
+            self.assertEqual(a["archive_bytes"], vb["bytes"], a["asset"])
+            self.assertEqual(digest, "sha256:" + a["sha256"], a["asset"])
+
+    def test_sixteen_optional_tars_are_not_paid_for(self) -> None:
+        """16 颗可选档的 tar 不读整包：不为没人会下载的那一颗付流量，也不假装知道。"""
+        unread = [a for a in artifact()["assets"]
+                  if a["asset"].endswith(".tar.gz") and not a["read"]]
+        self.assertEqual(len(unread), 16)
+        self.assertEqual(artifact()["server_gaps"], [])
+        for a in unread:
+            self.assertIn("整包", a["why_not_read"])
 
     def test_server_name_rule_is_visible_in_the_table(self) -> None:
         """Windows 要带 .exe、Linux/macOS 不带：这条规则必须能在产物里被看见，
         而且要同时出现"带 .exe"和"不带 .exe"两种，否则后缀规则坏了也没人知道。"""
         want = {a["expect_server"] for a in artifact()["assets"] if a["read"]}
-        self.assertEqual(want, {"llama-server.exe", "whisper-server.exe",
-                                "sd-server.exe", "sd-server"})
+        self.assertEqual(want, {"llama-server.exe", "llama-server", "whisper-server.exe",
+                                "whisper-server", "sd-server.exe", "sd-server"})
         import launch_plan as lp
         self.assertEqual(rp.server_name("llama", "win-x64"), lp.SERVER_BASE["llama"] + ".exe")
         self.assertEqual(rp.server_name("sd", "linux-x64"), lp.SERVER_BASE["sd"])
@@ -141,10 +163,15 @@ class TestArtifact(unittest.TestCase):
             if a["read"]:
                 self.assertGreaterEqual(sum(a["libs"].values()), 1, a["asset"])
 
-    def test_packed_sum_close_to_matrix_size(self) -> None:
+    def test_size_agrees_with_the_matrix_for_every_read_asset(self) -> None:
+        """zip 比中央目录压缩后合计，tar 比整包字节 —— 两条路都得与矩阵声明对上，
+        否则"读到的成员表"来自另一个包，证据不算数。"""
         for a in artifact()["assets"]:
-            if a["read"] and a["mib"] is not None:
-                self.assertLessEqual(abs(a["packed_sum_mib"] - a["mib"]), 1.5, a["asset"])
+            if not a["read"] or a["mib"] is None:
+                continue
+            got = a["packed_sum_mib"] if a["read_via"] == "zip_central_directory" else \
+                round(a["archive_bytes"] / 1048576, 1)
+            self.assertLessEqual(abs(got - a["mib"]), 1.5, (a["asset"], got, a["mib"]))
 
     def test_server_names_are_never_retyped_in_the_source(self) -> None:
         """可执行名只有一个来源（launch_plan.SERVER_BASE）。代码里的字符串常量出现它就是第二个定义；
@@ -202,14 +229,16 @@ class TestSelftest(unittest.TestCase):
                         "捕获必须每读一颗就写一次")
 
 
-OLD_TAR = '        if not r["asset"].endswith(".zip"):'
+OLD_TAR = '        is_tar = not r["asset"].endswith(".zip")'
 OLD_DEFAULT_FLOOR = '        if a is None:'
 OLD_DRIFT_TUPLE = '\n'.join([
-    '        for f in ("expect_server", "has_server", "read", "entries", "server_sibling_lib",',
-    '                  "packed_sum_mib", "libs", "is_default", "os_resolved"):'])
+    '        for f in ("expect_server", "has_server", "read", "read_via", "entries",',
+    '                  "server_sibling_lib", "packed_sum_mib", "archive_bytes", "sha256_verified",',
+    '                  "libs", "is_default", "os_resolved"):'])
 NEW_DRIFT_TUPLE = '\n'.join([
-    '        for f in ("expect_server", "read", "entries", "server_sibling_lib",',
-    '                  "packed_sum_mib", "libs", "is_default", "os_resolved"):'])
+    '        for f in ("expect_server", "read", "read_via", "entries",',
+    '                  "packed_sum_mib", "archive_bytes", "sha256_verified",',
+    '                  "libs", "is_default", "os_resolved"):'])
 
 
 class TestSourceMutants(unittest.TestCase):
@@ -221,18 +250,21 @@ class TestSourceMutants(unittest.TestCase):
     MUTANTS = [
         ("捕获少一颗不报", "        if cap is None:", "        if False and cap is None:"),
         ("成员表 0 条不报", '        if s["entries"] == 0:', '        if False and s["entries"] == 0:'),
-        ("中央目录体积与矩阵不符不报",
-         '        if r["mib"] is not None and abs(packed_mib - r["mib"]) > 1.5:',
-         '        if False and r["mib"] is not None and abs(packed_mib - r["mib"]) > 1.5:'),
+        ("体积与矩阵不符不报",
+         '        if r["mib"] is not None and abs(size_mib - r["mib"]) > 1.5:',
+         '        if False and r["mib"] is not None and abs(size_mib - r["mib"]) > 1.5:'),
         ("默认档缺 server 不报",
          '        if not s["has_server"] and item["is_default"]:',
          '        if False and not s["has_server"] and item["is_default"]:'),
         ("默认档缺 server 也塞进 gaps（把硬约束降格成备注）",
          '        if not s["has_server"] and item["is_default"]:',
          '        if not s["has_server"] or item["is_default"]:'),
-        ("tar 被当成读过了（未知冒充缺席）", OLD_TAR, "        if False and not "
-                                                     'r["asset"].endswith(".zip"):'),
+        ("tar 被当成读过了（未知冒充缺席）", OLD_TAR, "        is_tar = False"),
         ("默认档整颗消失时不点名", OLD_DEFAULT_FLOOR, "        if False and a is None:"),
+        ("tar 的整包 digest 不符不报", '            if not cap["digest_matches"]:',
+         '            if False and not cap["digest_matches"]:'),
+        ("真装的 tar 没读也不报", '            if item["is_default"]:',
+         '            if False and item["is_default"]:'),
         ("不写平台那颗改成猜 win-x64",
          '        os_key = r["os"] if r["os"] is not None else os_of_asset.get(r["asset"])',
          '        os_key = r["os"] or "win-x64"'),
@@ -260,7 +292,8 @@ class TestSourceMutants(unittest.TestCase):
             committed = artifact()
             fresh, _pr = mod.build(caps, m, p)
             out["b 重算与漂移"] = mod.drift(committed, fresh) == []
-            dflt = next(a for a in fresh["assets"] if a.get("read") and a["is_default"])
+            dflt = next(a for a in fresh["assets"] if a.get("read") and a["is_default"]
+                        and a["asset"].endswith(".zip"))
             c1 = copy.deepcopy(caps)
             c1[dflt["asset"]]["names"] = [n for n in c1[dflt["asset"]]["names"]
                                           if not n.endswith(dflt["expect_server"])]
@@ -282,11 +315,12 @@ class TestSourceMutants(unittest.TestCase):
             c5 = copy.deepcopy(caps)
             c5[alt["asset"]]["names"] = []
             out["g 空成员表被报"] = any("解析出 0 条" in x for x in mod.build(c5, m, p)[1])
-            tars = [a for a in fresh["assets"] if a["asset"].endswith(".tar.gz")]
+            unread_tar = {a["asset"] for a in fresh["assets"]
+                          if a["asset"].endswith(".tar.gz") and not a.get("read")}
             out["h tar 不被当成读过"] = (
-                bool(tars) and all(a.get("read") is False for a in tars)
-                and not any(a["asset"].endswith(".tar.gz") for a in fresh["server_gaps"])
-                and len(fresh["not_read"]) == len(tars) + 1)
+                len(unread_tar) == 16 and len(fresh["not_read"]) == 17
+                and not (unread_tar & {g["asset"] for g in fresh["server_gaps"]})
+                and not any("是 zip 却没有捕获" in x for x in _pr))
             off = {a["asset"]: a for a in fresh["assets"] if not a["os_named"]}
             out["i 平台从 plan 取不猜"] = (
                 off["whisper-bin-x64.zip"].get("os_resolved") == "win-x64"
@@ -301,11 +335,34 @@ class TestSourceMutants(unittest.TestCase):
                     a["has_server"] = not a["has_server"]
                     break
             out["k has_server 被手改要叫"] = mod.drift(c7, fresh) != []
+            c8 = copy.deepcopy(caps)
+            for v in c8.values():
+                if v.get("reader") == "tar_stream":
+                    v["digest_matches"] = False
+            out["l tar 的 digest 不符被报"] = any(
+                "成员表是从另一个包读的" in x for x in mod.build(c8, m, p)[1])
+            c9 = copy.deepcopy(caps)
+            for v in c9.values():
+                if v.get("reader") == "tar_stream":
+                    v["bytes"] = 1000
+            out["m tar 的体积对不上被报"] = any(
+                "差过 1.5" in x for x in mod.build(c9, m, p)[1])
+            dtar = next(a for a in fresh["assets"]
+                        if a["is_default"] and a["asset"].endswith(".tar.gz"))
+            c10 = copy.deepcopy(caps)
+            c10.pop(dtar["asset"])
+            out["n 默认档 tar 没捕获被报"] = any(
+                "没人证过" in x for x in mod.build(c10, m, p)[1])
+            out["o tar 字节与哈希搬自 plan"] = all(
+                a["sha256_verified"] for a in fresh["assets"]
+                if a.get("read_via") == "tar_stream" and a["read"])
         except Exception as exc:                     # noqa: BLE001
             for k in ("b 重算与漂移", "c 默认档缺 server 被报", "d 可选档只点名不报警",
                       "e 捕获少一颗被报", "f 体积对不上被报", "g 空成员表被报",
                       "h tar 不被当成读过", "i 平台从 plan 取不猜", "j 默认档消失单独点名",
-                      "k has_server 被手改要叫"):
+                      "k has_server 被手改要叫", "l tar 的 digest 不符被报",
+                      "m tar 的体积对不上被报", "n 默认档 tar 没捕获被报",
+                      "o tar 字节与哈希搬自 plan"):
                 out.setdefault(k, False)
             out["_b 异常"] = str(exc)[:60]
         return out
@@ -316,7 +373,9 @@ class TestSourceMutants(unittest.TestCase):
                           "d 可选档只点名不报警": True, "e 捕获少一颗被报": True,
                           "f 体积对不上被报": True, "g 空成员表被报": True,
                           "h tar 不被当成读过": True, "i 平台从 plan 取不猜": True,
-                          "j 默认档消失单独点名": True, "k has_server 被手改要叫": True})
+                          "j 默认档消失单独点名": True, "k has_server 被手改要叫": True,
+                          "l tar 的 digest 不符被报": True, "m tar 的体积对不上被报": True,
+                          "n 默认档 tar 没捕获被报": True, "o tar 字节与哈希搬自 plan": True})
 
     def test_every_mutant_is_caught(self) -> None:
         missed = []
@@ -329,7 +388,7 @@ class TestSourceMutants(unittest.TestCase):
         self.assertEqual(missed, [], "这些变异没人报：对应判据是装饰\n" + "\n".join(missed))
 
     def test_mutant_count(self) -> None:
-        self.assertEqual(len(self.MUTANTS), 9)
+        self.assertEqual(len(self.MUTANTS), 11)
 
 
 if __name__ == "__main__":

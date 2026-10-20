@@ -62,6 +62,18 @@ def shipped_defaults(plan: dict) -> dict:
             for r in rows if r.get("engine")}
 
 
+def verified_bytes_of(plan: dict) -> dict:
+    """tar.gz 只能在取回整包后读成员表，所以这一条**必须**建在字节与哈希都对得上的包上：
+    体积与 digest 直接取 payload-plan 已经量过的 `verified_bytes`，不在这里重打数字。"""
+    out = {}
+    for rows in plan["os"].values():
+        for r in rows:
+            v = r.get("verified_bytes") or {}
+            if r.get("asset") and v.get("bytes") and v.get("sha256"):
+                out[r["asset"]] = {"bytes": v["bytes"], "sha256": v["sha256"]}
+    return out
+
+
 def summarize(names: list[str], engine: str, os_key: str) -> dict:
     """成员文件名表 → 这台引擎的可执行文件与库闭包形状。"""
     bases = [n.replace("\\", "/").rsplit("/", 1)[-1] for n in names]
@@ -101,18 +113,21 @@ def build(captures: dict, matrix: dict, plan: dict) -> tuple[dict, list[str]]:
         item["os_resolved"] = os_key
         item["is_default"] = os_key is not None and defaults.get((r["engine"], os_key)) == r["asset"]
         item["expect_server"] = None if os_key is None else server_name(r["engine"], os_key)
-        if not r["asset"].endswith(".zip"):
-            # tar.gz：中央目录读不了。不装作知道，也不把它算成"没有"。
+        cap = captures.get(r["asset"])
+        is_tar = not r["asset"].endswith(".zip")
+        if cap is None:
+            if not is_tar:
+                problems.append(f"{r['asset']}: 是 zip 却没有捕获 —— 这张表说它存在而捕获里没有，"
+                                "两份产者已经漂了（不许把没读到当成读过了）")
+                continue
+            if item["is_default"]:
+                problems.append(f"{r['asset']}: 真装的默认档却是 tar.gz 且捕获里没有它 —— 这一档"
+                                "起不起来没人证过（读它必须把整包字节与上游 digest 都对上）")
             item["read"] = False
             item["read_via"] = "tar_stream"
-            item["why_not_read"] = ("gzip 流不可随机寻址，整包流式读是计费流量；"
-                                    "这一颗的 server 在场与否要由出包车道（pack_engine 解包后点名）证")
+            item["why_not_read"] = ("gzip 流不可随机寻址，读成员表要付整包流量；这一档不是真装的那一颗，"
+                                    "所以不为它付 —— server 在场与否未证，要证就出包车道解包后点名")
             assets.append(item)
-            continue
-        cap = captures.get(r["asset"])
-        if cap is None:
-            problems.append(f"{r['asset']}: 是 zip 却没有捕获 —— 这张表说它存在而捕获里没有，"
-                            "两份产者已经漂了（不许把没读到当成读过了）")
             continue
         if os_key is None:
             item.update({"read": False, "read_via": "zip_unnamed_os",
@@ -121,14 +136,22 @@ def build(captures: dict, matrix: dict, plan: dict) -> tuple[dict, list[str]]:
             assets.append(item)
             continue
         s = summarize(cap["names"], r["engine"], os_key)
-        packed_mib = round(cap["packed_total"] / 1048576, 1)
         item.update(s)
-        item.update({"read": True, "read_via": "zip_central_directory",
-                     "packed_sum_mib": packed_mib})
+        if cap.get("reader") == "tar_stream":
+            size_mib = round(cap["bytes"] / 1048576, 1)
+            item.update({"read": True, "read_via": "tar_stream", "archive_bytes": cap["bytes"],
+                         "sha256_verified": bool(cap["digest_matches"]), "packed_sum_mib": None})
+            if not cap["digest_matches"]:
+                problems.append(f"{r['asset']}: 整包 sha256 与上游 release digest 不等 —— "
+                                "成员表是从另一个包读的，不能算这一档的证据")
+        else:
+            size_mib = round(cap["packed_total"] / 1048576, 1)
+            item.update({"read": True, "read_via": "zip_central_directory",
+                         "packed_sum_mib": size_mib})
         if s["entries"] == 0:
-            problems.append(f"{r['asset']}: 中央目录解析出 0 条 —— 读法坏了，不是包空了")
-        if r["mib"] is not None and abs(packed_mib - r["mib"]) > 1.5:
-            problems.append(f"{r['asset']}: 中央目录压缩后合计 {packed_mib} MiB 与矩阵声明的 "
+            problems.append(f"{r['asset']}: 解析出 0 条成员 —— 读法坏了，不是包空了")
+        if r["mib"] is not None and abs(size_mib - r["mib"]) > 1.5:
+            problems.append(f"{r['asset']}: 读到的体积 {size_mib} MiB 与矩阵声明的 "
                             f"{r['mib']} MiB 差过 1.5 —— 量的不是同一份东西")
         if not s["has_server"] and item["is_default"]:
             problems.append(f"{r['asset']}: 这是 payload-plan 真装的那一颗，可成员表里没有 "
@@ -157,7 +180,10 @@ def build(captures: dict, matrix: dict, plan: dict) -> tuple[dict, list[str]]:
            "rule": {"server_name": "可执行文件名只从 tools/launch_plan.py 的 SERVER_BASE 取，"
                                    "Windows 加 .exe；这张表里没有第二个定义",
                     "reader": "zip 用 Range 读中央目录（约 1 MiB 尾部，不整包下载、不解压、不运行）；"
-                              "tar.gz 不可随机寻址 → 一律 not_read 并写明该由谁证",
+                              "tar.gz 不可随机寻址，只能取整包读成员表 —— 这一层只为 payload-plan 真装的"
+                              "默认档付那份流量，且取回的字节数与整包 sha256 都按 payload-plan 已量过的数复核",
+                    "cost": "16 颗可选档的 tar.gz 不读：不为没人会下载的那一颗付整包流量，"
+                            "如实标未证（要证就走出包车道解包后点名）",
                     "absent_vs_unknown": "读到成员表而里面没 server = 缺（进 gaps 点名）；"
                                          "没读到 = 未知（进 not_read），两者不许混",
                     "hard": "payload-plan 真装的那几颗必须有 server —— 装上起不来就是红",
@@ -186,29 +212,51 @@ def drift(committed: dict, fresh: dict) -> list[str]:
         if o is None:
             bad.append(f"{a['asset']}: 新增资产，已提交那张没有")
             continue
-        for f in ("expect_server", "has_server", "read", "entries", "server_sibling_lib",
-                  "packed_sum_mib", "libs", "is_default", "os_resolved"):
+        for f in ("expect_server", "has_server", "read", "read_via", "entries",
+                  "server_sibling_lib", "packed_sum_mib", "archive_bytes", "sha256_verified",
+                  "libs", "is_default", "os_resolved"):
             if o.get(f) != a.get(f):
                 bad.append(f"{a['asset']}: {f} 变了 {o.get(f)} → {a.get(f)}")
     return bad
 
 
-def fetch(rows: list[dict], path: str) -> None:
+def fetch(rows: list[dict], path: str, plan: dict) -> None:
     """增量落盘：这个 CN 出口会在半路 TLS 断（实测过），一次抓取十几分钟，
-    全部攒在内存里最后才写 = 一断就前功尽弃。每读一颗就写一次，重跑自动接上。"""
+    全部攒在内存里最后才写 = 一断就前功尽弃。每读一颗就写一次，重跑自动接上。
+
+    zip 用 Range 读中央目录；tar.gz **只读真装的那几颗默认档**，且体积与整包哈希都按
+    payload-plan 已经量过的数复核 —— 不为一个没人会下载的可选档付整包流量。
+    """
     zp = _load("zip_peek")
+    pp = _load("payload_plan")
+    verified = verified_bytes_of(plan)
+    defaults = set(shipped_defaults(plan).values())
     cap = load(path) if os.path.exists(path) else {}
     for r in rows:
-        if not r["asset"].endswith(".zip") or r["asset"] in cap:
+        asset = r["asset"]
+        url = f"https://github.com/{r['repo']}/releases/download/{r['release']}/{asset}"
+        if asset in cap:
             continue
-        url = f"https://github.com/{r['repo']}/releases/download/{r['release']}/{r['asset']}"
-        entries = zp.entries(url)
-        cap[r["asset"]] = {"url": url, "names": [x["name"] for x in entries],
-                           "packed_total": sum(x["packed"] for x in entries if not x["dir"])}
+        if asset.endswith(".zip"):
+            entries = zp.entries(url)
+            cap[asset] = {"url": url, "reader": "zip_central_directory",
+                          "names": [x["name"] for x in entries],
+                          "packed_total": sum(x["packed"] for x in entries if not x["dir"])}
+            print("捕获", asset, len(entries), "条")
+        elif asset in defaults and asset in verified:
+            got, meta = pp.read_tar_entries(url, verified[asset]["bytes"],
+                                            verified[asset]["sha256"])
+            cap[asset] = {"url": url, "reader": "tar_stream",
+                          "names": [x["name"] for x in got], "bytes": meta["bytes"],
+                          "sha256": meta["sha256"], "digest_matches": meta["digest_matches"],
+                          "packed_total": None}
+            print("捕获(tar)", asset, len(got), "条", meta["bytes"], "B",
+                  "digest 对上了" if meta["digest_matches"] else "digest 不符")
+        else:
+            continue
         with open(path, "w", encoding="utf-8", newline="\n") as fh:
             json.dump(cap, fh, ensure_ascii=False, indent=1, sort_keys=True)
             fh.write("\n")
-        print("捕获", r["asset"], len(entries), "条")
     print("落盘捕获", path, len(cap), "颗")
 
 
@@ -225,13 +273,15 @@ def selftest() -> int:
                    "捕获没在场就等于这一层没跑")
     if doc["stats"]["runtime 资产"] != matrix["stats"]["runtime 行"]:
         bad.append("资产数必须等于矩阵的 runtime 行数，现在不等 —— 这一层在偷偷丢行")
-    # 实测的三个数（2026-10-20 那一份捕获）：27 读到 / 20 读不到 / 0 档缺 server。
-    # "换到任意一档都起得来"这句现在靠这三个数撑着，上游改了包形状就必须在这里叫。
+    # 实测的数（2026-10-20 那一份捕获）：30 读到 / 17 读不到 / 0 档缺 server。
+    # "换到任意一档都起得来"与"真装的那 8 颗一定起得来"两句都靠这些数撑着。
     if (doc["stats"]["读到成员表"], doc["stats"]["没读要走出包车道"],
-            doc["stats"]["缺 server 的可选档"]) != (27, 20, 0):
-        bad.append(f"实测应是 27 读到 / 20 读不到 / 0 档缺 server，现在 "
+            doc["stats"]["缺 server 的可选档"]) != (30, 17, 0):
+        bad.append(f"实测应是 30 读到 / 17 读不到 / 0 档缺 server，现在 "
                    f"{doc['stats']['读到成员表']}/{doc['stats']['没读要走出包车道']}/"
                    f"{doc['stats']['缺 server 的可选档']}")
+    if any(not (a.get("read") and a.get("has_server")) for a in doc["assets"] if a["is_default"]):
+        bad.append("8 颗真装的默认档必须逐颗证过 server —— 缺一个就是装了起不来")
     if doc["stats"]["有 server"] != doc["stats"]["读到成员表"]:
         bad.append("读到的每一颗都必须带着 server —— 有缺的就得进 gaps 点名，不许只算总数")
     llama_win = [a for a in doc["assets"] if a["engine"] == "llama"
@@ -272,11 +322,18 @@ def selftest() -> int:
     c5[victim["asset"]]["names"] = []
     if not any("解析出 0 条" in x for x in build(c5, matrix, plan)[1]):
         bad.append("0 条成员时没红")
-    # ⑥ tar.gz 那颗不许被算成"缺 server"，也不许被算成"读过了"。
-    if not all(a.get("read") is False for a in doc["assets"] if a["asset"].endswith(".tar.gz")):
-        bad.append("tar.gz 被当成读过了")
-    if any(a["asset"].endswith(".tar.gz") for a in doc["server_gaps"]):
+    # ⑥ 没读到的 tar 不许被算成"缺 server"；读到的 tar 必须逐颗 digest 对上。
+    unread_tar = {a["asset"] for a in doc["assets"]
+                  if a["asset"].endswith(".tar.gz") and not a.get("read")}
+    if len(unread_tar) != 16:
+        bad.append(f"未读的 tar 应有 16 颗（19 减掉 3 颗读过的默认档），现在 {len(unread_tar)} "
+                   "—— 整包流量只给默认档这条门槛被改了")
+    if any(a["asset"] in unread_tar for a in doc["server_gaps"]):
         bad.append("没读到的 tar 被写成了「缺 server」—— 未知与缺席混成一件事")
+    read_tar = [a for a in doc["assets"] if a.get("read_via") == "tar_stream" and a.get("read")]
+    if len(read_tar) != 3 or not all(a["sha256_verified"] for a in read_tar):
+        bad.append(f"读到的 tar 应是 3 颗且逐颗 digest 对上，现在 "
+                   f"{[(a['asset'], a.get('sha256_verified')) for a in read_tar]}")
     # ⑧ 名字里不写平台那两颗：OS 只能从 payload-plan 取，plan 里没有的那颗必须停在"未知"。
     unnamed = {a["asset"]: a for a in doc["assets"] if not a["os_named"]}
     if sorted(unnamed) != ["whisper-bin-x64.zip", "whisper-blas-bin-x64.zip"]:
@@ -292,6 +349,20 @@ def selftest() -> int:
             break
     if not any("has_server 变了" in x for x in drift(doc, c7)):
         bad.append("has_server 被手改时漂移判据没红")
+    # ⑩ 整包 digest 对不上必须红：成员表是从另一个包读的，这一档就不算有证据。
+    c10 = json.loads(json.dumps(caps))
+    for v in c10.values():
+        if v.get("reader") == "tar_stream":
+            v["digest_matches"] = False
+    if not any("成员表是从另一个包读的" in x for x in build(c10, matrix, plan)[1]):
+        bad.append("tar 的整包 digest 不符时没红")
+    # ⑪ tar 的整包体积与矩阵声明差太远必须红（读到的不是那一颗的量）。
+    c11 = json.loads(json.dumps(caps))
+    for v in c11.values():
+        if v.get("reader") == "tar_stream":
+            v["bytes"] = 1000
+    if not any("差过 1.5" in x for x in build(c11, matrix, plan)[1]):
+        bad.append("tar 体积对不上时没红")
     print("---- 结论 ----", doc["stats"], f"BAD 数量 = {len(bad)}")
     for x in bad:
         print("BAD:", x)
@@ -316,7 +387,7 @@ def main(argv: list[str]) -> int:
     matrix, plan = load(MATRIX), load(PLAN)
     rows = rows_from_matrix(matrix)
     if a.fetch:
-        fetch(rows, a.captures)
+        fetch(rows, a.captures, load(PLAN))
     caps = load(a.captures)
     doc, problems = build(caps, matrix, plan)
     if a.check:

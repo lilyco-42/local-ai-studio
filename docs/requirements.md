@@ -48,15 +48,17 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
    **"换到哪一档、要多下多少"是另一张表**（验收第 28 条）：默认档从 `payload-plan` 搬、
    CUDA 档必须连 `cudart-` 伴生包一起算（实测伴生包 373–567 MiB，比本体还大），
    CPU 退路分四态算出来。
-   **"换过去还起得来"同样有表**（验收第 29 条）：27 颗 zip 的成员表逐颗核过，每一档都带着
-   外壳要点名执行的那个 server（llama 的 Windows 包还带同名 impl 库成对）；`.tar.gz` 那 19 颗
-   读不了中央目录，如实标未证，不冒充"已知没有"。
+   **"换过去还起得来"同样有表**（验收第 29 条）：47 个 runtime 资产里 30 颗读到了成员表，
+   每一颗都带着外壳要点名执行的那个 server（llama 的 Windows 包还带同名 impl 库成对），
+   真装的 8 颗默认档全部证过；剩下 16 颗可选档的 `.tar.gz` 读不了中央目录，如实标未证，
+   不冒充"已知没有"。
 4. **对话、字幕、生图三项起常驻 server，而不是一次一进程**：上游包里就有
    `llama-server` / `whisper-server` / `sd-server`（见 ADR-0001"包内到底有什么"）。
    400 MB 权重每次重载不可接受。`llama-bench` 也在包里，"这台机器多少 tok/s"不用自研。
-   **"包里有 server"这句现在是成员表级的证据**（验收第 29 条：27 颗 zip 逐颗读到文件名，
-   三档引擎都带 server），只有 3 颗 tar.gz 默认档（llama 的 linux/macOS、whisper 的 linux）
-   要等出包车道真跑一次才算证 —— 那句"每项都带 server"对它们是**未证**，不是"已知没有"。
+   **"包里有 server"这句现在是成员表级的证据**（验收第 29 条）：三档引擎真装的那 8 颗
+   逐颗读到文件名、逐颗带着 server —— 其中 3 颗是 `.tar.gz`，取整包读成员表并把**字节数与
+   上游 digest 都对上**才算数。剩下 16 颗可选档的 tar 没读（不为没人下载的那一颗付流量），
+   标的是未证，不是"已知没有"。
    **OCR 是例外**：2026-10-20 递归列过 oar-ocr 在钉住 ref 的 464 个成员，
    只有 `oar-ocr-cli` / `oar-ocr-bench` / `examples`，没有任何 HTTP 服务面
    （`oar-ocr-vl/src/api` 是库的 Rust API 模块，不是网络服务）——
@@ -95,13 +97,13 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
 
 ## 验收标准（在当前唯一可用验证手段 = GitHub Actions 下）
 
-1. `ci.yml`：757 个单测绿（重数：`python -W error::ResourceWarning -m unittest discover -s tests
+1. `ci.yml`：759 个单测绿（重数：`python -W error::ResourceWarning -m unittest discover -s tests
    -p "test_*.py"`；按文件数就 `python -m unittest tests.<模块名>`。2026-10-20 实测逐文件：
    `test_yaml_gate.py` 闸门自己 14、`test_lane_argv.py` 车道 ↔ 启动表一致（含 9 个 workflow 文本变异）10、
    `test_sideload.py` sideload 按内容认领（6 条源码变异体 + 三个真上游文件）22、
    `test_backends.py` 后端矩阵（7 条源码变异体 + 真实 release 捕获）22、
    `test_backend_choice.py` 换档表（10 条源码变异体 × 13 条探针，输入是两份已钉产物）22、
-   `test_runtime_parity.py` server 在场表（9 条源码变异体 × 11 条探针 + 捕获夹具字节复核）19、
+   `test_runtime_parity.py` server 在场表（11 条源码变异体 × 15 条探针 + 捕获夹具字节复核）21、
    `test_toolbelt_pins.py` 工具带钉表 14、
    `test_catalog_snapshot.py` 目录快照与侧表 16、`test_citation_check.py` 出处闸门 22、
    `test_ocr_build_surface.py` OCR 依赖面 15、`test_file_index.py` 下载层五种状态与首启队列 35、
@@ -697,32 +699,37 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     叠在一起才成立：如果 CUDA 那一档只发了 CLI，换过去就不是"换个文件"而是另一种活法。
     **这一层只用只读元数据证**：zip 用 `tools/zip_peek.py` 的 HTTP Range 读中央目录
     （每颗约 1 MiB 尾部，不整包下载、不解压、不运行 —— 硬约束没被绕开，也没被顺手扩大成"连看清上游发了什么都不许"）。
-    实测 **47 个 runtime 资产 / 27 颗读到成员表 / 27 颗都带着 server / 0 档缺 server**：
+    实测 **47 个 runtime 资产 / 30 颗读到成员表 / 30 颗都带着 server / 0 档缺 server**：
     llama 在 Windows 的 11 颗（cpu / cuda 12.4 / cuda 13.4 ×x64+arm64 / vulkan ×2 / rocm / sycl / openvino / opencl-adreno）
     都同时有 `llama-server.exe` **和** `llama-server-impl.dll` 成对，whisper 的 8 颗都有 `whisper-server.exe`，
     sd 的 8 颗都有 `sd-server`（Windows 带 .exe）。**每一档都能起常驻服务**这句不再是推测。
     三条边界的形状：
-    ① `.tar.gz` 19 颗**读不了**中央目录（gzip 流不可随机寻址，整包流式读是计费流量）→ 一律
-    `read: false` + `not_read` 点名"该由出包车道证"，**绝不写进 server_gaps**（未知冒充缺席就是谎称知道）；
-    ② 8 颗默认档里 **5 颗已证**（win 三颗 + sd 的 linux 与 macOS 两颗）、**3 颗未证**
-    （llama 的 linux-x64 与 macos-arm64、whisper 的 linux-x64，都是 tar.gz）—— 那 3 颗的"起得来"
-    要等 `pack_engine` 真跑一次（#19），文档不许提前把它写成已证；
+    ① `.tar.gz` 读不了中央目录（gzip 流不可随机寻址），只能取整包读成员表 —— 这一层**只为真装的
+    默认档付那份流量**，且字节数与整包 sha256 都按 `payload-plan` 已经量过的数复核（3 颗全对上）；
+    剩下 16 颗可选档不读 → `read: false` + `not_read` 点名"该由出包车道证"，
+    **绝不写进 server_gaps**（未知冒充缺席就是谎称知道）；
+    ② 8 颗默认档 **全部证过**：5 颗走 zip 中央目录，3 颗走整包读并复核 digest
+    （llama 的 linux-x64 与 macos-arm64、whisper 的 linux-x64）—— 之前那句"3 颗要等出包车道"
+    在这一轮被证掉了，代价是 40,629,147 B（38.75 MiB）的一次性读取，而不是等一条从没跑过的 CI；
     ③ `whisper-blas-bin-x64.zip` 名字里不写平台、payload-plan 又没装它 → `read_via: zip_unnamed_os`
     并停在未知；同一颗 whisper 的 CPU 默认包 `whisper-bin-x64.zip` 的 OS 是**从 payload-plan 取的**，
     不是猜 win-x64（把这条兜底改成猜的变异体被探针「平台从 plan 取不猜」抓住）。
+    读到的 tar 还顺带量到库闭包：llama linux 28 个 `.so`、llama macOS 35 个 `.dylib`、
+    whisper linux 18 个 `.so` —— "$ORIGIN 找运行库"那句现在有数可依。
     `server_sibling_lib`（exe 与同名 impl 库成对）**只对 llama 求值**，whisper/sd 写 `null` 不写 `false` ——
     那个包形状只在 llama 上被量过，套上去就是替上游编判据。
     另一条独立证据顺手落进表里：**sd 在 macOS 有 `sd-server` + 1 个 `.dylib`**（Darwin 包 5 条成员），
     与"whisper 在 macOS 只有 xcframework、没有可执行产物"（#29）形成对照 —— 生图在这台机器上有路，字幕没有。
     可执行名**只有一个来源**（`launch_plan.SERVER_BASE`，Windows 加 `.exe`），源码里出现字面量
     由一条 ast 扫描拒绝（docstring 允许解释，代码常量不允许）；中央目录压缩后合计与矩阵声明的
-    体积逐颗对表（27 颗全在 1.5 MiB 内），差太远=量的不是同一份东西。
-    判据的承重：**9 条源码变异体**（捕获少一颗不报 / 空成员表不报 / 体积不符不报 / 默认档缺 server 不报 /
-    默认档缺 server 降级成备注 / tar 被当成读过 / 默认档整颗消失不点名 / 平台改成猜 win-x64 /
-    `has_server` 不进漂移比对表）× **11 条探针**全被抓，另有"可选档少 server 只点名不报警"这条
-    防止判据过度报警的正向对照。捕获钉成 `tests/fixtures/parity-captures.json`（28 颗 / 36,628 B，
-    sha256 记在 `.meta.json` 并由测试复算字节），所以没有 runner 也能离线重算。
-    车道 `backends` 最后四步跑它：判据本身 / 单测 / 离线对表 / **现读那 28 颗 zip 的中央目录再对一次**
+    体积逐颗对表（30 颗全在 1.5 MiB 内），差太远=量的不是同一份东西。
+    判据的承重：**11 条源码变异体**（捕获少一颗不报 / 空成员表不报 / 体积不符不报 / 默认档缺 server 不报 /
+    默认档缺 server 降级成备注 / tar 被当成读过 / 默认档整颗消失不点名 / 真装的 tar 没读也不报 /
+    tar 的整包 digest 不符不报 / 平台改成猜 win-x64 / `has_server` 不进漂移比对表）×
+    **15 条探针**全被抓，另有"可选档少 server 只点名不报警"这条防止判据过度报警的正向对照。
+    捕获钉成 `tests/fixtures/parity-captures.json`（31 颗 / 44,548 B，sha256 记在 `.meta.json`
+    并由测试复算字节），所以没有 runner 也能离线重算。
+    车道 `backends` 最后四步跑它：判据本身 / 单测 / 离线对表 / **现读 28 颗 zip 的中央目录与真装默认档那 3 颗 tar 的成员表，再对一次**
     —— 上游重打包、把某档的 server 换掉或删掉，就在这一步红，而不是等外壳去 exec 一个不存在的文件。
     重数：`python3 tools/runtime_parity.py --selftest`、`--check`、
     `python3 tools/runtime_parity.py --fetch --captures <路径> --check --captures <路径>`。
@@ -748,7 +755,7 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
 | `lane-argv` | 车道真敲的那一行是否与 `pins/launch-plan.json` 一致 | **不是上游声明，是本仓库两份产物互相核对**：读 `.github/workflows/engine-live.yml`（pyyaml），按表里的 `binaries` / `bind` / `flags_absent` / `omit` / `subcommand` 查。九种改坏 workflow 文本的对照全被报（含 `$SRV` 换成 `:` 的"只 find 不 exec"）；判据不吃注释与 heredoc 正文，这条本身也有正反对照。上游那五处旗标事实的出处仍归 `launch-plan` 那一行 |
 | `sideload` | 用户手上的文件能不能按内容认领 | 三个**真实下载的上游文件**（`tests/fixtures/sideload/`，都 <30 KB）：两颗钉过的字典 + `ppocrv5_latin_dict.txt` 的另一颗同名不同字节者。同一串 sha256 取自 GitHub API 的 `asset.digest`（复现命令连同两颗 tag 的体积与 digest 一起记在 `tests/fixtures/sideload.meta.json` 的 reproduce 字段 —— 那条 jq 里有竖线，写进这张表会打断一行），meta 记完整串、测试按 meta 复算字节。`.gguf` 文件头不在这一层解读（归 CI/外壳里的 gguf-parser），产物 `rule.header` 写明了这条边界 |
 | `backends` | 分层与 runtime 可替换这两句有多少可选面 | 三个 ref 的 release 表按 `pins/payload-plan.json` 钉的那一个现取（`gh api repos/<repo>/releases/tags/<tag>` 的 name / size / digest）：llama `b11727` 36 个、whisper `b5454` 12 个、sd `master-975-95b3090` 9 个 = 57，与 ADR-0001 那句"36 个产物"逐条对得上。真实捕获钉在 `tests/fixtures/backend_assets.json`（sha256 记在 `.meta.json`，测试复算字节），车道 `backends` 的现取步骤再现取一次对表；同一 job 后四步是换档表（`--selftest` / 单测 / 离线对表 / 拿现取那份矩阵重算） |
-| `backends`（server 在场那四步） | "每一档包里都有外壳要 exec 的那个文件"这句话的前提 | zip **中央目录的成员文件名表**（`tools/zip_peek.py` 用 HTTP Range 读尾部，每颗约 1 MiB；不整包下载、不解压、不运行）：28 颗 zip 钉在 `tests/fixtures/parity-captures.json`（36,628 B，sha256 记 `.meta.json` 并由测试复算字节）；可执行名不在这张表里定义，只从 `launch_plan.SERVER_BASE` 取（那条出处见上面两行），源码里出现字面量由一条 ast 扫描拒绝 |
+| `backends`（server 在场那四步） | "每一档包里都有外壳要 exec 的那个文件"这句话的前提 | zip **中央目录的成员文件名表**（`tools/zip_peek.py` 用 HTTP Range 读尾部，每颗约 1 MiB，不解压不运行）+ 真装默认档那 3 颗 `.tar.gz` 的**成员表**（`payload_plan.read_tar_entries`：取整包后先要求"字节数 == release 声明"与"整包 sha256 == 上游 digest"，才读 `tarfile.getmembers()`）；31 颗钉在 `tests/fixtures/parity-captures.json`（44,548 B，sha256 记 `.meta.json` 并由测试复算字节）；可执行名不在这张表里定义，只从 `launch_plan.SERVER_BASE` 取（那条出处见上面两行），源码里出现字面量由一条 ast 扫描拒绝 |
 | 引擎与权重输入 | 上游 `digest` 就是内容哈希 | 五个包整包下回实算相等（llama b11727、whisper b5454、sd 95b3090、qwen 415 MB、SD1.5 1.5 GB），见 `pins/models.json` 的 `bytes_verified` |
 
 写这张表的理由：CI 现在一次都跑不了，而"日志里会出现某串"这类假设一旦错，

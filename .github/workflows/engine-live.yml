@@ -737,8 +737,9 @@ jobs:
     # 而不是等外壳按一张过期表去挑后端。认不出来的词必须人来认一次，不许静默归成 cpu。
     # 后四个步骤是"换档那张表"（默认档 / 伴生包 / 体积差 / CPU 退路），最后一步拿现取的
     # 矩阵重算一遍：上游撤掉某个 CUDA 版本时，先红的会是伴生包配对而不是体积。
-    # 再后四个步骤是"server 在场表"：用 HTTP Range 读 zip 中央目录（不整包下载、不解压、不运行），
-    # 证明每一档包里都有外壳要点名执行的那个 server —— "换个 asset 就换个后端"这句话的前提。
+    # 再后四个步骤是"server 在场表"：HTTP Range 读 zip 中央目录，加上真装默认档那 3 颗
+    # tar.gz 的整包成员表（字节数与上游 digest 都对上才算读到），证明每一档都有外壳要 exec 的
+    # 那个 server —— "换个 asset 就换个后端"这句话的前提。不解压、不运行任何东西。
     timeout-minutes: 10
     runs-on: ubuntu-latest
     steps:
@@ -773,7 +774,7 @@ jobs:
         run: python -m unittest tests.test_runtime_parity -v
       - name: 离线：用已提交那份成员表对表
         run: python3 tools/runtime_parity.py --check
-      - name: 现读 zip 的中央目录再对一次（上游重打包、把 server 换掉就在这里红）
+      - name: 现读 zip 中央目录与 3 颗默认档 tar 的成员表再对一次（上游重打包就在这里红）
         run: python3 tools/runtime_parity.py --fetch --captures .cache/live-parity.json
              --check --captures .cache/live-parity.json
 
