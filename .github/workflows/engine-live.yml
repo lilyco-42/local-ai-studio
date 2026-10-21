@@ -860,6 +860,10 @@ jobs:
       DICT_SIZE: "27156"
       WORD: OARCI2291
     steps:
+      # 这一条不是为了源码（源码按 commit 单独取），而是为了让 `../pins/ocr-Cargo.lock`
+      # 真的在场。第一版没 checkout：条件判断永远是假，`--locked` 从未走到，
+      # 日志里那句"现场解析"就是证据 —— 没有这一步，钉住的锁只是仓库里的一个文件。
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4.4.0
       - name: 确认工具链够新（workspace 要 edition 2024 / rust-version 1.95）
         run: |
           rustup toolchain install stable --profile minimal
@@ -952,7 +956,6 @@ jobs:
           path: |
             src/Cargo.lock
             ${{ runner.temp }}/ocr-Cargo.lock.sha256
-          if-none-available: false
       - name: 取三个模型文件并按上游 digest 校验
         # 模型/字典来自 release **v0.7.0**，与上面源码的 commit 不同源是有意为之：
         # 这三条 tiny 文件只在 v0.7.0 那批产物里（2026-10-19 逐条下整包验过：
