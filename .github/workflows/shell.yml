@@ -69,23 +69,35 @@ jobs:
         env:
           GDK_BACKEND: x11
           WEBKIT_DISABLE_COMPOSITING_MODE: "1"
+          WEBKIT_DISABLE_DMABUF_RENDERER: "1"
+          WEBKIT_DISABLE_SANDBOX_THIS_IS_DANGEROUS: "1"
+          LIBGL_ALWAYS_SOFTWARE: "1"
           NO_AT_BRIDGE: "1"
         run: |
-          sudo apt-get install -y xvfb xdotool
+          sudo apt-get install -y xvfb xdotool x11-utils
           cargo build --bin local-ai-studio-shell
+          ls -l target/debug/local-ai-studio-shell
           xvfb-run -a -s "-screen 0 1024x768x24" bash -euo pipefail -c '
             ./target/debug/local-ai-studio-shell > /tmp/shell-boot.log 2>&1 &
             app=$!
             found=0
-            for _ in $(seq 1 100); do
-              if xdotool search --name "Local AI Studio" >/dev/null 2>&1; then found=1; break; fi
-              kill -0 "$app" 2>/dev/null || break
+            for _ in $(seq 1 300); do
+              if xdotool search --onlyvisible --pid "$app" >/dev/null 2>&1; then found=1; break; fi
+              if xdotool search --onlyvisible --name "Local AI Studio" >/dev/null 2>&1; then found=1; break; fi
+              if ! kill -0 "$app" 2>/dev/null; then break; fi
               sleep 0.1
             done
             if [ "$found" -ne 1 ]; then
-              echo "没有等到窗口；进程日志："
+              echo "没有等到窗口（app=$app，DISPLAY=$DISPLAY）；进程状态："
+              ps -o pid,stat,etime,cmd -p "$app" || true
+              echo "进程名下的窗口："
+              xdotool search --pid "$app" getwindowname %@ 2>&1 | head -20 || true
+              echo "窗口树："
+              xwininfo -root -tree 2>&1 | head -40 || true
+              echo "进程日志："
               cat /tmp/shell-boot.log || true
               kill "$app" 2>/dev/null || true
+              wait "$app" 2>/dev/null || true
               exit 1
             fi
             sleep 2
@@ -94,7 +106,9 @@ jobs:
               cat /tmp/shell-boot.log || true
               exit 1
             fi
-            echo "窗口标题：$(xdotool search --name "Local AI Studio" getwindowname %@ | head -1)"
+            win=$(xdotool search --onlyvisible --pid "$app" | head -1)
+            echo "窗口标题：$(xdotool getwindowname "$win")"
+            xdotool getwindowgeometry --shell "$win"
             kill "$app" 2>/dev/null || true
             wait "$app" 2>/dev/null || true
           '
