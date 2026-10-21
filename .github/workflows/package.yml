@@ -22,6 +22,9 @@ on:
 permissions:
   contents: read
 
+env:
+  GITHUB_TOKEN: ${{ github.token }}
+
 jobs:
   engine-payload:
     strategy:

@@ -98,7 +98,7 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
 
 ## 验收标准（在当前唯一可用验证手段 = GitHub Actions 下）
 
-1. `ci.yml`：913 个单测绿（重数：`python -W error::ResourceWarning -m unittest discover -s tests
+1. `ci.yml`：914 个单测绿（重数：`python -W error::ResourceWarning -m unittest discover -s tests
    -p "test_*.py"`；按文件数就 `python -m unittest tests.<模块名>`。2026-10-20 实测逐文件：
    `test_yaml_gate.py` 闸门自己（含 workflow 文件清单与磁盘覆盖对照）17、`test_lane_argv.py` 车道 ↔ 启动表一致（含 15 个 workflow 文本变异）10、
    `test_sideload.py` sideload 按内容认领（6 条源码变异体 + 三个真上游文件）22、
@@ -122,7 +122,7 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
    探针与 policy 对表 + serde 形状重放）18、
    `test_payload_plan.py` 装机负载（含 tar 成员表与缺口点名）19、
    `test_pack_engine.py` 出包逻辑与 server-only 收窄（含符号链接闭包、只留一个可执行文件、
-   清单 serde 形状 1 条正控 + 7 个变异）19、
+   清单 serde 形状 1 条正控 + 7 个变异）20、
    `test_stage_payload.py` 出包产物→外壳 runtime 摆位（含真实合同落点与 9 条负向）10、
    `test_payload_intake.py` 首启交付清单（真实合同落点 / 两个数据根同一份字节 / 6 条源码变异体 / 消费端重放）21、
    `test_make_icons.py` 图标从 ICO 派生（PNG 尺寸 / ICNS chunk 覆盖 / 预乘缩放无黑边 /
@@ -346,7 +346,7 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     收窄后 win 默认档 112 → 57 个文件、115.6 → **104.7 MiB**（`zip` 中央目录的 uncompressed
     size 求和，未下载整包；llama 51→24 / 42.8、whisper 41→16 / 16.9、sd 20→17 / 45.0；
     Linux/macOS 的 tar 引擎要等 CI 首次解流，zip 的 sd 已算出 65.0→63.6 与 93.9→90.4）。
-    `--selfcheck` 18 条、`tests/test_pack_engine.py` 19 条（合成 zip + 合成 tar.gz，含 digest
+    `--selfcheck` 18 条、`tests/test_pack_engine.py` 20 条（合成 zip + 合成 tar.gz，含 digest
     不符、下载失败、链式 dylib 链接与"手工塞回一个 CLI 必须红"；另按
     `shell/core/src/manifest.rs` 重放出包清单的 serde 形状，7 个变异含字符串化体积、
     带路径的文件名与同名重复），

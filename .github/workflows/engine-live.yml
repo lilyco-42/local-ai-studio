@@ -77,6 +77,11 @@ on:
 permissions:
   contents: read
 
+env:
+  # runner 的共享出口上，匿名 API 60 次/小时不够一条车道用；所有 live 步骤统一带 token。
+  GITHUB_TOKEN: ${{ github.token }}
+  GH_TOKEN: ${{ github.token }}
+
 jobs:
   discover:
     timeout-minutes: 10
@@ -101,6 +106,7 @@ jobs:
         run: |
           python - <<'PY' >> "$GITHUB_OUTPUT"
           import json
+          import sys
           m = json.load(open("manifest.json"))["targets"]
           llama = m["llama-ubuntu-base-x64"]
           sd = m["sd-ubuntu-base-x64"]
@@ -110,9 +116,10 @@ jobs:
           print("sd_digest=" + sd["digest"].split(":", 1)[1])
           print("sd_size=" + str(sd["size"]))
           print("sd_tag=" + sd["release"])
-          print("::notice::llama %s 产物 %s %.1fMB" % (llama["release"], llama["asset"], llama["size"] / 1048576))
+          # $GITHUB_OUTPUT 只收 key=value；notice 混进去会让整份输出无效
+          print("::notice::llama %s 产物 %s %.1fMB" % (llama["release"], llama["asset"], llama["size"] / 1048576), file=sys.stderr)
           print("::notice::sd %s 产物 %s %.1fMB 上游digest=%s"
-                % (sd["release"], sd["asset"], sd["size"] / 1048576, sd["digest"][:18]))
+                % (sd["release"], sd["asset"], sd["size"] / 1048576, sd["digest"][:18]), file=sys.stderr)
           PY
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4.6.2
         with:
@@ -606,6 +613,12 @@ jobs:
         run: python -m unittest tests.test_recommend_models -v
       - name: 用切片离线重算并与已提交的那张比漂移（不联网，改一个字也要红）
         run: python3 tools/recommend_models.py --fixtures tests/fixtures/recommend_slice.json --check
+      - name: 复现描述层（describe.json 是被 gitignore 的派生物，重抓后侧表必须一字节不差）
+        # recommend --live 吃 catalog/describe.json，而它在干净检出的仓库里本来就不存在：
+        # 按钉住的 commit 重抓是唯一正确的来源，顺便用 git diff 证明侧表仍可复现。
+        run: |
+          python3 tools/catalog_snapshot.py --live
+          git diff --exit-code -- catalog/describe.sha256 catalog/defaults.json
       - name: 真取两家元数据重算（上游漂了就红，包括某档凑不满）
         run: python3 tools/recommend_models.py --live --check
 

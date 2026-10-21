@@ -206,9 +206,9 @@ impl Supervisor {
             if cap.mode != "server" {
                 continue;
             }
-            let cell = cap.os.get(platform).ok_or_else(|| {
-                CoreError::Platform(format!("{name}: 合同里没有 {platform} 这一格"))
-            })?;
+            // 这一格不存在不算构造失败：status() 要把它报成 available=false
+            // （macOS 没有这家引擎的预编译产物）；真要起它时 ensure_running 才报 Platform。
+            let Some(cell) = cap.os.get(platform) else { continue; };
             cell.argv_for(tier).map_err(|_| {
                 CoreError::Contract(format!(
                     "{name}: 没有档位 {tier:?} 的命令行（有: {:?}）",

@@ -399,7 +399,7 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   同名不同目录的成员不许静默覆盖；主二进制缺席、清单里残留被排除的东西、目录里留着压缩包都会红。
   收窄后 win 默认档 112 → 57 个文件、115.6 → **104.7 MiB**（中央目录 uncompressed size 求和，
   未下载整包；llama 51→24 / 42.8，whisper 41→16 / 16.9，sd 20→17 / 45.0）。
-  `--selfcheck` 18 条、`tests/test_pack_engine.py` 17 条（合成 zip/tar.gz，含 digest 不符、
+  `--selfcheck` 18 条、`tests/test_pack_engine.py` 20 条（合成 zip/tar.gz，含 digest 不符、
   下载失败、链路链接与"塞回 CLI 必须红"）。
 - `tools/stage_payload.py` + `package.yml` 里的摆位步：把上面那份**扁平**的 `dist/<os>/<engine>/`
   摆成外壳真会去读的 `runtime/<os>/<engine>/<version>/<asset-stem>/`，并在数据根写根清单

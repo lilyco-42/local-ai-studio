@@ -329,8 +329,9 @@ def pack_one(row: dict, out_root: str, keep_archives: bool) -> tuple[dict, list[
     bad += [f"{engine}: 链接建不起来 {x}（运行时找不到这个名字）" for x in failed]
     rows = manifest_of(out_dir, keep)
     bad += check(engine, rows)
+    archive_bytes = os.path.getsize(archive)
     entry = {"engine": engine, "status": "ok", "asset": row["asset"], "url": row["url"],
-             "archive_sha256": got, "archive_bytes": os.path.getsize(archive),
+             "archive_sha256": got, "archive_bytes": archive_bytes,
              "policy": "server-only",
              "executables": [r["file"] for r in rows if r.get("exec")],
              "symlinks": [r["file"] for r in rows if r.get("kind") == "symlink"],
@@ -340,6 +341,9 @@ def pack_one(row: dict, out_root: str, keep_archives: bool) -> tuple[dict, list[
              "files": rows}
     if keep_archives:
         entry["kept_archive"] = os.path.basename(archive)
+    else:
+        # 压缩包落在 out_root 里就等于混进了装机负载：再解一次包才能用的东西不该发出去。
+        os.remove(archive)
     return entry, bad
 
 

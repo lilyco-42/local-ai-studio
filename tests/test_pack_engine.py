@@ -206,6 +206,32 @@ class TestShipPolicy(unittest.TestCase):
         bad = pe.check("llama", rows)
         self.assertTrue(any("llama-cli.exe" in b and "只留一个" in b for b in bad), bad)
 
+    def test_archive_is_removed_unless_asked_to_keep_it(self) -> None:
+        real = pe.download
+        with tempfile.TemporaryDirectory() as d:
+            src = make_zip(os.path.join(d, "source.zip"),
+                           {"p/llama-server.exe": b"bin", "p/llama-server-impl.dll": b"dll"})
+            with open(src, "rb") as fh:
+                digest = hashlib.sha256(fh.read()).hexdigest()
+
+            def fake_download(url, dest, timeout=3600):
+                import shutil
+                shutil.copyfile(src, dest)
+                return 0
+            pe.download = fake_download
+            try:
+                row = {"engine": "llama", "asset": "llama.zip", "url": "https://x/llama.zip",
+                       "digest": "sha256:" + digest}
+                entry, bad = pe.pack_one(row, d, keep_archives=False)
+                self.assertEqual(bad, [])
+                self.assertEqual(entry["archive_bytes"], os.path.getsize(src))
+                self.assertFalse(os.path.exists(os.path.join(d, "llama.zip")))
+                entry, bad = pe.pack_one(row, d, keep_archives=True)
+                self.assertTrue(os.path.exists(os.path.join(d, "llama.zip")))
+                self.assertEqual(entry["kept_archive"], "llama.zip")
+            finally:
+                pe.download = real
+
     def test_pack_one_manifest_records_the_policy(self) -> None:
         """跑一遍完整路径：下载→整包哈希→策略→落盘→清单。"""
         real = pe.download

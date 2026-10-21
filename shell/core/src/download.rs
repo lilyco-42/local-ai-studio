@@ -1163,8 +1163,8 @@ mod tests {
         assert!(plan.item("b.gguf").is_err());
         let dup = Plan::parse(
             r#"{"schema":1,"items":[
-                 {"file":"a","bytes":1,"sha256":"a","sources":[]},
-                 {"file":"a","bytes":2,"sha256":"b","sources":[]}]}"#,
+                 {"file":"a","bytes":1,"sha256":"a","kind":"chat","sources":[]},
+                 {"file":"a","bytes":2,"sha256":"b","kind":"chat","sources":[]}]}"#,
         )
         .unwrap();
         assert!(dup.item("a").is_err());
