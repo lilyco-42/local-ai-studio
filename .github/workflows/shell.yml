@@ -130,7 +130,7 @@ jobs:
           if ! command -v tauri-driver >/dev/null 2>&1; then
             cargo install tauri-driver --locked --version 2.1.0
           fi
-          tauri-driver --version || true
+          tauri-driver --help | head -6
           cargo build --bin local-ai-studio-shell
           xvfb-run -a -s "-screen 0 1024x768x24" python3 "$GITHUB_WORKSPACE/tools/wd_ipc_probe.py" \
             --app "$PWD/target/debug/local-ai-studio-shell" \

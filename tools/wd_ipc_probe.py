@@ -9,6 +9,7 @@
 from __future__ import annotations
 
 import argparse
+import http.client
 import json
 import os
 import re
@@ -74,8 +75,10 @@ def request(url: str, method: str = "GET", payload: dict | None = None, timeout:
             raw = resp.read()
     except urllib.error.HTTPError as exc:
         raise ProbeError(parse_driver_error(exc.code, exc.read())) from None
-    except urllib.error.URLError as exc:
-        raise ProbeError(f"{method} {url} 连不上：{exc.reason}") from None
+    except (urllib.error.URLError, http.client.HTTPException) as exc:
+        # 原生驱动还没 listen 时，中间节点会直接关掉连接（RemoteDisconnected 不走 URLError）。
+        reason = getattr(exc, "reason", exc)
+        raise ProbeError(f"{method} {url} 连接失败：{reason}") from None
     try:
         return json.loads(raw.decode("utf-8"))
     except ValueError:
@@ -311,6 +314,12 @@ def main(argv=None) -> int:
         return run(args)
     except (ProbeError, ValueError, OSError) as exc:
         print(f"失败：{exc}", file=sys.stderr)
+        if os.path.exists(args.log):
+            with open(args.log, encoding="utf-8", errors="replace") as fh:
+                tail = "".join(fh.readlines()[-60:]).strip()
+            if tail:
+                print("--- tauri-driver 日志（最后 60 行） ---", file=sys.stderr)
+                print(tail, file=sys.stderr)
         return 1
 
 

@@ -7,6 +7,7 @@
 import os
 import re
 import sys
+import time
 import unittest
 
 import yaml
@@ -164,6 +165,28 @@ class TestUiGate(unittest.TestCase):
     def test_wrong_title_is_rejected(self) -> None:
         with self.assertRaisesRegex(wd.ProbeError, "标题"):
             wd.check_ui(ui_state(title="about:blank"), ui_state()["data_root_text"])
+
+
+class TestPolling(unittest.TestCase):
+    def test_transient_probe_errors_are_retried(self) -> None:
+        """原生驱动比中间节点晚 listen：第一次连接被关掉时必须重试，而不是当场判死。"""
+        calls = {"n": 0}
+
+        def probe():
+            calls["n"] += 1
+            if calls["n"] < 3:
+                raise wd.ProbeError("连接失败：Remote end closed connection without response")
+            return True
+
+        self.assertTrue(wd.poll_until(probe, time.monotonic() + 5, "ready", interval=0.001))
+        self.assertEqual(calls["n"], 3)
+
+    def test_timeout_reports_the_last_error(self) -> None:
+        def probe():
+            raise wd.ProbeError("no such window")
+
+        with self.assertRaisesRegex(wd.ProbeError, "no such window"):
+            wd.poll_until(probe, time.monotonic() + 0.05, "ready", interval=0.01)
 
 
 class TestWorkflow(unittest.TestCase):
