@@ -304,7 +304,11 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
    ② 已提交 `pins/ocr-Cargo.lock`（121,677 B，sha256 `ee01f0cb…`；495 个 `[[package]]`、
    445 个有名包、489 条 checksum、0 个 git 依赖，`ort = 2.0.0-rc.13`）；
    ③ 此后该步骤在锁存在时走 `cargo build --locked`；仓库里没有锁时才现场解析并打 `::warning::`
-   点名"不能算钉住"（正常路径由已提交的锁兜住）。**`--locked` 这一支要等提交后的下一次车道才算真跑过。**
+   点名"不能算钉住"（正常路径由已提交的锁兜住）。这一支在 run 39638448298 的 `ocr-proof`
+   里真走进去过：notice「依赖图按仓库里的 pins/ocr-Cargo.lock 钉住」、lock 里 495 个包、
+   编译 3m46s、识别出 `OARCI2291`。第一次 6653cfc 其实落到了 else 分支 —— 那个 job 没有
+   checkout，`../pins/ocr-Cargo.lock` 根本不存在，warning 就是证据；46dfead 补了 checkout
+   并把 `tools/action_pins.py` 的 uses 计数重算成 57（citation-drift 因此红过一次）。
    漂移由 `ocr-build-surface` 车道守：`tools/ocr_build_surface.py --check` 比对
    `pins/ocr-build-surface.json`（fingerprint + 锁文件状态），上游一旦开始发锁也会红（那就该改成取它的锁）。
    分类判据本身有 15 条离线单测，其中三条是给"曾经算错的样子"写的：`{ workspace = true }` 不是未钉、
@@ -1052,7 +1056,8 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
    `headless-inference` 12 s（35）、`os-inference-proof` 5 s。四个预算都留得很宽，最紧的仍是
    OCR（占 18%），暂不按实测收紧 —— 2 核 runner 的缓存命中率会变。
 2. **OCR**：真编译过了（6m06s），识别输出命中 `OARCI2291`；锁已提交（第 12 条），
-   下一次车道要看 `cargo build --locked` 那一支是否真的走进去（日志里会有"依赖图按…钉住"的 notice）。
+   `--locked` 已在 run 39638448298 的 `ocr-proof` 里真走过（notice「依赖图按…钉住」、495 个包、
+   编译 3m46s、同一句识别）；首轮 6653cfc 因 job 没 checkout 落进 else 分支，46dfead 补后才算钉住。
 3. **sd 的动态库闭包**：`sd-server` 真起来了并出图；这次的坑不在 `.so`，而在权重 ——
    上一版用 UNet-only 的 Q4_0，diffusion 模型缺失直接出不了图；换成完整 checkpoint
    （4,265,146,304 B）后一次通过。以后修生图先看权重完整性，再怀疑 `.so`。
@@ -1077,7 +1082,6 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
   或在执行车道加一条"按 pin 下载再跑"。
 - `upstream-follow` 的 `schedule` 会不会真触发（这台账号 cron 会丢槽）。
 - macOS 字幕（#29）、写 R2（#23）、把负载送到数据根（#57）。
-- `cargo build --locked` 的首次真实执行。
 
 **CI 证明不了的**：GUI 是否真打开、集显/独显上的真实性能与兼容性、DirectML/Vulkan EP 是否真的加速。
 这几项必须留到设备矩阵，交付说明里要写清，不拿 CI 绿当"能用"。
