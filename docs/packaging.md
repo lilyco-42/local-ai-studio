@@ -62,9 +62,10 @@ application as a Tauri binary for macOS, Linux and Windows"，最新 release 是
 
 顺手把这张表存在的理由说完：**在这一轮之前，三个 workflow 里 4 个 `uses:` 全是浮动大版本 tag**
 （`actions/checkout@v4`、`actions/setup-python@v5`、`actions/upload-artifact@v4`、
-`actions/download-artifact@v4`，共 44 处；**现在这张表记的是 53 处 / 5 个 workflow / 5 个 action**
+`actions/download-artifact@v4`，共 44 处；**现在这张表记的是 56 处 / 6 个 workflow / 5 个 action**
 —— `launch-plan` 加了一处 `download-artifact` 去吃 `file-index` 那份首启队列报告，`backends` 那条
-新车道又带进 checkout 与 setup-python 各一处，`installer.yml` 再带进 checkout 与 tauri-action 各一处；
+新车道又带进 checkout 与 setup-python 各一处，`installer.yml` 再带进 checkout 与 tauri-action 各一处，
+`upstream-follow.yml` 带进 checkout / setup-python / upload-artifact 各一处；
 **另有 4 处是补漏**：上一版扫描表没列 `shell.yml`，它从进仓库起就有 2 个 checkout + 2 个
 upload-artifact 没被数过（"49 处"因此少算）。计数不靠这句话自证：
 `python3 tools/action_pins.py --check` 会按五份 workflow 重数一遍）。仓库对引擎、权重、工具带都定了"release + sha256"，
@@ -90,15 +91,19 @@ upload-artifact 没被数过（"49 处"因此少算）。计数不靠这句话�
 
 ## ④ 包里到底该装什么？—— 只装外壳，引擎与权重一律首启下载
 
-`pins/payload-plan.json` 实测的引擎**落地**负载（逐文件那部分只算得出 zip 的行）：
+`pins/payload-plan.json` 实测的引擎**落地**负载。出包现在只收 server 与共享运行库
+（`pack_engine.py` 的 server-only 策略），所以"全量"与"只收 server"两列都给：
+只有 zip 的逐文件大小可离线精确求和，tar 的收窄后体积要等 CI 首次解流。
 
-| OS 默认档 | 引擎压缩包相加 | 引擎落地 | 最省的一条权重 |
+| OS 默认档 | 引擎压缩包相加 | 引擎落地（全量 → 只收 server） | 最省的一条权重 |
 |---|---|---|---|
-| win-x64 | 44.2 MiB | **115.6 MiB** | 对话 qwen2.5-0.5b-q2_k 415 MB |
-| linux-x64 | 52.1 MiB | 65.0 MiB（llama/whisper 是 tar.gz，逐文件要 CI 解） | 同上 |
-| macos-arm64 | 46.5 MiB | 93.9 MiB | 同上 |
+| win-x64 | 44.2 MiB | 115.6 → **104.7 MiB**（三个包都是 zip，逐文件精确） | 对话 qwen2.5-0.5b-q2_k 415 MB |
+| linux-x64 | 52.1 MiB | 136.1 MiB；sd 是 zip，65.0 → 63.6，llama/whisper 是 tar.gz 待 CI | 同上 |
+| macos-arm64 | 46.5 MiB | 124.9 MiB；sd 是 zip，93.9 → 90.4（5 条收 2 条），llama/whisper 是 tar.gz 待 CI | 同上 |
 
-结论不是审美问题而是算术：**引擎装进安装包就已经 >100 MiB，再叠 415 MB（对话）或
+（上一版这三格只有 sd 的数却标成整档落地 —— linux 65.0 / macOS 93.9 都漏掉了 llama 与 whisper。）
+
+结论不是审美问题而是算术：**引擎装进安装包就已经 >100 MiB（只收 server 也还有 104.7 MiB），再叠 415 MB（对话）或
 1,566 MB（生图）就不是安装包了** —— 而且权重本来就该按内容寻址校验后现下
 （下载层契约见 [model-catalog.md](model-catalog.md) 与 `tools/file_index.py`）。
 LM Studio 也是这个形态（壳先装好、模型首启下载），所以"安装包小、首启下载"不是妥协，是同类产品的共同选择。
@@ -122,12 +127,31 @@ LM Studio 也是这个形态（壳先装好、模型首启下载），所以"安
   写完与源清单按字节比一次。`--check` 解析两份清单逐键相等，再把每个文件重算一遍。
 - **缺席要点名，不是报错**：包里没有的合同能力（OCR；macOS 的 whisper 上游没有可执行产物）
   记进 `not_in_manifest`，装的时候看得到，不会假装装了。
+- **首启交付清单只生成、不上传**：`tools/payload_intake.py` 读摆好的数据根，逐文件给出
+  `(key, dest, sha256, bytes)`。键是 `payload/<os>/<数据根相对路径>`，根清单单独一行标
+  `land: last`（文件先到位，清单最后落）；`--check` 用同一棵树重算并要求逐键相等。
+  它复算每个文件的体积与 sha256，拒绝多余/缺失文件、键前缀越界、两个引擎指到同一个目标；
+  输出不含 runner 的绝对路径 —— 两台机器摆同一棵树必须得到同一份字节。同一 OS 的根清单
+  键固定（`payload/<os>/payload-manifest.json`），发布新版本时必须整版原子替换或给
+  `--prefix` 加版本段；本次只生成清单，**没有发布动作**。
 
 证据边界：`--selftest` 用合成合同/合成包证明 13 条判据会红（篡改、脏目录、路径逃逸、
 asset/OS/引擎不符等）；`tests/test_stage_payload.py` 10 条离线对照，其中一条走**真实合同**
 （whisper 落在 `runtime/win-x64/whisper/b5454/whisper-bin-x64`）。`package.yml` 里是
-`--json` 出报告 + `--check` 复核两步。**车道至今 0 次执行**（#19），所以"CI 上真摆对"仍未证；
-权重不在这一步，它们按 [model-catalog.md](model-catalog.md) 首启下载。
+`--json` 出报告 + `--check` 复核两步。摆位之后同一 job 再跑 `payload_intake.py` 生成
+`delivery-manifest.json` 并 `--check`，随 artifact 一起上传；**这份清单只描述"怎么送"，
+没有任何写入桶或首启下载的动作**。`tests/test_payload_intake.py` 21 条（真实合同落点、
+两个数据根同一份字节、13 条合成自测、6 条源码变异体，以及消费端重放：删掉原数据根，
+只凭对象字典按清单还原，按外壳 `verify_payload` 的顺序逐文件验过；坏对象/缺对象/
+越界或重复落点时根清单不落）。**车道至今 0 次执行**（#19），
+所以"CI 上真摆对/真生成"仍未证；权重不在这一步，它们按
+[model-catalog.md](model-catalog.md) 首启下载。
+
+**还没接上的一段**：数据根仍只在 CI 的 `/tmp` 里；`delivery-manifest.json` 现在给出了逐文件
+对象键与落点，但**没有人往 R2 上传、也没有首启下载的 IPC 入口**。安装包车道只编壳（⑥），
+`download.rs` 只处理权重的平铺文件。把负载送到数据根仍是任务 #57 的待定动作：
+首启按这份清单逐文件从 R2 取（需他批准写桶；104.7 MiB ≈ 116 s @ 0.90 MiB/s），
+或随安装包分发（安装器 +105 MiB）。
 
 ## ⑥ 安装包本身怎么出？—— 三平台各一个未签名包，图标由 ICO 派生
 

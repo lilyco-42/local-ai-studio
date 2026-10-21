@@ -1,19 +1,19 @@
 {
  "first_run_totals_gib": {
   "16GB": {
-   "linux-x64": 11.44,
-   "macos-arm64": 11.43,
-   "win-x64": 11.43
+   "linux-x64": 11.32,
+   "macos-arm64": 11.32,
+   "win-x64": 11.31
   },
   "4GB": {
-   "linux-x64": 3.93,
-   "macos-arm64": 3.92,
-   "win-x64": 3.92
+   "linux-x64": 3.81,
+   "macos-arm64": 3.81,
+   "win-x64": 3.8
   },
   "8GB": {
-   "linux-x64": 7.74,
-   "macos-arm64": 7.73,
-   "win-x64": 7.73
+   "linux-x64": 7.62,
+   "macos-arm64": 7.62,
+   "win-x64": 7.61
   }
  },
  "from": [
@@ -22,7 +22,8 @@
   "pins/ocr-languages.json",
   "catalog/recommendations.json",
   "catalog/subtitle-tiers.json",
-  "catalog/image-tiers.json"
+  "catalog/image-tiers.json",
+  "pins/ocr.json"
  ],
  "measured_at_exit": "lain42.top（CN 出口，2026-10 一次量）",
  "per_tier": {
@@ -30,10 +31,11 @@
    "by_os": {
     "linux-x64": {
      "deferred_image_bytes": 10079502016,
-     "download_bytes": 22360077651,
-     "download_gib": 20.82,
+     "download_bytes": 22236780278,
+     "download_gib": 20.71,
      "engine_download_mib": 52.1,
      "engine_landed_mib": 136.1,
+     "engine_minutes_at_github_rate": 62.0,
      "engine_rows": [
       {
        "asset": "llama-b11727-bin-ubuntu-x64.tar.gz",
@@ -60,21 +62,26 @@
        "status": "ok"
       }
      ],
-     "first_run_bytes": 12280575635,
-     "first_run_gib": 11.44,
-     "first_run_minutes_at_measured_rate": 46.5,
-     "first_run_worst_case_hours_at_slowest_measured": 13.01,
-     "minutes_at_measured_rate": 84.6,
+     "first_run_bytes": 12157278262,
+     "first_run_gib": 11.32,
+     "first_run_ideal_all_modelscope_minutes": 46.0,
+     "first_run_minutes_at_measured_rate": 292.9,
+     "first_run_seconds_at_fastest_sources": 17571.89087,
+     "first_run_worst_case_hours_at_slowest_measured": 13.97,
+     "ideal_all_modelscope_minutes": 84.2,
+     "minutes_at_measured_rate": 331.0,
      "missing_capabilities": [],
+     "total_seconds_at_fastest_sources": 19860.596154,
      "unknown_landed_sizes": [],
-     "worst_case_hours_at_slowest_measured": 23.69
+     "worst_case_hours_at_slowest_measured": 24.65
     },
     "macos-arm64": {
      "deferred_image_bytes": 10079502016,
-     "download_bytes": 22354205625,
-     "download_gib": 20.82,
+     "download_bytes": 22230908252,
+     "download_gib": 20.7,
      "engine_download_mib": 46.5,
      "engine_landed_mib": 124.9,
+     "engine_minutes_at_github_rate": 55.4,
      "engine_rows": [
       {
        "asset": "llama-b11727-bin-macos-arm64.tar.gz",
@@ -101,23 +108,28 @@
        "status": "ok"
       }
      ],
-     "first_run_bytes": 12274703609,
-     "first_run_gib": 11.43,
-     "first_run_minutes_at_measured_rate": 46.5,
-     "first_run_worst_case_hours_at_slowest_measured": 13.01,
-     "minutes_at_measured_rate": 84.6,
+     "first_run_bytes": 12151406236,
+     "first_run_gib": 11.32,
+     "first_run_ideal_all_modelscope_minutes": 46.0,
+     "first_run_minutes_at_measured_rate": 286.2,
+     "first_run_seconds_at_fastest_sources": 17171.890842,
+     "first_run_worst_case_hours_at_slowest_measured": 13.86,
+     "ideal_all_modelscope_minutes": 84.1,
+     "minutes_at_measured_rate": 324.3,
      "missing_capabilities": [
       "字幕"
      ],
+     "total_seconds_at_fastest_sources": 19460.596126,
      "unknown_landed_sizes": [],
-     "worst_case_hours_at_slowest_measured": 23.69
+     "worst_case_hours_at_slowest_measured": 24.54
     },
     "win-x64": {
      "deferred_image_bytes": 10079502016,
-     "download_bytes": 22351793900,
-     "download_gib": 20.82,
+     "download_bytes": 22228496527,
+     "download_gib": 20.7,
      "engine_download_mib": 44.2,
      "engine_landed_mib": 115.6,
+     "engine_minutes_at_github_rate": 52.6,
      "engine_rows": [
       {
        "asset": "llama-b11727-bin-win-cpu-x64.zip",
@@ -144,14 +156,18 @@
        "status": "ok"
       }
      ],
-     "first_run_bytes": 12272291884,
-     "first_run_gib": 11.43,
-     "first_run_minutes_at_measured_rate": 46.4,
-     "first_run_worst_case_hours_at_slowest_measured": 13.0,
-     "minutes_at_measured_rate": 84.6,
+     "first_run_bytes": 12148994511,
+     "first_run_gib": 11.31,
+     "first_run_ideal_all_modelscope_minutes": 46.0,
+     "first_run_minutes_at_measured_rate": 283.5,
+     "first_run_seconds_at_fastest_sources": 17007.605115,
+     "first_run_worst_case_hours_at_slowest_measured": 13.81,
+     "ideal_all_modelscope_minutes": 84.1,
+     "minutes_at_measured_rate": 321.6,
      "missing_capabilities": [],
+     "total_seconds_at_fastest_sources": 19296.310399,
      "unknown_landed_sizes": [],
-     "worst_case_hours_at_slowest_measured": 23.68
+     "worst_case_hours_at_slowest_measured": 24.49
     }
    },
    "companion_bytes": 1904261600,
@@ -182,163 +198,278 @@
     {
      "bytes": 9001753376,
      "default_install": true,
+     "distributor_absent": [],
+     "fastest_source": "modelscope",
      "file": "Qwen3-14B-Q4_K_M.gguf",
      "from": "catalog/recommendations.json",
      "hash_status": "agree",
      "kind": "chat",
+     "measured_mib_s": 4.2,
      "name": "Qwen/Qwen3-14B",
      "repo": "ggml-org/Qwen3-14B-GGUF",
      "resolve_via": "hf_metadata",
+     "seconds_at_fastest_measured": 2043.985952,
+     "seconds_at_slowest_measured": 34338.963989,
      "sha256": "5ff1fe7a07aebc8d090682d01b17cf268a1b4680c6477050ce75a600aecb9efb",
-     "trusted_before_download": true
+     "slowest_mib_s": 0.25,
+     "slowest_source": "hf-mirror.com",
+     "trusted_before_download": true,
+     "urls": [
+      "https://www.modelscope.cn/models/ggml-org/Qwen3-14B-GGUF/resolve/master/Qwen3-14B-Q4_K_M.gguf",
+      "https://hf-mirror.com/ggml-org/Qwen3-14B-GGUF/resolve/main/Qwen3-14B-Q4_K_M.gguf",
+      "https://huggingface.co/ggml-org/Qwen3-14B-GGUF/resolve/main/Qwen3-14B-Q4_K_M.gguf"
+     ]
     },
     {
      "bytes": 8175240416,
      "default_install": false,
+     "distributor_absent": [],
+     "fastest_source": "modelscope",
      "file": "flux1-schnell-Q5_0.gguf",
      "from": "catalog/image-tiers.json",
      "hash_status": "agree",
      "kind": "image",
+     "measured_mib_s": 4.2,
      "name": "second-state/FLUX.1-schnell-GGUF",
      "repo": "second-state/FLUX.1-schnell-GGUF",
      "resolve_via": "hf_metadata",
      "role": "unet",
+     "seconds_at_fastest_measured": 1856.313527,
+     "seconds_at_slowest_measured": 31186.067261,
      "sha256": "7324362f5366f404fbf662357f321d6335a889e3f2030f1788270323eebd9116",
-     "trusted_before_download": true
+     "slowest_mib_s": 0.25,
+     "slowest_source": "hf-mirror.com",
+     "trusted_before_download": true,
+     "urls": [
+      "https://www.modelscope.cn/models/second-state/FLUX.1-schnell-GGUF/resolve/master/flux1-schnell-Q5_0.gguf",
+      "https://hf-mirror.com/second-state/FLUX.1-schnell-GGUF/resolve/main/flux1-schnell-Q5_0.gguf",
+      "https://huggingface.co/second-state/FLUX.1-schnell-GGUF/resolve/main/flux1-schnell-Q5_0.gguf"
+     ]
     },
     {
      "bytes": 1605835296,
      "companion_of": "flux1-schnell-Q5_0.gguf",
      "default_install": false,
+     "distributor_absent": [],
+     "fastest_source": "modelscope",
      "file": "t5xxl-Q2_K.gguf",
      "from": "catalog/image-tiers.json",
      "group_alternates": 7,
      "hash_status": "agree",
      "kind": "image",
+     "measured_mib_s": 4.2,
      "name": "second-state/FLUX.1-schnell-GGUF",
      "need_key": "t5xxl",
      "repo": "second-state/FLUX.1-schnell-GGUF",
      "resolve_via": "hf_metadata",
      "role": "text_encoder",
+     "seconds_at_fastest_measured": 364.629495,
+     "seconds_at_slowest_measured": 6125.775513,
      "sha256": "4368e93e01946e930490d4ce9e8e406b611fa8872cb0077b7ec57f394f1fcb16",
-     "trusted_before_download": true
+     "slowest_mib_s": 0.25,
+     "slowest_source": "hf-mirror.com",
+     "trusted_before_download": true,
+     "urls": [
+      "https://www.modelscope.cn/models/second-state/FLUX.1-schnell-GGUF/resolve/master/t5xxl-Q2_K.gguf",
+      "https://hf-mirror.com/second-state/FLUX.1-schnell-GGUF/resolve/main/t5xxl-Q2_K.gguf",
+      "https://huggingface.co/second-state/FLUX.1-schnell-GGUF/resolve/main/t5xxl-Q2_K.gguf"
+     ]
     },
     {
      "bytes": 167656704,
      "companion_of": "flux1-schnell-Q5_0.gguf",
      "default_install": false,
+     "distributor_absent": [],
+     "fastest_source": "modelscope",
      "file": "ae-f16.gguf",
      "from": "catalog/image-tiers.json",
      "group_alternates": 0,
      "hash_status": "agree",
      "kind": "image",
+     "measured_mib_s": 4.2,
      "name": "second-state/FLUX.1-schnell-GGUF",
      "need_key": "VAE",
      "repo": "second-state/FLUX.1-schnell-GGUF",
      "resolve_via": "hf_metadata",
      "role": "vae",
+     "seconds_at_fastest_measured": 38.069022,
+     "seconds_at_slowest_measured": 639.55957,
      "sha256": "1bed7b05318709e46a8cb9accc211168fc7f0b61ab594661860bbfe4d785cc46",
-     "trusted_before_download": true
+     "slowest_mib_s": 0.25,
+     "slowest_source": "hf-mirror.com",
+     "trusted_before_download": true,
+     "urls": [
+      "https://www.modelscope.cn/models/second-state/FLUX.1-schnell-GGUF/resolve/master/ae-f16.gguf",
+      "https://hf-mirror.com/second-state/FLUX.1-schnell-GGUF/resolve/main/ae-f16.gguf",
+      "https://huggingface.co/second-state/FLUX.1-schnell-GGUF/resolve/main/ae-f16.gguf"
+     ]
     },
     {
      "bytes": 130769600,
      "companion_of": "flux1-schnell-Q5_0.gguf",
      "default_install": false,
+     "distributor_absent": [],
+     "fastest_source": "modelscope",
      "file": "clip_l-Q8_0.gguf",
      "from": "catalog/image-tiers.json",
      "group_alternates": 1,
      "hash_status": "agree",
      "kind": "image",
+     "measured_mib_s": 4.2,
      "name": "second-state/FLUX.1-schnell-GGUF",
      "need_key": "clip_l",
      "repo": "second-state/FLUX.1-schnell-GGUF",
      "resolve_via": "hf_metadata",
      "role": "text_encoder",
+     "seconds_at_fastest_measured": 29.69324,
+     "seconds_at_slowest_measured": 498.846436,
      "sha256": "59cbe002c3e75d2b89d38787e81d12fb4e512fd76176884c470737ad87a1d309",
-     "trusted_before_download": true
+     "slowest_mib_s": 0.25,
+     "slowest_source": "hf-mirror.com",
+     "trusted_before_download": true,
+     "urls": [
+      "https://www.modelscope.cn/models/second-state/FLUX.1-schnell-GGUF/resolve/master/clip_l-Q8_0.gguf",
+      "https://hf-mirror.com/second-state/FLUX.1-schnell-GGUF/resolve/main/clip_l-Q8_0.gguf",
+      "https://huggingface.co/second-state/FLUX.1-schnell-GGUF/resolve/main/clip_l-Q8_0.gguf"
+     ]
     },
     {
      "bytes": 123297373,
      "default_install": true,
+     "fastest_source": null,
      "file": "(合计)",
      "from": "pins/ocr-languages.json",
      "hash_status": "mixed",
      "kind": "ocr",
+     "measured_mib_s": null,
      "name": "全 14 种语言（rec+dict）",
-     "note": "这是把默认档换成全语言时多出来的量，不是叠在默认档上；它不是一个文件，所以进不了首启队列（不等于没验过 —— 逐条在 pins/ocr-languages.json 与 ocr-languages 车道）",
+     "note": "这是把默认档换成全语言时多出来的量，不是叠在默认档上；它不是一个文件，所以进不了首启队列、也不进字节与时间（不等于没验过 —— 逐条在 pins/ocr-languages.json 与 ocr-languages 车道）",
      "queueable": false,
      "repo": null,
      "resolve_via": "not_a_file",
+     "seconds_at_fastest_measured": null,
+     "seconds_at_slowest_measured": null,
      "sha256": null,
+     "slowest_mib_s": null,
+     "slowest_source": null,
      "trusted_before_download": null
     },
     {
      "bytes": 4462639,
      "default_install": true,
+     "distributor_absent": [],
+     "fastest_source": "modelscope",
      "file": "pp-ocrv6_tiny_rec.onnx",
      "from": "catalog/defaults.json",
      "hash_status": "agree",
      "kind": "ocr",
+     "measured_mib_s": 4.2,
      "name": "默认档",
      "repo": null,
      "resolve_via": "github_release_digest",
+     "seconds_at_fastest_measured": 1.013311,
+     "seconds_at_slowest_measured": 303.993157,
      "sha256": "9ef676d6ed3c88256a2d92c640c44f25b0c40947e111b14b8be8f594091563e6",
-     "trusted_before_download": true
+     "slowest_mib_s": 0.014,
+     "slowest_source": "github.com",
+     "trusted_before_download": true,
+     "urls": [
+      "https://www.modelscope.cn/models/greatv/oar-ocr/resolve/master/pp-ocrv6_tiny_rec.onnx",
+      "https://github.com/GreatV/oar-ocr/releases/download/v0.7.0/pp-ocrv6_tiny_rec.onnx"
+     ]
     },
     {
      "bytes": 1780590,
      "default_install": true,
+     "distributor_absent": [],
+     "fastest_source": "modelscope",
      "file": "pp-ocrv6_tiny_det.onnx",
      "from": "catalog/defaults.json",
      "hash_status": "agree",
      "kind": "ocr",
+     "measured_mib_s": 4.2,
      "name": "默认档",
      "repo": null,
      "resolve_via": "github_release_digest",
+     "seconds_at_fastest_measured": 0.40431,
+     "seconds_at_slowest_measured": 121.293068,
      "sha256": "193bab7a04fca699a6c82e6abb5b81bdb28177f0abd4062552b04908dafb19f8",
-     "trusted_before_download": true
+     "slowest_mib_s": 0.014,
+     "slowest_source": "github.com",
+     "trusted_before_download": true,
+     "urls": [
+      "https://www.modelscope.cn/models/greatv/oar-ocr/resolve/master/pp-ocrv6_tiny_det.onnx",
+      "https://github.com/GreatV/oar-ocr/releases/download/v0.7.0/pp-ocrv6_tiny_det.onnx"
+     ]
     },
     {
      "bytes": 27156,
      "default_install": true,
+     "distributor_absent": [],
+     "fastest_source": "modelscope",
      "file": "ppocrv6_tiny_dict.txt",
      "from": "catalog/defaults.json",
      "hash_status": "agree",
      "kind": "ocr",
+     "measured_mib_s": 4.2,
      "name": "默认档",
      "repo": null,
      "resolve_via": "github_release_digest",
+     "seconds_at_fastest_measured": 0.006166,
+     "seconds_at_slowest_measured": 1.849856,
      "sha256": "c5cbe34ef40c29c4df07ed012bf96569cb69a2d2a01a07027e9f13cb832bd9cd",
-     "trusted_before_download": true
+     "slowest_mib_s": 0.014,
+     "slowest_source": "github.com",
+     "trusted_before_download": true,
+     "urls": [
+      "https://www.modelscope.cn/models/greatv/oar-ocr/resolve/master/ppocrv6_tiny_dict.txt",
+      "https://github.com/GreatV/oar-ocr/releases/download/v0.7.0/ppocrv6_tiny_dict.txt"
+     ]
     },
     {
      "bytes": 3094623691,
      "default_install": true,
+     "distributor_absent": [
+      "modelscope"
+     ],
+     "fastest_source": "hf-mirror.com",
      "file": "ggml-large-v1.bin",
      "from": "catalog/subtitle-tiers.json",
      "hash_status": "single",
      "kind": "subtitle",
+     "measured_mib_s": 0.25,
      "mem_text": "3.9 GB",
      "name": "large-v1",
      "repo": "ggerganov/whisper.cpp",
      "resolve_via": "hf_metadata",
+     "seconds_at_fastest_measured": 11805.052532,
+     "seconds_at_slowest_measured": 11805.052532,
      "sha256": "7d99f41a10525d0206bddadd86760181fa920438b6b33237e3118ff6c83bb53d",
-     "trusted_before_download": false
+     "slowest_mib_s": 0.25,
+     "slowest_source": "hf-mirror.com",
+     "trusted_before_download": false,
+     "urls": [
+      "https://www.modelscope.cn/models/ggerganov/whisper.cpp/resolve/master/ggml-large-v1.bin",
+      "https://hf-mirror.com/ggerganov/whisper.cpp/resolve/main/ggml-large-v1.bin",
+      "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-large-v1.bin"
+     ]
     }
    ],
+   "not_downloaded_bytes": 123297373,
    "untrusted_rows": [
     "ggml-large-v1.bin"
    ],
-   "weights_bytes": 22305446841
+   "weights_bytes": 22182149468
   },
   "4GB": {
    "by_os": {
     "linux-x64": {
      "deferred_image_bytes": 2132586944,
-     "download_bytes": 6347829883,
-     "download_gib": 5.91,
+     "download_bytes": 6224532510,
+     "download_gib": 5.8,
      "engine_download_mib": 52.1,
      "engine_landed_mib": 136.1,
+     "engine_minutes_at_github_rate": 62.0,
      "engine_rows": [
       {
        "asset": "llama-b11727-bin-ubuntu-x64.tar.gz",
@@ -365,21 +496,26 @@
        "status": "ok"
       }
      ],
-     "first_run_bytes": 4215242939,
-     "first_run_gib": 3.93,
-     "first_run_minutes_at_measured_rate": 16.0,
-     "first_run_worst_case_hours_at_slowest_measured": 4.47,
-     "minutes_at_measured_rate": 24.0,
+     "first_run_bytes": 4091945566,
+     "first_run_gib": 3.81,
+     "first_run_ideal_all_modelscope_minutes": 15.5,
+     "first_run_minutes_at_measured_rate": 169.0,
+     "first_run_seconds_at_fastest_sources": 10140.740097,
+     "first_run_worst_case_hours_at_slowest_measured": 5.42,
+     "ideal_all_modelscope_minutes": 23.6,
+     "minutes_at_measured_rate": 177.1,
      "missing_capabilities": [],
+     "total_seconds_at_fastest_sources": 10624.97662,
      "unknown_landed_sizes": [],
-     "worst_case_hours_at_slowest_measured": 6.73
+     "worst_case_hours_at_slowest_measured": 7.68
     },
     "macos-arm64": {
      "deferred_image_bytes": 2132586944,
-     "download_bytes": 6341957857,
-     "download_gib": 5.91,
+     "download_bytes": 6218660484,
+     "download_gib": 5.79,
      "engine_download_mib": 46.5,
      "engine_landed_mib": 124.9,
+     "engine_minutes_at_github_rate": 55.4,
      "engine_rows": [
       {
        "asset": "llama-b11727-bin-macos-arm64.tar.gz",
@@ -406,23 +542,28 @@
        "status": "ok"
       }
      ],
-     "first_run_bytes": 4209370913,
-     "first_run_gib": 3.92,
-     "first_run_minutes_at_measured_rate": 15.9,
-     "first_run_worst_case_hours_at_slowest_measured": 4.46,
-     "minutes_at_measured_rate": 24.0,
+     "first_run_bytes": 4086073540,
+     "first_run_gib": 3.81,
+     "first_run_ideal_all_modelscope_minutes": 15.5,
+     "first_run_minutes_at_measured_rate": 162.3,
+     "first_run_seconds_at_fastest_sources": 9740.740069,
+     "first_run_worst_case_hours_at_slowest_measured": 5.31,
+     "ideal_all_modelscope_minutes": 23.5,
+     "minutes_at_measured_rate": 170.4,
      "missing_capabilities": [
       "字幕"
      ],
+     "total_seconds_at_fastest_sources": 10224.976592,
      "unknown_landed_sizes": [],
-     "worst_case_hours_at_slowest_measured": 6.72
+     "worst_case_hours_at_slowest_measured": 7.57
     },
     "win-x64": {
      "deferred_image_bytes": 2132586944,
-     "download_bytes": 6339546132,
-     "download_gib": 5.9,
+     "download_bytes": 6216248759,
+     "download_gib": 5.79,
      "engine_download_mib": 44.2,
      "engine_landed_mib": 115.6,
+     "engine_minutes_at_github_rate": 52.6,
      "engine_rows": [
       {
        "asset": "llama-b11727-bin-win-cpu-x64.zip",
@@ -449,14 +590,18 @@
        "status": "ok"
       }
      ],
-     "first_run_bytes": 4206959188,
-     "first_run_gib": 3.92,
-     "first_run_minutes_at_measured_rate": 15.9,
-     "first_run_worst_case_hours_at_slowest_measured": 4.46,
-     "minutes_at_measured_rate": 24.0,
+     "first_run_bytes": 4083661815,
+     "first_run_gib": 3.8,
+     "first_run_ideal_all_modelscope_minutes": 15.5,
+     "first_run_minutes_at_measured_rate": 159.6,
+     "first_run_seconds_at_fastest_sources": 9576.454342,
+     "first_run_worst_case_hours_at_slowest_measured": 5.27,
+     "ideal_all_modelscope_minutes": 23.5,
+     "minutes_at_measured_rate": 167.7,
      "missing_capabilities": [],
+     "total_seconds_at_fastest_sources": 10060.690865,
      "unknown_landed_sizes": [],
-     "worst_case_hours_at_slowest_measured": 6.72
+     "worst_case_hours_at_slowest_measured": 7.53
     }
    },
    "companion_bytes": 0,
@@ -476,112 +621,191 @@
     {
      "bytes": 2497281312,
      "default_install": true,
+     "distributor_absent": [],
+     "fastest_source": "modelscope",
      "file": "Qwen3-4B-Q4_K_M.gguf",
      "from": "catalog/recommendations.json",
      "hash_status": "agree",
      "kind": "chat",
+     "measured_mib_s": 4.2,
      "name": "Qwen/Qwen3-4B",
      "repo": "unsloth/Qwen3-4B-GGUF",
      "resolve_via": "hf_metadata",
+     "seconds_at_fastest_measured": 567.045964,
+     "seconds_at_slowest_measured": 9526.372192,
      "sha256": "f6f851777709861056efcdad3af01da38b31223a3ba26e61a4f8bf3a2195813a",
-     "trusted_before_download": true
+     "slowest_mib_s": 0.25,
+     "slowest_source": "hf-mirror.com",
+     "trusted_before_download": true,
+     "urls": [
+      "https://www.modelscope.cn/models/unsloth/Qwen3-4B-GGUF/resolve/master/Qwen3-4B-Q4_K_M.gguf",
+      "https://hf-mirror.com/unsloth/Qwen3-4B-GGUF/resolve/main/Qwen3-4B-Q4_K_M.gguf",
+      "https://huggingface.co/unsloth/Qwen3-4B-GGUF/resolve/main/Qwen3-4B-Q4_K_M.gguf"
+     ]
     },
     {
      "bytes": 2132586944,
      "default_install": false,
+     "distributor_absent": [],
+     "fastest_source": "modelscope",
      "file": "stable-diffusion-v1-5-pruned-emaonly-f16.gguf",
      "from": "catalog/image-tiers.json",
      "hash_status": "agree",
      "kind": "image",
+     "measured_mib_s": 4.2,
      "name": "second-state/stable-diffusion-v1-5-GGUF",
      "repo": "second-state/stable-diffusion-v1-5-GGUF",
      "resolve_via": "hf_metadata",
      "role": "unet",
+     "seconds_at_fastest_measured": 484.236523,
+     "seconds_at_slowest_measured": 8135.173584,
      "sha256": "da017009aa86a3f46468857d95833435fe55e4a2856afab76ba7722ef8ee4d8b",
-     "trusted_before_download": true
+     "slowest_mib_s": 0.25,
+     "slowest_source": "hf-mirror.com",
+     "trusted_before_download": true,
+     "urls": [
+      "https://www.modelscope.cn/models/second-state/stable-diffusion-v1-5-GGUF/resolve/master/stable-diffusion-v1-5-pruned-emaonly-f16.gguf",
+      "https://hf-mirror.com/second-state/stable-diffusion-v1-5-GGUF/resolve/main/stable-diffusion-v1-5-pruned-emaonly-f16.gguf",
+      "https://huggingface.co/second-state/stable-diffusion-v1-5-GGUF/resolve/main/stable-diffusion-v1-5-pruned-emaonly-f16.gguf"
+     ]
     },
     {
      "bytes": 123297373,
      "default_install": true,
+     "fastest_source": null,
      "file": "(合计)",
      "from": "pins/ocr-languages.json",
      "hash_status": "mixed",
      "kind": "ocr",
+     "measured_mib_s": null,
      "name": "全 14 种语言（rec+dict）",
-     "note": "这是把默认档换成全语言时多出来的量，不是叠在默认档上；它不是一个文件，所以进不了首启队列（不等于没验过 —— 逐条在 pins/ocr-languages.json 与 ocr-languages 车道）",
+     "note": "这是把默认档换成全语言时多出来的量，不是叠在默认档上；它不是一个文件，所以进不了首启队列、也不进字节与时间（不等于没验过 —— 逐条在 pins/ocr-languages.json 与 ocr-languages 车道）",
      "queueable": false,
      "repo": null,
      "resolve_via": "not_a_file",
+     "seconds_at_fastest_measured": null,
+     "seconds_at_slowest_measured": null,
      "sha256": null,
+     "slowest_mib_s": null,
+     "slowest_source": null,
      "trusted_before_download": null
     },
     {
      "bytes": 4462639,
      "default_install": true,
+     "distributor_absent": [],
+     "fastest_source": "modelscope",
      "file": "pp-ocrv6_tiny_rec.onnx",
      "from": "catalog/defaults.json",
      "hash_status": "agree",
      "kind": "ocr",
+     "measured_mib_s": 4.2,
      "name": "默认档",
      "repo": null,
      "resolve_via": "github_release_digest",
+     "seconds_at_fastest_measured": 1.013311,
+     "seconds_at_slowest_measured": 303.993157,
      "sha256": "9ef676d6ed3c88256a2d92c640c44f25b0c40947e111b14b8be8f594091563e6",
-     "trusted_before_download": true
+     "slowest_mib_s": 0.014,
+     "slowest_source": "github.com",
+     "trusted_before_download": true,
+     "urls": [
+      "https://www.modelscope.cn/models/greatv/oar-ocr/resolve/master/pp-ocrv6_tiny_rec.onnx",
+      "https://github.com/GreatV/oar-ocr/releases/download/v0.7.0/pp-ocrv6_tiny_rec.onnx"
+     ]
     },
     {
      "bytes": 1780590,
      "default_install": true,
+     "distributor_absent": [],
+     "fastest_source": "modelscope",
      "file": "pp-ocrv6_tiny_det.onnx",
      "from": "catalog/defaults.json",
      "hash_status": "agree",
      "kind": "ocr",
+     "measured_mib_s": 4.2,
      "name": "默认档",
      "repo": null,
      "resolve_via": "github_release_digest",
+     "seconds_at_fastest_measured": 0.40431,
+     "seconds_at_slowest_measured": 121.293068,
      "sha256": "193bab7a04fca699a6c82e6abb5b81bdb28177f0abd4062552b04908dafb19f8",
-     "trusted_before_download": true
+     "slowest_mib_s": 0.014,
+     "slowest_source": "github.com",
+     "trusted_before_download": true,
+     "urls": [
+      "https://www.modelscope.cn/models/greatv/oar-ocr/resolve/master/pp-ocrv6_tiny_det.onnx",
+      "https://github.com/GreatV/oar-ocr/releases/download/v0.7.0/pp-ocrv6_tiny_det.onnx"
+     ]
     },
     {
      "bytes": 27156,
      "default_install": true,
+     "distributor_absent": [],
+     "fastest_source": "modelscope",
      "file": "ppocrv6_tiny_dict.txt",
      "from": "catalog/defaults.json",
      "hash_status": "agree",
      "kind": "ocr",
+     "measured_mib_s": 4.2,
      "name": "默认档",
      "repo": null,
      "resolve_via": "github_release_digest",
+     "seconds_at_fastest_measured": 0.006166,
+     "seconds_at_slowest_measured": 1.849856,
      "sha256": "c5cbe34ef40c29c4df07ed012bf96569cb69a2d2a01a07027e9f13cb832bd9cd",
-     "trusted_before_download": true
+     "slowest_mib_s": 0.014,
+     "slowest_source": "github.com",
+     "trusted_before_download": true,
+     "urls": [
+      "https://www.modelscope.cn/models/greatv/oar-ocr/resolve/master/ppocrv6_tiny_dict.txt",
+      "https://github.com/GreatV/oar-ocr/releases/download/v0.7.0/ppocrv6_tiny_dict.txt"
+     ]
     },
     {
      "bytes": 1533763059,
      "default_install": true,
+     "distributor_absent": [
+      "modelscope"
+     ],
+     "fastest_source": "hf-mirror.com",
      "file": "ggml-medium.bin",
      "from": "catalog/subtitle-tiers.json",
      "hash_status": "single",
      "kind": "subtitle",
+     "measured_mib_s": 0.25,
      "mem_text": "2.1 GB",
      "name": "medium",
      "repo": "ggerganov/whisper.cpp",
      "resolve_via": "hf_metadata",
+     "seconds_at_fastest_measured": 5850.841747,
+     "seconds_at_slowest_measured": 5850.841747,
      "sha256": "6c14d5adee5f86394037b4e4e8b59f1673b6cee10e3cf0b11bbdbee79c156208",
-     "trusted_before_download": false
+     "slowest_mib_s": 0.25,
+     "slowest_source": "hf-mirror.com",
+     "trusted_before_download": false,
+     "urls": [
+      "https://www.modelscope.cn/models/ggerganov/whisper.cpp/resolve/master/ggml-medium.bin",
+      "https://hf-mirror.com/ggerganov/whisper.cpp/resolve/main/ggml-medium.bin",
+      "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-medium.bin"
+     ]
     }
    ],
+   "not_downloaded_bytes": 123297373,
    "untrusted_rows": [
     "ggml-medium.bin"
    ],
-   "weights_bytes": 6293199073
+   "weights_bytes": 6169901700
   },
   "8GB": {
    "by_os": {
     "linux-x64": {
      "deferred_image_bytes": 4265059488,
-     "download_bytes": 12571666259,
-     "download_gib": 11.71,
+     "download_bytes": 12448368886,
+     "download_gib": 11.59,
      "engine_download_mib": 52.1,
      "engine_landed_mib": 136.1,
+     "engine_minutes_at_github_rate": 62.0,
      "engine_rows": [
       {
        "asset": "llama-b11727-bin-ubuntu-x64.tar.gz",
@@ -608,21 +832,26 @@
        "status": "ok"
       }
      ],
-     "first_run_bytes": 8306606771,
-     "first_run_gib": 7.74,
-     "first_run_minutes_at_measured_rate": 31.4,
-     "first_run_worst_case_hours_at_slowest_measured": 8.8,
-     "minutes_at_measured_rate": 47.6,
+     "first_run_bytes": 8183309398,
+     "first_run_gib": 7.62,
+     "first_run_ideal_all_modelscope_minutes": 31.0,
+     "first_run_minutes_at_measured_rate": 277.8,
+     "first_run_seconds_at_fastest_sources": 16669.540384,
+     "first_run_worst_case_hours_at_slowest_measured": 9.76,
+     "ideal_all_modelscope_minutes": 47.1,
+     "minutes_at_measured_rate": 294.0,
      "missing_capabilities": [],
+     "total_seconds_at_fastest_sources": 17637.987453,
      "unknown_landed_sizes": [],
-     "worst_case_hours_at_slowest_measured": 13.32
+     "worst_case_hours_at_slowest_measured": 14.28
     },
     "macos-arm64": {
      "deferred_image_bytes": 4265059488,
-     "download_bytes": 12565794233,
-     "download_gib": 11.7,
+     "download_bytes": 12442496860,
+     "download_gib": 11.59,
      "engine_download_mib": 46.5,
      "engine_landed_mib": 124.9,
+     "engine_minutes_at_github_rate": 55.4,
      "engine_rows": [
       {
        "asset": "llama-b11727-bin-macos-arm64.tar.gz",
@@ -649,23 +878,28 @@
        "status": "ok"
       }
      ],
-     "first_run_bytes": 8300734745,
-     "first_run_gib": 7.73,
-     "first_run_minutes_at_measured_rate": 31.4,
-     "first_run_worst_case_hours_at_slowest_measured": 8.8,
-     "minutes_at_measured_rate": 47.6,
+     "first_run_bytes": 8177437372,
+     "first_run_gib": 7.62,
+     "first_run_ideal_all_modelscope_minutes": 30.9,
+     "first_run_minutes_at_measured_rate": 271.2,
+     "first_run_seconds_at_fastest_sources": 16269.540356,
+     "first_run_worst_case_hours_at_slowest_measured": 9.65,
+     "ideal_all_modelscope_minutes": 47.1,
+     "minutes_at_measured_rate": 287.3,
      "missing_capabilities": [
       "字幕"
      ],
+     "total_seconds_at_fastest_sources": 17237.987425,
      "unknown_landed_sizes": [],
-     "worst_case_hours_at_slowest_measured": 13.32
+     "worst_case_hours_at_slowest_measured": 14.17
     },
     "win-x64": {
      "deferred_image_bytes": 4265059488,
-     "download_bytes": 12563382508,
-     "download_gib": 11.7,
+     "download_bytes": 12440085135,
+     "download_gib": 11.59,
      "engine_download_mib": 44.2,
      "engine_landed_mib": 115.6,
+     "engine_minutes_at_github_rate": 52.6,
      "engine_rows": [
       {
        "asset": "llama-b11727-bin-win-cpu-x64.zip",
@@ -692,14 +926,18 @@
        "status": "ok"
       }
      ],
-     "first_run_bytes": 8298323020,
-     "first_run_gib": 7.73,
-     "first_run_minutes_at_measured_rate": 31.4,
-     "first_run_worst_case_hours_at_slowest_measured": 8.79,
-     "minutes_at_measured_rate": 47.5,
+     "first_run_bytes": 8175025647,
+     "first_run_gib": 7.61,
+     "first_run_ideal_all_modelscope_minutes": 30.9,
+     "first_run_minutes_at_measured_rate": 268.4,
+     "first_run_seconds_at_fastest_sources": 16105.254629,
+     "first_run_worst_case_hours_at_slowest_measured": 9.6,
+     "ideal_all_modelscope_minutes": 47.1,
+     "minutes_at_measured_rate": 284.6,
      "missing_capabilities": [],
+     "total_seconds_at_fastest_sources": 17073.701698,
      "unknown_landed_sizes": [],
-     "worst_case_hours_at_slowest_measured": 13.31
+     "worst_case_hours_at_slowest_measured": 14.12
     }
    },
    "companion_bytes": 0,
@@ -719,107 +957,186 @@
     {
      "bytes": 5027784512,
      "default_install": true,
+     "distributor_absent": [],
+     "fastest_source": "modelscope",
      "file": "Qwen3-8B-Q4_K_M.gguf",
      "from": "catalog/recommendations.json",
      "hash_status": "agree",
      "kind": "chat",
+     "measured_mib_s": 4.2,
      "name": "Qwen/Qwen3-8B",
      "repo": "unsloth/Qwen3-8B-GGUF",
      "resolve_via": "hf_metadata",
+     "seconds_at_fastest_measured": 1141.635466,
+     "seconds_at_slowest_measured": 19179.47583,
      "sha256": "120307ba529eb2439d6c430d94104dabd578497bc7bfe7e322b5d9933b449bd4",
-     "trusted_before_download": true
+     "slowest_mib_s": 0.25,
+     "slowest_source": "hf-mirror.com",
+     "trusted_before_download": true,
+     "urls": [
+      "https://www.modelscope.cn/models/unsloth/Qwen3-8B-GGUF/resolve/master/Qwen3-8B-Q4_K_M.gguf",
+      "https://hf-mirror.com/unsloth/Qwen3-8B-GGUF/resolve/main/Qwen3-8B-Q4_K_M.gguf",
+      "https://huggingface.co/unsloth/Qwen3-8B-GGUF/resolve/main/Qwen3-8B-Q4_K_M.gguf"
+     ]
     },
     {
      "bytes": 4265059488,
      "default_install": false,
+     "distributor_absent": [],
+     "fastest_source": "modelscope",
      "file": "stable-diffusion-v1-5-pruned-emaonly-f32.gguf",
      "from": "catalog/image-tiers.json",
      "hash_status": "agree",
      "kind": "image",
+     "measured_mib_s": 4.2,
      "name": "second-state/stable-diffusion-v1-5-GGUF",
      "repo": "second-state/stable-diffusion-v1-5-GGUF",
      "resolve_via": "hf_metadata",
      "role": "unet",
+     "seconds_at_fastest_measured": 968.447069,
+     "seconds_at_slowest_measured": 16269.910767,
      "sha256": "52c7ca39d8d48d6f44fa4ff2c44569f3c924d92311108cb38492958350d48ff8",
-     "trusted_before_download": true
+     "slowest_mib_s": 0.25,
+     "slowest_source": "hf-mirror.com",
+     "trusted_before_download": true,
+     "urls": [
+      "https://www.modelscope.cn/models/second-state/stable-diffusion-v1-5-GGUF/resolve/master/stable-diffusion-v1-5-pruned-emaonly-f32.gguf",
+      "https://hf-mirror.com/second-state/stable-diffusion-v1-5-GGUF/resolve/main/stable-diffusion-v1-5-pruned-emaonly-f32.gguf",
+      "https://huggingface.co/second-state/stable-diffusion-v1-5-GGUF/resolve/main/stable-diffusion-v1-5-pruned-emaonly-f32.gguf"
+     ]
     },
     {
      "bytes": 123297373,
      "default_install": true,
+     "fastest_source": null,
      "file": "(合计)",
      "from": "pins/ocr-languages.json",
      "hash_status": "mixed",
      "kind": "ocr",
+     "measured_mib_s": null,
      "name": "全 14 种语言（rec+dict）",
-     "note": "这是把默认档换成全语言时多出来的量，不是叠在默认档上；它不是一个文件，所以进不了首启队列（不等于没验过 —— 逐条在 pins/ocr-languages.json 与 ocr-languages 车道）",
+     "note": "这是把默认档换成全语言时多出来的量，不是叠在默认档上；它不是一个文件，所以进不了首启队列、也不进字节与时间（不等于没验过 —— 逐条在 pins/ocr-languages.json 与 ocr-languages 车道）",
      "queueable": false,
      "repo": null,
      "resolve_via": "not_a_file",
+     "seconds_at_fastest_measured": null,
+     "seconds_at_slowest_measured": null,
      "sha256": null,
+     "slowest_mib_s": null,
+     "slowest_source": null,
      "trusted_before_download": null
     },
     {
      "bytes": 4462639,
      "default_install": true,
+     "distributor_absent": [],
+     "fastest_source": "modelscope",
      "file": "pp-ocrv6_tiny_rec.onnx",
      "from": "catalog/defaults.json",
      "hash_status": "agree",
      "kind": "ocr",
+     "measured_mib_s": 4.2,
      "name": "默认档",
      "repo": null,
      "resolve_via": "github_release_digest",
+     "seconds_at_fastest_measured": 1.013311,
+     "seconds_at_slowest_measured": 303.993157,
      "sha256": "9ef676d6ed3c88256a2d92c640c44f25b0c40947e111b14b8be8f594091563e6",
-     "trusted_before_download": true
+     "slowest_mib_s": 0.014,
+     "slowest_source": "github.com",
+     "trusted_before_download": true,
+     "urls": [
+      "https://www.modelscope.cn/models/greatv/oar-ocr/resolve/master/pp-ocrv6_tiny_rec.onnx",
+      "https://github.com/GreatV/oar-ocr/releases/download/v0.7.0/pp-ocrv6_tiny_rec.onnx"
+     ]
     },
     {
      "bytes": 1780590,
      "default_install": true,
+     "distributor_absent": [],
+     "fastest_source": "modelscope",
      "file": "pp-ocrv6_tiny_det.onnx",
      "from": "catalog/defaults.json",
      "hash_status": "agree",
      "kind": "ocr",
+     "measured_mib_s": 4.2,
      "name": "默认档",
      "repo": null,
      "resolve_via": "github_release_digest",
+     "seconds_at_fastest_measured": 0.40431,
+     "seconds_at_slowest_measured": 121.293068,
      "sha256": "193bab7a04fca699a6c82e6abb5b81bdb28177f0abd4062552b04908dafb19f8",
-     "trusted_before_download": true
+     "slowest_mib_s": 0.014,
+     "slowest_source": "github.com",
+     "trusted_before_download": true,
+     "urls": [
+      "https://www.modelscope.cn/models/greatv/oar-ocr/resolve/master/pp-ocrv6_tiny_det.onnx",
+      "https://github.com/GreatV/oar-ocr/releases/download/v0.7.0/pp-ocrv6_tiny_det.onnx"
+     ]
     },
     {
      "bytes": 27156,
      "default_install": true,
+     "distributor_absent": [],
+     "fastest_source": "modelscope",
      "file": "ppocrv6_tiny_dict.txt",
      "from": "catalog/defaults.json",
      "hash_status": "agree",
      "kind": "ocr",
+     "measured_mib_s": 4.2,
      "name": "默认档",
      "repo": null,
      "resolve_via": "github_release_digest",
+     "seconds_at_fastest_measured": 0.006166,
+     "seconds_at_slowest_measured": 1.849856,
      "sha256": "c5cbe34ef40c29c4df07ed012bf96569cb69a2d2a01a07027e9f13cb832bd9cd",
-     "trusted_before_download": true
+     "slowest_mib_s": 0.014,
+     "slowest_source": "github.com",
+     "trusted_before_download": true,
+     "urls": [
+      "https://www.modelscope.cn/models/greatv/oar-ocr/resolve/master/ppocrv6_tiny_dict.txt",
+      "https://github.com/GreatV/oar-ocr/releases/download/v0.7.0/ppocrv6_tiny_dict.txt"
+     ]
     },
     {
      "bytes": 3094623691,
      "default_install": true,
+     "distributor_absent": [
+      "modelscope"
+     ],
+     "fastest_source": "hf-mirror.com",
      "file": "ggml-large-v1.bin",
      "from": "catalog/subtitle-tiers.json",
      "hash_status": "single",
      "kind": "subtitle",
+     "measured_mib_s": 0.25,
      "mem_text": "3.9 GB",
      "name": "large-v1",
      "repo": "ggerganov/whisper.cpp",
      "resolve_via": "hf_metadata",
+     "seconds_at_fastest_measured": 11805.052532,
+     "seconds_at_slowest_measured": 11805.052532,
      "sha256": "7d99f41a10525d0206bddadd86760181fa920438b6b33237e3118ff6c83bb53d",
-     "trusted_before_download": false
+     "slowest_mib_s": 0.25,
+     "slowest_source": "hf-mirror.com",
+     "trusted_before_download": false,
+     "urls": [
+      "https://www.modelscope.cn/models/ggerganov/whisper.cpp/resolve/master/ggml-large-v1.bin",
+      "https://hf-mirror.com/ggerganov/whisper.cpp/resolve/main/ggml-large-v1.bin",
+      "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-large-v1.bin"
+     ]
     }
    ],
+   "not_downloaded_bytes": 123297373,
    "untrusted_rows": [
     "ggml-large-v1.bin"
    ],
-   "weights_bytes": 12517035449
+   "weights_bytes": 12393738076
   }
  },
  "ram_statement": "本文件的 download_bytes 是磁盘与下载量，不是峰值内存",
  "rates_mib_s": {
+  "github": 0.014,
   "hf-mirror": 0.25,
   "modelscope": 4.2
  },
@@ -828,8 +1145,8 @@
   "image_companions": "生图的配套件（clip/t5/vae）按 weights 里的真实字节加，查不到就报问题、不估算；同一角色的多个量化是**备选**不是都要下，只把最小那颗计入，其余记 alternates；档位表判为 incomplete（需要但同仓库没有）或 unknown_arch（判不了）的那些档，生图部分只是下限，判定依据是上游 docs/sd.md 的 txt2img 例子那四行（每行都有 file:line 出处）",
   "ocr": "默认档三条与全 14 语言合计是两个数，不能相加",
   "ram": "不加内存：四项能力共用一个常驻引擎、一次跑一项，内存那一轴由各档位表自己的判据负责",
-  "sum": "只加已钉产物里的字节：引擎净负载(payload-plan totals_mib) + 各档默认权重(三张档位表该档第一行) + OCR(默认档三条已钉字节)",
-  "time": "等待时间用 lain42.top 这台 CN 出口一次量的吞吐换算，只当量级"
+  "sum": "只加已钉产物里的字节：引擎净负载(payload-plan totals_mib) + 各档默认权重(三张档位表该档第一行) + OCR(默认档三条已钉字节)；`resolve_via=not_a_file` 的行（OCR 全语言合计）只作信息，不进字节也不进时间",
+  "time": "等待时间逐颗按它自己候选源里最快的实测出口相加（引擎只发 GitHub release 0.014、whisper 只有 hf-mirror 0.25、对话/生图/OCR 有 ModelScope 4.2），源缺席（distributor_absent）的不参与；ideal_all_modelscope_* 是「全部字节都走 4.2」的理想值，只用来量网络差距，不是任何机器的承诺"
  },
  "schema": 1,
  "tiers": [
@@ -839,19 +1156,19 @@
  ],
  "totals_gib": {
   "16GB": {
-   "linux-x64": 20.82,
-   "macos-arm64": 20.82,
-   "win-x64": 20.82
+   "linux-x64": 20.71,
+   "macos-arm64": 20.7,
+   "win-x64": 20.7
   },
   "4GB": {
-   "linux-x64": 5.91,
-   "macos-arm64": 5.91,
-   "win-x64": 5.9
+   "linux-x64": 5.8,
+   "macos-arm64": 5.79,
+   "win-x64": 5.79
   },
   "8GB": {
-   "linux-x64": 11.71,
-   "macos-arm64": 11.7,
-   "win-x64": 11.7
+   "linux-x64": 11.59,
+   "macos-arm64": 11.59,
+   "win-x64": 11.59
   }
  }
 }

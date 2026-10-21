@@ -67,6 +67,122 @@ class TestArtifact(unittest.TestCase):
         self.assertEqual(r.returncode, 0, r.stdout)
         self.assertIn("问题 0 条", r.stdout)
 
+    def test_contract_would_deserialize_in_the_rust_shell(self) -> None:
+        """`include_str!` 嵌的是这张表，类型漂一个，四个能力在运行时全起不来。"""
+
+        def is_int(v, hi: int) -> bool:
+            return isinstance(v, int) and not isinstance(v, bool) and 0 <= v < hi
+
+        def opt_str(v, where: str) -> None:
+            self.assertTrue(v is None or isinstance(v, str), f"{where} 类型不对")
+
+        def check(doc: dict) -> None:
+            self.assertTrue(is_int(doc.get("schema"), 2 ** 32), "schema 不是 u32")
+            caps = doc.get("capabilities")
+            self.assertIsInstance(caps, dict, "capabilities 不是表")
+            for name, cap in caps.items():
+                w = f"capabilities[{name}]"
+                self.assertIsInstance(cap, dict, f"{w} 不是表")
+                for key in ("engine", "mode"):
+                    self.assertIsInstance(cap.get(key), str, f"{w}.{key} 不是字符串")
+                opt_str(cap.get("bind"), f"{w}.bind")
+                self.assertIsInstance(cap.get("lifecycle"), dict, f"{w}.lifecycle 缺失或不是表")
+                self.assertIsInstance(cap["lifecycle"].get("mode"), str,
+                                      f"{w}.lifecycle.mode 不是字符串")
+                idle = cap["lifecycle"].get("idle_timeout_secs")
+                if idle is not None:
+                    self.assertTrue(is_int(idle, 2 ** 64),
+                                    f"{w}.lifecycle.idle_timeout_secs 不是 u64")
+                self.assertIsInstance(cap.get("version"), dict, f"{w}.version 缺失或不是表")
+                opt_str(cap["version"].get("pinned"), f"{w}.version.pinned")
+                if "auth" in cap:
+                    auth = cap["auth"]
+                    self.assertIsInstance(auth, dict, f"{w}.auth 不是表")
+                    if "mode" in auth:
+                        self.assertIsInstance(auth["mode"], str, f"{w}.auth.mode 不是字符串")
+                    opt_str(auth.get("flag"), f"{w}.auth.flag")
+                    opt_str(auth.get("header"), f"{w}.auth.header")
+                    if auth.get("token_bytes") is not None:
+                        self.assertTrue(is_int(auth["token_bytes"], 2 ** 64),
+                                        f"{w}.auth.token_bytes 不是 usize")
+                    if "persisted" in auth:
+                        self.assertIsInstance(auth["persisted"], bool,
+                                              f"{w}.auth.persisted 不是布尔")
+                if cap.get("cors") is not None:
+                    self.assertIsInstance(cap["cors"], dict, f"{w}.cors 不是表")
+                    for key in ("flag", "value", "upstream_default"):
+                        opt_str(cap["cors"].get(key), f"{w}.cors.{key}")
+                if cap.get("readiness") is not None:
+                    r = cap["readiness"]
+                    self.assertIsInstance(r, dict, f"{w}.readiness 不是表")
+                    for key in ("method", "path"):
+                        self.assertIsInstance(r.get(key), str, f"{w}.readiness.{key} 不是字符串")
+                    self.assertTrue(is_int(r.get("expect_status"), 2 ** 16),
+                                    f"{w}.readiness.expect_status 不是 u16")
+                if cap.get("request") is not None:
+                    q = cap["request"]
+                    self.assertIsInstance(q, dict, f"{w}.request 不是表")
+                    for key in ("method", "path", "multipart_field", "poll"):
+                        opt_str(q.get(key), f"{w}.request.{key}")
+                    if q.get("expect_status") is not None:
+                        self.assertTrue(is_int(q["expect_status"], 2 ** 16),
+                                        f"{w}.request.expect_status 不是 u16")
+                    if q.get("extra_fields") is not None:
+                        self.assertIsInstance(q["extra_fields"], dict,
+                                              f"{w}.request.extra_fields 不是表")
+                        for k, v in q["extra_fields"].items():
+                            self.assertIsInstance(v, str,
+                                                  f"{w}.request.extra_fields[{k}] 不是字符串")
+                cells = cap.get("os")
+                self.assertIsInstance(cells, dict, f"{w}.os 不是表")
+                for os_label, cell in cells.items():
+                    cw = f"{w}.os[{os_label}]"
+                    self.assertIsInstance(cell, dict, f"{cw} 不是表")
+                    self.assertIsInstance(cell.get("binary"), str, f"{cw}.binary 不是字符串")
+                    if "argv_by_tier" in cell:
+                        self.assertIsInstance(cell["argv_by_tier"], dict,
+                                              f"{cw}.argv_by_tier 不是表")
+                        for tier, argv in cell["argv_by_tier"].items():
+                            self.assertIsInstance(argv, list, f"{cw}.argv_by_tier[{tier}] 不是列表")
+                            for a in argv:
+                                self.assertIsInstance(a, str,
+                                                      f"{cw}.argv_by_tier[{tier}] 里有非字符串")
+                    if cell.get("argv") is not None:
+                        self.assertIsInstance(cell["argv"], list, f"{cw}.argv 不是列表")
+                        for a in cell["argv"]:
+                            self.assertIsInstance(a, str, f"{cw}.argv 里有非字符串")
+                    for key in ("default_asset", "version_dir", "asset_dir"):
+                        opt_str(cell.get(key), f"{cw}.{key}")
+
+        contract = load(ART)
+        check(contract)
+        mutations = {
+            "schema 是 true": lambda d: d.__setitem__("schema", True),
+            "schema 缺失": lambda d: d.pop("schema"),
+            "capabilities 是列表": lambda d: d.__setitem__("capabilities", []),
+            "engine 是数字": lambda d: d["capabilities"]["对话"].__setitem__("engine", 5),
+            "lifecycle 缺失": lambda d: d["capabilities"]["对话"].pop("lifecycle"),
+            "idle 是负数": lambda d: d["capabilities"]["对话"]["lifecycle"].__setitem__(
+                "idle_timeout_secs", -1),
+            "pinned 是数字": lambda d: d["capabilities"]["对话"]["version"].__setitem__(
+                "pinned", 5),
+            "token_bytes 是小数": lambda d: d["capabilities"]["对话"]["auth"].__setitem__(
+                "token_bytes", 1.5),
+            "persisted 是字符串": lambda d: d["capabilities"]["对话"]["auth"].__setitem__(
+                "persisted", "false"),
+            "binary 是数字": lambda d: d["capabilities"]["对话"]["os"]["win-x64"].__setitem__(
+                "binary", 1),
+            "argv_by_tier 的值不是列表": lambda d: d["capabilities"]["对话"]["os"]["win-x64"][
+                "argv_by_tier"].__setitem__("4GB", "not-a-list"),
+            "default_asset 是数字": lambda d: d["capabilities"]["对话"]["os"]["win-x64"].__setitem__(
+                "default_asset", 5),
+        }
+        for label, mutate in mutations.items():
+            bad = copy.deepcopy(contract)
+            mutate(bad)
+            with self.subTest(label=label), self.assertRaises(AssertionError):
+                check(bad)
+
     def test_four_capabilities_one_engine_each(self) -> None:
         caps = sc.load(ART)["capabilities"]
         self.assertEqual({k: v["engine"] for k, v in caps.items()}, ENGINES)

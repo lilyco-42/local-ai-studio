@@ -3,7 +3,8 @@ name: 出包（引擎负载与逐文件清单）
 # 但它把两件必须先有真东西的东西产出来：
 # ① 每个 OS 默认档实际要带的文件清单（含逐文件 sha256 与体积），外壳运行时按这份清单校验引擎；
 # ② `payload_plan` 里那些 `needs_extract` 的行（llama/whisper 的 Linux/macOS 包是 tar.gz，
-#    中央目录读不出来）在这里被真正解开答出来 —— 之前只能标"不知道"。
+#    中央目录读不出来）在这里被真正解开答出来 —— 之前只能标"不知道"；
+# ③ 一份首启交付清单：每个文件落到用户机器的相对路径与对象键（只生成，不上传）。
 # 下载与解包只发生在 runner 上：本机的硬约束是不编译不运行，连下载解包都不在这台机器做。
 on:
   workflow_dispatch:
@@ -12,7 +13,10 @@ on:
       - "tools/pack_engine.py"
       - "tools/payload_plan.py"
       - "tools/engine_probe.py"
+      - "tools/stage_payload.py"
+      - "tools/payload_intake.py"
       - "pins/payload-plan.json"
+      - "pins/shell-contract.json"
       - ".github/workflows/package.yml"
 
 permissions:
@@ -76,7 +80,16 @@ jobs:
           set -euo pipefail
           python3 tools/stage_payload.py --package "dist/${OS_TAG}" --data "/tmp/root-${OS_TAG}" --os "${OS_TAG}" --json "/tmp/stage-${OS_TAG}.json"
           python3 tools/stage_payload.py --check --package "dist/${OS_TAG}" --data "/tmp/root-${OS_TAG}" --os "${OS_TAG}"
-      - name: 上传引擎负载
+      - name: 生成首启交付清单（逐文件 key + sha256；不上传、不执行）
+        env:
+          OS_TAG: ${{ matrix.os_tag }}
+        run: |
+          set -euo pipefail
+          python3 tools/payload_intake.py --data "/tmp/root-${OS_TAG}" --os "${OS_TAG}" \
+            --out "dist/${OS_TAG}/delivery-manifest.json"
+          python3 tools/payload_intake.py --check --data "/tmp/root-${OS_TAG}" --os "${OS_TAG}" \
+            --out "dist/${OS_TAG}/delivery-manifest.json"
+      - name: 上传引擎负载与首启交付清单
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4.6.2
         with:
           name: engine-payload-${{ matrix.os_tag }}

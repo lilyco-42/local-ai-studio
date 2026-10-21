@@ -1,0 +1,43 @@
+name: 上游跟随（llama.cpp 新版只报不跟）
+# 用户要求"随时跟随上游更新 llama.cpp"。但上游一天能发好几个包（b11727 → b11755
+# 只用了几天），把"有新版本"本身变成红，红就不再是信号。所以这条车道只做两件事：
+#   1. 钉住那颗还在不在、有没有被重打包 —— 这里坏了才红（退出码 1）；
+#   2. 报出落后几个带产物的版本、候选版还能不能覆盖我们真装的三条 OS。
+# 升级永远是一次显式动作：本地跑 tools/follow_upstream.py --update --tag bNNNNN，
+# 量出装机负载、再按它打印的命令逐张重出派生表。车道本身不写仓库。
+on:
+  # 这台账号上的 schedule 实测会晚 1–3 小时、还会整槽丢；一天只排一次等于经常当天没检查。
+  # 四个时点让"丢一槽"不至于变成"一天没看上游"；重叠由下面的 concurrency 取消。
+  schedule:
+    - cron: "17 3,9,15,21 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: upstream-follow
+  cancel-in-progress: true
+
+jobs:
+  lag:
+    timeout-minutes: 15
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4.4.0
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5.6.0
+        with:
+          python-version: "3.12"
+      - name: 现取窗口并判定（新版不红；钉值撤了/被重打包才红）
+        # setup-python 的 3.12 自带 pyyaml 之外的东西不保证，而 follow_upstream 只 import
+        # 标准库与仓库内工具；这里不装任何包，保持这条定时车道最少的依赖面。
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python tools/follow_upstream.py --check --live --json upstream-lag.json
+      - name: 报告落盘（红的时候也要留证据）
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4.6.2
+        with:
+          name: upstream-lag
+          path: upstream-lag.json
+          if-no-files-found: warn

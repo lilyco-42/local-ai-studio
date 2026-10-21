@@ -146,6 +146,7 @@ fn log_tail(path: &Path, max_bytes: usize) -> String {
 pub struct Status {
     pub capability: String,
     pub engine: String,
+    pub available: bool,
     pub running: bool,
     pub pid: Option<u32>,
     pub port: Option<u16>,
@@ -241,6 +242,7 @@ impl Supervisor {
     pub fn status(&mut self) -> Vec<Status> {
         let mut out = Vec::new();
         for (name, cap) in &self.contract.capabilities {
+            let available = cap.os.contains_key(self.platform);
             let mut running = false;
             let mut pid = None;
             let mut port = None;
@@ -264,6 +266,7 @@ impl Supervisor {
             out.push(Status {
                 capability: name.clone(),
                 engine: cap.engine.clone(),
+                available,
                 running,
                 pid,
                 port,
@@ -1033,6 +1036,17 @@ mod tests {
             .expect("6GB 不在合同的档位里")
             .to_string();
         assert!(err.contains("6GB"), "{err}");
+    }
+
+    #[test]
+    fn status_reports_a_capability_the_platform_has_no_build_for() {
+        let mut s = Supervisor::new(embedded(), "macos-arm64", "8GB", PathBuf::from("/data"), "auto")
+            .unwrap();
+        let rows = s.status();
+        let sub = rows.iter().find(|r| r.capability == "字幕").unwrap();
+        let chat = rows.iter().find(|r| r.capability == "对话").unwrap();
+        assert!(!sub.available, "macOS 的合同里没有字幕这一格");
+        assert!(chat.available, "macOS 的合同里有对话这一格");
     }
 
     #[test]

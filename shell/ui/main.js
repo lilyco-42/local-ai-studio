@@ -11,6 +11,8 @@ const I18N = {
     tabImage: '生图',
     idle: '未启动',
     running: '运行中',
+    unavailable: '本平台暂不提供',
+    unavailableHint: '上游没有发布这一平台的引擎；这台机器只能装合同里有的能力。',
     oneShot: '一次性进程',
     startEngine: '启动引擎',
     stopEngine: '停止',
@@ -45,6 +47,8 @@ const I18N = {
     tabImage: 'Images',
     idle: 'stopped',
     running: 'running',
+    unavailable: 'not available on this platform',
+    unavailableHint: 'Upstream publishes no engine for this platform; only capabilities in the contract can be installed here.',
     oneShot: 'one-shot process',
     startEngine: 'Start engine',
     stopEngine: 'Stop',
@@ -82,6 +86,7 @@ let lang = loadLang();
 let activeTab = 'chat';
 let busy = false;
 let statusRows = [];
+let unavailable = new Set();
 let history = [];
 
 function loadLang() {
@@ -147,7 +152,7 @@ async function run(task) {
 
 function setButtonsDisabled(value) {
   document.querySelectorAll('main button, #engine-start, #engine-stop').forEach((node) => {
-    node.disabled = value;
+    node.disabled = value || unavailable.has(node.dataset.capability);
   });
 }
 
@@ -195,6 +200,12 @@ async function refreshStatus() {
     el('engine-chip').textContent = String(err);
     return;
   }
+  unavailable = new Set(statusRows
+    .filter((row) => row.available === false)
+    .map((row) => row.capability));
+  document.querySelectorAll('[data-capability]').forEach((node) => {
+    node.disabled = busy || unavailable.has(node.dataset.capability);
+  });
   renderStatus();
 }
 
@@ -208,6 +219,13 @@ function renderStatus() {
   if (!row) {
     el('engine-chip').textContent = cap + ' · ' + t('idle');
     el('engine-state').textContent = cap + ' · ' + t('idle');
+    return;
+  }
+  if (row.available === false) {
+    el('engine-chip').textContent = cap + ' · ' + t('unavailable');
+    el('engine-state').textContent = cap + ' · ' + t('unavailableHint');
+    el('engine-start').disabled = true;
+    el('engine-stop').disabled = true;
     return;
   }
   const state = row.running ? t('running') + ' (:' + row.port + ')' : t('idle');

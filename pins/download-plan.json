@@ -1,0 +1,547 @@
+{
+ "from": [
+  "catalog/machine-budget.json",
+  "catalog/recommendations.json",
+  "catalog/subtitle-tiers.json",
+  "catalog/image-tiers.json",
+  "pins/ocr.json",
+  "tools/r2_manifest.py"
+ ],
+ "gaps": [
+  "OCR 默认档 3 颗已有 ModelScope（整包下载复核 sha256）与 GitHub release 两条源；R2 镜像仍未建（#23），海外/兜底只剩 GitHub release 直连",
+  "whisper.cpp 的 ModelScope 源被删掉是证据决定的（同次捕获 0 条），不是漏配；它的 `single` 强度也来自同一份捕获",
+  "`huggingface.co` 直连 2026-10-19 从 CN 实测 0 字节，只作海外/兜底，不参与「哪家更快」的排序"
+ ],
+ "items": [
+  {
+   "bytes": 2497281312,
+   "default_install": true,
+   "file": "Qwen3-4B-Q4_K_M.gguf",
+   "kind": "chat",
+   "known_absent": [],
+   "repo": "unsloth/Qwen3-4B-GGUF",
+   "route": "hf_metadata",
+   "sha256": "f6f851777709861056efcdad3af01da38b31223a3ba26e61a4f8bf3a2195813a",
+   "single_source": false,
+   "sources": [
+    {
+     "measured_mib_s": 4.2,
+     "name": "modelscope",
+     "note": "1/16/32 MiB 三档最保守一档",
+     "url": "https://www.modelscope.cn/models/unsloth/Qwen3-4B-GGUF/resolve/master/Qwen3-4B-Q4_K_M.gguf"
+    },
+    {
+     "measured_mib_s": 0.25,
+     "name": "hf-mirror.com",
+     "note": "1 MiB 样本，含 ttfb 1.8 s",
+     "url": "https://hf-mirror.com/unsloth/Qwen3-4B-GGUF/resolve/main/Qwen3-4B-Q4_K_M.gguf"
+    },
+    {
+     "measured_mib_s": 0.0,
+     "name": "huggingface.co",
+     "note": "2026-10-19 从 CN 出口实测 0 字节（不可用），海外或直连时才用",
+     "url": "https://huggingface.co/unsloth/Qwen3-4B-GGUF/resolve/main/Qwen3-4B-Q4_K_M.gguf"
+    }
+   ],
+   "tiers": [
+    "4GB"
+   ]
+  },
+  {
+   "bytes": 5027784512,
+   "default_install": true,
+   "file": "Qwen3-8B-Q4_K_M.gguf",
+   "kind": "chat",
+   "known_absent": [],
+   "repo": "unsloth/Qwen3-8B-GGUF",
+   "route": "hf_metadata",
+   "sha256": "120307ba529eb2439d6c430d94104dabd578497bc7bfe7e322b5d9933b449bd4",
+   "single_source": false,
+   "sources": [
+    {
+     "measured_mib_s": 4.2,
+     "name": "modelscope",
+     "note": "1/16/32 MiB 三档最保守一档",
+     "url": "https://www.modelscope.cn/models/unsloth/Qwen3-8B-GGUF/resolve/master/Qwen3-8B-Q4_K_M.gguf"
+    },
+    {
+     "measured_mib_s": 0.25,
+     "name": "hf-mirror.com",
+     "note": "1 MiB 样本，含 ttfb 1.8 s",
+     "url": "https://hf-mirror.com/unsloth/Qwen3-8B-GGUF/resolve/main/Qwen3-8B-Q4_K_M.gguf"
+    },
+    {
+     "measured_mib_s": 0.0,
+     "name": "huggingface.co",
+     "note": "2026-10-19 从 CN 出口实测 0 字节（不可用），海外或直连时才用",
+     "url": "https://huggingface.co/unsloth/Qwen3-8B-GGUF/resolve/main/Qwen3-8B-Q4_K_M.gguf"
+    }
+   ],
+   "tiers": [
+    "8GB"
+   ]
+  },
+  {
+   "bytes": 9001753376,
+   "default_install": true,
+   "file": "Qwen3-14B-Q4_K_M.gguf",
+   "kind": "chat",
+   "known_absent": [],
+   "repo": "ggml-org/Qwen3-14B-GGUF",
+   "route": "hf_metadata",
+   "sha256": "5ff1fe7a07aebc8d090682d01b17cf268a1b4680c6477050ce75a600aecb9efb",
+   "single_source": false,
+   "sources": [
+    {
+     "measured_mib_s": 4.2,
+     "name": "modelscope",
+     "note": "1/16/32 MiB 三档最保守一档",
+     "url": "https://www.modelscope.cn/models/ggml-org/Qwen3-14B-GGUF/resolve/master/Qwen3-14B-Q4_K_M.gguf"
+    },
+    {
+     "measured_mib_s": 0.25,
+     "name": "hf-mirror.com",
+     "note": "1 MiB 样本，含 ttfb 1.8 s",
+     "url": "https://hf-mirror.com/ggml-org/Qwen3-14B-GGUF/resolve/main/Qwen3-14B-Q4_K_M.gguf"
+    },
+    {
+     "measured_mib_s": 0.0,
+     "name": "huggingface.co",
+     "note": "2026-10-19 从 CN 出口实测 0 字节（不可用），海外或直连时才用",
+     "url": "https://huggingface.co/ggml-org/Qwen3-14B-GGUF/resolve/main/Qwen3-14B-Q4_K_M.gguf"
+    }
+   ],
+   "tiers": [
+    "16GB"
+   ]
+  },
+  {
+   "bytes": 1533763059,
+   "default_install": true,
+   "file": "ggml-medium.bin",
+   "kind": "subtitle",
+   "known_absent": [
+    "modelscope"
+   ],
+   "repo": "ggerganov/whisper.cpp",
+   "route": "hf_metadata",
+   "sha256": "6c14d5adee5f86394037b4e4e8b59f1673b6cee10e3cf0b11bbdbee79c156208",
+   "single_source": false,
+   "sources": [
+    {
+     "measured_mib_s": 0.25,
+     "name": "hf-mirror.com",
+     "note": "1 MiB 样本，含 ttfb 1.8 s",
+     "url": "https://hf-mirror.com/ggerganov/whisper.cpp/resolve/main/ggml-medium.bin"
+    },
+    {
+     "measured_mib_s": 0.0,
+     "name": "huggingface.co",
+     "note": "2026-10-19 从 CN 出口实测 0 字节（不可用），海外或直连时才用",
+     "url": "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-medium.bin"
+    }
+   ],
+   "tiers": [
+    "4GB"
+   ]
+  },
+  {
+   "bytes": 3094623691,
+   "default_install": true,
+   "file": "ggml-large-v1.bin",
+   "kind": "subtitle",
+   "known_absent": [
+    "modelscope"
+   ],
+   "repo": "ggerganov/whisper.cpp",
+   "route": "hf_metadata",
+   "sha256": "7d99f41a10525d0206bddadd86760181fa920438b6b33237e3118ff6c83bb53d",
+   "single_source": false,
+   "sources": [
+    {
+     "measured_mib_s": 0.25,
+     "name": "hf-mirror.com",
+     "note": "1 MiB 样本，含 ttfb 1.8 s",
+     "url": "https://hf-mirror.com/ggerganov/whisper.cpp/resolve/main/ggml-large-v1.bin"
+    },
+    {
+     "measured_mib_s": 0.0,
+     "name": "huggingface.co",
+     "note": "2026-10-19 从 CN 出口实测 0 字节（不可用），海外或直连时才用",
+     "url": "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-large-v1.bin"
+    }
+   ],
+   "tiers": [
+    "16GB",
+    "8GB"
+   ]
+  },
+  {
+   "bytes": 27156,
+   "default_install": true,
+   "file": "ppocrv6_tiny_dict.txt",
+   "kind": "ocr",
+   "known_absent": [],
+   "repo": null,
+   "route": "github_release_digest",
+   "sha256": "c5cbe34ef40c29c4df07ed012bf96569cb69a2d2a01a07027e9f13cb832bd9cd",
+   "single_source": false,
+   "sources": [
+    {
+     "measured_mib_s": 4.2,
+     "name": "modelscope",
+     "note": "1/16/32 MiB 三档最保守一档；2026-10-20 整包下载后 sha256 相等",
+     "url": "https://www.modelscope.cn/models/greatv/oar-ocr/resolve/master/ppocrv6_tiny_dict.txt"
+    },
+    {
+     "measured_mib_s": 0.014,
+     "name": "github.com",
+     "note": "GitHub release 三个 1 MiB 样本 0.012–0.017",
+     "url": "https://github.com/GreatV/oar-ocr/releases/download/v0.7.0/ppocrv6_tiny_dict.txt"
+    }
+   ],
+   "tiers": [
+    "16GB",
+    "4GB",
+    "8GB"
+   ]
+  },
+  {
+   "bytes": 1780590,
+   "default_install": true,
+   "file": "pp-ocrv6_tiny_det.onnx",
+   "kind": "ocr",
+   "known_absent": [],
+   "repo": null,
+   "route": "github_release_digest",
+   "sha256": "193bab7a04fca699a6c82e6abb5b81bdb28177f0abd4062552b04908dafb19f8",
+   "single_source": false,
+   "sources": [
+    {
+     "measured_mib_s": 4.2,
+     "name": "modelscope",
+     "note": "1/16/32 MiB 三档最保守一档；2026-10-20 整包下载后 sha256 相等",
+     "url": "https://www.modelscope.cn/models/greatv/oar-ocr/resolve/master/pp-ocrv6_tiny_det.onnx"
+    },
+    {
+     "measured_mib_s": 0.014,
+     "name": "github.com",
+     "note": "GitHub release 三个 1 MiB 样本 0.012–0.017",
+     "url": "https://github.com/GreatV/oar-ocr/releases/download/v0.7.0/pp-ocrv6_tiny_det.onnx"
+    }
+   ],
+   "tiers": [
+    "16GB",
+    "4GB",
+    "8GB"
+   ]
+  },
+  {
+   "bytes": 4462639,
+   "default_install": true,
+   "file": "pp-ocrv6_tiny_rec.onnx",
+   "kind": "ocr",
+   "known_absent": [],
+   "repo": null,
+   "route": "github_release_digest",
+   "sha256": "9ef676d6ed3c88256a2d92c640c44f25b0c40947e111b14b8be8f594091563e6",
+   "single_source": false,
+   "sources": [
+    {
+     "measured_mib_s": 4.2,
+     "name": "modelscope",
+     "note": "1/16/32 MiB 三档最保守一档；2026-10-20 整包下载后 sha256 相等",
+     "url": "https://www.modelscope.cn/models/greatv/oar-ocr/resolve/master/pp-ocrv6_tiny_rec.onnx"
+    },
+    {
+     "measured_mib_s": 0.014,
+     "name": "github.com",
+     "note": "GitHub release 三个 1 MiB 样本 0.012–0.017",
+     "url": "https://github.com/GreatV/oar-ocr/releases/download/v0.7.0/pp-ocrv6_tiny_rec.onnx"
+    }
+   ],
+   "tiers": [
+    "16GB",
+    "4GB",
+    "8GB"
+   ]
+  },
+  {
+   "bytes": 130769600,
+   "default_install": false,
+   "file": "clip_l-Q8_0.gguf",
+   "kind": "image",
+   "known_absent": [],
+   "repo": "second-state/FLUX.1-schnell-GGUF",
+   "route": "hf_metadata",
+   "sha256": "59cbe002c3e75d2b89d38787e81d12fb4e512fd76176884c470737ad87a1d309",
+   "single_source": false,
+   "sources": [
+    {
+     "measured_mib_s": 4.2,
+     "name": "modelscope",
+     "note": "1/16/32 MiB 三档最保守一档",
+     "url": "https://www.modelscope.cn/models/second-state/FLUX.1-schnell-GGUF/resolve/master/clip_l-Q8_0.gguf"
+    },
+    {
+     "measured_mib_s": 0.25,
+     "name": "hf-mirror.com",
+     "note": "1 MiB 样本，含 ttfb 1.8 s",
+     "url": "https://hf-mirror.com/second-state/FLUX.1-schnell-GGUF/resolve/main/clip_l-Q8_0.gguf"
+    },
+    {
+     "measured_mib_s": 0.0,
+     "name": "huggingface.co",
+     "note": "2026-10-19 从 CN 出口实测 0 字节（不可用），海外或直连时才用",
+     "url": "https://huggingface.co/second-state/FLUX.1-schnell-GGUF/resolve/main/clip_l-Q8_0.gguf"
+    }
+   ],
+   "tiers": [
+    "16GB"
+   ]
+  },
+  {
+   "bytes": 167656704,
+   "default_install": false,
+   "file": "ae-f16.gguf",
+   "kind": "image",
+   "known_absent": [],
+   "repo": "second-state/FLUX.1-schnell-GGUF",
+   "route": "hf_metadata",
+   "sha256": "1bed7b05318709e46a8cb9accc211168fc7f0b61ab594661860bbfe4d785cc46",
+   "single_source": false,
+   "sources": [
+    {
+     "measured_mib_s": 4.2,
+     "name": "modelscope",
+     "note": "1/16/32 MiB 三档最保守一档",
+     "url": "https://www.modelscope.cn/models/second-state/FLUX.1-schnell-GGUF/resolve/master/ae-f16.gguf"
+    },
+    {
+     "measured_mib_s": 0.25,
+     "name": "hf-mirror.com",
+     "note": "1 MiB 样本，含 ttfb 1.8 s",
+     "url": "https://hf-mirror.com/second-state/FLUX.1-schnell-GGUF/resolve/main/ae-f16.gguf"
+    },
+    {
+     "measured_mib_s": 0.0,
+     "name": "huggingface.co",
+     "note": "2026-10-19 从 CN 出口实测 0 字节（不可用），海外或直连时才用",
+     "url": "https://huggingface.co/second-state/FLUX.1-schnell-GGUF/resolve/main/ae-f16.gguf"
+    }
+   ],
+   "tiers": [
+    "16GB"
+   ]
+  },
+  {
+   "bytes": 1605835296,
+   "default_install": false,
+   "file": "t5xxl-Q2_K.gguf",
+   "kind": "image",
+   "known_absent": [],
+   "repo": "second-state/FLUX.1-schnell-GGUF",
+   "route": "hf_metadata",
+   "sha256": "4368e93e01946e930490d4ce9e8e406b611fa8872cb0077b7ec57f394f1fcb16",
+   "single_source": false,
+   "sources": [
+    {
+     "measured_mib_s": 4.2,
+     "name": "modelscope",
+     "note": "1/16/32 MiB 三档最保守一档",
+     "url": "https://www.modelscope.cn/models/second-state/FLUX.1-schnell-GGUF/resolve/master/t5xxl-Q2_K.gguf"
+    },
+    {
+     "measured_mib_s": 0.25,
+     "name": "hf-mirror.com",
+     "note": "1 MiB 样本，含 ttfb 1.8 s",
+     "url": "https://hf-mirror.com/second-state/FLUX.1-schnell-GGUF/resolve/main/t5xxl-Q2_K.gguf"
+    },
+    {
+     "measured_mib_s": 0.0,
+     "name": "huggingface.co",
+     "note": "2026-10-19 从 CN 出口实测 0 字节（不可用），海外或直连时才用",
+     "url": "https://huggingface.co/second-state/FLUX.1-schnell-GGUF/resolve/main/t5xxl-Q2_K.gguf"
+    }
+   ],
+   "tiers": [
+    "16GB"
+   ]
+  },
+  {
+   "bytes": 2132586944,
+   "default_install": false,
+   "file": "stable-diffusion-v1-5-pruned-emaonly-f16.gguf",
+   "kind": "image",
+   "known_absent": [],
+   "repo": "second-state/stable-diffusion-v1-5-GGUF",
+   "route": "hf_metadata",
+   "sha256": "da017009aa86a3f46468857d95833435fe55e4a2856afab76ba7722ef8ee4d8b",
+   "single_source": false,
+   "sources": [
+    {
+     "measured_mib_s": 4.2,
+     "name": "modelscope",
+     "note": "1/16/32 MiB 三档最保守一档",
+     "url": "https://www.modelscope.cn/models/second-state/stable-diffusion-v1-5-GGUF/resolve/master/stable-diffusion-v1-5-pruned-emaonly-f16.gguf"
+    },
+    {
+     "measured_mib_s": 0.25,
+     "name": "hf-mirror.com",
+     "note": "1 MiB 样本，含 ttfb 1.8 s",
+     "url": "https://hf-mirror.com/second-state/stable-diffusion-v1-5-GGUF/resolve/main/stable-diffusion-v1-5-pruned-emaonly-f16.gguf"
+    },
+    {
+     "measured_mib_s": 0.0,
+     "name": "huggingface.co",
+     "note": "2026-10-19 从 CN 出口实测 0 字节（不可用），海外或直连时才用",
+     "url": "https://huggingface.co/second-state/stable-diffusion-v1-5-GGUF/resolve/main/stable-diffusion-v1-5-pruned-emaonly-f16.gguf"
+    }
+   ],
+   "tiers": [
+    "4GB"
+   ]
+  },
+  {
+   "bytes": 4265059488,
+   "default_install": false,
+   "file": "stable-diffusion-v1-5-pruned-emaonly-f32.gguf",
+   "kind": "image",
+   "known_absent": [],
+   "repo": "second-state/stable-diffusion-v1-5-GGUF",
+   "route": "hf_metadata",
+   "sha256": "52c7ca39d8d48d6f44fa4ff2c44569f3c924d92311108cb38492958350d48ff8",
+   "single_source": false,
+   "sources": [
+    {
+     "measured_mib_s": 4.2,
+     "name": "modelscope",
+     "note": "1/16/32 MiB 三档最保守一档",
+     "url": "https://www.modelscope.cn/models/second-state/stable-diffusion-v1-5-GGUF/resolve/master/stable-diffusion-v1-5-pruned-emaonly-f32.gguf"
+    },
+    {
+     "measured_mib_s": 0.25,
+     "name": "hf-mirror.com",
+     "note": "1 MiB 样本，含 ttfb 1.8 s",
+     "url": "https://hf-mirror.com/second-state/stable-diffusion-v1-5-GGUF/resolve/main/stable-diffusion-v1-5-pruned-emaonly-f32.gguf"
+    },
+    {
+     "measured_mib_s": 0.0,
+     "name": "huggingface.co",
+     "note": "2026-10-19 从 CN 出口实测 0 字节（不可用），海外或直连时才用",
+     "url": "https://huggingface.co/second-state/stable-diffusion-v1-5-GGUF/resolve/main/stable-diffusion-v1-5-pruned-emaonly-f32.gguf"
+    }
+   ],
+   "tiers": [
+    "8GB"
+   ]
+  },
+  {
+   "bytes": 8175240416,
+   "default_install": false,
+   "file": "flux1-schnell-Q5_0.gguf",
+   "kind": "image",
+   "known_absent": [],
+   "repo": "second-state/FLUX.1-schnell-GGUF",
+   "route": "hf_metadata",
+   "sha256": "7324362f5366f404fbf662357f321d6335a889e3f2030f1788270323eebd9116",
+   "single_source": false,
+   "sources": [
+    {
+     "measured_mib_s": 4.2,
+     "name": "modelscope",
+     "note": "1/16/32 MiB 三档最保守一档",
+     "url": "https://www.modelscope.cn/models/second-state/FLUX.1-schnell-GGUF/resolve/master/flux1-schnell-Q5_0.gguf"
+    },
+    {
+     "measured_mib_s": 0.25,
+     "name": "hf-mirror.com",
+     "note": "1 MiB 样本，含 ttfb 1.8 s",
+     "url": "https://hf-mirror.com/second-state/FLUX.1-schnell-GGUF/resolve/main/flux1-schnell-Q5_0.gguf"
+    },
+    {
+     "measured_mib_s": 0.0,
+     "name": "huggingface.co",
+     "note": "2026-10-19 从 CN 出口实测 0 字节（不可用），海外或直连时才用",
+     "url": "https://huggingface.co/second-state/FLUX.1-schnell-GGUF/resolve/main/flux1-schnell-Q5_0.gguf"
+    }
+   ],
+   "tiers": [
+    "16GB"
+   ]
+  }
+ ],
+ "measured_at_exit": "lain42.top（CN 出口，2026-10 一次量）",
+ "note": "由 tools/download_plan.py 生成；不要手改。行来自装机预算，源来自三张档位表，顺序来自实测吞吐。",
+ "policy": {
+  "attempts_per_source": 2,
+  "default_install_min_sources": 2,
+  "item_order": "默认安装先；同组按 chat < subtitle < ocr < image，再按字节升序",
+  "known_absent_sources_removed": true,
+  "low_speed": {
+   "bytes_per_s": 65536,
+   "seconds": 30
+  },
+  "resume": "Range: bytes=<已有字节>-；206 追加，200 丢弃 .part 重下，416/404 保留进度换源",
+  "source_order": "measured_mib_s 降序；速率相同保持来源表里（pin 里）的候选顺序",
+  "verify": "收满 bytes 后算 sha256；不符删掉 .part 从 0 重来；通过后落 blobs/<sha> 再硬链接到文件名"
+ },
+ "rates_mib_s": {
+  "github.com": 0.014,
+  "hf-mirror.com": 0.25,
+  "modelscope": 4.2
+ },
+ "schema": 1,
+ "skipped": [
+  {
+   "bytes": 123297373,
+   "file": "(合计)",
+   "kind": "ocr",
+   "note": "这是把默认档换成全语言时多出来的量，不是叠在默认档上；它不是一个文件，所以进不了首启队列、也不进字节与时间（不等于没验过 —— 逐条在 pins/ocr-languages.json 与 ocr-languages 车道）"
+  }
+ ],
+ "totals": {
+  "by_kind": {
+   "chat": {
+    "bytes": 16526819200,
+    "items": 3
+   },
+   "image": {
+    "bytes": 16477148448,
+    "items": 6
+   },
+   "ocr": {
+    "bytes": 6270385,
+    "items": 3
+   },
+   "subtitle": {
+    "bytes": 4628386750,
+    "items": 2
+   }
+  },
+  "by_tier_weights_bytes": {
+   "16GB": {
+    "default_install_bytes": 12102647452,
+    "items": 9,
+    "optional_bytes": 10079502016
+   },
+   "4GB": {
+    "default_install_bytes": 4037314756,
+    "items": 6,
+    "optional_bytes": 2132586944
+   },
+   "8GB": {
+    "default_install_bytes": 8128678588,
+    "items": 6,
+    "optional_bytes": 4265059488
+   }
+  },
+  "default_install_items": 8,
+  "items": 14,
+  "scope": "三档并集；一台机器只装其中一档，逐档首启量见 machine-budget 的 first_run_*",
+  "union_bytes": {
+   "default_install": 21161476335,
+   "optional": 16477148448
+  }
+ }
+}

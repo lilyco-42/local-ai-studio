@@ -9,7 +9,8 @@ from __future__ import annotations
 
 import os
 
-WORKFLOW_FILES = ("ci.yml", "engine-live.yml", "package.yml", "shell.yml", "installer.yml")
+WORKFLOW_FILES = ("ci.yml", "engine-live.yml", "package.yml", "shell.yml", "installer.yml",
+                  "upstream-follow.yml")
 
 
 def paths(root: str) -> list[str]:

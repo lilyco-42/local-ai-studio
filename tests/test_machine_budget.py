@@ -111,7 +111,14 @@ class TestArithmetic(unittest.TestCase):
     def test_download_bytes_is_weights_plus_engine(self) -> None:
         plan = src("pins/payload-plan.json")
         for tier, block in self.d["per_tier"].items():
-            self.assertEqual(block["weights_bytes"], sum(i["bytes"] for i in block["items"]))
+            # (合计) 是"换成全语言会多出多少"，不是一个文件：它不得进权重和，也不得进时间
+            agg = [i for i in block["items"] if i["file"] == "(合计)"]
+            self.assertEqual(len(agg), 1, tier)
+            self.assertEqual(agg[0]["resolve_via"], "not_a_file")
+            self.assertFalse(agg[0]["queueable"])
+            self.assertEqual(block["not_downloaded_bytes"], agg[0]["bytes"], tier)
+            self.assertEqual(block["weights_bytes"],
+                             sum(i["bytes"] for i in block["items"]) - agg[0]["bytes"], tier)
             for os_key, ov in block["by_os"].items():
                 self.assertEqual(ov["download_bytes"],
                                  block["weights_bytes"] + int(round(ov["engine_download_mib"] * MIB)),
@@ -149,18 +156,56 @@ class TestArithmetic(unittest.TestCase):
         self.assertTrue(with_comp,
                         "默认档至少要有一行真的带配套件，否则上面的加法判据全是空的（合成那半在 selftest）")
 
-    def test_time_is_derived_from_the_measured_rate_module(self) -> None:
-        self.assertEqual(self.d["rates_mib_s"]["modelscope"],
+    def test_time_is_derived_per_source_from_the_measured_rate_module(self) -> None:
+        rates = self.d["rates_mib_s"]
+        self.assertEqual(rates["modelscope"],
                          float(next(r for k, r, _n in r2_manifest.RATES_MIB_S if "modelscope" in k)))
-        self.assertEqual(self.d["rates_mib_s"]["hf-mirror"], 0.25)
+        self.assertEqual(rates["hf-mirror"], 0.25)
+        self.assertEqual(rates["github"], 0.014)
+        sources = {rates[k] for k in ("modelscope", "hf-mirror", "github")}
         for tier, block in self.d["per_tier"].items():
+            timed = [i for i in block["items"]
+                     if i.get("seconds_at_fastest_measured") is not None]
+            for i in timed:
+                self.assertIn(i["measured_mib_s"], sources, (tier, i["file"]))
+                self.assertEqual(i["seconds_at_fastest_measured"],
+                                 round(i["bytes"] / MIB / i["measured_mib_s"], 6), (tier, i["file"]))
+                self.assertEqual(i["seconds_at_slowest_measured"],
+                                 round(i["bytes"] / MIB / i["slowest_mib_s"], 6), (tier, i["file"]))
+                self.assertGreaterEqual(i["measured_mib_s"], i["slowest_mib_s"], (tier, i["file"]))
+            self.assertNotIn("(合计)", {i["file"] for i in timed}, tier)
             for os_key, ov in block["by_os"].items():
-                want = round(ov["download_bytes"] / MIB / self.d["rates_mib_s"]["modelscope"] / 60, 1)
+                # 引擎只有 GitHub release 一个源；权重逐颗按候选源最快的一档
+                engine_bytes = int(round(ov["engine_download_mib"] * MIB))
+                eng_sec = round(engine_bytes / MIB / rates["github"], 6)
+                want = round((eng_sec + sum(i["seconds_at_fastest_measured"] for i in timed)) / 60, 1)
                 self.assertEqual(ov["minutes_at_measured_rate"], want, (tier, os_key))
+                first = [i for i in timed if i.get("default_install", True)]
+                want_first = round((eng_sec + sum(i["seconds_at_fastest_measured"]
+                                                  for i in first)) / 60, 1)
+                self.assertEqual(ov["first_run_minutes_at_measured_rate"], want_first,
+                                 (tier, os_key))
+                self.assertEqual(ov["engine_minutes_at_github_rate"], round(eng_sec / 60, 1))
                 self.assertGreater(ov["worst_case_hours_at_slowest_measured"],
                                    ov["minutes_at_measured_rate"] / 60)
+                # 回归：旧版拿全局 4.2 MiB/s 除全部字节，4GB 首装被写成 15.9 分钟
+                self.assertGreater(ov["first_run_minutes_at_measured_rate"],
+                                   ov["first_run_ideal_all_modelscope_minutes"],
+                                   (tier, os_key))
         self.assertIn("lain42", self.d["measured_at_exit"],
                       "换算用的吞吐是哪台机器量的，必须写在产物里")
+
+    def test_the_source_it_times_is_the_one_that_actually_serves_the_file(self) -> None:
+        b = {i["file"]: i for i in self.d["per_tier"]["4GB"]["items"]}
+        # whisper 的 ModelScope 地址是上游 404，只能按 hf-mirror 的 0.25 计时
+        self.assertEqual(b["ggml-medium.bin"]["fastest_source"], "hf-mirror.com")
+        self.assertEqual(b["ggml-medium.bin"]["measured_mib_s"], 0.25)
+        # 对话/生图/OCR 在 ModelScope 有整包，按 4.2
+        self.assertEqual(b["Qwen3-4B-Q4_K_M.gguf"]["fastest_source"], "modelscope")
+        tiny = next(i for i in self.d["per_tier"]["4GB"]["items"]
+                    if i["kind"] == "ocr" and i["file"].startswith("pp-"))
+        self.assertEqual(tiny["fastest_source"], "modelscope")
+        self.assertEqual(tiny["slowest_source"], "github.com")
 
     def test_missing_and_unknown_landed_are_different_things(self) -> None:
         plan = src("pins/payload-plan.json")
@@ -214,6 +259,20 @@ class TestRecompute(unittest.TestCase):
             ("engine_mib", lambda d: d["per_tier"]["4GB"]["by_os"]["win-x64"].__setitem__(
                 "engine_download_mib", 0.0)),
             ("companion_bytes", lambda d: d["per_tier"]["4GB"].__setitem__("companion_bytes", 1)),
+            ("weights_bytes", lambda d: d["per_tier"]["4GB"].__setitem__("weights_bytes", 1)),
+            ("not_downloaded", lambda d: d["per_tier"]["4GB"].__setitem__(
+                "not_downloaded_bytes", 0)),
+            ("item_bytes", lambda d: d["per_tier"]["4GB"]["items"][0].__setitem__("bytes", 1)),
+            ("item_rate", lambda d: d["per_tier"]["4GB"]["items"][0].__setitem__(
+                "measured_mib_s", 0.25)),
+            ("first_run_seconds", lambda d: d["per_tier"]["4GB"]["by_os"]["win-x64"].__setitem__(
+                "first_run_seconds_at_fastest_sources", 1.0)),
+            ("total_seconds", lambda d: d["per_tier"]["4GB"]["by_os"]["win-x64"].__setitem__(
+                "total_seconds_at_fastest_sources", 1.0)),
+            ("ideal", lambda d: d["per_tier"]["4GB"]["by_os"]["win-x64"].__setitem__(
+                "first_run_ideal_all_modelscope_minutes", 1.0)),
+            ("engine_minutes", lambda d: d["per_tier"]["4GB"]["by_os"]["win-x64"].__setitem__(
+                "engine_minutes_at_github_rate", 1.0)),
             ("image_companions", lambda d: d["per_tier"]["4GB"].__setitem__(
                 "image_companions", {"repo": "x/y", "roles": ["vae"], "alternates": 3})),
             ("carries", lambda d: d["per_tier"]["4GB"].__setitem__("image_lower_bound", True)),
@@ -262,7 +321,7 @@ class TestCli(unittest.TestCase):
     def test_selftest_is_load_bearing(self) -> None:
         orig = mb.ocr_items
         try:
-            mb.ocr_items = lambda arts: []
+            mb.ocr_items = lambda arts, problems=None: []
             rc, text = self.run_cli(["--selftest"])
         finally:
             mb.ocr_items = orig
@@ -280,7 +339,8 @@ class TestCli(unittest.TestCase):
         with tempfile.TemporaryDirectory() as d:
             rc, text = self.run_cli(["--out", os.path.join(d, "budget.json")])
             self.assertEqual(rc, 0, text)
-            self.assertEqual(text.count("实测吞吐约"), 9, "3 档 × 3 个 OS")
+            self.assertEqual(text.count("逐源实测约"), 9, "3 档 × 3 个 OS")
+            self.assertEqual(text.count("全按 ModelScope 的理想值"), 9)
             self.assertIn("要下完自算的行", text)
             self.assertTrue(os.path.exists(os.path.join(d, "budget.json")),
                             "给了 --out 却没落盘")

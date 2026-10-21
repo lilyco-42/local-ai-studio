@@ -9,6 +9,8 @@ on:
     branches: [main]
     paths:
       - "shell/**"
+      # 外壳核心用 include_str! 把这张表嵌进二进制：表变了必须重出安装包。
+      - "pins/shell-contract.json"
       - ".github/workflows/installer.yml"
 
 permissions:

@@ -67,11 +67,11 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
 5. **生图按检测到的后端分层**：有 Vulkan/DirectML/CUDA 时正常默认；只有 CPU 时保留入口但
    明示"一张约 5–10 分钟"并默认降到量化 SD1.5 级。依据是第三方数字与产物表实测的
    sd.cpp 每 release 都发 vulkan/rocm 包（详见 ADR-0001）。
-   量完权重还要补一条：**最省的量化版也是 1,494 MiB**，按实测速率 25–30 分钟，
-   所以生图权重**不进首装默认队列**，必须显式触发 + 后台 + 可续传；
+   量完权重还要补一条：**最省的量化版也是 1,494 MiB**（ModelScope 4.2 MiB/s 约 6 分钟，
+   hf-mirror 0.25 约 100 分钟），所以生图权重**不进首装默认队列**，必须显式触发 + 后台 + 可续传；
    而 OCR（4.6+15.8 MiB）与字幕（181.3 MiB）是可以默认的。数字见
    [model-catalog.md](model-catalog.md)。
-   **这一条此前只是一句文档**：装机预算与首启队列都把生图算进"首装"，于是那句"约 24.0 分钟"里
+   **这一条此前只是一句文档**：装机预算与首启队列都把生图算进"首装"，于是那句"装齐"的数里
    含着用户根本没点的 2,033.8 MiB（16GB 档是 9,612.6 MiB）。现在它是一张机器读的表
    （`machine-budget.json` 的 `default_install` + `first_run_*` / `download_*` 两组数，
    `pins/launch-plan.json` 每项能力的 `install_stage`），半装半不装直接红 —— 见验收第 20 条。
@@ -98,7 +98,7 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
 
 ## 验收标准（在当前唯一可用验证手段 = GitHub Actions 下）
 
-1. `ci.yml`：835 个单测绿（重数：`python -W error::ResourceWarning -m unittest discover -s tests
+1. `ci.yml`：913 个单测绿（重数：`python -W error::ResourceWarning -m unittest discover -s tests
    -p "test_*.py"`；按文件数就 `python -m unittest tests.<模块名>`。2026-10-20 实测逐文件：
    `test_yaml_gate.py` 闸门自己（含 workflow 文件清单与磁盘覆盖对照）17、`test_lane_argv.py` 车道 ↔ 启动表一致（含 15 个 workflow 文本变异）10、
    `test_sideload.py` sideload 按内容认领（6 条源码变异体 + 三个真上游文件）22、
@@ -106,25 +106,35 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
    `test_backend_choice.py` 换档表（12 条源码变异体 × 16 条探针，输入是三份已钉产物）25、
    `test_runtime_parity.py` server 在场表（11 条源码变异体 × 15 条探针 + 捕获夹具字节复核）21、
    `test_runtime_versions.py` runtime 版本轴（18 条源码变异体 × 24 条探针 + 窗口元数据夹具）21、
-   `test_shell_contract.py` 外壳合同（14 条源码变异体 × 24 条探针，输入是五张已钉产物）18、
+   `test_follow_upstream.py` 上游跟随判定与 re-pin 流程（19 条，含"新版不红 / 钉值被撤或被重打包才红"）19、
+   `test_shell_contract.py` 外壳合同（14 条源码变异体 × 24 条探针，输入是五张已钉产物 +
+   serde 形状重放 12 个变异）19、
    `test_shell_source.py` 外壳源码结构闸门（7 条核心变异体 + 2 条 UI 负控 + 1 条包装层负控 +
-   3 条 IPC 对表、Rust 分隔符平衡）11、
+   3 条 IPC 对表、Rust 分隔符平衡含 raw string、能力可用性 1 条正控 + 2 个变异、
+   i18n 键集与引用 1 条正控 + 5 个变异）16、
    `test_toolbelt_pins.py` 工具带钉表 14、
    `test_catalog_snapshot.py` 目录快照与侧表 16、`test_citation_check.py` 出处闸门 22、
    `test_strength_derivation.py` 强度级从 pin 字段推导 19、
    `test_ocr_build_surface.py` OCR 依赖面 15、`test_ocr_language_pins.py` OCR 语言轴 31、
    `test_ocr_language_lane.py` 语言车道 9、`test_ocr_pins_augment.py` pin 增量写回 11、
    `test_file_index.py` 下载层五种状态与首启队列 35、
-   `test_payload_plan.py` 装机负载（含 tar 成员表与缺口点名）19、`test_pack_engine.py` 出包逻辑 10、
+   `test_download_plan.py` 下载计划（重算逐键相等 + 源顺序/出处 + 生成器拒猜 + 镜像与 release 兜底 +
+   探针与 policy 对表 + serde 形状重放）18、
+   `test_payload_plan.py` 装机负载（含 tar 成员表与缺口点名）19、
+   `test_pack_engine.py` 出包逻辑与 server-only 收窄（含符号链接闭包、只留一个可执行文件、
+   清单 serde 形状 1 条正控 + 7 个变异）19、
    `test_stage_payload.py` 出包产物→外壳 runtime 摆位（含真实合同落点与 9 条负向）10、
+   `test_payload_intake.py` 首启交付清单（真实合同落点 / 两个数据根同一份字节 / 6 条源码变异体 / 消费端重放）21、
    `test_make_icons.py` 图标从 ICO 派生（PNG 尺寸 / ICNS chunk 覆盖 / 预乘缩放无黑边 /
    已提交图标可复算 + 篡改与缺件必须红 + 重压缩同一张图必须认、改一个像素必须拒）10、
    `test_establish_verify.py` 字节复核 16、`test_shell_vars.py` shell 变量判据 14、
    `test_bash_gate.py` `bash -n` 一好一坏双对照 9、
    `test_r2_manifest.py` 镜像清单 6、`test_lane_assertions.py` + `test_image_proof_block.py`
    车道判据 38 + 6 = 44、`test_png_proof.py` PNG 判据 25、`test_srt_proof.py` SRT 判据 20、
-   `test_recommend_image.py` 生图档位表 31、`test_machine_budget.py` 装机预算 20、
-   `test_lane_replay_report.py` 给分段、预跑与 job 数计数 4、`test_engine_probe.py` 产物名解析与 skipped 点名 30、
+   `test_recommend_image.py` 生图档位表 31、`test_machine_budget.py` 装机预算 21、
+   `test_lane_replay_report.py` 给分段、预跑与 job 数计数，并把上面这份逐文件账按模块 import 复算
+   （1 条正控 + 4 个计数变异 + 合写加法自洽），另按锚点复算 README 与两份文档里 7 处
+   「车道 … N 条单测」（1 条正控 + 4 个变异）8、`test_engine_probe.py` 产物名解析与 skipped 点名 30、
    `test_recommend_subtitle.py` 字幕四表对账 44、`test_recommend_models.py` 对话档位表 46、
    `test_launch_plan.py` 启动计划（含 16 条源码变异体全部被抓）66、
    `test_install_deps.py` 装依赖清单（含 8 条源码变异体与真捕获夹具的字节校验）36、
@@ -170,8 +180,9 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
    产物里却是 `Steps: 3`/256x256，才能证明参数是从请求体吃进去的）。
    OCR 没有服务形态可测（见"技术前提"第 4 条的例外说明）。
    但覆盖度说的是**车道存在**，不是跑过 —— 跑过与否要看 Actions 的真实记录，目前为零。
-5. **车道里的 Python 片段要真编译**：`yaml_gate.py` 现在把五条 workflow 里的每段 `<<'PY'` 抽出来
-   `compile()`（本轮 17 段；`python tools/yaml_gate.py` 自己会打印这个数，别信文档里的静态值），
+5. **车道里的 Python 片段要真编译**：`yaml_gate.py` 现在把六条 workflow 里的每段 `<<'PY'` 抽出来
+   `compile()`（本轮仍是 17 段 —— `upstream-follow.yml` 是纯命令车道、0 段；
+   `python tools/yaml_gate.py` 自己会打印这个数，别信文档里的静态值），
    并验过它会红 —— 掺一段缩进错的 PY 进去，它按
    `文件:job#步骤 第N段` 报出语法错。这个能力是被我上一次写的车道逼出来的：
    一个多缩进两格的注释就是 IndentationError，而旧闸门只查 heredoc 是否闭合，放它过去了。
@@ -227,8 +238,8 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
    的环境，同一行的 `"$FOO"` 由当前 shell 展开，`set -u` 下确实未定义（这条是写完判据才发现自己
    原来的"对照用例"预期错了，判据比对照对）。
    证过它承重：把守卫去掉（临时副本，不动工作树），闸门红在第 5 行点名 `$LD_LIBRARY_PATH`。
-9. **语法这一层交给真解析器，但先验证解析器本身**：`tools/bash_gate.py` 把五条 workflow 的每一段
-   `run:` 写进临时文件跑 `bash -n`（只解析，绝不执行）。2026-10-20 实测覆盖 108 段、0 问
+9. **语法这一层交给真解析器，但先验证解析器本身**：`tools/bash_gate.py` 把六条 workflow 的每一段
+   `run:` 写进临时文件跑 `bash -n`（只解析，绝不执行）。2026-10-20 实测覆盖 109 段、0 问
    （重数：`python3 tools/bash_gate.py` 最后一行的"语法检查了 N 段 run"）。
    这条工具是被一个假结论逼出来的：本机 PATH 上的 `bash` 是 WSL 的占位程序，它对**任何**文件都返回
    非 0 并吐一段 UTF-16 的"未安装"提示 —— 第一遍跑出的是"42/42 步骤全部语法错"，看着像查得很严，
@@ -323,12 +334,24 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     stdlib 解包（不调外部 unzip/tar）→ 按收集规则落成**扁平布局**
     （llama 的顶层同名目录与 whisper 的 `Release/` 都拉平，这是 `$ORIGIN` 找运行库的前提）→
     逐文件 sha256 + 体积写 `payload-manifest.json` 并上传为 artifact。
-    自查三件：主二进制必须在位、清单里不许残留被排除的东西、负载目录里不许留压缩包
+    **一个引擎只放一个可执行文件**：只收 `LAUNCH_PLAN` 点名的 server，CLI/bench/quantize 等
+    工具与它们各自的 `-impl` 运行库（Windows 的 `x-impl.dll`、Linux 的 `libx-impl.so`）逐条点名
+    排除；`.dll/.so/.dylib` 是共享闭包，`LICENSE`、`.metal` 这类非可执行数据也保留 ——
+    判"是不是工具"靠归档的可执行位，不靠后缀白名单。macOS 的 `libx.0.dylib` 是链接，
+    真身是 `libx.0.7.0.dylib`；链接本身必须落盘，否则 `@rpath` 找不到。
+    自查：主二进制必须在位、server 必须在位、清单里不许残留被排除的东西、除 server 外不许有
+    可执行文件、孤儿 `-impl.dll` 不许出现、符号链接必须能解到随包的真身、负载目录里不许留压缩包
     （留着就等于把二次解包推给用户首启）。同名不同目录的成员**不许静默覆盖**，
     要点名进排除表 —— 覆盖会让"装进去的文件"与"清单里的文件"不是同一份。
-    离线对照 10 条（合成 zip + 合成 tar.gz，含 digest 不符与下载失败两条），
-    闸门现在同时解析五条 workflow（17 段 heredoc PY；重数：`python3 tools/yaml_gate.py` 的
-    "编译了 N 段"那行）。
+    收窄后 win 默认档 112 → 57 个文件、115.6 → **104.7 MiB**（`zip` 中央目录的 uncompressed
+    size 求和，未下载整包；llama 51→24 / 42.8、whisper 41→16 / 16.9、sd 20→17 / 45.0；
+    Linux/macOS 的 tar 引擎要等 CI 首次解流，zip 的 sd 已算出 65.0→63.6 与 93.9→90.4）。
+    `--selfcheck` 18 条、`tests/test_pack_engine.py` 19 条（合成 zip + 合成 tar.gz，含 digest
+    不符、下载失败、链式 dylib 链接与"手工塞回一个 CLI 必须红"；另按
+    `shell/core/src/manifest.rs` 重放出包清单的 serde 形状，7 个变异含字符串化体积、
+    带路径的文件名与同名重复），
+    闸门现在同时解析六条 workflow（17 段 heredoc PY，`upstream-follow.yml` 0 段；重数：
+    `python3 tools/yaml_gate.py` 的 "编译了 N 段"那行）。
     车道仍 0 次执行，所以这一条给的是"出包这一步有路、有判据、有清单格式"，不是"包已经出出来"。
 16. **"只能靠 GitHub Actions 出包"这句本身要被验，不能当审美前提**：拆开四问，答案全部来自
     pin 住的公共来源（已进 `pins/citations.json`，由 `citation-drift` 查），详见
@@ -338,7 +361,7 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     `libwebkit2gtk-4.1-dev` 一族，所以安装包车道第一步是 apt 装 + 打印 `pkg-config --modversion`；
     官方 `tauri-apps/tauri-action`（MIT、1,619★、2026-10-16 仍在 push）是 `uses:` 型且
     release **没有产物**，所以它只能按 commit SHA 钉，工具带那套 digest sha256 对它不适用。
-    最后是算术：**引擎落地就有 115.6 MiB（win-x64）**，再加 415 MB/1,566 MB 权重就不是安装包 ——
+    最后是算术：**引擎落地就有 104.7 MiB（win-x64，只收 server 后；全量 115.6）**，再加 415 MB/1,566 MB 权重就不是安装包 ——
     所以"壳装好、引擎与权重首启按下载层契约拉"是决定，不是妥协（LM Studio 同形态）。
 17. **给用户看的对话档 ≠ 车道最小样本，而这张表也是重算出来的，不是手挑的**：
     `catalog/defaults.json` 那颗 `qwen2.5-0.5b-instruct-q2_k`（415 MB）只为在 2 核无 GPU 的
@@ -412,10 +435,16 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     "这颗选哪个"，普通人问的是另一句。这个数字此前没有任何地方算过 —— `payload-plan` 只算引擎净负载，
     档位表只给单颗大小。`tools/machine_budget.py` 只加**已钉产物里有的字节**：引擎净负载 + 三张档位表
     该档第一行（默认档）+ OCR 默认档三条；`pins/ocr-languages.json` 的全 14 语言合计是**替代**默认档的
-    另一个数，不许叠上去再加。实测（win-x64）分两组：**首装默认** 4GB **3.92 GiB**、8GB **7.73**、
-    16GB **11.43**，按 lain42.top 量到的 ModelScope 4.2 MiB/s 折成 **15.9 / 31.4 / 46.4 分钟**
-    （最慢出口 **4.46 / 8.79 / 13.0 小时**）；**装齐四样** 才是 4GB **5.90 GiB**、8GB **11.70**、
-    16GB **20.82**，折成 **24.0 / 47.5 / 84.6 分钟**（最慢出口 **6.72 / 13.31 / 23.68 小时**）。
+    另一个数，不许叠上去再加（它不是一个文件：`not_downloaded_bytes` 单列，不进字节也不进时间）。
+    实测（win-x64）分两组：**首装默认** 4GB **3.80 GiB**、8GB **7.61**、16GB **11.31**，
+    等待 **159.6 / 268.4 / 283.5 分钟**；**装齐四样** 才是 4GB **5.79 GiB**、8GB **11.59**、
+    16GB **20.70**，等待 **167.7 / 284.6 / 321.6 分钟**。时间逐颗按它自己的候选源里**最快**的
+    已量出口相加：引擎只发 GitHub release（0.014 MiB/s）、whisper 只有 hf-mirror（0.25，ModelScope
+    地址是上游 404）、对话/生图/OCR 有 ModelScope（4.2）。每颗再取可用源里最慢的一档作为上界：
+    首装 **5.27 / 9.60 / 13.81 小时**、装齐 **7.53 / 14.12 / 24.49 小时**。
+    旧版把全部字节按 4.2 除（漏掉引擎与 whisper 的真实出口），得到 15.9 / 31.4 / 46.4 分钟 ——
+    乐观约 10 倍。`ideal_all_modelscope_*`（首装 15.5 / 30.9 / 46.0 分钟）只留作
+    "如果全部走 ModelScope"的网络差距参照，不是任何机器的承诺。
     这两组此前被并成一组：生图那部分（4GB 档就有 2,033.8 MiB）按**产品约束第 5 条**要显式触发，
     不该混进"点完安装要等多久"。现在政策在产物里（`default_install`：chat/subtitle/ocr 默认、image 不默认），
     `first_run_*` 与 `download_*` 各一套，`--check` 两个数都比；缺 `default_install` 字段的行会被报出来，
@@ -423,9 +452,11 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     三条口径由产物自己带着（`rule` / `ram_statement` / `measured_at_exit`），因为它们都会被人误用：
     ① 这是**磁盘与下载量，不是峰值内存** —— 四项能力共用一个常驻引擎、一次只跑一项（第 10 条），
        把权重相加当内存需求是错的，内存那一轴由三张表各自的判据负责；
-    ② 吞吐是**一台机器一次量的**，所以最快与最慢两个数都要给用户 —— 只报 24 分钟等于拿最好网速
-       承诺最坏体验；查表的短针（`hf-mirror`）必须对得上表里的长键（`hf-mirror.com`），
-       方向写反不报错、只会静默把慢吞吐读成 0 让整个最慢档消失，这条有独立用例；
+    ② 吞吐是**一台机器一次量的**，而且每颗文件走哪个源不一样：逐颗取可用源里最快的一档，
+       再逐颗取最慢的一档给上界，两个数都给用户；源缺席（`distributor_absent`，whisper 的
+       ModelScope 404）不参与计时。只报最快那一列等于拿最好网速承诺最坏体验；查表的短针
+       （`hf-mirror`）必须对得上表里的长键（`hf-mirror.com`），方向写反不报错、
+       只会静默把慢吞吐读成 0 让整个最慢档消失，这条有独立用例；
     ③ **"没有产物"与"落地大小未知"是两件事**：macOS 的字幕是上游没发（`missing_capabilities`），
        某行格式读不出成员表时才标 `unknown_landed_sizes`（`needs_extract`）—— 把后者当缺失能力
        报出去等于谎称那项功能在这台机器上没得用。这一版之前 Linux/macOS 两档全靠它标"落地未知"，
@@ -448,7 +479,7 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
        （"档位表说这一族需要 X，但加法里没有它"），同键的十几个量化才是备选，取最小那颗，
        其余记 `group_alternates`。
     车道 `machine-budget` 三步**全离线**（输入就是那五张已提交的表加吞吐表；联网重算属于上面三条
-    档位车道，那边一漂这边就跟着红）：`--selftest` → 18 条单测 → `--check`。
+    档位车道，那边一漂这边就跟着红）：`--selftest` → 21 条单测 → `--check`。
     一次性变异扫描 23 条全被抓，其中四条是这轮补的：分钟数少除一个 60、吞吐查表方向写反、
     OCR 的"下之前就能当真"写死成 `True`（默认档三条恰好全含 4.5 级，只有合成输入能证明那标记
     是读来的）、配套件按 `role` 分组（就是第 ⑥ 点那个错）。
@@ -586,10 +617,11 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
 
 24. **出包那只手自己也要钉住**（`tools/action_pins.py` → `pins/actions.json`）：
     硬约束是"只能靠 GitHub Actions 出包"，那么 workflow 里每个 `uses:` 就是那条路径本身。
-    这一轮之前它们全是**浮动大版本 tag**（4 个 action、开工时 44 处；现在这张表记 **53 处 /
-    5 个 workflow / 5 个 action**：`launch-plan` 加了一处 `download-artifact` 去吃队列报告，
+    这一轮之前它们全是**浮动大版本 tag**（4 个 action、开工时 44 处；现在这张表记 **56 处 /
+    6 个 workflow / 5 个 action**：`launch-plan` 加了一处 `download-artifact` 去吃队列报告，
     `backends` 那条新车道又带进 `checkout` 与 `setup-python` 各一处，`installer.yml` 带进
-    `checkout` 与 `tauri-action` 各一处；**另有 4 处是补漏** —— 上一版扫描表没列 `shell.yml`，
+    `checkout` 与 `tauri-action` 各一处，`upstream-follow.yml` 带进 `checkout` / `setup-python` /
+    `upload-artifact` 各一处；**另有 4 处是补漏** —— 上一版扫描表没列 `shell.yml`，
     它从进仓库那天起就有 2 个 `checkout` + 2 个 `upload-artifact` 没被数过，"49 处"因此少算 —
     重数：`python3 tools/action_pins.py --check`），
     今天全部改成 40 位 commit SHA，
@@ -715,7 +747,8 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     这张表**故意不说**的写在 `rule.driver`：这台机器的驱动能不能吃到某一档 CUDA，要运行时问
     `nvidia-smi`，属外壳 #25 —— 与"有哪些档可换"仍是两句话。
     **落地体积这一列是第四个会骗人的数**：下载量小不等于占盘小。逐颗从 `runtime-parity` 取
-    （那颗包成员解压后大小相加），默认那颗作减法基准，实测 llama 在 win-x64：
+    （那颗包成员解压后大小相加；整包全量口径 —— 出包只收 server 后默认档 42.8，
+    可选档的收窄差值未逐档重算），默认那颗作减法基准，实测 llama 在 win-x64：
     CPU 落 **47.9** MiB → Vulkan **87.5**（+39.6）→ CUDA 13.4 **190.7**（+142.8）→
     CUDA 12.4 **598.3**（+550.4）→ ROCm **1148.7**（+1100.8 MiB）—— 换 ROCm 是多占 1.1 GiB，
     不是"多下 228 MiB"那么简单；whisper 在 win-x64 换 CUDA 12.4.0 落 **1161.2** MiB（+1139.1）。
@@ -829,7 +862,7 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     出包车道还没把它写进 `payload-manifest.json`，这条缺口以 `ocr-manifest` 记在产物里，
     不删也不当成已覆盖。14 条源码变异体 × 24 条探针（每条判据都能被单独改坏：常驻不带钥匙、
     llama 丢 CORS、OCR ref 不是 commit、默认档不在 release、digest 对不上、check 不看鉴权/缺口/
-    UI 扫描位置、runtime 目录不写版本、whisper 的多段字段被改名……），18 条单测，CI 静态门禁跑
+    UI 扫描位置、runtime 目录不写版本、whisper 的多段字段被改名……），19 条单测，CI 静态门禁跑
     `--selftest` 与 `--check`。
 32. **这张合同的每一条都有代码了，但代码一行都还没被编译过**：`shell/core`（Tauri-free，可离线测）
     把上面 ①–④ 写成可执行逻辑 ——
@@ -845,14 +878,16 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     都从合同读，生图的 `poll_url` 只许回环地址。
     `shell/src-tauri`（Tauri 2）只做装配：`AppState` 持有 supervisor 与数据根，8 条 IPC 命令
     （status / data_root / start_engine / stop_engine / chat / transcribe / image / ocr）全部把
-    阻塞调用丢进 `spawn_blocking`，返回结构一律 `serde`；UI（`shell/ui`）只调
+    阻塞调用丢进 `spawn_blocking`，返回结构一律 `serde`；`status` 每行带 `available`
+    （合同里有没有当前平台这一格），UI 据此禁用按钮并写"本平台暂不提供"，而不是点了才报错；
+    UI（`shell/ui`）只调
     `window.__TAURI__.core.invoke`，没有网络 API，中英两套文案；`icons/icon.ico` 是
     Windows 资源段要的那一颗（`tauri-build` 缺它会直接报错，而不是跳过）。
     **证据的边界**：`.github/workflows/shell.yml` 现在是两个 job —— `core` 与 `app` 各在 3 OS 跑
     `cargo test --all-targets`（`app` 在 Ubuntu 先装 WebKitGTK；两个 job 都上传首轮的 `Cargo.lock`），
     但仓库仍是 private 且 runner 未解锁（任务 #19），
     所以两个 crate 的编译与单测**至今 0 次执行**，`Cargo.lock` 也还没提交；离线能证的只有
-    `python tools/shell_source.py --check`（问题 0 条）、Rust 分隔符平衡与那 11 条 Python 单测。
+    `python tools/shell_source.py --check`（问题 0 条）、Rust 分隔符平衡与那 14 条 Python 单测。
     这次不把"写了"说成"过了"。
 33. **出包产物到外壳目录之间的那一步补上了**：出包车道的产物是平铺的 `dist/<os>/<engine>/`，
     外壳只认 `<data>/runtime/<os>/<engine>/<version>/<asset-stem>/` + 根部的 `payload-manifest.json`，
@@ -863,6 +898,13 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     `--selftest` 用合成合同/合成包证明 13 条判据会红，`tests/test_stage_payload.py` 10 条
     （含真实合同里 whisper 的落点、改合同落点必须跟着改、第二条引擎失败时根部无清单）。
     CI：`package.yml` 在三档负载解包后、上传前各摆一次并 `--check`（不执行任何二进制）。
+    同一 job 接着跑 `tools/payload_intake.py`：读摆好的数据根，逐文件给出
+    `payload/<os>/<数据根相对路径>` 对象键、dest、sha256、bytes，根清单标 `land: last`；
+    `--check` 重算并逐键相等，拒绝多余/缺失、两个引擎同目标、越界前缀，输出不含绝对路径。
+    `tests/test_payload_intake.py` 21 条（真实合同落点、两个数据根同一份字节、13 条合成自测、
+    6 条源码变异体，以及消费端重放：删掉原数据根后只凭对象字典按清单还原，按外壳
+    `verify_payload` 的顺序逐文件验过；坏对象/缺对象/越界或重复落点时根清单不许落）。这份 `delivery-manifest.json` 随 artifact 上传，但**没有任何写桶或首启
+    下载动作** —— #57 的 A/B 仍未定。
     **证据边界**：全部是本机 Python 证据；`package.yml` 至今 0 次执行，所以"真实上游包能按合同落位"
     只有逻辑证据。OCR 仍不在出包清单里，`not_in_manifest` 会点名 `文字识别/oar-ocr` —— 已知缺口，
     不是这一步的失败。
@@ -883,7 +925,56 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     `uploadWorkflowArtifacts: true` 成功不代表编出了东西。
     **证据边界**：这条车道 0 次执行（#19 未解）；包未签名、未公证；CLI 版本与 deb maintainer
     （tauri-bundler 取 identifier 第二段 `lilyco42`）都只是静态核对。安装包只装外壳：引擎落地
-    win-x64 就是 115.6 MiB，权重 415 MB / 1.5 GB，都不进安装器。
+    win-x64 就是 104.7 MiB（只收 server；全量 115.6），权重 415 MB / 1.5 GB，都不进安装器。
+35. **国内下载层：慢在网络，别慢在设计与重试**（`shell/core/src/download.rs` + `tools/download_plan.py` +
+    `pins/download-plan.json`）：传输不引 TLS 依赖，也不把 URL 拼进 shell 字符串 —— `CurlFetcher`
+    调系统 `curl`，每个参数一个 argv，URL 只出现在 `--url` 后面；`--speed-limit 65536 --speed-time 30`
+    把"30 秒低于 64 KiB/s"判成断流，`--proto-redir =https` 禁止跳转降级。续不续传、换不换源是纯逻辑，
+    由 `Fetcher` trait 注入，测试不需要网络。顺序只认实测吞吐（ModelScope 4.2 MiB/s、hf-mirror 0.25、
+    GitHub release 0.014、huggingface.co 直连 0 仅作最后兜底），不认域名或模板；每源 2 次机会，
+    206 追加、200 丢弃 `.part` 重下、416/404 保留进度换源、收满后 sha256 不符删 `.part` 从 0 重来；
+    全源失败时保留已下字节并把每个源的失败原因拼进错误。落盘只在哈希通过后发生：
+    `blobs/<sha>.part` → 复核长度与 sha256 → `blobs/<sha>` → 硬链接到 `<file>`；已存在但哈希不符的
+    目标挪成 `<file>.corrupt[-N]`，不删除。
+    `tools/download_plan.py` 从 `catalog/machine-budget.json` 的行出发，按 `repo + file + sha256`
+    精确连到三张档位表里的候选源，生成 `pins/download-plan.json`：14 项、8 项默认安装、1 行 `(合计)`
+    被点名为聚合值（123,297,373 B = OCR 全部语言 rec+dict，不是文件，不下载）；逐档默认权重
+    4GB 3850.3 / 8GB 7752.1 / 16GB 11542.0 MiB，三档并集 20181.2 MiB **不是一台机器的数**。
+    whisper 的 ModelScope 源按 `distributor_absent` 删掉（不再制造一个必 404 的候选），HF 直连排最后；
+    OCR 三颗各有两条源：ModelScope（`pins/ocr.json` 的 `mirrors`，2026-10-20 整包下载后 sha256
+    与 pin 相等）与 GitHub release，镜像的哈希/体积只要和 pin 差一位 build 就报问题；默认安装
+    不允许单源（`default_install_min_sources: 2`）。`--check` 用同一份输入重算并逐键比对，
+    `--selftest` 用十类变异证明会红（换源顺序 / HF 提前 / 聚合行混入 / OCR 丢 release 兜底 /
+    默认安装单源 / 计划少一项 / OCR pin 哈希不符 / 档位表缺行 / 镜像哈希不符 / 镜像 URL 与
+    repo+revision 推不出来）。`--probe` 是报告式的现探：URL 逐字取自计划（`known_absent` 没有 URL
+    就不探，不按模板补），Range `bytes=0-0` 只读 1 字节，200/206 且真拿到字节才算通，并拿
+    `Content-Range` 的总长与预算字节对表（206 的 `Content-Length` 是片段长度，不冒充总长）；
+    2026-10-20T15:09:58Z 实测 37 个 URL 里 36 个通、36/36 总长与预算相等（modelscope 12、
+    hf-mirror 11、huggingface.co 10、GitHub 3），唯一失败的是 HF 直连 `ggml-large-v1.bin`
+    的 `SSL: UNEXPECTED_EOF_WHILE_READING` —— 它本来就排在最后。落地主机是
+    cdn-lfs-cn-1.modelscope.cn 11 / www.modelscope.cn 1 / us.aws.cdn.hf.co 21 /
+    release-assets.githubusercontent.com 3。可达 ≠ 吞吐：huggingface.co 直连整份仍是 0 B/s，
+    排序只认 `RATES_MIB_S`。`tests/test_download_plan.py` 18 条（探针四条钉住"URL 逐字来自计划 /
+    200 空正文不算通 / 总长不符算红 / 空列表不算全绿"，另一条把 policy 的 65536/30/2 与
+    `download.rs` 的 curl 参数对表；另一条按 serde 语义重放整份计划 —— `schema` 是 u32、
+    `bytes` 是 u64、速率有限、`file` 扁平且不重名，6 个变异各自必须红）。Rust 侧 `Plan::parse/from_file/item` 读同一份 JSON
+    （重名必须报错），`download.rs` 20 条单测。
+    **证据边界**：20 条 Rust 单测一次都没编译过（`shell.yml` 因 #19 零执行），curl 在真实网络上的
+    重试/续传行为只有 Fake fetcher 的逻辑证据；R2 镜像仍是唯一缺口（#23）。
+36. **跟随上游 llama.cpp：定时只报不跟，重钉是一次显式动作**（`tools/follow_upstream.py` +
+    `.github/workflows/upstream-follow.yml`）：上游一天发好几个包（钉住的 b11727 到 2026-10-20
+    已到 b11755），把"有新版本"当红，红就不再是信号。车道每天 03:17 UTC 现取窗口，只有钉值坏了
+    才红：钉住那颗从窗口里消失、产物被重打包（逐颗 name+size+sha256 对已提交捕获）、
+    `backend-matrix` 与 `payload-plan` 钉的不是同一颗。新版本身退出码 0；候选丢我们真装的 target /
+    出现认不出的后端词 / 没有上游 digest 只报 `blocked`，`--strict` 才当红。
+    升级路径是显式命令：`--update --tag bNNNNN` 走 `payload_plan.rows_for` 的真路径量出三行
+    （zip 读中央目录、tar 读成员表；只下载与读取，不执行），`--apply` 只替换 payload-plan 里
+    该引擎的行。之后十份派生文件（3 份捕获 + 7 张表）只要还有旧 tag，退出码 2 并逐张打印重出
+    命令 —— 半套重钉不许说成完成；自检用 8 类变异证明（含"换 tag 后别的引擎一个字节不许动"、
+    "同 tag/回退必须拒绝"），`tests/test_follow_upstream.py` 19 条。
+    **证据边界**：这条车道因 #19 仍是 0 次执行；2026-10-20 本地只读跑过一次 `--check --live`，
+    读到 b11755、落后 17 个带产物的版本、退出码 0 —— 证的是工具与 GitHub API 的形状，
+    不是 schedule 真会触发（这台账号的定时触发本就不准时，见"第一次真跑要盯什么"）。
 
 ## 车道判据的出处（全部按**钉住的那个 ref** 核过，不是按 HEAD 记的）
 
@@ -916,8 +1007,8 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
 判据本身也不能只靠"看上去对"，而且**这几个计数不许只活在散文里**：
 `tests/test_lane_replay_report.py` 把它们钉成断言，重数只要一条命令
 （`python -W error::ResourceWarning -m unittest tests.test_lane_replay_report -v`）。
-2026-10-20 实测：五条 workflow 合起来 **17 段** `<<'PY'`（`engine-live.yml` 14、`ci.yml` 2、
-`package.yml` 1、`shell.yml` 0、`installer.yml` 0；`yaml_gate.py` 会打同一份编译计数，
+2026-10-20 实测：六条 workflow 合起来 **17 段** `<<'PY'`（`engine-live.yml` 14、`ci.yml` 2、
+`package.yml` 1、`shell.yml` 0、`installer.yml` 0、`upstream-follow.yml` 0；`yaml_gate.py` 会打同一份编译计数，
 段数打 0 就意味着闸门什么都没查），
 其中 **12 段含判据**（认 `check(` / `SystemExit` / `assert` / `sys.exit(` —— 最后这个是这轮补的：
 `ocr-proof` 那段工具链版本闸就是靠 `sys.exit("工具链低于…")` 红的，只找前三个会漏），

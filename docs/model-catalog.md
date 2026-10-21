@@ -368,20 +368,28 @@ python3 tools/recommend_models.py --live --check                          # 真�
 这个数字此前没有任何地方算过。`machine_budget.py` 只加已钉产物里的字节，一个都不估算：
 引擎净负载（`pins/payload-plan.json` 的 `totals_mib`，Range 读 zip 中央目录量的）
 + 三张档位表该档第一行（就是默认档）+ OCR 默认档三条已钉字节；
-`pins/ocr-languages.json` 的全 14 语言合计是**替代**默认档的另一个数，不许叠上去再加。
+`pins/ocr-languages.json` 的全 14 语言合计是**替代**默认档的另一个数，不许叠上去再加
+（它不是一个文件，产物里单列 `not_downloaded_bytes`，不进字节也不进时间）。
 
-| 档位 | 首装默认（不含生图） | 装齐四样 | 按最快已量出口（ModelScope 4.2 MiB/s） | 按最慢已量出口（hf-mirror 0.25 MiB/s） |
-|---|---|---|---|---|
-| 4GB | **3.92 GiB** | 5.90 GiB | 首装 15.9 / 装齐 24.0 分钟 | 首装 4.46 / 装齐 6.72 小时 |
-| 8GB | **7.73 GiB** | 11.70 GiB | 首装 31.4 / 装齐 47.5 分钟 | 首装 8.79 / 装齐 13.31 小时 |
-| 16GB | **11.43 GiB** | 20.82 GiB（含生图配套件 1.77） | 首装 46.4 / 装齐 84.6 分钟 | 首装 13.0 / 装齐 23.68 小时 |
+| 档位 | 首装默认（不含生图） | 装齐四样 | 首装等待（逐源实测） | 装齐等待（逐源实测） | 可用最慢源（首装 / 装齐） |
+|---|---|---|---|---|---|
+| 4GB | **3.80 GiB** | 5.79 GiB | 159.6 分钟 | 167.7 分钟 | 5.27 / 7.53 小时 |
+| 8GB | **7.61 GiB** | 11.59 GiB | 268.4 分钟 | 284.6 分钟 | 9.60 / 14.12 小时 |
+| 16GB | **11.31 GiB** | 20.70 GiB（含生图配套件 1.77） | 283.5 分钟 | 321.6 分钟 | 13.81 / 24.49 小时 |
+
+等待时间不是"总字节 ÷ 一个速率"：引擎只发 GitHub release（0.014 MiB/s）、whisper 只有 hf-mirror
+（0.25，ModelScope 地址是上游 404）、对话/生图/OCR 有 ModelScope（4.2），每颗文件按它自己
+候选源里最快的一档计时；"可用最慢源"再逐颗取最慢的一档给上界，源缺席（`distributor_absent`）
+的不参与。产物里另留 `ideal_all_modelscope_*`（首装 15.5 / 30.9 / 46.0 分钟），它只回答
+"如果全部字节都能走 ModelScope，网络差距有多大"，不是任何机器的承诺 —— 旧版把全部字节按
+4.2 除，得到 15.9 / 31.4 / 46.4 分钟，漏掉引擎与 whisper 的真实出口，乐观约 10 倍。
 
 **这两列此前是一列 —— 那是个错。** 产品约束第 5 条写明生图要"显式触发 + 后台 + 可续传"
-（最省的量化档也 1,494 MiB，按这台出口是 25–30 分钟），可预算与首启队列当时都把它算进"首装"，
-于是那句"约 24.0 分钟"其实包含了用户还没点过生图的那 2,033.8 MiB（16GB 档是 9,612.6 MiB）。
+（最省的量化档也 1,494 MiB），可预算与首启队列当时都把它算进"首装"，
+于是那句"装齐"的数其实包含了用户还没点过生图的那 2,033.8 MiB（16GB 档是 9,612.6 MiB）。
 现在 `machine-budget.json` 里两组数各一套（`first_run_*` / `download_*`），政策本身在
 `default_install` 那张表上，UI 必须按"点完安装要等的"讲首装那一列。
-重数：`python3 tools/machine_budget.py --check`（两个数与政策都由它复算）。
+重数：`python3 tools/machine_budget.py --check`（逐行字节/源/时间、两个总数与政策都由它复算）。
 
 **两个数都要给。** 吞吐是 2026-10 从 lain42.top 这台 CN 出口一次量的（`r2_manifest.RATES_MIB_S`，
 产物里 `measured_at_exit` 就写这台机器），不同城市/运营商必然不同 ——
@@ -392,7 +400,8 @@ python3 tools/recommend_models.py --live --check                          # 真�
 把权重相加当内存需求是错的，内存那一轴由三张表各自的判据负责）；
 `missing_capabilities`（**没有产物**：macOS 的字幕 —— whisper 为 Apple 平台只发 xcframework 库，成员表里数不出 `whisper-cli`）与
 `unknown_landed_sizes`（**落地大小未知**：某行格式读不出成员表时才标；llama/whisper 的 tar.gz
-以前全靠它，现在读了 tar 成员表，落地 win **115.6** / linux **136.1** / macOS **124.9** MiB）
+以前全靠它，现在读了 tar 成员表，落地 win **115.6** / linux **136.1** / macOS **124.9** MiB ——
+这是**整包全量**口径；出包只收 server 后 win 是 **104.7**，见 [packaging.md](packaging.md) ④）
 是两个字段 —— 把后者当缺失能力报出去，等于谎称那项功能在 Apple silicon 上没得用。
 
 **这张表算出来之后，反过来把生图那条链改了三处**（方向全是"少算"，这正是单独加总一遍的价值）：
@@ -416,7 +425,7 @@ python3 tools/recommend_models.py --live --check                          # 真�
    取最小那颗，其余记 `group_alternates`，所以 16GB 的配套件是 1.77 GiB 而不是 17 颗编码器的总量。
 
 车道 `machine-budget` 三步**全离线**（输入就是上面那五张已提交的表加吞吐表；
-联网重算属于三条档位车道，那边一漂这边就跟着红）：`--selftest` → 18 条单测 → `--check`。
+联网重算属于三条档位车道，那边一漂这边就跟着红）：`--selftest` → 21 条单测 → `--check`。
 
 ## 从"总量"到"能下的清单"：`file_index.py --queue`
 

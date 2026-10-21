@@ -9,6 +9,7 @@ pub enum CoreError {
     Manifest(String),
     Spawn(String),
     Protocol(String),
+    Download(String),
 }
 
 impl fmt::Display for CoreError {
@@ -21,6 +22,7 @@ impl fmt::Display for CoreError {
             CoreError::Manifest(m) => write!(f, "载荷: {m}"),
             CoreError::Spawn(m) => write!(f, "启动: {m}"),
             CoreError::Protocol(m) => write!(f, "协议: {m}"),
+            CoreError::Download(m) => write!(f, "下载: {m}"),
         }
     }
 }
