@@ -210,55 +210,55 @@
        "{token}"
       ]
      },
-     "asset_dir": "<data>/runtime/linux-x64/llama/b11798/llama-b11798-bin-ubuntu-x64",
+     "asset_dir": "<data>/runtime/linux-x64/llama/b11799/llama-b11799-bin-ubuntu-x64",
      "backends": {
-      "default": "llama-b11798-bin-ubuntu-x64.tar.gz",
+      "default": "llama-b11799-bin-ubuntu-x64.tar.gz",
       "options": [
        {
-        "asset": "llama-b11798-bin-ubuntu-x64.tar.gz",
+        "asset": "llama-b11799-bin-ubuntu-x64.tar.gz",
         "backend": "cpu",
         "is_default": true
        },
        {
-        "asset": "llama-b11798-bin-ubuntu-cuda-12.8-x64.tar.gz",
+        "asset": "llama-b11799-bin-ubuntu-cuda-12.8-x64.tar.gz",
         "backend": "cuda",
         "is_default": false
        },
        {
-        "asset": "llama-b11798-bin-ubuntu-cuda-13.4-x64.tar.gz",
+        "asset": "llama-b11799-bin-ubuntu-cuda-13.4-x64.tar.gz",
         "backend": "cuda",
         "is_default": false
        },
        {
-        "asset": "llama-b11798-bin-ubuntu-openvino-2026.4.1-x64.tar.gz",
+        "asset": "llama-b11799-bin-ubuntu-openvino-2026.4.1-x64.tar.gz",
         "backend": "openvino",
         "is_default": false
        },
        {
-        "asset": "llama-b11798-bin-ubuntu-rocm-10.0-x64.tar.gz",
+        "asset": "llama-b11799-bin-ubuntu-rocm-10.0-x64.tar.gz",
         "backend": "rocm",
         "is_default": false
        },
        {
-        "asset": "llama-b11798-bin-ubuntu-sycl-fp16-x64.tar.gz",
+        "asset": "llama-b11799-bin-ubuntu-sycl-fp16-x64.tar.gz",
         "backend": "sycl",
         "is_default": false
        },
        {
-        "asset": "llama-b11798-bin-ubuntu-sycl-fp32-x64.tar.gz",
+        "asset": "llama-b11799-bin-ubuntu-sycl-fp32-x64.tar.gz",
         "backend": "sycl",
         "is_default": false
        },
        {
-        "asset": "llama-b11798-bin-ubuntu-vulkan-x64.tar.gz",
+        "asset": "llama-b11799-bin-ubuntu-vulkan-x64.tar.gz",
         "backend": "vulkan",
         "is_default": false
        }
       ]
      },
      "binary": "llama-server",
-     "default_asset": "llama-b11798-bin-ubuntu-x64.tar.gz",
-     "version_dir": "<data>/runtime/linux-x64/llama/b11798"
+     "default_asset": "llama-b11799-bin-ubuntu-x64.tar.gz",
+     "version_dir": "<data>/runtime/linux-x64/llama/b11799"
     },
     "macos-arm64": {
      "argv_by_tier": {
@@ -302,20 +302,20 @@
        "{token}"
       ]
      },
-     "asset_dir": "<data>/runtime/macos-arm64/llama/b11798/llama-b11798-bin-macos-arm64",
+     "asset_dir": "<data>/runtime/macos-arm64/llama/b11799/llama-b11799-bin-macos-arm64",
      "backends": {
-      "default": "llama-b11798-bin-macos-arm64.tar.gz",
+      "default": "llama-b11799-bin-macos-arm64.tar.gz",
       "options": [
        {
-        "asset": "llama-b11798-bin-macos-arm64.tar.gz",
+        "asset": "llama-b11799-bin-macos-arm64.tar.gz",
         "backend": "unknown_from_name",
         "is_default": true
        }
       ]
      },
      "binary": "llama-server",
-     "default_asset": "llama-b11798-bin-macos-arm64.tar.gz",
-     "version_dir": "<data>/runtime/macos-arm64/llama/b11798"
+     "default_asset": "llama-b11799-bin-macos-arm64.tar.gz",
+     "version_dir": "<data>/runtime/macos-arm64/llama/b11799"
     },
     "win-x64": {
      "argv_by_tier": {
@@ -359,50 +359,50 @@
        "{token}"
       ]
      },
-     "asset_dir": "<data>/runtime/win-x64/llama/b11798/llama-b11798-bin-win-cpu-x64",
+     "asset_dir": "<data>/runtime/win-x64/llama/b11799/llama-b11799-bin-win-cpu-x64",
      "backends": {
-      "default": "llama-b11798-bin-win-cpu-x64.zip",
+      "default": "llama-b11799-bin-win-cpu-x64.zip",
       "options": [
        {
-        "asset": "llama-b11798-bin-win-cpu-x64.zip",
+        "asset": "llama-b11799-bin-win-cpu-x64.zip",
         "backend": "cpu",
         "is_default": true
        },
        {
-        "asset": "llama-b11798-bin-win-cuda-12.4-x64.zip",
+        "asset": "llama-b11799-bin-win-cuda-12.4-x64.zip",
         "backend": "cuda",
         "is_default": false
        },
        {
-        "asset": "llama-b11798-bin-win-cuda-13.4-x64.zip",
+        "asset": "llama-b11799-bin-win-cuda-13.4-x64.zip",
         "backend": "cuda",
         "is_default": false
        },
        {
-        "asset": "llama-b11798-bin-win-openvino-2026.4.1-x64.zip",
+        "asset": "llama-b11799-bin-win-openvino-2026.4.1-x64.zip",
         "backend": "openvino",
         "is_default": false
        },
        {
-        "asset": "llama-b11798-bin-win-rocm-10.0-x64.zip",
+        "asset": "llama-b11799-bin-win-rocm-10.0-x64.zip",
         "backend": "rocm",
         "is_default": false
        },
        {
-        "asset": "llama-b11798-bin-win-sycl-x64.zip",
+        "asset": "llama-b11799-bin-win-sycl-x64.zip",
         "backend": "sycl",
         "is_default": false
        },
        {
-        "asset": "llama-b11798-bin-win-vulkan-x64.zip",
+        "asset": "llama-b11799-bin-win-vulkan-x64.zip",
         "backend": "vulkan",
         "is_default": false
        }
       ]
      },
      "binary": "llama-server.exe",
-     "default_asset": "llama-b11798-bin-win-cpu-x64.zip",
-     "version_dir": "<data>/runtime/win-x64/llama/b11798"
+     "default_asset": "llama-b11799-bin-win-cpu-x64.zip",
+     "version_dir": "<data>/runtime/win-x64/llama/b11799"
     }
    },
    "readiness": {
@@ -418,8 +418,8 @@
     "path": "/v1/chat/completions"
    },
    "version": {
-    "oldest_verifiable": "b11769",
-    "pinned": "b11798",
+    "oldest_verifiable": "b11770",
+    "pinned": "b11799",
     "verifiable_count": 25
    }
   },
@@ -764,7 +764,7 @@
     "poll": "poll_url"
    },
    "version": {
-    "oldest_verifiable": "master-945-a1ded76",
+    "oldest_verifiable": "master-950-f2f168f",
     "pinned": "master-975-95b3090",
     "verifiable_count": 25
    }

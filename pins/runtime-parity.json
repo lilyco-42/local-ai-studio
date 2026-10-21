@@ -1,7 +1,7 @@
 {
  "assets": [
   {
-   "asset": "llama-b11798-bin-android-arm64.tar.gz",
+   "asset": "llama-b11799-bin-android-arm64.tar.gz",
    "backend": "cpu",
    "engine": "llama",
    "expect_server": "llama-server",
@@ -12,14 +12,14 @@
    "os_resolved": "android-arm64",
    "read": false,
    "read_via": "tar_stream",
-   "release": "b11798",
+   "release": "b11799",
    "repo": "ggml-org/llama.cpp",
-   "sha256": "c6dc032e8295f0a9ed8f669d6026ebd6b015a068ca81c31164dc8a4a42c560cd",
+   "sha256": "cfae8e9f99697f87ad11200f28d54cf65b3b23077aa9d6bb3dd5bd627eab8088",
    "version": null,
    "why_not_read": "gzip 流不可随机寻址，读成员表要付整包流量；这一档不是真装的那一颗，所以不为它付 —— server 在场与否未证，要证就出包车道解包后点名"
   },
   {
-   "asset": "llama-b11798-bin-android-arm64-snapdragon.tar.gz",
+   "asset": "llama-b11799-bin-android-arm64-snapdragon.tar.gz",
    "backend": "qnn-snapdragon",
    "engine": "llama",
    "expect_server": "llama-server",
@@ -30,14 +30,14 @@
    "os_resolved": "android-arm64",
    "read": false,
    "read_via": "tar_stream",
-   "release": "b11798",
+   "release": "b11799",
    "repo": "ggml-org/llama.cpp",
-   "sha256": "21db679ba9d3d65cc59a3dadc4198d2185ddfa4900b0b7cd69bb9217d9a6eaab",
+   "sha256": "f9b5b0b557b63f5d86e0804408dcf8550f8c13c1197f3fa08cfb5fa65d9c46b8",
    "version": null,
    "why_not_read": "gzip 流不可随机寻址，读成员表要付整包流量；这一档不是真装的那一颗，所以不为它付 —— server 在场与否未证，要证就出包车道解包后点名"
   },
   {
-   "asset": "llama-b11798-bin-ubuntu-arm64.tar.gz",
+   "asset": "llama-b11799-bin-ubuntu-arm64.tar.gz",
    "backend": "cpu",
    "engine": "llama",
    "expect_server": "llama-server",
@@ -48,14 +48,14 @@
    "os_resolved": "linux-arm64",
    "read": false,
    "read_via": "tar_stream",
-   "release": "b11798",
+   "release": "b11799",
    "repo": "ggml-org/llama.cpp",
-   "sha256": "71621bb7e73bf5d2d5a70b45f87aefb32e8d27defbffa9c0f702c3b0dab6328a",
+   "sha256": "d53caf55e76e56f1718e08ab7c3c3fb9746a7c817c81f6a3fc5e2f15e601d82b",
    "version": null,
    "why_not_read": "gzip 流不可随机寻址，读成员表要付整包流量；这一档不是真装的那一颗，所以不为它付 —— server 在场与否未证，要证就出包车道解包后点名"
   },
   {
-   "asset": "llama-b11798-bin-ubuntu-cuda-13.4-arm64.tar.gz",
+   "asset": "llama-b11799-bin-ubuntu-cuda-13.4-arm64.tar.gz",
    "backend": "cuda",
    "engine": "llama",
    "expect_server": "llama-server",
@@ -66,14 +66,14 @@
    "os_resolved": "linux-arm64",
    "read": false,
    "read_via": "tar_stream",
-   "release": "b11798",
+   "release": "b11799",
    "repo": "ggml-org/llama.cpp",
-   "sha256": "e0a61e6b93de65ff7ed6db1a76b7d64bef9e933bcc22cb000284225bf199864e",
+   "sha256": "12c9e731f5f8ceb556a81068183f6df63c77779db64afa785c27eb8c4e396e81",
    "version": "13.4",
    "why_not_read": "gzip 流不可随机寻址，读成员表要付整包流量；这一档不是真装的那一颗，所以不为它付 —— server 在场与否未证，要证就出包车道解包后点名"
   },
   {
-   "asset": "llama-b11798-bin-linux-arm64-snapdragon.tar.gz",
+   "asset": "llama-b11799-bin-linux-arm64-snapdragon.tar.gz",
    "backend": "qnn-snapdragon",
    "engine": "llama",
    "expect_server": "llama-server",
@@ -84,14 +84,14 @@
    "os_resolved": "linux-arm64",
    "read": false,
    "read_via": "tar_stream",
-   "release": "b11798",
+   "release": "b11799",
    "repo": "ggml-org/llama.cpp",
-   "sha256": "589be8f90a5b37e51efcd52bc88629cc95a020d6af1bf172d52c268566567baf",
+   "sha256": "b3b158fc6ec2288aff14ee896700f13db8adf2f0587efcbd6cd45020625b4253",
    "version": null,
    "why_not_read": "gzip 流不可随机寻址，读成员表要付整包流量；这一档不是真装的那一颗，所以不为它付 —— server 在场与否未证，要证就出包车道解包后点名"
   },
   {
-   "asset": "llama-b11798-bin-ubuntu-vulkan-arm64.tar.gz",
+   "asset": "llama-b11799-bin-ubuntu-vulkan-arm64.tar.gz",
    "backend": "vulkan",
    "engine": "llama",
    "expect_server": "llama-server",
@@ -102,14 +102,14 @@
    "os_resolved": "linux-arm64",
    "read": false,
    "read_via": "tar_stream",
-   "release": "b11798",
+   "release": "b11799",
    "repo": "ggml-org/llama.cpp",
-   "sha256": "4e36ffb9357f09ff912e0890faaf5a7f1619c411e7ecc3496d55a61b16cf9523",
+   "sha256": "1820421f8bf6abe325df51bee04963ec88344949a506f1e1af02134c677f38be",
    "version": null,
    "why_not_read": "gzip 流不可随机寻址，读成员表要付整包流量；这一档不是真装的那一颗，所以不为它付 —— server 在场与否未证，要证就出包车道解包后点名"
   },
   {
-   "asset": "llama-b11798-bin-ubuntu-s390x.tar.gz",
+   "asset": "llama-b11799-bin-ubuntu-s390x.tar.gz",
    "backend": "cpu",
    "engine": "llama",
    "expect_server": "llama-server",
@@ -120,15 +120,15 @@
    "os_resolved": "linux-s390x",
    "read": false,
    "read_via": "tar_stream",
-   "release": "b11798",
+   "release": "b11799",
    "repo": "ggml-org/llama.cpp",
-   "sha256": "4ac0404dfb002d65c680e8fbfcd73aa2d8faeb20b2bac0da868d6253c7227255",
+   "sha256": "1926ff5d7223f49e502e6cca6c03e055f8d30959f5461d19059dfef001b32fcd",
    "version": null,
    "why_not_read": "gzip 流不可随机寻址，读成员表要付整包流量；这一档不是真装的那一颗，所以不为它付 —— server 在场与否未证，要证就出包车道解包后点名"
   },
   {
-   "archive_bytes": 22300188,
-   "asset": "llama-b11798-bin-ubuntu-x64.tar.gz",
+   "archive_bytes": 22300522,
+   "asset": "llama-b11799-bin-ubuntu-x64.tar.gz",
    "backend": "cpu",
    "engine": "llama",
    "entries": 62,
@@ -149,16 +149,16 @@
    "packed_sum_mib": null,
    "read": true,
    "read_via": "tar_stream",
-   "release": "b11798",
+   "release": "b11799",
    "repo": "ggml-org/llama.cpp",
    "server_sibling_lib": false,
-   "sha256": "9342761b01a8d82e0567c9673d3dd8f6264964e0ccb27a008193853c757cf563",
+   "sha256": "4920c65448350c28f8ce7b35eec91566807e0f111c25a0df2d5fc12a1ed1716a",
    "sha256_verified": true,
    "test_hits": [],
    "version": null
   },
   {
-   "asset": "llama-b11798-bin-ubuntu-cuda-12.8-x64.tar.gz",
+   "asset": "llama-b11799-bin-ubuntu-cuda-12.8-x64.tar.gz",
    "backend": "cuda",
    "engine": "llama",
    "expect_server": "llama-server",
@@ -169,14 +169,14 @@
    "os_resolved": "linux-x64",
    "read": false,
    "read_via": "tar_stream",
-   "release": "b11798",
+   "release": "b11799",
    "repo": "ggml-org/llama.cpp",
-   "sha256": "fcb26ea24536156d435dbbbbbfdfe6c013dbd084f7d9bdef1e6d2dd4c3ee6d16",
+   "sha256": "2610bab529c7652d393cbef99e1cf014e61a9e2317f8de709a424e3b9af76870",
    "version": "12.8",
    "why_not_read": "gzip 流不可随机寻址，读成员表要付整包流量；这一档不是真装的那一颗，所以不为它付 —— server 在场与否未证，要证就出包车道解包后点名"
   },
   {
-   "asset": "llama-b11798-bin-ubuntu-cuda-13.4-x64.tar.gz",
+   "asset": "llama-b11799-bin-ubuntu-cuda-13.4-x64.tar.gz",
    "backend": "cuda",
    "engine": "llama",
    "expect_server": "llama-server",
@@ -187,14 +187,14 @@
    "os_resolved": "linux-x64",
    "read": false,
    "read_via": "tar_stream",
-   "release": "b11798",
+   "release": "b11799",
    "repo": "ggml-org/llama.cpp",
-   "sha256": "19bc204384759d0095760c7196f132f3fbc62cb4ca3865757eed98b89d16c244",
+   "sha256": "c2948dc424381f2c2ade98fc179cda40edb2e1031cffd07024f4078da0dc0621",
    "version": "13.4",
    "why_not_read": "gzip 流不可随机寻址，读成员表要付整包流量；这一档不是真装的那一颗，所以不为它付 —— server 在场与否未证，要证就出包车道解包后点名"
   },
   {
-   "asset": "llama-b11798-bin-ubuntu-openvino-2026.4.1-x64.tar.gz",
+   "asset": "llama-b11799-bin-ubuntu-openvino-2026.4.1-x64.tar.gz",
    "backend": "openvino",
    "engine": "llama",
    "expect_server": "llama-server",
@@ -205,14 +205,14 @@
    "os_resolved": "linux-x64",
    "read": false,
    "read_via": "tar_stream",
-   "release": "b11798",
+   "release": "b11799",
    "repo": "ggml-org/llama.cpp",
-   "sha256": "bc7d18f480b14645f27c385ce2e5419e2de27279ecb997d881833b16c3059db9",
+   "sha256": "726e545aa87b78403b280cfe4abe54b0f406e336ad8603f0cb62e15ed4063306",
    "version": "2026.4.1",
    "why_not_read": "gzip 流不可随机寻址，读成员表要付整包流量；这一档不是真装的那一颗，所以不为它付 —— server 在场与否未证，要证就出包车道解包后点名"
   },
   {
-   "asset": "llama-b11798-bin-ubuntu-rocm-10.0-x64.tar.gz",
+   "asset": "llama-b11799-bin-ubuntu-rocm-10.0-x64.tar.gz",
    "backend": "rocm",
    "engine": "llama",
    "expect_server": "llama-server",
@@ -223,14 +223,14 @@
    "os_resolved": "linux-x64",
    "read": false,
    "read_via": "tar_stream",
-   "release": "b11798",
+   "release": "b11799",
    "repo": "ggml-org/llama.cpp",
-   "sha256": "f2ffc7c1938df5638f3255c3de72d9117dea5147d582eeed4d35765e8ed9ed3b",
+   "sha256": "5e59b0c30287dd75ea06d0003cfa5c9b302d09304cd591a92e954c73416f1f0e",
    "version": "10.0",
    "why_not_read": "gzip 流不可随机寻址，读成员表要付整包流量；这一档不是真装的那一颗，所以不为它付 —— server 在场与否未证，要证就出包车道解包后点名"
   },
   {
-   "asset": "llama-b11798-bin-ubuntu-sycl-fp16-x64.tar.gz",
+   "asset": "llama-b11799-bin-ubuntu-sycl-fp16-x64.tar.gz",
    "backend": "sycl",
    "engine": "llama",
    "expect_server": "llama-server",
@@ -241,14 +241,14 @@
    "os_resolved": "linux-x64",
    "read": false,
    "read_via": "tar_stream",
-   "release": "b11798",
+   "release": "b11799",
    "repo": "ggml-org/llama.cpp",
-   "sha256": "aaa0d2882506824e3ca0332dbdc4a982e623e7f3d4867cc1ebef6b4118b924f0",
+   "sha256": "059daff77fb98062fabf58ec4357fd60b66608c1781a22470505778add003a03",
    "version": "16",
    "why_not_read": "gzip 流不可随机寻址，读成员表要付整包流量；这一档不是真装的那一颗，所以不为它付 —— server 在场与否未证，要证就出包车道解包后点名"
   },
   {
-   "asset": "llama-b11798-bin-ubuntu-sycl-fp32-x64.tar.gz",
+   "asset": "llama-b11799-bin-ubuntu-sycl-fp32-x64.tar.gz",
    "backend": "sycl",
    "engine": "llama",
    "expect_server": "llama-server",
@@ -259,14 +259,14 @@
    "os_resolved": "linux-x64",
    "read": false,
    "read_via": "tar_stream",
-   "release": "b11798",
+   "release": "b11799",
    "repo": "ggml-org/llama.cpp",
-   "sha256": "baf7346ff337a19aa48014431052c3cc62949b1d9e4014a6e685d1d321f6a14b",
+   "sha256": "33b7bd7ec69c4f71f9ba9f348b909457ca841c4e8df785cc51c3a6343cda6697",
    "version": "32",
    "why_not_read": "gzip 流不可随机寻址，读成员表要付整包流量；这一档不是真装的那一颗，所以不为它付 —— server 在场与否未证，要证就出包车道解包后点名"
   },
   {
-   "asset": "llama-b11798-bin-ubuntu-vulkan-x64.tar.gz",
+   "asset": "llama-b11799-bin-ubuntu-vulkan-x64.tar.gz",
    "backend": "vulkan",
    "engine": "llama",
    "expect_server": "llama-server",
@@ -277,15 +277,15 @@
    "os_resolved": "linux-x64",
    "read": false,
    "read_via": "tar_stream",
-   "release": "b11798",
+   "release": "b11799",
    "repo": "ggml-org/llama.cpp",
-   "sha256": "4da40b588675c0b8a70e53950745fa4098fe4bfcd706b5379fd6b4579e73bb3e",
+   "sha256": "43b6502752cf29808438fe090e95d34b140706a7fe70d2b3c1689eb584ede920",
    "version": null,
    "why_not_read": "gzip 流不可随机寻址，读成员表要付整包流量；这一档不是真装的那一颗，所以不为它付 —— server 在场与否未证，要证就出包车道解包后点名"
   },
   {
-   "archive_bytes": 16136448,
-   "asset": "llama-b11798-bin-macos-arm64.tar.gz",
+   "archive_bytes": 16136376,
+   "asset": "llama-b11799-bin-macos-arm64.tar.gz",
    "backend": "unknown_from_name",
    "engine": "llama",
    "entries": 62,
@@ -306,16 +306,16 @@
    "packed_sum_mib": null,
    "read": true,
    "read_via": "tar_stream",
-   "release": "b11798",
+   "release": "b11799",
    "repo": "ggml-org/llama.cpp",
    "server_sibling_lib": false,
-   "sha256": "77b5ce7c28aacd70a27aa6157039e46ddba510792ca68c8e2897ed23e87cfe75",
+   "sha256": "51c3471c9212b41e51a6696c0b966628fa45d625385fdb024c4483e8d3154dca",
    "sha256_verified": true,
    "test_hits": [],
    "version": null
   },
   {
-   "asset": "llama-b11798-bin-macos-x64.tar.gz",
+   "asset": "llama-b11799-bin-macos-x64.tar.gz",
    "backend": "unknown_from_name",
    "engine": "llama",
    "expect_server": "llama-server",
@@ -326,14 +326,14 @@
    "os_resolved": "macos-x64",
    "read": false,
    "read_via": "tar_stream",
-   "release": "b11798",
+   "release": "b11799",
    "repo": "ggml-org/llama.cpp",
-   "sha256": "8b788bf85e4638a0007707811136a10823b561b58c4174c0e70a6c0bc1f4d1eb",
+   "sha256": "ceaaffdeaf7622a0b6a6aaae2823f0bd6532b9e01d5b4687e8c8692369185a11",
    "version": null,
    "why_not_read": "gzip 流不可随机寻址，读成员表要付整包流量；这一档不是真装的那一颗，所以不为它付 —— server 在场与否未证，要证就出包车道解包后点名"
   },
   {
-   "asset": "llama-b11798-bin-win-cpu-arm64.zip",
+   "asset": "llama-b11799-bin-win-cpu-arm64.zip",
    "backend": "cpu",
    "engine": "llama",
    "entries": 38,
@@ -374,15 +374,15 @@
    "packed_sum_mib": 12.1,
    "read": true,
    "read_via": "zip_central_directory",
-   "release": "b11798",
+   "release": "b11799",
    "repo": "ggml-org/llama.cpp",
    "server_sibling_lib": true,
-   "sha256": "b5f662983cf86a0092bb6335c74b13ad8abbb27ec4d512cb7c493ef2499de0fa",
+   "sha256": "5efeb456bbade9d777b178afefdb059bde75ade9254f64e7679a4869dff518a0",
    "test_hits": [],
    "version": null
   },
   {
-   "asset": "llama-b11798-bin-win-cuda-13.4-arm64.zip",
+   "asset": "llama-b11799-bin-win-cuda-13.4-arm64.zip",
    "backend": "cuda",
    "engine": "llama",
    "entries": 39,
@@ -423,15 +423,15 @@
    "packed_sum_mib": 140.7,
    "read": true,
    "read_via": "zip_central_directory",
-   "release": "b11798",
+   "release": "b11799",
    "repo": "ggml-org/llama.cpp",
    "server_sibling_lib": true,
-   "sha256": "7faf42f6fd95916546ac63ce8a5016ca5e95db0ecec9714faed4b6b34a2e634a",
+   "sha256": "091d9c8015aa4b46d7ea73e3f39fd4c318737a74359f95e22583eb428ffba5e1",
    "test_hits": [],
    "version": "13.4"
   },
   {
-   "asset": "llama-b11798-bin-win-opencl-adreno-arm64.zip",
+   "asset": "llama-b11799-bin-win-opencl-adreno-arm64.zip",
    "backend": "opencl-adreno",
    "engine": "llama",
    "entries": 39,
@@ -472,15 +472,15 @@
    "packed_sum_mib": 12.9,
    "read": true,
    "read_via": "zip_central_directory",
-   "release": "b11798",
+   "release": "b11799",
    "repo": "ggml-org/llama.cpp",
    "server_sibling_lib": true,
-   "sha256": "06de47c05feb79d00dca937b10e646a8ec1c7cc334314aa4d40fb4543a9dab48",
+   "sha256": "9be0ebb8ebc2739a0a88c078186f0f58e7cd3424dfda5da8f570a3fa85a643c3",
    "test_hits": [],
    "version": null
   },
   {
-   "asset": "llama-b11798-bin-win-vulkan-arm64.zip",
+   "asset": "llama-b11799-bin-win-vulkan-arm64.zip",
    "backend": "vulkan",
    "engine": "llama",
    "entries": 39,
@@ -521,15 +521,15 @@
    "packed_sum_mib": 23.9,
    "read": true,
    "read_via": "zip_central_directory",
-   "release": "b11798",
+   "release": "b11799",
    "repo": "ggml-org/llama.cpp",
    "server_sibling_lib": true,
-   "sha256": "3590bd3d0fc63b05f854ab958e4ce4126a3751a54aba6d4f9f35949574f021ed",
+   "sha256": "a91d1acae9b87d09482c070bb0c3051e628925ae943ffa11c6d7437bf371b1b6",
    "test_hits": [],
    "version": null
   },
   {
-   "asset": "llama-b11798-bin-win-cpu-x64.zip",
+   "asset": "llama-b11799-bin-win-cpu-x64.zip",
    "backend": "cpu",
    "engine": "llama",
    "entries": 52,
@@ -571,15 +571,15 @@
    "packed_sum_mib": 22.9,
    "read": true,
    "read_via": "zip_central_directory",
-   "release": "b11798",
+   "release": "b11799",
    "repo": "ggml-org/llama.cpp",
    "server_sibling_lib": true,
-   "sha256": "ee0a6715749b63bc61c193152d9442b98e13403870eb54083d64bcf407d4d375",
+   "sha256": "e77aee2c06504a5821d2127b98e71c9228507292ee1cb72b120280bdcb616291",
    "test_hits": [],
    "version": null
   },
   {
-   "asset": "llama-b11798-bin-win-cuda-12.4-x64.zip",
+   "asset": "llama-b11799-bin-win-cuda-12.4-x64.zip",
    "backend": "cuda",
    "engine": "llama",
    "entries": 53,
@@ -621,15 +621,15 @@
    "packed_sum_mib": 259.5,
    "read": true,
    "read_via": "zip_central_directory",
-   "release": "b11798",
+   "release": "b11799",
    "repo": "ggml-org/llama.cpp",
    "server_sibling_lib": true,
-   "sha256": "44f6defed17cf10350b24f20408624823bfb65559bd849de85467a4a957b89d0",
+   "sha256": "57f345787c3863b8aa869155e552d7890510668b319029672aba5cb04b798460",
    "test_hits": [],
    "version": "12.4"
   },
   {
-   "asset": "llama-b11798-bin-win-cuda-13.4-x64.zip",
+   "asset": "llama-b11799-bin-win-cuda-13.4-x64.zip",
    "backend": "cuda",
    "engine": "llama",
    "entries": 53,
@@ -671,15 +671,15 @@
    "packed_sum_mib": 152.3,
    "read": true,
    "read_via": "zip_central_directory",
-   "release": "b11798",
+   "release": "b11799",
    "repo": "ggml-org/llama.cpp",
    "server_sibling_lib": true,
-   "sha256": "4be1ac185e543c3bd3377bec44779763995844aa03434432bf2efe8d31d734e5",
+   "sha256": "e83a4b8e09c552ed23e1151eafaa2a8e7ca4e5083bd62a10cecdf192798f7a2e",
    "test_hits": [],
    "version": "13.4"
   },
   {
-   "asset": "llama-b11798-bin-win-openvino-2026.4.1-x64.zip",
+   "asset": "llama-b11799-bin-win-openvino-2026.4.1-x64.zip",
    "backend": "openvino",
    "engine": "llama",
    "entries": 95,
@@ -721,15 +721,15 @@
    "packed_sum_mib": 99.2,
    "read": true,
    "read_via": "zip_central_directory",
-   "release": "b11798",
+   "release": "b11799",
    "repo": "ggml-org/llama.cpp",
    "server_sibling_lib": true,
-   "sha256": "e643324337593387ab2156e347c59a652dc7fe14022105d3fa54fb7ec86b25e4",
+   "sha256": "8dd78f2f7d9974383401538a62b0e415f40e664d04558c23d1b7ba5d0d392c0c",
    "test_hits": [],
    "version": "2026.4.1"
   },
   {
-   "asset": "llama-b11798-bin-win-rocm-10.0-x64.zip",
+   "asset": "llama-b11799-bin-win-rocm-10.0-x64.zip",
    "backend": "rocm",
    "engine": "llama",
    "entries": 56,
@@ -771,15 +771,15 @@
    "packed_sum_mib": 251.2,
    "read": true,
    "read_via": "zip_central_directory",
-   "release": "b11798",
+   "release": "b11799",
    "repo": "ggml-org/llama.cpp",
    "server_sibling_lib": true,
-   "sha256": "14da7b74f9ce864d0143669154790d7344cec3caabc949d8dc5c3aa59f5551c7",
+   "sha256": "c127d93242d2fc3f108db0e584662daaa2de4d9a5440bfd46f229421992a5a97",
    "test_hits": [],
    "version": "10.0"
   },
   {
-   "asset": "llama-b11798-bin-win-sycl-x64.zip",
+   "asset": "llama-b11799-bin-win-sycl-x64.zip",
    "backend": "sycl",
    "engine": "llama",
    "entries": 73,
@@ -822,15 +822,15 @@
    "packed_sum_mib": 147.0,
    "read": true,
    "read_via": "zip_central_directory",
-   "release": "b11798",
+   "release": "b11799",
    "repo": "ggml-org/llama.cpp",
    "server_sibling_lib": true,
-   "sha256": "04c92751de97423cc64295c9b6dadd1e9848552a078cf33fdca33601d43a30ef",
+   "sha256": "81e4fa72bf351b1e58ab6ccef19c8075ad8a38512c97c47cbc2a32ee3471b6d1",
    "test_hits": [],
    "version": null
   },
   {
-   "asset": "llama-b11798-bin-win-vulkan-x64.zip",
+   "asset": "llama-b11799-bin-win-vulkan-x64.zip",
    "backend": "vulkan",
    "engine": "llama",
    "entries": 53,
@@ -872,10 +872,10 @@
    "packed_sum_mib": 35.1,
    "read": true,
    "read_via": "zip_central_directory",
-   "release": "b11798",
+   "release": "b11799",
    "repo": "ggml-org/llama.cpp",
    "server_sibling_lib": true,
-   "sha256": "a120759e8910823364f5d0044b054a0ba7567e6e27f70a1b49fcc40882943dd2",
+   "sha256": "45640f66af6baaa51da03bb8e37a22b8ea35535307e4b5a792080f2828f77127",
    "test_hits": [],
    "version": null
   },
@@ -1696,7 +1696,7 @@
  "from": "pins/backend-matrix.json 的 runtime 行 + zip 中央目录捕获 + payload-plan 的默认档",
  "not_read": [
   {
-   "asset": "llama-b11798-bin-android-arm64.tar.gz",
+   "asset": "llama-b11799-bin-android-arm64.tar.gz",
    "backend": "cpu",
    "engine": "llama",
    "expect_server": "llama-server",
@@ -1704,7 +1704,7 @@
    "read_via": "tar_stream"
   },
   {
-   "asset": "llama-b11798-bin-android-arm64-snapdragon.tar.gz",
+   "asset": "llama-b11799-bin-android-arm64-snapdragon.tar.gz",
    "backend": "qnn-snapdragon",
    "engine": "llama",
    "expect_server": "llama-server",
@@ -1712,7 +1712,7 @@
    "read_via": "tar_stream"
   },
   {
-   "asset": "llama-b11798-bin-ubuntu-arm64.tar.gz",
+   "asset": "llama-b11799-bin-ubuntu-arm64.tar.gz",
    "backend": "cpu",
    "engine": "llama",
    "expect_server": "llama-server",
@@ -1720,7 +1720,7 @@
    "read_via": "tar_stream"
   },
   {
-   "asset": "llama-b11798-bin-ubuntu-cuda-13.4-arm64.tar.gz",
+   "asset": "llama-b11799-bin-ubuntu-cuda-13.4-arm64.tar.gz",
    "backend": "cuda",
    "engine": "llama",
    "expect_server": "llama-server",
@@ -1728,7 +1728,7 @@
    "read_via": "tar_stream"
   },
   {
-   "asset": "llama-b11798-bin-linux-arm64-snapdragon.tar.gz",
+   "asset": "llama-b11799-bin-linux-arm64-snapdragon.tar.gz",
    "backend": "qnn-snapdragon",
    "engine": "llama",
    "expect_server": "llama-server",
@@ -1736,7 +1736,7 @@
    "read_via": "tar_stream"
   },
   {
-   "asset": "llama-b11798-bin-ubuntu-vulkan-arm64.tar.gz",
+   "asset": "llama-b11799-bin-ubuntu-vulkan-arm64.tar.gz",
    "backend": "vulkan",
    "engine": "llama",
    "expect_server": "llama-server",
@@ -1744,7 +1744,7 @@
    "read_via": "tar_stream"
   },
   {
-   "asset": "llama-b11798-bin-ubuntu-s390x.tar.gz",
+   "asset": "llama-b11799-bin-ubuntu-s390x.tar.gz",
    "backend": "cpu",
    "engine": "llama",
    "expect_server": "llama-server",
@@ -1752,7 +1752,7 @@
    "read_via": "tar_stream"
   },
   {
-   "asset": "llama-b11798-bin-ubuntu-cuda-12.8-x64.tar.gz",
+   "asset": "llama-b11799-bin-ubuntu-cuda-12.8-x64.tar.gz",
    "backend": "cuda",
    "engine": "llama",
    "expect_server": "llama-server",
@@ -1760,7 +1760,7 @@
    "read_via": "tar_stream"
   },
   {
-   "asset": "llama-b11798-bin-ubuntu-cuda-13.4-x64.tar.gz",
+   "asset": "llama-b11799-bin-ubuntu-cuda-13.4-x64.tar.gz",
    "backend": "cuda",
    "engine": "llama",
    "expect_server": "llama-server",
@@ -1768,7 +1768,7 @@
    "read_via": "tar_stream"
   },
   {
-   "asset": "llama-b11798-bin-ubuntu-openvino-2026.4.1-x64.tar.gz",
+   "asset": "llama-b11799-bin-ubuntu-openvino-2026.4.1-x64.tar.gz",
    "backend": "openvino",
    "engine": "llama",
    "expect_server": "llama-server",
@@ -1776,7 +1776,7 @@
    "read_via": "tar_stream"
   },
   {
-   "asset": "llama-b11798-bin-ubuntu-rocm-10.0-x64.tar.gz",
+   "asset": "llama-b11799-bin-ubuntu-rocm-10.0-x64.tar.gz",
    "backend": "rocm",
    "engine": "llama",
    "expect_server": "llama-server",
@@ -1784,7 +1784,7 @@
    "read_via": "tar_stream"
   },
   {
-   "asset": "llama-b11798-bin-ubuntu-sycl-fp16-x64.tar.gz",
+   "asset": "llama-b11799-bin-ubuntu-sycl-fp16-x64.tar.gz",
    "backend": "sycl",
    "engine": "llama",
    "expect_server": "llama-server",
@@ -1792,7 +1792,7 @@
    "read_via": "tar_stream"
   },
   {
-   "asset": "llama-b11798-bin-ubuntu-sycl-fp32-x64.tar.gz",
+   "asset": "llama-b11799-bin-ubuntu-sycl-fp32-x64.tar.gz",
    "backend": "sycl",
    "engine": "llama",
    "expect_server": "llama-server",
@@ -1800,7 +1800,7 @@
    "read_via": "tar_stream"
   },
   {
-   "asset": "llama-b11798-bin-ubuntu-vulkan-x64.tar.gz",
+   "asset": "llama-b11799-bin-ubuntu-vulkan-x64.tar.gz",
    "backend": "vulkan",
    "engine": "llama",
    "expect_server": "llama-server",
@@ -1808,7 +1808,7 @@
    "read_via": "tar_stream"
   },
   {
-   "asset": "llama-b11798-bin-macos-x64.tar.gz",
+   "asset": "llama-b11799-bin-macos-x64.tar.gz",
    "backend": "unknown_from_name",
    "engine": "llama",
    "expect_server": "llama-server",

@@ -2,7 +2,7 @@
  {
   "id": "llama-host-default",
   "repo": "ggml-org/llama.cpp",
-  "ref": "b11798",
+  "ref": "b11799",
   "path": "common/common.h",
   "line": 652,
   "expect": "hostnames = {\"127.0.0.1\"}",
@@ -13,7 +13,7 @@
  {
   "id": "llama-cors-star",
   "repo": "ggml-org/llama.cpp",
-  "ref": "b11798",
+  "ref": "b11799",
   "path": "common/common.h",
   "line": 656,
   "expect": "std::string cors_origins = \"*\";",
@@ -24,7 +24,7 @@
  {
   "id": "llama-apikeys-empty",
   "repo": "ggml-org/llama.cpp",
-  "ref": "b11798",
+  "ref": "b11799",
   "path": "common/common.h",
   "line": 669,
   "expect": "std::vector<std::string> api_keys;",
@@ -35,7 +35,7 @@
  {
   "id": "llama-api-key-flag",
   "repo": "ggml-org/llama.cpp",
-  "ref": "b11798",
+  "ref": "b11799",
   "path": "common/arg.cpp",
   "line": 3533,
   "expect": "{\"--api-key\"}",
@@ -46,7 +46,7 @@
  {
   "id": "llama-cors-flag",
   "repo": "ggml-org/llama.cpp",
-  "ref": "b11798",
+  "ref": "b11799",
   "path": "common/arg.cpp",
   "line": 3372,
   "expect": "{\"--cors-origins\"}",
@@ -57,7 +57,7 @@
  {
   "id": "llama-cors-warn",
   "repo": "ggml-org/llama.cpp",
-  "ref": "b11798",
+  "ref": "b11799",
   "path": "tools/server/server.cpp",
   "line": 359,
   "expect": "params.cors_origins == \"*\" && params.api_keys.empty()",
@@ -68,7 +68,7 @@
  {
   "id": "llama-no-cnv",
   "repo": "ggml-org/llama.cpp",
-  "ref": "b11798",
+  "ref": "b11799",
   "path": "common/arg.cpp",
   "line": 1907,
   "expect": "\"--no-conversation\"",
@@ -79,7 +79,7 @@
  {
   "id": "llama-timing-print",
   "repo": "ggml-org/llama.cpp",
-  "ref": "b11798",
+  "ref": "b11799",
   "path": "tools/cli/cli-context.cpp",
   "line": 657,
   "expect": "[ Prompt: %.1f t/s | Generation: %.1f t/s ]",
@@ -864,7 +864,7 @@
  {
   "id": "llama-health-is-public",
   "repo": "ggml-org/llama.cpp",
-  "ref": "b11798",
+  "ref": "b11799",
   "path": "tools/server/server.cpp",
   "line": 280,
   "expect": "ctx_http.get (\"/health\"",
@@ -886,7 +886,7 @@
  {
   "id": "llama-chat-completions-route",
   "repo": "ggml-org/llama.cpp",
-  "ref": "b11798",
+  "ref": "b11799",
   "path": "tools/server/server.cpp",
   "line": 291,
   "expect": "ctx_http.post(\"/v1/chat/completions\"",

@@ -398,7 +398,7 @@ class TestSourceMutants(unittest.TestCase):
                 and caps["生图"]["lifecycle"]["mode"] == "on_demand"
                 and caps["文字识别"]["lifecycle"]["mode"] == "one_shot")
             out["e 版本钉在轴上"] = (
-                caps["对话"]["version"]["pinned"] == "b11798"
+                caps["对话"]["version"]["pinned"] == "b11799"
                 and caps["字幕"]["version"]["pinned"] == "b5454"
                 and caps["文字识别"]["version"]["pinned"] == ins["ocr"]["ref"])
             okdir = True

@@ -38,7 +38,7 @@
      "engine_minutes_at_github_rate": 67.0,
      "engine_rows": [
       {
-       "asset": "llama-b11798-bin-ubuntu-x64.tar.gz",
+       "asset": "llama-b11799-bin-ubuntu-x64.tar.gz",
        "capability": "对话",
        "download_mib": 21.3,
        "engine": "llama",
@@ -84,7 +84,7 @@
      "engine_minutes_at_github_rate": 59.8,
      "engine_rows": [
       {
-       "asset": "llama-b11798-bin-macos-arm64.tar.gz",
+       "asset": "llama-b11799-bin-macos-arm64.tar.gz",
        "capability": "对话",
        "download_mib": 15.4,
        "engine": "llama",
@@ -132,7 +132,7 @@
      "engine_minutes_at_github_rate": 57.5,
      "engine_rows": [
       {
-       "asset": "llama-b11798-bin-win-cpu-x64.zip",
+       "asset": "llama-b11799-bin-win-cpu-x64.zip",
        "capability": "对话",
        "download_mib": 22.9,
        "engine": "llama",
@@ -472,7 +472,7 @@
      "engine_minutes_at_github_rate": 67.0,
      "engine_rows": [
       {
-       "asset": "llama-b11798-bin-ubuntu-x64.tar.gz",
+       "asset": "llama-b11799-bin-ubuntu-x64.tar.gz",
        "capability": "对话",
        "download_mib": 21.3,
        "engine": "llama",
@@ -518,7 +518,7 @@
      "engine_minutes_at_github_rate": 59.8,
      "engine_rows": [
       {
-       "asset": "llama-b11798-bin-macos-arm64.tar.gz",
+       "asset": "llama-b11799-bin-macos-arm64.tar.gz",
        "capability": "对话",
        "download_mib": 15.4,
        "engine": "llama",
@@ -566,7 +566,7 @@
      "engine_minutes_at_github_rate": 57.5,
      "engine_rows": [
       {
-       "asset": "llama-b11798-bin-win-cpu-x64.zip",
+       "asset": "llama-b11799-bin-win-cpu-x64.zip",
        "capability": "对话",
        "download_mib": 22.9,
        "engine": "llama",
@@ -808,7 +808,7 @@
      "engine_minutes_at_github_rate": 67.0,
      "engine_rows": [
       {
-       "asset": "llama-b11798-bin-ubuntu-x64.tar.gz",
+       "asset": "llama-b11799-bin-ubuntu-x64.tar.gz",
        "capability": "对话",
        "download_mib": 21.3,
        "engine": "llama",
@@ -854,7 +854,7 @@
      "engine_minutes_at_github_rate": 59.8,
      "engine_rows": [
       {
-       "asset": "llama-b11798-bin-macos-arm64.tar.gz",
+       "asset": "llama-b11799-bin-macos-arm64.tar.gz",
        "capability": "对话",
        "download_mib": 15.4,
        "engine": "llama",
@@ -902,7 +902,7 @@
      "engine_minutes_at_github_rate": 57.5,
      "engine_rows": [
       {
-       "asset": "llama-b11798-bin-win-cpu-x64.zip",
+       "asset": "llama-b11799-bin-win-cpu-x64.zip",
        "capability": "对话",
        "download_mib": 22.9,
        "engine": "llama",
