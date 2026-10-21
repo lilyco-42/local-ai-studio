@@ -9,7 +9,10 @@
 from __future__ import annotations
 
 import argparse
+import functools
+import hashlib
 import http.client
+import http.server
 import json
 import os
 import re
@@ -17,12 +20,15 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import threading
 import time
 import urllib.error
 import urllib.request
 
 # 与 shell/ui/main.js 的 TAB_CAP 一致：这四个名字是 UI 与后端的接缝，改名了这里必须跟着红。
 EXPECTED_CAPABILITIES = ("对话", "字幕", "文字识别", "生图")
+# 与 shell/core/src/payload_fetch.rs 的 SOURCE_NAME 一致。
+SOURCE_NAME = "payload-source.json"
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 REQUIRED_STATUS_FIELDS = (
     "capability", "engine", "available", "installed", "running",
@@ -191,6 +197,140 @@ def plant_payload(data_root: str, contract_path: str, capability: str = "对话"
             "engine": cap["engine"], "asset": asset, "bytes": size}
 
 
+def build_install_fixture(work: str, contract_path: str, capability: str = "对话",
+                          platform: str = "linux-x64", prefix: str = "payload") -> dict:
+    """用真实的 `stage_payload` + `payload_intake` 造一棵包树与一张交付清单，只摆在 `work` 里。
+
+    数据根必须保持干净：这里不写目标目录、也不写根清单，安装过程本身才会落盘。
+    服务的对象放在 `server_root/<key>`，`manifest_url_path` 指同一目录下的交付清单。
+    """
+    import payload_intake as intake_tool
+    import stage_payload as stage_tool
+
+    with open(contract_path, encoding="utf-8") as fh:
+        contract = json.load(fh)
+    cap = contract["capabilities"].get(capability)
+    cell = (cap or {}).get("os", {}).get(platform)
+    if not cap or not cell:
+        raise ValueError(f"合同里没有 {capability} / {platform}")
+    if cap.get("mode") != "server":
+        raise ValueError(f"{capability} 不是 server 形态（mode={cap.get('mode')!r}）")
+    engine = cap.get("engine")
+    asset = cell.get("default_asset")
+    if not engine or not asset:
+        raise ValueError(f"{capability} / {platform} 缺引擎或默认资产：{cell!r}")
+
+    package = os.path.join(work, "package")
+    engine_dir = os.path.join(package, engine)
+    os.makedirs(engine_dir, exist_ok=True)
+    bodies = {
+        "probe-server.bin": b"synthetic engine payload for the IPC probe\n",
+        "probe-shared.bin": b"synthetic shared library placeholder\n",
+    }
+    files = []
+    for name, body in bodies.items():
+        with open(os.path.join(engine_dir, name), "wb") as fh:
+            fh.write(body)
+        files.append({"file": name, "bytes": len(body),
+                      "sha256": hashlib.sha256(body).hexdigest()})
+    manifest = {"os": platform, "engines": [{
+        "engine": engine, "status": "ok", "asset": asset, "files": files,
+    }]}
+    with open(os.path.join(package, stage_tool.MANIFEST_NAME), "w", encoding="utf-8") as fh:
+        json.dump(manifest, fh, ensure_ascii=False)
+
+    stage_root = os.path.join(work, "stage")
+    os.makedirs(stage_root, exist_ok=True)
+    stage_tool.stage(package, stage_root, platform, contract_path)
+    delivery = intake_tool.build(stage_root, platform, contract_path, prefix)
+
+    server_root = os.path.join(work, "server")
+    os.makedirs(server_root, exist_ok=True)
+    for row in list(delivery["files"]) + [delivery["manifest"]]:
+        src = os.path.join(stage_root, *row["dest"].split("/"))
+        dst = os.path.join(server_root, *row["key"].split("/"))
+        os.makedirs(os.path.dirname(dst), exist_ok=True)
+        shutil.copyfile(src, dst)
+    manifest_rel = f"{prefix}/{platform}/delivery-manifest.json"
+    manifest_path = os.path.join(server_root, *manifest_rel.split("/"))
+    os.makedirs(os.path.dirname(manifest_path), exist_ok=True)
+    with open(manifest_path, "w", encoding="utf-8") as fh:
+        json.dump(delivery, fh, ensure_ascii=False, indent=1, sort_keys=True)
+    return {"server_root": server_root, "stage_root": stage_root, "delivery": delivery,
+            "manifest_url_path": "/" + manifest_rel, "engine": engine, "asset": asset}
+
+
+def write_source(data_root: str, manifest_url: str, base: str) -> str:
+    """把首装源配置写进数据根；同目录临时文件再替换，轮询不会读到半份 JSON。"""
+    if not is_absolute_path(data_root):
+        raise ValueError(f"data_root 必须是绝对路径：{data_root!r}")
+    path = os.path.join(data_root, SOURCE_NAME)
+    tmp = path + ".probe-tmp"
+    with open(tmp, "w", encoding="utf-8", newline="\n") as fh:
+        json.dump({"manifest_url": manifest_url, "bases": [base]}, fh, ensure_ascii=False)
+        fh.write("\n")
+    os.replace(tmp, path)
+    return path
+
+
+def check_installed_tree(data_root: str, delivery: dict) -> int:
+    """逐颗核对安装结果：文件表 + 根清单都要在盘上、字节数与 sha256 与清单相同。"""
+    rows = list(delivery["files"]) + [delivery["manifest"]]
+    for row in rows:
+        path = os.path.join(data_root, *row["dest"].split("/"))
+        if not os.path.isfile(path):
+            raise ProbeError(f"装完缺文件：{path}")
+        with open(path, "rb") as fh:
+            body = fh.read()
+        if len(body) != row["bytes"]:
+            raise ProbeError(f"{row['dest']}: 清单写 {row['bytes']} 字节，盘上是 {len(body)}")
+        got = hashlib.sha256(body).hexdigest()
+        if got != row["sha256"]:
+            raise ProbeError(f"{row['dest']}: sha256 与清单不符（盘上 {got[:12]}…）")
+    return len(rows)
+
+
+def check_reinstall_report(value, object_files: int) -> None:
+    """第二次安装必须只读不写：written=0，跳过项 = 对象数 + 根清单。"""
+    if not isinstance(value, dict):
+        raise ProbeError(f"install_payload 没回对象：{value!r}")
+    missing = [key for key in ("platform", "written", "skipped") if key not in value]
+    if missing:
+        raise ProbeError(f"install_payload 的回执缺字段 {missing}：{value!r}")
+    if not isinstance(value["platform"], str) or not value["platform"]:
+        raise ProbeError(f"install_payload 的 platform 不是非空字符串：{value['platform']!r}")
+    if value["written"] != 0:
+        raise ProbeError(f"第二次安装应 0 写入，实际 written={value['written']!r}")
+    want = object_files + 1
+    if value["skipped"] != want:
+        raise ProbeError(f"第二次安装应跳过 {want} 项（{object_files} 个对象 + 根清单），"
+                         f"实际 skipped={value['skipped']!r}")
+
+
+class _QuietHandler(http.server.SimpleHTTPRequestHandler):
+    def log_message(self, format, *args) -> None:
+        pass
+
+
+def serve_dir(root: str):
+    """在 127.0.0.1 的随机端口上把一棵目录当对象桶；返回 (server, thread)。"""
+    handler = functools.partial(_QuietHandler, directory=root)
+    server = http.server.ThreadingHTTPServer(("127.0.0.1", 0), handler)
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    return server, thread
+
+
+def base_url(server) -> str:
+    return f"http://127.0.0.1:{server.server_address[1]}"
+
+
+def stop_server(server, thread) -> None:
+    server.shutdown()
+    server.server_close()
+    thread.join(timeout=5)
+
+
 def check_ui(state, data_root: str, expected_title: str = "Local AI Studio", chip_suffix=None) -> None:
     if not isinstance(state, dict):
         raise ProbeError(f"UI 状态不是对象：{state!r}")
@@ -225,6 +365,9 @@ return {
   tauri: !!(window.__TAURI__ && window.__TAURI__.core && typeof window.__TAURI__.core.invoke === "function"),
   boot_hidden: document.getElementById('boot').hidden,
   chip: document.getElementById('engine-chip').textContent,
+  engine_state: document.getElementById('engine-state').textContent,
+  install_hidden: document.getElementById('payload-install').hidden,
+  install_disabled: document.getElementById('payload-install').disabled,
   data_root_text: document.getElementById('data-root').textContent
 };
 """
@@ -313,6 +456,8 @@ def invoke(driver: Driver, sid: str, command: str):
 def run(args) -> int:
     if not os.path.isfile(args.app):
         raise ProbeError(f"--app 指向的二进制不存在：{args.app}")
+    if args.install_payload and args.install_payload != "对话":
+        raise ValueError("--install-payload 只驱动对话页：安装按钮与状态条跟着当前页签走")
     native = args.native_driver or shutil.which("WebKitWebDriver")
     if not native:
         raise ProbeError("找不到 WebKitWebDriver（Ubuntu 上是 webkit2gtk-driver 包）")
@@ -328,7 +473,7 @@ def run(args) -> int:
         poll_until(lambda: driver.execute(sid, READY_JS) is True, deadline, "页面里的 window.__TAURI__")
 
         rows = invoke(driver, sid, "status")
-        fresh = args.expect_not_installed or bool(args.plant_payload)
+        fresh = args.expect_not_installed or bool(args.plant_payload) or bool(args.install_payload)
         check_status(rows, installed=False if fresh else None)
         say("status: " + " / ".join(
             f"{row['capability']}(available={row['available']},installed={row['installed']},"
@@ -389,6 +534,90 @@ def run(args) -> int:
                 raise ProbeError(f"装上载荷后状态条是 {state['chip']!r}，期望 {want_chip!r}")
             say(f"ui(装上后): chip={state['chip']!r}")
 
+        if args.install_payload:
+            work = tempfile.mkdtemp(prefix="wd-install-fixture-")
+            server = thread = None
+            try:
+                fixture = build_install_fixture(work, args.contract,
+                                                capability=args.install_payload,
+                                                platform=args.platform)
+                server, thread = serve_dir(fixture["server_root"])
+                fixture_base = base_url(server)
+                manifest_url = fixture_base + fixture["manifest_url_path"]
+                source = write_source(root, manifest_url, fixture_base)
+                delivery = fixture["delivery"]
+                say(f"fixture: {len(delivery['files'])} 个对象 + 根清单，经 {manifest_url}")
+
+                ready_deadline = time.monotonic() + min(60.0, args.timeout)
+
+                def button_ready():
+                    current = driver.execute(sid, UI_STATE_JS)
+                    if not isinstance(current, dict):
+                        return None
+                    if current.get("install_hidden") is not False:
+                        return None
+                    if current.get("install_disabled") is not False:
+                        return None
+                    return current
+
+                button = poll_until(button_ready, ready_deadline,
+                                    "刷新状态后出现可点的安装按钮")
+                say(f"button: hidden={button['install_hidden']} disabled={button['install_disabled']}"
+                    f"（{source}）")
+                clicked = driver.execute(
+                    sid, "document.getElementById('payload-install').click(); return true;")
+                if clicked is not True:
+                    raise ProbeError(f"点安装按钮没有回 true：{clicked!r}")
+
+                want = {name: name == args.install_payload for name in EXPECTED_CAPABILITIES}
+                install_deadline = time.monotonic() + args.timeout
+
+                def installed_now():
+                    current = invoke(driver, sid, "status")
+                    check_status(current)
+                    try:
+                        check_installed_map(current, want)
+                    except ProbeError as exc:
+                        state = driver.execute(sid, UI_STATE_JS) or {}
+                        raise ProbeError(
+                            f"{exc}；状态条 {state.get('chip')!r}，"
+                            f"说明 {state.get('engine_state')!r}"
+                        ) from None
+                    return current
+
+                rows = poll_until(installed_now, install_deadline,
+                                  "点按钮后 status 把载荷报成 installed=true")
+                say("status(点按钮后): " + " / ".join(
+                    f"{row['capability']}(installed={row['installed']})" for row in rows))
+
+                def ready_chip():
+                    current = driver.execute(sid, UI_STATE_JS)
+                    if not isinstance(current, dict):
+                        return None
+                    if current.get("chip") != f"{args.install_payload} · 未启动":
+                        return None
+                    return current
+
+                state = poll_until(ready_chip, install_deadline,
+                                   "状态条从“运行组件未安装”翻成就绪")
+                check_ui(state, root)
+                checked = check_installed_tree(root, delivery)
+                if os.path.exists(os.path.join(root, ".objects")):
+                    raise ProbeError("装完后 .objects 还在 —— 断点缓存没有清")
+                say(f"ui(点按钮后): chip={state['chip']!r}；盘上 {checked} 颗文件与清单逐字节相符，"
+                    ".objects 已清")
+
+                report = invoke(driver, sid, "install_payload")
+                check_reinstall_report(report, len(delivery["files"]))
+                if os.path.exists(os.path.join(root, ".objects")):
+                    raise ProbeError("第二次安装后 .objects 还在")
+                say(f"reinstall: written={report['written']} skipped={report['skipped']}"
+                    f"（{len(delivery['files'])} 个对象 + 根清单）")
+            finally:
+                if server is not None:
+                    stop_server(server, thread)
+                shutil.rmtree(work, ignore_errors=True)
+
         if args.negative_control:
             spoofed = EXPECTED_CAPABILITIES[:-1] + ("不存在的能力",)
             try:
@@ -425,8 +654,12 @@ def main(argv=None) -> int:
                         help="装机目录与资产名只从这张合同表取（默认仓库里那份）")
     parser.add_argument("--platform", default="linux-x64",
                         help="合同里的 OS 键；这条车道只在 Linux 上跑")
-    parser.add_argument("--plant-payload", metavar="CAPABILITY", default=None,
-                        help="在数据根摆一份合成清单+占位文件，要求该能力 installed 翻成 true（其余仍 false）")
+    payload = parser.add_mutually_exclusive_group()
+    payload.add_argument("--plant-payload", metavar="CAPABILITY", default=None,
+                         help="在数据根摆一份合成清单+占位文件，要求该能力 installed 翻成 true（其余仍 false）")
+    payload.add_argument("--install-payload", metavar="CAPABILITY", default=None,
+                         help="起一个只读的本地对象桶，写 payload-source.json 后点 UI 的安装按钮，"
+                              "要求真下载、校验、落盘，且第二次安装 0 写入")
     parser.add_argument("--log", default=os.path.join(tempfile.gettempdir(), "wd-ipc-probe.log"))
     args = parser.parse_args(argv)
     try:

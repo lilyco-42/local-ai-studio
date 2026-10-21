@@ -112,7 +112,7 @@ jobs:
             kill "$app" 2>/dev/null || true
             wait "$app" 2>/dev/null || true
           '
-      - name: 真驱动窗口里的 IPC（WebDriver：status/data_root 与 UI 渲染）
+      - name: 真驱动窗口里的 IPC（WebDriver：status/data_root、UI 渲染与首装按钮）
         if: matrix.os == 'ubuntu-latest'
         timeout-minutes: 15
         env:
@@ -136,7 +136,7 @@ jobs:
             --app "$PWD/target/debug/local-ai-studio-shell" \
             --native-driver "$(command -v WebKitWebDriver)" \
             --expect-not-installed \
-            --plant-payload 对话 \
+            --install-payload 对话 \
             --negative-control \
             --timeout 180
       - name: 把首轮解析出的 Cargo.lock 留档（Tauri 依赖图目前未钉）

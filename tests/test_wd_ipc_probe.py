@@ -4,13 +4,16 @@
 会话请求的形状、status 的字段与能力集合、data_root 的绝对路径、UI 渲染证据，
 以及"车道真的调用了这套判据并带了已知坏对照"。
 """
+import hashlib
 import json
 import os
 import re
+import shutil
 import sys
 import tempfile
 import time
 import unittest
+import urllib.request
 
 import yaml
 
@@ -218,6 +221,133 @@ class TestPlantedPayload(unittest.TestCase):
             wd.plant_payload(self.root, CONTRACT, platform="plan9-x64")
 
 
+class TestInstallFixture(unittest.TestCase):
+    def setUp(self) -> None:
+        self.tmp = tempfile.TemporaryDirectory()
+        self.work = self.tmp.name
+
+    def tearDown(self) -> None:
+        self.tmp.cleanup()
+
+    def fixture(self) -> dict:
+        return wd.build_install_fixture(self.work, CONTRACT, capability="对话")
+
+    def install_offline(self, fixture: dict, root: str, with_manifest: bool = True) -> None:
+        rows = list(fixture["delivery"]["files"])
+        if with_manifest:
+            rows.append(fixture["delivery"]["manifest"])
+        for row in rows:
+            src = os.path.join(fixture["server_root"], *row["key"].split("/"))
+            dst = os.path.join(root, *row["dest"].split("/"))
+            os.makedirs(os.path.dirname(dst), exist_ok=True)
+            shutil.copyfile(src, dst)
+
+    def test_fixture_comes_from_the_real_stage_and_intake_tools(self) -> None:
+        fixture = self.fixture()
+        delivery = fixture["delivery"]
+        self.assertEqual(delivery["os"], "linux-x64")
+        self.assertEqual(len(delivery["files"]), 2)
+        self.assertEqual(delivery["manifest"]["land"], "last")
+        self.assertEqual(delivery["manifest"]["dest"], "payload-manifest.json")
+        self.assertRegex(fixture["manifest_url_path"],
+                         r"^/payload/linux-x64/delivery-manifest\.json$")
+        for row in list(delivery["files"]) + [delivery["manifest"]]:
+            with self.subTest(dest=row["dest"]):
+                served = os.path.join(fixture["server_root"], *row["key"].split("/"))
+                self.assertTrue(os.path.isfile(served), served)
+                self.assertEqual(os.path.getsize(served), row["bytes"])
+                staged = os.path.join(fixture["stage_root"], *row["dest"].split("/"))
+                with open(staged, "rb") as fh:
+                    self.assertEqual(hashlib.sha256(fh.read()).hexdigest(), row["sha256"])
+        manifest_path = os.path.join(
+            fixture["server_root"], *fixture["manifest_url_path"].lstrip("/").split("/"))
+        with open(manifest_path, encoding="utf-8") as fh:
+            self.assertEqual(json.load(fh), delivery)
+
+    def test_fixture_refuses_unknown_or_non_server_capabilities(self) -> None:
+        with self.assertRaisesRegex(ValueError, "不是 server"):
+            wd.build_install_fixture(self.work, CONTRACT, capability="文字识别")
+        with self.assertRaises(ValueError):
+            wd.build_install_fixture(self.work, CONTRACT, capability="不存在")
+        with self.assertRaises(ValueError):
+            wd.build_install_fixture(self.work, CONTRACT, platform="plan9-x64")
+
+    def test_source_is_written_atomically_and_names_one_base(self) -> None:
+        root = os.path.join(self.work, "data")
+        os.makedirs(root)
+        manifest_url = "http://127.0.0.1:9/payload/linux-x64/delivery-manifest.json"
+        path = wd.write_source(root, manifest_url, "http://127.0.0.1:9")
+        with open(path, encoding="utf-8") as fh:
+            self.assertEqual(json.load(fh),
+                             {"manifest_url": manifest_url, "bases": ["http://127.0.0.1:9"]})
+        self.assertFalse(os.path.exists(path + ".probe-tmp"))
+
+    def test_source_refuses_a_relative_data_root(self) -> None:
+        with self.assertRaises(ValueError):
+            wd.write_source("data", "http://127.0.0.1:9/m.json", "http://127.0.0.1:9")
+
+    def test_tree_check_reads_every_object_and_the_root_manifest(self) -> None:
+        fixture = self.fixture()
+        root = os.path.join(self.work, "data")
+        os.makedirs(root)
+        self.install_offline(fixture, root)
+        self.assertEqual(wd.check_installed_tree(root, fixture["delivery"]), 3)
+        victim = os.path.join(root, *fixture["delivery"]["files"][0]["dest"].split("/"))
+        with open(victim, "ab") as fh:
+            fh.write(b"x")
+        with self.assertRaisesRegex(wd.ProbeError, "清单写|sha256"):
+            wd.check_installed_tree(root, fixture["delivery"])
+
+    def test_tree_check_needs_the_root_manifest(self) -> None:
+        fixture = self.fixture()
+        root = os.path.join(self.work, "data")
+        os.makedirs(root)
+        self.install_offline(fixture, root, with_manifest=False)
+        with self.assertRaisesRegex(wd.ProbeError, "缺文件"):
+            wd.check_installed_tree(root, fixture["delivery"])
+
+    def test_reinstall_report_requires_zero_written_and_all_skipped(self) -> None:
+        wd.check_reinstall_report({"platform": "linux-x64", "written": 0, "skipped": 3}, 2)
+        bad = (
+            {"platform": "linux-x64", "written": 1, "skipped": 2},
+            {"platform": "linux-x64", "written": 0, "skipped": 2},
+            {"written": 0, "skipped": 3},
+            None,
+        )
+        for value in bad:
+            with self.subTest(value=value), self.assertRaises(wd.ProbeError):
+                wd.check_reinstall_report(value, 2)
+
+
+class TestFixtureServer(unittest.TestCase):
+    def test_serves_the_delivery_manifest_and_every_object_key(self) -> None:
+        opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+        with tempfile.TemporaryDirectory() as work:
+            fixture = wd.build_install_fixture(work, CONTRACT)
+            server, thread = wd.serve_dir(fixture["server_root"])
+            try:
+                base = wd.base_url(server)
+                self.assertTrue(base.startswith("http://127.0.0.1:"))
+                with opener.open(base + fixture["manifest_url_path"], timeout=5) as resp:
+                    self.assertEqual(resp.status, 200)
+                    self.assertEqual(json.loads(resp.read().decode("utf-8")), fixture["delivery"])
+                row = fixture["delivery"]["files"][0]
+                with opener.open(base + "/" + row["key"], timeout=5) as resp:
+                    body = resp.read()
+                self.assertEqual(len(body), row["bytes"])
+                self.assertEqual(hashlib.sha256(body).hexdigest(), row["sha256"])
+            finally:
+                wd.stop_server(server, thread)
+
+
+class TestSourceName(unittest.TestCase):
+    def test_python_constant_matches_the_rust_source_name(self) -> None:
+        path = os.path.join(ROOT, "shell", "core", "src", "payload_fetch.rs")
+        with open(path, encoding="utf-8") as fh:
+            source = fh.read()
+        self.assertIn('pub const SOURCE_NAME: &str = "payload-source.json";', source)
+
+
 class TestDataRootGate(unittest.TestCase):
     def test_linux_and_windows_absolute_paths_pass(self) -> None:
         wd.check_data_root("/home/runner/.local/share/local-ai-studio")
@@ -319,7 +449,7 @@ class TestWorkflow(unittest.TestCase):
             '--app "$PWD/target/debug/local-ai-studio-shell"',
             '--native-driver "$(command -v WebKitWebDriver)"',
             "--expect-not-installed",
-            "--plant-payload 对话",
+            "--install-payload 对话",
             "--negative-control",
         ):
             with self.subTest(needle=needle):

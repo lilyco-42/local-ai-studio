@@ -99,6 +99,7 @@ let statusRows = [];
 let unavailable = new Set();
 let history = [];
 let payloadSource = null;
+let payloadSourceError = null;
 
 function loadLang() {
   try {
@@ -211,6 +212,13 @@ async function refreshStatus() {
     el('engine-chip').textContent = String(err);
     return;
   }
+  try {
+    payloadSource = await invoke('payload_source');
+    payloadSourceError = null;
+  } catch (err) {
+    payloadSource = null;
+    payloadSourceError = String(err);
+  }
   unavailable = new Set(statusRows
     .filter((row) => row.available === false)
     .map((row) => row.capability));
@@ -238,7 +246,8 @@ function renderStatus() {
   }
   if (row && row.installed === false) {
     el('engine-chip').textContent = cap + ' · ' + t('notInstalled');
-    el('engine-state').textContent = cap + ' · ' + t(payloadSource ? 'notInstalledHint' : 'payloadUnconfigured');
+    el('engine-state').textContent = cap + ' · '
+      + (payloadSource ? t('notInstalledHint') : (payloadSourceError || t('payloadUnconfigured')));
     installButton.hidden = !payloadSource;
     if (!busy) {
       installButton.disabled = !payloadSource;
@@ -272,15 +281,6 @@ async function stopEngine() {
   await run(async () => {
     await invoke('stop_engine', { capability });
   });
-}
-
-async function loadPayloadSource() {
-  try {
-    payloadSource = await invoke('payload_source');
-  } catch (err) {
-    payloadSource = null;
-    el('engine-state').textContent = String(err);
-  }
 }
 
 function listenPayloadProgress() {
@@ -426,7 +426,7 @@ function init() {
     .catch((err) => {
       el('data-root').textContent = String(err);
     });
-  loadPayloadSource().then(refreshStatus);
+  refreshStatus();
   window.setInterval(() => {
     if (!busy) refreshStatus();
   }, 3000);
