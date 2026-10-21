@@ -956,14 +956,22 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     公网 http/空基址）与交付清单本身（404、空体、临时文件不残留），不需要网络。
     **首启入口**：`payload_source` 报告数据根里有没有源配置，`install_payload` 取清单 → 校验平台 →
     逐对象装进数据根，根清单最后写，`.objects` 成功后才删；UI 只在“未安装 + 有配置”时显示安装按钮，
-    进度按文件数发 `payload-progress`。离线单测只能证这条消费链，**真 HTTPS 与真实用户首装仍未跑过**。
+    进度按文件数发 `payload-progress`。离线单测只能证这条消费链；真窗口里的“点按钮首装”已有 CI 证据（见下），
+    **真 HTTPS 基址与真实用户电脑上的首装仍未跑过**。
     **证据边界**：2026-10-21 `package.yml`（run 39632180385）在三档 OS 上真跑了第 8 步（摆位 + `--check`）
     与第 9 步（交付清单），三档 `engine-payload-<os>` 都上传成功；同日 run 39654853807 在**三档原生 runner**
     上做了消费者重放：删掉摆好的数据根，只凭清单装进空目录（linux-x64 94 个文件 / 156.3 MiB、
     win-x64 58 / 105.0、macos-arm64 33 / 158.4，均 0 跳过），再从装好的树起 `llama-server --help`
     （三次 rc=0，输出含 `--port`）。所以"真实上游包能按合同落位"与"清单足以还原能起引擎的树"都有 CI 证据；
     出包车道现在还会把对象目录当 HTTP 远端再取一遍（`--base-url`；run 39656642754 三档均 0 跳过、
-    同数落盘、`--help` 三次 rc=0，但这段是回环明文，真 HTTPS 基址仍未在重放里跑过），
+    同数落盘、`--help` 三次 rc=0，但这段是回环明文，真 HTTPS 基址仍未在重放里跑过）。
+    同日 UI 车道（run 39688402251）把点击首装也接进了 shell.yml：`wd_ipc_probe.py --install-payload 对话`
+    用真实 `stage_payload`/`payload_intake` 造 2 个对象 + 根清单（合成字节 43/35 B，不是上游包），
+    起一个回环 HTTP 对象桶；窗口起来后才写 `payload-source.json`，由 WebDriver **点真按钮**。日志里
+    `button: hidden=False disabled=False` → 点后 `对话(installed=True)` 且其余三档仍 false →
+    `ui(…): chip='对话 · 未启动'`、盘上 3 颗文件逐字节相符、`.objects` 已清 → 二次安装
+    `written=0 skipped=3`；负向对照同时证明判据会红（掺假能力名被拒）。即"UI → IPC → 取数 → 落盘 →
+    幂等"整条链在 CI 里真跑通过一次，只是版本与基址都是回环合成件。
     仍没有的是**发布落点（R2 写）、生产 HTTPS 基址**（#57），以及用户个人电脑上的"装完真能跑"。
     OCR 仍不在出包清单里，`not_in_manifest` 会点名 `文字识别/oar-ocr` —— 已知缺口，不是这一步的失败。
 34. **安装包本身：三平台各一个未签名包，只装壳**（`.github/workflows/installer.yml` + `tools/make_icons.py`）：
