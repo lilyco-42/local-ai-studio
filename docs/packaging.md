@@ -143,8 +143,8 @@ asset/OS/引擎不符等）；`tests/test_stage_payload.py` 10 条离线对照�
 没有任何写入桶或首启下载的动作**。`tests/test_payload_intake.py` 21 条（真实合同落点、
 两个数据根同一份字节、13 条合成自测、6 条源码变异体，以及消费端重放：删掉原数据根，
 只凭对象字典按清单还原，按外壳 `verify_payload` 的顺序逐文件验过；坏对象/缺对象/
-越界或重复落点时根清单不落）。**车道至今 0 次执行**（#19），
-所以"CI 上真摆对/真生成"仍未证；权重不在这一步，它们按
+越界或重复落点时根清单不落）。2026-10-21 出包车道（run 39632180385）在三档 OS 上真摆了位
+并生成了 `delivery-manifest.json`（第 8、9 步都绿）；仍没证的是"把负载交给安装后的外壳"。权重不在这一步，它们按
 [model-catalog.md](model-catalog.md) 首启下载。
 
 **还没接上的一段**：数据根仍只在 CI 的 `/tmp` 里；`delivery-manifest.json` 现在给出了逐文件
@@ -171,18 +171,19 @@ AND 掩码），按**预乘 alpha** 做双线性放大，写出 `32x32.png`、`1
 改一个像素必须拒"这对正负对照。
 `bundle.active` 已打开，目标写在 `tauri.conf.json`，车道再用 `--bundles` 逐平台收窄。
 
-证据边界：**车道 0 次执行**。CLI 版本、图标、矩阵与最后那条"产物必须非空"都只做了静态核对；
-签名仍没做（macOS 无公证、Windows 无代码签名，首启有系统警告），证书是 #30 里等他决定的部分。
+证据边界：2026-10-21 三格都真出包了（run 39633525944）：Linux `deb` 3,237,370 B、Windows
+`nsis` 2,076,484 B、macOS `dmg` 3,152,248 B；CLI 版本、图标与"产物必须非空"都由车道本身核过。
+签名仍没做（macOS 无公证、Windows 无代码签名，首启有系统警告），证书仍需他决定。
 
 ## 还欠什么（都在等一个决定，不是技术问题）
 
-- **CI 本身没跑过**：2026-10-20 在 `4202ef0` 上量到的形状是 run 建了、`engine-live.yml` 的 21 个
-  job 全部登记（现在是 22 个，多了 `backends` 那条；同样没有一次执行），
-  但每个都 `runner_name` 空、`steps: 0`、2-3 秒 failure；原因只在 check-run
-  annotation 里，写的是**账单/支出上限**（"recent account payments have failed or your spending
-  limit needs to be increased"），不是"private 没有免费额度"一句话。逐条复现命令与完整观察
-  记在 README 末段"这套 CI 能证明什么"。`installer.yml` 同样只有 0 步。上面 ①②④⑤⑥ 都是本机读公共来源量的，
-  **唯独"车道真跑一遍装出包"必须等解锁**（#19）。
+- **CI 已经跑过了**：2026-10-21 仓库转 public 后，`ci`、`shell`、`engine-live`（22 job）、
+  `package`（3 OS）全绿；`installer` 的 Linux `deb` 与 Windows `nsis` 已出包，macOS `dmg` 仍在
+  队列/编译中。转 public 之前（2026-10-20 在 `4202ef0` 上）的形状是 run 建了、job 全登记但
+  `runner_name` 空、`steps: 0`、2-3 秒 failure；原因只在 check-run annotation 里，写的是
+  **账单/支出上限**（"recent account payments have failed or your spending limit needs to be
+  increased"），不是"private 没有免费额度"一句话。逐条复现命令与完整观察记在 README 末段
+  "这套 CI 能证明什么"。①②④⑤⑥ 现在都有 CI 证据；仍未证的是安装后的外壳真的能打开（GUI 设备验证）。
 - **签名**：macOS 要 Apple 证书 + notarization secrets；Windows 签名要代码签名证书，不签就吃 SmartScreen 提示。
   这两件都要花钱/要账号，由他定；不签名也能出包，只是首启有警告。
 - **macOS 的字幕**：上游 whisper.cpp 没有 macOS 的**可执行**产物（`payload-plan` 里那行 `上游无产物`， 同排的 `asset_evidence` 记着 xcframework 的成员表与"里面没有 whisper-cli"这一事实），

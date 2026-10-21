@@ -112,7 +112,7 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   `ggml-large-v1.bin` 的 SSL EOF —— 它本来就排在最后；可达 ≠ 吞吐，排序仍按实测速率）。
   `shell/core/src/download.rs` 是这条计划的消费者：系统 curl 传输（不引 TLS crate）、Range 续传、
   低速/断流换源、收满 sha256 才从 `blobs/<sha>.part` 落成 `blobs/<sha>` 并硬链接到文件名；
-  20 条 Rust 单测仍没被编译过（`shell.yml` 因 #19 零执行）。
+  这一组单测已随 `shell.yml` 的 `core` 在 3 个操作系统上真跑过（2026-10-21，各 70 条全过）。
 - `tools/recommend_models.py` + `catalog/recommendations.json`：**给用户的**「我这台机器装哪个」表。
   `catalog/defaults.json` 那 6 条是车道最小样本（对话那颗 415 MB，只为跑通），不是推荐。
   四条规则都进产物、UI 要说得出为什么推荐它：半档 < `recommended_ram_gb` ≤ 档位（上游 llmfit 的数）、
@@ -311,6 +311,10 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   18 条源码变异体 × 24 条探针 + 窗口元数据夹具（`tests/fixtures/release-window.json`，259,753 B），
   漂移只报不跟。现取车道用 `--live` 口径：只核对钉住那颗还在、产物没被重打包；上游又发新版
   不算红（实测抓完半小时后 llama 又发了 5 个版本 —— 按"有新版本"红会让这条道永远红）。
+  2026-10-21 车道 `backends` 末步原样跑了这条现取：三个仓库窗口内 101 个 release（带产物 92 个）、
+  问题 0 条；同一条道还抓到一次"上游正在上传"的假红 —— b11797 的 release 16:01:17Z 发布、
+  win 产物 16:03:57Z 才出现，16:03:24Z 那次捕获把它读成"升级会丢 win-x64"（run 39631173958），
+  16:20Z 再读问题 0 条。这就是 `--live` 只把"升级路径覆盖变窄"当提示、只把钉住那颗的完整性当红的原因。
   重数：`python3 tools/runtime_versions.py --selftest`、`--check`。
 - `tools/follow_upstream.py` + `.github/workflows/upstream-follow.yml`：**跟随上游 llama.cpp，
   但新版只报不跟**。上游一天发好几个包，把"有新版本"当红，红就不再是信号；这条每天 03:17 UTC
@@ -319,9 +323,10 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   （`--strict` 才红）。升级是显式动作：`--update --tag bNNNNN` 用 `payload_plan.rows_for` 的
   真路径量出三行（zip 读中央目录、tar 读成员表，不执行），`--apply` 只替换该引擎的行；十份派生
   文件（3 份捕获 + 7 张表）只要还带旧 tag 就退出码 2 并逐张打印重出命令，半套重钉不许说完成。
-  8 类变异自检 + `tests/test_follow_upstream.py` 19 条；2026-10-20 本地只读实跑读到 b11755
-  （钉 b11727、落后 17 个带产物版本、rc=0）。**证据边界**：车道因 #19 仍是 0 次执行，
-  定时触发在这台账号本就不准时。
+  8 类变异自检 + `tests/test_follow_upstream.py` 19 条；2026-10-21T16:28Z 本地只读实跑读到 b11797
+  （钉 b11727、落后 50 个、最新带产物 b11797、rc=0）。**证据边界**：这条车道的 `schedule` 至今
+  没有被真正触发过（这台账号的 cron 实测晚 1–3 小时且会整槽丢）；同一套现取逻辑已在 `backends`
+  车道末步跑过（101 个 release / 92 个带产物 / 0 问题），但"定时会不会落地"仍未知。
 - `tools/shell_contract.py` + `pins/shell-contract.json`：**把外壳必须遵守的合同钉成表**。
   只从已提交的五张表推导（launch-plan / backend-choice / runtime-versions / payload-plan /
   ocr-build-surface），不读外壳源码：入口（外壳 0 个监听口，UI 只走 Tauri IPC）、
@@ -344,9 +349,11 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   `shell/src-tauri`（Tauri 2）只做装配：`AppState` + 8 条 IPC 命令全部 `spawn_blocking`
   调 core，`shell/ui` 只有 IPC、没有网络 API、中英两套文案；`icons/icon.ico` 是 Windows
   资源段要的那一颗。
-  **但这些代码一次都没被编译过**：`shell.yml` 的 `core` 与 `app` 两个 job（各 3 OS
-  `cargo test --all-targets`，`app` 在 Ubuntu 先装 WebKitGTK）因仓库 private、
-  runner 未解锁而 0 次执行，`Cargo.lock` 也还没产出；离线只证了结构闸门与 12 条 Python 单测。
+  **这些代码现在真编过、真跑过了**：2026-10-21 `shell.yml` 的 `core` 在 3 个操作系统上各 70 条
+  单测全过，`app` 在 3 个操作系统上真的编出 Tauri 层并跑 3 条单测（Ubuntu 首编 1m30s，先装 WebKitGTK）；
+  两个 crate 的首轮 `Cargo.lock` 已作为 artifact 产出（`shell-core-Cargo.lock`、`shell-app-Cargo.lock`），
+  还没提交进仓库。Windows 第一次跑红在假服务器的 RST 竞态，修法是读到完整请求（头 + Content-Length
+  正文）再回包 —— 只有真跑才会发现。仍未证的是"窗口真的能开"：车道只跑 `cargo test`，不起窗口、不起引擎。
 - `tools/action_pins.py` + `pins/actions.json`：**出包那只手自己也要钉住**。开工时三个
   workflow 里 4 个 `uses:` 全是浮动大版本 tag（`checkout@v4`、`setup-python@v5`、
   `upload-artifact@v4`、`download-artifact@v4`）—— 仓库对引擎/权重/工具带都定了
@@ -408,14 +415,17 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   逐文件按清单的 bytes + sha256 复制并复核；目标目录里多一个清单外文件也停（不覆盖、不删除）。
   根清单**最后写**（临时文件 + `os.replace`），中途任何失败都不会留下"看似齐全"的根清单；
   `--check` 再解析两份清单逐键相等并重算每个文件。包里没有的能力（OCR、macOS 字幕）记进
-  `not_in_manifest` 点名，不当作失败。13 条合成自测 + 10 条离线对照。**这一步至今 0 次执行**（#19）。
+  `not_in_manifest` 点名，不当作失败。13 条合成自测 + 10 条离线对照。2026-10-21 出包车道
+  （run 39632180385）在三档 OS 上真跑了这一步：摆位后 `--check` 通过，`not_in_manifest` 点名
+  OCR 与 macOS 字幕。
 - `tools/payload_intake.py` + `package.yml` 里的交付清单步：读摆好的数据根，为每个文件生成
   `payload/<os>/<数据根相对路径>` 的对象键、落点、sha256 与字节数；根清单单独一行标
   `land: last`。它重新复核每个文件，拒绝多余/缺失、键前缀越界与两个引擎同目标；输出不含
   绝对路径，两个数据根得到同一份字节。`--check` 重算并逐键相等。只生成清单，**不上传、
   不下载、不执行**；`delivery-manifest.json` 随 `engine-payload-<os>` artifact 上传。
   21 条离线对照（含真实合同落点、6 条源码变异体，以及删掉原树后只凭清单还原的
-  消费端重放；坏对象或越界落点不许落根清单），车道至今 0 次执行（#19）。
+  消费端重放；坏对象或越界落点不许落根清单），2026-10-21 同一轮出包车道在三档 OS 上都生成了
+  `delivery-manifest.json`（run 39632180385 第 9 步）。
 - `.github/workflows/installer.yml` + `tools/make_icons.py`：**安装包本身**，三平台各一个未签名包，
   只装壳、不带引擎与权重（引擎 server-only 后 104.7 MiB + 权重 415 MB 起，装不进安装器）。矩阵 Windows `nsis` /
   macOS `dmg` / Linux `deb`，用钉住的 `tauri-apps/tauri-action`；CLI 显式传
@@ -426,13 +436,17 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   —— 压缩流随 zlib 实现而变（本机 python3 的 zlib-ng 1.3.1 与 Anaconda python 的 zlib 1.3.2
   对同一份像素给出 6,389 vs 6,393 B），逐字节比会在 CI 的另一种 zlib 上假红；
   `tests/test_make_icons.py` 10 条（含"重新压缩但图没变"的阳性对照与改一个像素的阴性对照）。车道最后一步断言 glob 真找到包且非空
-  （`uploadWorkflowArtifacts` 成功不代表编出了东西）。**证据边界**：这条车道 0 次执行、包未签名，
-  `tauriScript` 与 deb maintainer 都只是静态核对（#19 未解）。
+  （`uploadWorkflowArtifacts` 成功不代表编出了东西）。**2026-10-21 三格全出了**（run 39633525944）：
+  Linux `deb` 3,237,370 B、Windows `nsis` 2,076,484 B、macOS `dmg` 3,152,248 B（`darwin-aarch64-dmg`，
+  16:28Z 才排到 runner、约 3 分钟编完）。包未签名，`tauriScript` 与 deb maintainer 仍只是静态核对。
 - `.github/workflows/ci.yml`：静态门禁（含 yaml_gate）+ 单测（夹具是真实 API 捕获）+ 离线跑发现器
   与离线回放工具带钉表。
 - `.github/workflows/engine-live.yml`：打真实 API 发现产物 → 下载 linux 引擎（不编译）→ 下载 pin 住的
   0.5B GGUF 并校 sha256 → 无头推理，要求真的抓到 `tokens per second > 0`；
   另有 os-inference-proof 逐条解压 `manifest["inferred"]` 里的产物，要求里面有 `.exe/.dll`。
+  **口径**：llama 与 sd 用 discover 现挑的**最新**产物（2026-10-21 是 b11797 / master-982），
+  不是 `payload-plan` 钉住的那两颗；whisper 与 OCR 才固定用钉值。所以这条车道证明的是
+  "上游最新版 + 按钉值推导的 argv 仍然能跑"，钉住那颗的字节完整由 `backends` / 版本轴守。
 - `.github/workflows/upstream-follow.yml`：每天 03:17 UTC 现取 llama.cpp 的 release 窗口，只核对
   "钉住那颗还在不在、被没被重打包"与"候选还能不能覆盖三条 OS"；有新版本退出码仍是 0，
   钉值坏了才 1，报告 JSON 无论红绿都作为 artifact 留下。升级不在这条车道里自动做。
@@ -440,8 +454,11 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
 ## 这套 CI 能证明什么、不能证明什么
 
 能证明：上游产物可发现、可下载、校验对得上、在无 GPU 的 runner 上真能产出 token。
-**注意：这些车道至今一次都没跑过。** 2026-10-20 在 `4202ef0` 上又量了一次，得到的形状是：
-run 建出来了、`engine-live.yml` 的 **21 个 job 全部登记**（包括新加的 `launch-plan`；现在是 22 个，新加了 `backends` 那条），
+**2026-10-21 起这些车道真的跑过了**（仓库转 public 后）：`engine-live` 的 22 个 job 全绿
+（run 39633380193）、`package` 三档 OS 全绿（run 39632180385）、`shell` 的 `core` / `app` × 3 OS
+全绿（run 39633525782）、`ci` 绿（run 39633525885）；安装包三格（`deb` / `nsis` / `dmg`）都已产出。
+下面是转 public **之前**（2026-10-20 在 `4202ef0` 上）量到的形状，留作记录：
+run 建出来了、`engine-live.yml` 的 **21 个 job 全部登记**（现在是 22 个，新加了 `backends` 那条），
 可每一个都是 `runner_name` 为空、`steps: 0`、2-3 秒 conclusion=failure。
 `3781953` 上再量一次还是 21 个 job，但多了一种形状：**带 `needs:` 的那个 job 是 `skipped`**
 （`launch-plan` 等的是失败的 `file-index`）—— skipped 什么都不说，所以吃别人产物的那两步现在
@@ -451,19 +468,17 @@ run 建出来了、`engine-live.yml` 的 **21 个 job 全部登记**（包括新
 needs to be increased"** —— 是**账单/支出上限**，不是"private 仓库没有免费额度"这一句就完事。
 复现：`gh api repos/lilyco-42/local-ai-studio/actions/runs/<id>/jobs`（注意要 run **id**，
 用 run number 会 404），再 `gh api repos/.../check-runs/<job id>/annotations`。
-更早两次 push 停在 queued 二十分钟不动，别把"queued"读成"在排队、等等就有"。
-所以下面"能证明"目前是设计意图，不是结果。
+更早两次 push 停在 queued 二十分钟不动，别把"queued"读成"在排队、等等就有" —— 2026-10-21 的
+macOS `dmg` 也排了 10 分钟才起，队列是真实的。
 **也不能证明：图形界面真的打得开。** 桌面外壳交付时必须另找设备验证，不拿 CI 绿当"能用"。
 
 
 ## 待定
 
 仓库名（`local-ai-studio` 是占位）与外壳许可（AGPL-3.0-or-later 还是 MIT，所以现在**故意没放 LICENSE**）。
-可见性已经定了 private，代价就是跑不了 CI —— 三条出路都归你选：
-① `gh repo edit lilyco-42/local-ai-studio --visibility public`；
-② Settings→Billing 加付款方式 / 提 Actions 支出上限；
-③ 在 lain42.top 上挂一个 self-hosted runner（仍然算"靠 GitHub Actions 出包"，
-但要在这台跑着线上对局的机器上做 `cargo build` 与 1.5 GB 下载，我不代你决定）。
+可见性已按你的决定转 **public**（2026-10-21，选项 A），CI 因此真的跑起来了；当初 private 的三条出路
+留作记录：① 已执行；② 加付款方式 / 提支出上限；③ 在 lain42.top 挂 self-hosted runner（仍算"靠 GitHub
+Actions 出包"，但要在这台跑着线上对局的机器上做 `cargo build` 与 1.5 GB 下载，已不需要）。
 
 **已经定了的**：模型目录来源 —— 分两层，描述层用 llmfit 自带的 HF 快照（17,700 条，压缩后 850 KB），
 下载/校验层自建 `repo + 文件名 + sha256 + 多候选源`，因为那张表里一个内容哈希都没有。

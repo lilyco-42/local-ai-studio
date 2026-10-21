@@ -267,8 +267,9 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
    （llama 那行是 `--cors-origins localhost --api-key {token}`），`pins/shell-contract.json`
    把"谁有钥匙、没钥匙的引擎怎么活"钉成合同，`engine-live` 车道也加了运行时探针
    （无钥匙请求 `/props` 必须 401；`Origin: http://localhost:1420` 必须被反射；`https://evil.example`
-   必须没有 ACAO）。但**外壳本身还没写**，所以 UI 那一半 `ui_checked=false`；这些探针与车道
-   在 #19 解除前一次都没真跑过 —— 写了不等于验了。
+   必须没有 ACAO）。但**外壳本身还没写**，所以 UI 那一半 `ui_checked=false`；这些探针 2026-10-21
+   真跑了：不带头访问 `/props` 得 401、本机 Origin 被反射、`evil.example` 无 ACAO
+   （engine-live run 39633380193 的 `headless-inference`）—— 写了不等于验了，这次是验了。
 11. **每条 `file:line` 出处本身要能被查**：`pins/citations.json` 82 条声明（其中 1 条是 `absent`
     型缺席断言：runner 镜像 readme 里没有 `webkit2gtk`），每条记
    `repo/ref/path/line/expect/claim`；`tools/citation_check.py` 按 pin 住的 ref 取回那份文件，
@@ -296,13 +297,14 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
    重数这三句：`python tools/citation_check.py --cache .cache/refs`（计数行）与
    「把每条 line 加一再核对」那段（`tests/test_citation_check.py` 里有同形状的用例）。
    2026-10-20 清空缓存重抓 29 份原文，全部 82 条按 pin ref 联网实跑过一次（0 问题、0 跳过），
-   车道 `citation-drift` 本身仍是 0 次执行。
-12. **OCR 的依赖图要真的被钉住**（这条目前是**未达成**状态，写在这里是为了不让它被"车道绿了"蒙过去）：
-   上游 oar-ocr 不发 `Cargo.lock`（实测 404，正向对照 206），而 40 个外部包里只有 `ort` 是 `=` 精确钉的、
-   其余 37 个是 caret → `cargo build` 会在构建时重新解析。所以：
-   ① `ocr-proof` 第一次真跑生成锁并把 `Cargo.lock` + sha256 传成 artifact；
-   ② 由人提交成 `pins/ocr-Cargo.lock`；③ 此后该步骤走 `cargo build --locked`，缺锁就红。
-   在 ② 之前，OCR 那条只能算"编出来了"，**不能算"编的是钉住的那份依赖图"** —— 交付说明要照这句写。
+   车道 `citation-drift` 2026-10-21 也真跑了（engine-live run 39633380193，10 s，0 问题）。
+12. **OCR 的依赖图现在已经钉住**：上游 oar-ocr 不发 `Cargo.lock`（实测 404，正向对照 206），
+   而 40 个外部包里只有 `ort` 是 `=` 精确钉的、其余 37 个是 caret → `cargo build` 会在构建时重新解析。所以：
+   ① `ocr-proof` 第一次真跑（run 39633380193）生成了锁并传成 `oar-cargo-lock` artifact；
+   ② 已提交 `pins/ocr-Cargo.lock`（121,677 B，sha256 `ee01f0cb…`；495 个 `[[package]]`、
+   445 个有名包、489 条 checksum、0 个 git 依赖，`ort = 2.0.0-rc.13`）；
+   ③ 此后该步骤在锁存在时走 `cargo build --locked`；仓库里没有锁时才现场解析并打 `::warning::`
+   点名"不能算钉住"（正常路径由已提交的锁兜住）。**`--locked` 这一支要等提交后的下一次车道才算真跑过。**
    漂移由 `ocr-build-surface` 车道守：`tools/ocr_build_surface.py --check` 比对
    `pins/ocr-build-surface.json`（fingerprint + 锁文件状态），上游一旦开始发锁也会红（那就该改成取它的锁）。
    分类判据本身有 15 条离线单测，其中三条是给"曾经算错的样子"写的：`{ workspace = true }` 不是未钉、
@@ -358,7 +360,9 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     带路径的文件名与同名重复），
     闸门现在同时解析六条 workflow（18 段 heredoc PY，`upstream-follow.yml` 0 段；重数：
     `python3 tools/yaml_gate.py` 的 "编译了 N 段"那行）。
-    车道仍 0 次执行，所以这一条给的是"出包这一步有路、有判据、有清单格式"，不是"包已经出出来"。
+    2026-10-21 出包车道（run 39632180385）在三档 OS 上真跑了这一步（bundle 自检与单测都过，
+    三档 `engine-payload-<os>` 真的产出），所以这条现在既有判据、也有"包真的出出来"的证据；
+    但"装得上、跑得起来"仍要等第 34 条的安装包与设备验证。
 16. **"只能靠 GitHub Actions 出包"这句本身要被验，不能当审美前提**：拆开四问，答案全部来自
     pin 住的公共来源（已进 `pins/citations.json`，由 `citation-drift` 查），详见
     [docs/packaging.md](packaging.md)。要点：runner 镜像自带 Rust 1.99.1 与 Node 22.23.3
@@ -592,8 +596,9 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     `if: always()`，并且报告文件不在时由 `launch_plan.py` 自己报「不存在」再退出 1 ——
     `download-artifact` 缺件只警告、不红，不能指望它替这条核对把关。
     **仍然没有的部分**：这些是按上游源码与文档拼出来的模板，本机一台都没起过 ——
-    argv 真能被引擎接受，属于 #25 实现之后在 CI 里跑的那一轮
-    （而这条仓库现在还没有 runner，见 #19）。
+    argv 真能被引擎接受，2026-10-21 已在 CI 里验过关键那几条（`headless-inference` 用当时的
+    最新版 b11797 真起了 server 并走完鉴权/CORS 探针）；等 #25 外壳落地，再把 `launch-plan`
+    的每条命令逐条跑成探针（runner 2026-10-21 起已可用，不再是 #19 的阻塞）。
 
 23. **安装包车道要装什么，也是读出来的**：`tools/install_deps.py` → `pins/install-deps.json`
     从 Tauri 前提页（`tauri-apps/tauri-docs` @ `2e513e3f…`）的 `<TabItem label="Debian">` 那一族
@@ -890,11 +895,11 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     `window.__TAURI__.core.invoke`，没有网络 API，中英两套文案；`icons/icon.ico` 是
     Windows 资源段要的那一颗（`tauri-build` 缺它会直接报错，而不是跳过）。
     **证据的边界**：`.github/workflows/shell.yml` 现在是两个 job —— `core` 与 `app` 各在 3 OS 跑
-    `cargo test --all-targets`（`app` 在 Ubuntu 先装 WebKitGTK；两个 job 都上传首轮的 `Cargo.lock`），
-    但仓库仍是 private 且 runner 未解锁（任务 #19），
-    所以两个 crate 的编译与单测**至今 0 次执行**，`Cargo.lock` 也还没提交；离线能证的只有
-    `python tools/shell_source.py --check`（问题 0 条）、Rust 分隔符平衡与那 14 条 Python 单测。
-    这次不把"写了"说成"过了"。
+    `cargo test --all-targets`（`app` 在 Ubuntu 先装 WebKitGTK；两个 job 都上传首轮的 `Cargo.lock`）。
+    2026-10-21 真跑的结果：`core` 三档各 **70 条**全过，`app` 三档各 **3 条**全过（Ubuntu 首编 1m30s）；
+    首轮 `Cargo.lock` 已作为 `shell-core-Cargo.lock` / `shell-app-Cargo.lock` artifact 产出，
+    但还没提交进仓库。离线另证 `python tools/shell_source.py --check`（问题 0 条）与 14 条 Python 单测。
+    这次不把"写了"说成"过了"；仍没证的是"窗口真的能开"——两条车道都不起窗口、不起引擎。
 33. **出包产物到外壳目录之间的那一步补上了**：出包车道的产物是平铺的 `dist/<os>/<engine>/`，
     外壳只认 `<data>/runtime/<os>/<engine>/<version>/<asset-stem>/` + 根部的 `payload-manifest.json`，
     此前没有工具把两者接起来。`tools/stage_payload.py` 只从 `pins/shell-contract.json` 的
@@ -911,9 +916,10 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     6 条源码变异体，以及消费端重放：删掉原数据根后只凭对象字典按清单还原，按外壳
     `verify_payload` 的顺序逐文件验过；坏对象/缺对象/越界或重复落点时根清单不许落）。这份 `delivery-manifest.json` 随 artifact 上传，但**没有任何写桶或首启
     下载动作** —— #57 的 A/B 仍未定。
-    **证据边界**：全部是本机 Python 证据；`package.yml` 至今 0 次执行，所以"真实上游包能按合同落位"
-    只有逻辑证据。OCR 仍不在出包清单里，`not_in_manifest` 会点名 `文字识别/oar-ocr` —— 已知缺口，
-    不是这一步的失败。
+    **证据边界**：2026-10-21 `package.yml`（run 39632180385）在三档 OS 上真跑了第 8 步（摆位 + `--check`）
+    与第 9 步（交付清单），三档 `engine-payload-<os>` 都上传成功 —— "真实上游包能按合同落位"现在有
+    CI 证据；仍没有的是"把负载交给安装后的外壳"这一动作（#57），以及"装完真能跑"（设备验证）。
+    OCR 仍不在出包清单里，`not_in_manifest` 会点名 `文字识别/oar-ocr` —— 已知缺口，不是这一步的失败。
 34. **安装包本身：三平台各一个未签名包，只装壳**（`.github/workflows/installer.yml` + `tools/make_icons.py`）：
     矩阵 Windows `nsis` / macOS `dmg` / Linux `deb`；触发是 push main 上 `shell/**` 或自身 +
     `workflow_dispatch`；`permissions: contents: read`、并发组、checkout 与 tauri-action 全按 SHA。
@@ -929,8 +935,9 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     已提交图标可复算、篡改与缺件必须红、重压缩的 PNG/ICNS 必须认作同一张图、改一个像素必须拒）。
     车道最后一步断言矩阵 glob 真找到安装包且非空 ——
     `uploadWorkflowArtifacts: true` 成功不代表编出了东西。
-    **证据边界**：这条车道 0 次执行（#19 未解）；包未签名、未公证；CLI 版本与 deb maintainer
-    （tauri-bundler 取 identifier 第二段 `lilyco42`）都只是静态核对。安装包只装外壳：引擎落地
+    **证据边界**：2026-10-21 三格都真出包了（run 39633525944）：Linux `deb` 3,237,370 B、
+    Windows `nsis` 2,076,484 B、macOS `dmg` 3,152,248 B；包未签名、未公证；CLI 版本与 deb maintainer
+    （tauri-bundler 取 identifier 第二段 `lilyco42`）仍只是静态核对。安装包只装外壳：引擎落地
     win-x64 就是 104.7 MiB（只收 server；全量 115.6），权重 415 MB / 1.5 GB，都不进安装器。
 35. **国内下载层：慢在网络，别慢在设计与重试**（`shell/core/src/download.rs` + `tools/download_plan.py` +
     `pins/download-plan.json`）：传输不引 TLS 依赖，也不把 URL 拼进 shell 字符串 —— `CurlFetcher`
@@ -965,8 +972,8 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     `download.rs` 的 curl 参数对表；另一条按 serde 语义重放整份计划 —— `schema` 是 u32、
     `bytes` 是 u64、速率有限、`file` 扁平且不重名，6 个变异各自必须红）。Rust 侧 `Plan::parse/from_file/item` 读同一份 JSON
     （重名必须报错），`download.rs` 20 条单测。
-    **证据边界**：20 条 Rust 单测一次都没编译过（`shell.yml` 因 #19 零执行），curl 在真实网络上的
-    重试/续传行为只有 Fake fetcher 的逻辑证据；R2 镜像仍是唯一缺口（#23）。
+    **证据边界**：这组 Rust 单测已随 `core` 在 3 个操作系统上真跑（各 70 条全过，2026-10-21）；
+    curl 在真实网络上的重试/续传行为仍只有 Fake fetcher 的逻辑证据；R2 镜像仍是唯一缺口（#23）。
 36. **跟随上游 llama.cpp：定时只报不跟，重钉是一次显式动作**（`tools/follow_upstream.py` +
     `.github/workflows/upstream-follow.yml`）：上游一天发好几个包（钉住的 b11727 到 2026-10-20
     已到 b11755），把"有新版本"当红，红就不再是信号。车道每天 03:17 UTC 现取窗口，只有钉值坏了
@@ -978,9 +985,10 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     该引擎的行。之后十份派生文件（3 份捕获 + 7 张表）只要还有旧 tag，退出码 2 并逐张打印重出
     命令 —— 半套重钉不许说成完成；自检用 8 类变异证明（含"换 tag 后别的引擎一个字节不许动"、
     "同 tag/回退必须拒绝"），`tests/test_follow_upstream.py` 19 条。
-    **证据边界**：这条车道因 #19 仍是 0 次执行；2026-10-20 本地只读跑过一次 `--check --live`，
-    读到 b11755、落后 17 个带产物的版本、退出码 0 —— 证的是工具与 GitHub API 的形状，
-    不是 schedule 真会触发（这台账号的定时触发本就不准时，见"第一次真跑要盯什么"）。
+    **证据边界**：这条车道的 `schedule` 至今没有被真正触发过（这台账号的 cron 会晚 1–3 小时、整槽丢）；
+    2026-10-21T16:28Z 本地只读跑过一次 `--check --live`，读到 b11797、钉住 b11727 落后 50 个
+    （最新带产物 b11797）、退出码 0 —— 证的是工具与 GitHub API 的形状，不是 schedule 真会触发。
+    同一套现取逻辑已在 `engine-live` 的 `backends` 末步真跑（101 个 release / 92 个带产物 / 0 问题）。
 
 ## 车道判据的出处（全部按**钉住的那个 ref** 核过，不是按 HEAD 记的）
 
@@ -1037,48 +1045,39 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
 单跑一个模块时报的是 ImportError（`Ran 1 test … errors=1`），很容易被读成"这个模块只有 1 条用例"。
 现在两个文件自己把目录加进 `sys.path`，单跑与整跑给出的用例数一致。
 
-## 第一次真跑要盯什么（车道至今 0 次执行，这些是静态审计之后剩下的未知）
+## 第一次真跑实测（2026-10-21；引擎车道用例取的是当时的**最新版**，不是钉值）
 
-1. **timeout 够不够**：`image-proof` 2026-10-20 从 45 提到 60 min（2026-10-21 权重换成
-   4,265,146,304 B 的完整 checkpoint，并要跑两次模型加载；60 min 没跟着改，仍按第一次实跑回填），
-   `subtitle-proof` 从 20 提到 30 min（多起一次 whisper-server），
-   `ocr-proof` 是 34 min（2 核 runner 上 `cargo build --release` 要过 ort / onig / tokenizers 的编译），
-   `headless-inference` 是 35 min。这四个数全是估的，第一次跑就要按实际耗时改回来，
-   别把"超时"读成"能力不行"。
-2. **OCR 的源码 ref**：钉的是 main 的 `84817f58…`，因为 **v0.10.0 那个 tag 里没有 `oar-ocr-cli`**
-   （成员表实测只有 4 项）。断言已按 raw 文件在本地核过（成员含 CLI、`[[bin]] name = "oar"`），
-   剩下的未知是真编译 —— 上游若发新 tag，应该换成新 tag 而不是继续跟 main。
-3. **sd 的动态库闭包**：包内条目已确认（`sd-cli`/`sd-server` 平铺在根，31 个 `.so` 含
-   `libggml-cpu-*.so` 与带版本号软链名），车道已按 `find` 不限深度 + `LD_LIBRARY_PATH=$(dirname)` 处理；
-   **还没证的是运行时能不能真把这套 `.so` 起来** —— 若报 `cannot open shared object`，先查 RPATH 再怀疑后端。
-4. **whisper 与 llama 的 Linux 包比 Windows 多一层同名目录**（`whisper-bin-ubuntu-x64/`、`llama-b11727/`），
-   条目与二进制名都已用整包下载核对（`whisper-cli`、`whisper-server`、`llama-server` 都在深度 1；
-   2026-10-20 又整包核过一次 whisper 那份，47 个条目里 `whisper-server` 确实在，整包 sha256
-   与车道钉的 `a72becf1…` 相等）；整包 sha256 三个包都与上游 digest 相等。
-   剩下的未知是它们跑出来的结果对不对。
-5. **runner 侧的 HF 直连**：`headless-inference` 从 `huggingface.co` 直接下权重。国内出口不可用
-   这件事**不代表 GitHub runner 不可用**，两件事别混；但备选源该按 ADR 的新层级重排
-   （ModelScope 首选、hf-mirror 备选，见 [model-catalog.md](model-catalog.md)）。
-6. **每条 pin 都会被车道自己再 `sha256sum -c` 一遍**。任何一条对不上都是"上游被换过或源在说谎"，
-   要红着停下来，不许改成 warning 放行。
-7. **常驻 server 那三步的未知集中在"起不起来"而不是"字段对不对"**：`/health` 轮询给的是 60 次 × 2 s
-   （≈2 分钟），2 核 runner 加载 415 MB 权重大概率够，但没测过；超时就先改这个预算，别改判据。
-   `usage.tokens_predicted` 这个键名是按 `server-task.cpp:340` 核的，历史上它叫过 `completion_tokens`，
-   所以判据写成"缺了就跳过、不硬要求"，硬证据是非空文本 —— 第一次跑要是 `/props` 有内容而
-   `usage` 没有，那是键名换了，不是推理失败。`ldd` 那条只在**报 not found 时**才红（`grep` 找不到
-   就退出 1，被 `||` 接住），所以它绿只说明"没缺失"，不说明库真的被加载了。
-   新加的两步各自还压着三个没测过的假设，红的时候先按这里查：
-   · **whisper** —— 就绪判据要求 `/health` 正文含 `ok`（`:1221`）。上游哪天把就绪体写成别的，
-     探测会一直 503/200-但没-ok 直到预算用完，红字是"没到就绪态"而不是"转写失败"；
-     multipart 里 `language=en` 是按 `:558` 的 `has_file("language")` 给的，哪天 cpp-httplib 不再把
-     普通表单字段放进 `files`，那这些参数会**静默不生效**（SRT 仍然出，只是按默认语言赌）。
-   · **sd** —— 请求体只给了 `sample_params.sample_steps`，靠的是 `common.cpp:2204` 那种
-     "逐键 contains 再覆盖"的写法；哪天改成整块替换，scheduler/sampler 会跟着变默认值，
-     红点仍然是 `Steps:` 或产物尺寸，不会告诉你"块被换了"。
-     就绪探测用 `GET /v1/models`（`:253`）并要求正文含 `data` —— 若上游把这个 OpenAI 端点改名，
-     表现为"90 次探测没响应"，那时先查端点表再查权重加载。
-   · **两条共同的**：`find … -name whisper-server` / `-name sd-server` 命中 0 就是上游改了产物名，
-     红字里已经带上整包条目表，不必再跑一次才知道少了什么。
+1. **timeout 预算 vs 实测**：`image-proof` 3m43s（60 min 预算；4,265,146,304 B 权重下载 2m43s、
+   两次模型加载）、`subtitle-proof` 9 s（30）、`ocr-proof` 编译 6m06s + 识别（34）、
+   `headless-inference` 12 s（35）、`os-inference-proof` 5 s。四个预算都留得很宽，最紧的仍是
+   OCR（占 18%），暂不按实测收紧 —— 2 核 runner 的缓存命中率会变。
+2. **OCR**：真编译过了（6m06s），识别输出命中 `OARCI2291`；锁已提交（第 12 条），
+   下一次车道要看 `cargo build --locked` 那一支是否真的走进去（日志里会有"依赖图按…钉住"的 notice）。
+3. **sd 的动态库闭包**：`sd-server` 真起来了并出图；这次的坑不在 `.so`，而在权重 ——
+   上一版用 UNet-only 的 Q4_0，diffusion 模型缺失直接出不了图；换成完整 checkpoint
+   （4,265,146,304 B）后一次通过。以后修生图先看权重完整性，再怀疑 `.so`。
+4. **whisper 与 llama 的目录/产物名**：`find` 不限深度在 Linux 包上都找到了 `whisper-server` /
+   `llama-server`；subtitle 第一次红是短音频被 `--min-blocks` 门槛挡掉（改成 1），不是路径或 CLI 名。
+   whisper 用钉住的 b5454，llama 用 discover 现挑的 b11797（口径见本节标题与 README）。
+5. **runner 侧的 HF 直连**：可用 —— 415 MB 的 0.5B GGUF 与 4.27 GB 的 SD checkpoint 都从
+   `huggingface.co` 直接下成功并按 pin 校过 sha256。国内出口不可用仍是真的，所以产品侧仍按
+   ModelScope 首选、hf-mirror 备选（`pins/download-plan.json`）。
+6. **每条 pin 的 sha256 复核**：引擎与权重下载步骤都按 pin 复核通过；任何一条对不上仍会红着停下。
+   这次另有一条"假红"值得记住：上游正在上传新 release 时资产表可能只有一半（b11797 的 win 包
+   晚于 release 2 分 40 秒），`runtime_versions --live` 已把"升级路径覆盖变窄"降级为提示（5a601c7），
+   钉住那颗的完整性仍是硬红。
+7. **常驻 server 三步的"起不起来"**：都起来了 —— llama 第 2 次探测就绪（401/CORS 探针通过）、
+   whisper 加载期 503 后转 ok、sd 能答就是就绪；`usage.tokens_predicted` 是否出现没有单独记录，
+   判据本来就允许缺（缺了跳过），硬证据是非空文本。
+
+**仍没测的（下一轮盯这些，别把上面的绿读成"都验过了"）**：
+
+- GUI 是否真打开、集显/独显性能与 DirectML/Vulkan 是否真加速 —— 只能等设备矩阵。
+- **钉住的 llama/sd 二进制本身没被执行过**：执行车道跑的是最新版；要证钉值能跑，得重钉（#58）
+  或在执行车道加一条"按 pin 下载再跑"。
+- `upstream-follow` 的 `schedule` 会不会真触发（这台账号 cron 会丢槽）。
+- macOS 字幕（#29）、写 R2（#23）、把负载送到数据根（#57）。
+- `cargo build --locked` 的首次真实执行。
 
 **CI 证明不了的**：GUI 是否真打开、集显/独显上的真实性能与兼容性、DirectML/Vulkan EP 是否真的加速。
 这几项必须留到设备矩阵，交付说明里要写清，不拿 CI 绿当"能用"。

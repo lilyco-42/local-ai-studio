@@ -216,8 +216,8 @@ python tools/ocr_language_pins.py --check-pins pins/ocr.json --live       # OCR 
 - 换提供方是这条检查的全部价值所在：所以 URL 只能从 `TARGETS` 推（`sources()`），
   `TARGETS` 里认不出仓库的键**直接拒绝**，绝不拼一个猜出来的地址。
 - **一次车道运行就是一次第 5 级复核**：`subtitle-proof` / `image-proof` / `headless-inference` 都会
-  `sha256sum -c` 真下载的文件。换句话说 CI 跑绿的那天，这些 pin 会被自动重验一遍 ——
-  而 CI 现在一次都没跑过，所以这一级目前只有本机证据。
+  `sha256sum -c` 真下载的文件。2026-10-21 CI 真跑过（run 39633380193），这一级已经从"本机证据"
+  变成"车道每次跑都重验"；注意引擎二进制用的是当时最新版，权重才是 pin（见 requirements 的口径）。
 
 ### 每条 pin 现在处在哪一级（2026-10-19 全部实测）
 

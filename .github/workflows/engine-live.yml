@@ -59,6 +59,9 @@ on:
       - "catalog/defaults.json"
       - "tools/ocr_build_surface.py"
       - "pins/ocr-build-surface.json"
+      # 锁是 OCR 车道的**构建输入**：它一变，`cargo build --locked` 的行为就变，
+      # 这条道必须重跑才能说"编的是钉住的那份依赖图"。
+      - "pins/ocr-Cargo.lock"
       - "pins/citations.json"
       - "catalog/describe.sha256"
       - "pins/toolbelt.json"
