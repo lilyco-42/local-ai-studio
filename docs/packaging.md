@@ -97,13 +97,13 @@ upload-artifact 没被数过（"49 处"因此少算）。计数不靠这句话�
 
 | OS 默认档 | 引擎压缩包相加 | 引擎落地（全量 → 只收 server） | 最省的一条权重 |
 |---|---|---|---|
-| win-x64 | 44.2 MiB | 115.6 → **104.7 MiB**（三个包都是 zip，逐文件精确） | 对话 qwen2.5-0.5b-q2_k 415 MB |
-| linux-x64 | 52.1 MiB | 136.1 MiB；sd 是 zip，65.0 → 63.6，llama/whisper 是 tar.gz 待 CI | 同上 |
-| macos-arm64 | 46.5 MiB | 124.9 MiB；sd 是 zip，93.9 → 90.4（5 条收 2 条），llama/whisper 是 tar.gz 待 CI | 同上 |
+| win-x64 | 48.3 MiB | 126.9 → **105.0 MiB**（三个包都是 zip，逐文件精确） | 对话 qwen2.5-0.5b-q2_k 415 MB |
+| linux-x64 | 56.3 MiB | 145.6 → **124.7 MiB**（llama 41.0 / whisper 20.1 / sd 63.6；tar 已由 CI 解流，符号链接按链接本身计） | 同上 |
+| macos-arm64 | 50.2 MiB | 132.9 → **119.1 MiB**（llama 28.7 / sd 90.4；whisper 本来就没有 macOS 产物） | 同上 |
 
 （上一版这三格只有 sd 的数却标成整档落地 —— linux 65.0 / macOS 93.9 都漏掉了 llama 与 whisper。）
 
-结论不是审美问题而是算术：**引擎装进安装包就已经 >100 MiB（只收 server 也还有 104.7 MiB），再叠 415 MB（对话）或
+结论不是审美问题而是算术：**引擎装进安装包就已经 >100 MiB（只收 server 也还有 105.0 MiB），再叠 415 MB（对话）或
 1,566 MB（生图）就不是安装包了** —— 而且权重本来就该按内容寻址校验后现下
 （下载层契约见 [model-catalog.md](model-catalog.md) 与 `tools/file_index.py`）。
 LM Studio 也是这个形态（壳先装好、模型首启下载），所以"安装包小、首启下载"不是妥协，是同类产品的共同选择。

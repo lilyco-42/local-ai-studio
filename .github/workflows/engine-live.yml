@@ -567,10 +567,10 @@ jobs:
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5.6.0
         with:
           python-version: "3.12"
-      - name: 离线：产物级选择与大小（选错产物就是打错包）
-        run: python3 tools/payload_plan.py
+      - name: 离线：产物级选择与大小（对着出包默认档选，不是对着旧捕获）
+        run: python3 tools/payload_plan.py --plan pins/payload-plan.json
       - name: 逐文件：zip 读中央目录、tar.gz 读成员表（并对 release 声明的体积与 digest 复核整包）
-        run: python3 tools/payload_plan.py --live
+        run: python3 tools/payload_plan.py --plan pins/payload-plan.json --live
 
   file-index:
     # 下载层的形状判据：两家分发方的元数据哈希**一致**才允许"下载前就信"；

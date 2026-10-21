@@ -5,7 +5,8 @@
 ② 包里哪些是运行时闭包（`.so`/`.dll`/`*-impl.dll` 成对）、哪些是开发期垃圾（`test-*.exe`），
 ③ 首装要下多少字节、占多少盘。这三件事 ADR 只有定性结论，没有可对账的数字。
 
-`--artifacts` 完全离线（读 discover 的输入夹具），只给产物级 size/digest；
+`--fixtures` 完全离线（读 discover 的输入夹具），只给产物级 size/digest；
+`--plan pins/payload-plan.json` 直接对着出包默认档跑（车道用这条，钳住重钉后的真实产物）；
 `--live` 额外用 HTTP Range 读 zip 中央目录拿逐文件大小（不解压、不下载整包、不运行任何东西）。
 tar.gz 没有中央目录可读（格式决定），所以那条路改成**取到临时文件只读 tar 成员表**：
 顺手把整包体积与 sha256 对上 release 声明与上游 digest —— 对不上就是截断或换过附件，
@@ -227,9 +228,47 @@ def rows_for(os_label: str, targets: dict, live: bool,
     return rows, bad
 
 
-def load_targets(fixture_dir: str, manifest_path: str = "") -> tuple[dict, list[dict]]:
-    """两种输入：discover 车道产出的 manifest（真跑用的就是这个），或离线夹具里的三家 release。
+def targets_from_plan(path: str) -> tuple[dict, list[dict]]:
+    """把出包默认档（`pins/payload-plan.json` 的 ok 行）还原成 targets。
+
+    车道曾经对着 `tests/fixtures` 里 2026-10-19 抓的 b11727 窗口跑：钉子换到 b11799 之后
+    旧附件还在 GitHub 上，Range 读照样成功，于是车道一直绿着，检查的却是旧包。
+    出包读的就是这张表，所以它也应该是车道的输入 —— 夹具只留给单测离线回放。
+    """
+    with open(path, encoding="utf-8") as fh:
+        doc = json.load(fh)
+    cells = dict(OS_DEFAULTS)
+    targets = {}
+    for r in doc.get("rows") or []:
+        if r.get("status") != "ok":
+            continue
+        try:
+            want = dict(cells[r["os"]][r["capability"]])
+        except KeyError as exc:
+            raise SystemExit(f"{path}: 行 {r.get('os')}/{r.get('capability')} 对不上 OS_DEFAULTS：{exc}")
+        if not r.get("asset") or not r.get("url"):
+            raise SystemExit(f"{path}: {r['os']}/{r['capability']} 是 ok 行却没有 asset/url")
+        if r.get("engine") != want["engine"]:
+            raise SystemExit(f"{path}: {r['os']}/{r['capability']} 的引擎是 {r.get('engine')}，"
+                             f"默认档要的是 {want['engine']} —— 这张表被手改过")
+        vb = r.get("verified_bytes") or {}
+        want.update({"engine": r["engine"], "release": r["release"], "asset": r["asset"],
+                     "url": r["url"], "digest": r.get("digest"),
+                     "inferred_platform": r.get("inferred_platform"),
+                     # tar 行有整包实测字节；zip 只读了中央目录，size 只用于显示（不解包不校验整包）
+                     "size": vb.get("bytes") or round((r.get("archive_mib") or 0) * 1048576)})
+        targets[f"{r['os']}/{r['capability']}"] = want
+    if not targets:
+        raise SystemExit(f"{path} 里没有 status=ok 的行 —— 出包默认档是空的")
+    return targets, []
+
+
+def load_targets(fixture_dir: str, manifest_path: str = "",
+                 plan_path: str = "") -> tuple[dict, list[dict]]:
+    """三种输入：出包默认档（`--plan`，车道用它）、discover 的 manifest、或离线夹具里的三家 release。
     只留离线那条路的话，打包车道就只能对着昨天的产物表选文件 —— 那正是命名漂移会咬人的地方。"""
+    if plan_path:
+        return targets_from_plan(plan_path)
     if manifest_path:
         with open(manifest_path, encoding="utf-8") as fh:
             doc = json.load(fh)
@@ -246,8 +285,8 @@ def load_targets(fixture_dir: str, manifest_path: str = "") -> tuple[dict, list[
 
 
 def plan(os_labels: list[str], live: bool, fixture_dir: str = "",
-         manifest_path: str = "") -> tuple[dict, list[str]]:
-    targets, skipped = load_targets(fixture_dir, manifest_path)
+         manifest_path: str = "", plan_path: str = "") -> tuple[dict, list[str]]:
+    targets, skipped = load_targets(fixture_dir, manifest_path, plan_path)
     all_rows, bad = [], []
     for label in os_labels:
         rows, b = rows_for(label, targets, live, skipped)
@@ -273,13 +312,16 @@ def plan(os_labels: list[str], live: bool, fixture_dir: str = "",
 def main(argv) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--fixtures", default=os.path.join(ROOT, "tests", "fixtures"))
-    ap.add_argument("--manifest", default="", help="discover 产出的 manifest.json（给了就用它，不读夹具）")
+    src = ap.add_mutually_exclusive_group()
+    src.add_argument("--manifest", default="", help="discover 产出的 manifest.json（给了就用它，不读夹具）")
+    src.add_argument("--plan", default="", help="出包默认档 JSON（给了就按它的 ok 行跑，不读夹具）")
     ap.add_argument("--live", action="store_true", help="Range 读 zip 中央目录，出逐文件清单")
     ap.add_argument("--os", default="win-x64,linux-x64,macos-arm64")
     ap.add_argument("--json", default="")
     args = ap.parse_args(argv)
     labels = [s.strip() for s in args.os.split(",") if s.strip()]
-    out, bad = plan(labels, args.live, "" if args.manifest else args.fixtures, args.manifest)
+    out, bad = plan(labels, args.live, "" if (args.manifest or args.plan) else args.fixtures,
+                    args.manifest, args.plan)
     for l in labels:
         print(f"== {l}：引擎合计 {out['totals_mib'][l]} MiB（还没算权重）")
         for r in out["os"][l]:

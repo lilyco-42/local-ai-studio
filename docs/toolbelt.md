@@ -17,7 +17,7 @@ ADR-0001 只解决了"引擎从哪来"。但把普通人电脑用起来还差三
 | **gpustack/gguf-parser-go** (Go) | 读 GGUF 头部、估算内存占用与最大 context（**不用加载权重**） | **MIT** | 307★，push 2026-10-08，open issues **0** | 7 个按平台命名的裸二进制（含 darwin-universal） | 没有 sidecar，但 **API digest 7/7 全有** |
 | **huggingface/hf_transfer** (Rust) | HF 下载加速扩展 | **Apache-2.0** | 582★，push 2026-09-29 | PyPI wheel | — |
 | **huggingface/hf-agents** | HF 官方出的 CLI 扩展：**用 llmfit + llama.cpp 跑本地 agent** | Apache-2.0 | 440★，push 2026-03-25 | — | — |
-| llama.cpp 自带 | `llama-fit-params`、`llama-quantize`、`llama-bench`、`llama-gguf-split`、`llama-server` | MIT | 已在 ADR-0001 实测（`llama-win-cpu-x64.zip` 51 条目里都在） | 是 | **有**：release 产物的 API `digest = sha256:…`，实测与下载后本地算的一致 |
+| llama.cpp 自带 | `llama-fit-params`、`llama-quantize`、`llama-bench`、`llama-gguf-split`、`llama-server` | MIT | 已在 ADR-0001 实测（`llama-win-cpu-x64.zip` 52 条目里都在） | 是 | **有**：release 产物的 API `digest = sha256:…`，实测与下载后本地算的一致 |
 
 `hf-agents` 值得单独看一眼：它是 HuggingFace 官方把 **llmfit 当选型层、llama.cpp 当执行层**拼起来的产物，
 等于给我们指了同一条组合，而不是自己发明。

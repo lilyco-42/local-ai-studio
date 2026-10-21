@@ -98,7 +98,7 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
 
 ## 验收标准（在当前唯一可用验证手段 = GitHub Actions 下）
 
-1. `ci.yml`：959 个单测绿（重数：`python -W error::ResourceWarning -m unittest discover -s tests
+1. `ci.yml`：963 个单测绿（重数：`python -W error::ResourceWarning -m unittest discover -s tests
    -p "test_*.py"`；按文件数就 `python -m unittest tests.<模块名>`。2026-10-20 实测逐文件：
    `test_yaml_gate.py` 闸门自己（含 workflow 文件清单与磁盘覆盖对照）17、`test_lane_argv.py` 车道 ↔ 启动表一致（含 15 个 workflow 文本变异）10、
    `test_sideload.py` sideload 按内容认领（6 条源码变异体 + 三个真上游文件）22、
@@ -120,7 +120,7 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
    `test_file_index.py` 下载层五种状态与首启队列 35、
    `test_download_plan.py` 下载计划（重算逐键相等 + 源顺序/出处 + 生成器拒猜 + 镜像与 release 兜底 +
    探针与 policy 对表 + serde 形状重放）18、
-   `test_payload_plan.py` 装机负载（含 tar 成员表与缺口点名）19、
+   `test_payload_plan.py` 装机负载（含 tar 成员表、缺口点名与 --plan 车道路径）23、
    `test_pack_engine.py` 出包逻辑与 server-only 收窄（含符号链接闭包、只留一个可执行文件、
    清单 serde 形状 1 条正控 + 7 个变异）20、
    `test_stage_payload.py` 出包产物→外壳 runtime 摆位（含真实合同落点、soname 链接解真身与 11 条负向）12、
@@ -329,8 +329,8 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
 14. **装机负载必须先量出来再设计打包**（`tools/payload_plan.py` → `pins/payload-plan.json`，
     车道 `payload-plan`；Range 读 zip 中央目录，不解压、不下整包、不运行任何东西）：
     按"普通人默认档"（没 CUDA 的 x64 / Apple silicon）选产物，引擎净负载
-    win-x64 **44.2 MiB**、linux-x64 **52.1**、macos-arm64 **46.5**（都还没算权重）。
-    逐文件侧：`llama-win-cpu-x64.zip` 51 条全收（解压 47.9 MiB）、
+    win-x64 **48.3 MiB**、linux-x64 **56.3**、macos-arm64 **50.2**（都还没算权重）。
+    逐文件侧：`llama-win-cpu-x64.zip` 52 条全收（解压 59.2 MiB）、
     `whisper-bin-x64.zip` 41 条**收 31 排除 10**（`test-*.exe` 那批 —— ADR 的条目表第一次变成可对账的数字）、
     `sd-win-cpu` 20 条 45.6 MiB、`sd-linux` 35 条 65.0 MiB、`sd-macOS` 只有 5 条却 93.9 MiB（`.dylib` 闭包肥）。
     三条判据：主二进制不许被过滤掉、排除规则的总命中数不许为 0（**不逐包要求** ——
@@ -341,9 +341,13 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     这不再是缺口了：`--live` 把它取到临时文件、**只读 tar 成员表**（不解包、不执行），
     并且顺手要求"取回字节数 == release 声明的 size"与"整包 sha256 == 上游 digest"，
     任一条不符就当场抛错而不是交出一份看起来完整的清单。实测三颗 CPU 包全部相等
-    （llama ubuntu 17,971,994 B `17bfcf22…`、whisper ubuntu 10,364,195 B `a72becf1…`
-    —— 后者与字幕车道钉的那颗逐字符相同、llama macOS 12,292,958 B `46d40093…`）。
+    （llama ubuntu 22,300,522 B `4920c654…`、whisper ubuntu 10,364,195 B `a72becf1…`
+    —— 后者与字幕车道钉的那颗逐字符相同、llama macOS 16,136,376 B `51c3471c…`）。
     只有"格式不认识"或"没跑 `--live`"的行才留在 `needs_extract`。
+    车道 `payload-plan` 的离线与 `--live` 两步都按 `--plan pins/payload-plan.json` 跑 ——
+    这张表就是出包读的那张。此前它对着 `tests/fixtures` 里 2026-10-19 抓的 b11727 窗口跑：
+    钉子换到 b11799 后旧附件仍在 GitHub 上，Range 读照样成功，车道绿着却检查的是旧包。
+    现在重钉后要么读到新包、要么红在"表里的产物没了"；夹具只留给单测回放。
 15. **出包车道已经有了，且它先校哈希再解包**（`tools/pack_engine.py` + `.github/workflows/package.yml`）：
     按 OS 矩阵（win-x64 / linux-x64 / macos-arm64）取 `payload-plan` 选中的产物 →
     **整包 sha256 必须等于上游 digest，对不上就停，不许"先解包再说"** →
@@ -359,9 +363,11 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     可执行文件、孤儿 `-impl.dll` 不许出现、符号链接必须能解到随包的真身、负载目录里不许留压缩包
     （留着就等于把二次解包推给用户首启）。同名不同目录的成员**不许静默覆盖**，
     要点名进排除表 —— 覆盖会让"装进去的文件"与"清单里的文件"不是同一份。
-    收窄后 win 默认档 112 → 57 个文件、115.6 → **104.7 MiB**（`zip` 中央目录的 uncompressed
-    size 求和，未下载整包；llama 51→24 / 42.8、whisper 41→16 / 16.9、sd 20→17 / 45.0；
-    Linux/macOS 的 tar 引擎要等 CI 首次解流，zip 的 sd 已算出 65.0→63.6 与 93.9→90.4）。
+    收窄后 win 默认档 113 → 57 个文件、126.9 → **105.0 MiB**（`zip` 中央目录的 uncompressed
+    size 求和，未下载整包；llama 52→24 / 43.1、whisper 41→16 / 16.9、sd 20→17 / 45.0；
+    Linux/macOS 由 package 车道首次解流后的 manifest 给出：linux 145.6 → **124.7**
+    （llama 41.0 / whisper 20.1 / sd 63.6），macOS 132.9 → **119.1**（llama 28.7 / sd 90.4；
+    符号链接按链接本身计，不按目标大小重复算）。
     `--selfcheck` 18 条、`tests/test_pack_engine.py` 20 条（合成 zip + 合成 tar.gz，含 digest
     不符、下载失败、链式 dylib 链接与"手工塞回一个 CLI 必须红"；另按
     `shell/core/src/manifest.rs` 重放出包清单的 serde 形状，7 个变异含字符串化体积、
@@ -379,7 +385,7 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     `libwebkit2gtk-4.1-dev` 一族，所以安装包车道第一步是 apt 装 + 打印 `pkg-config --modversion`；
     官方 `tauri-apps/tauri-action`（MIT、1,619★、2026-10-16 仍在 push）是 `uses:` 型且
     release **没有产物**，所以它只能按 commit SHA 钉，工具带那套 digest sha256 对它不适用。
-    最后是算术：**引擎落地就有 104.7 MiB（win-x64，只收 server 后；全量 115.6）**，再加 415 MB/1,566 MB 权重就不是安装包 ——
+    最后是算术：**引擎落地就有 105.0 MiB（win-x64，只收 server 后；全量 126.9）**，再加 415 MB/1,566 MB 权重就不是安装包 ——
     所以"壳装好、引擎与权重首启按下载层契约拉"是决定，不是妥协（LM Studio 同形态）。
 17. **给用户看的对话档 ≠ 车道最小样本，而这张表也是重算出来的，不是手挑的**：
     `catalog/defaults.json` 那颗 `qwen2.5-0.5b-instruct-q2_k`（415 MB）只为在 2 核无 GPU 的
@@ -766,10 +772,10 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     这张表**故意不说**的写在 `rule.driver`：这台机器的驱动能不能吃到某一档 CUDA，要运行时问
     `nvidia-smi`，属外壳 #25 —— 与"有哪些档可换"仍是两句话。
     **落地体积这一列是第四个会骗人的数**：下载量小不等于占盘小。逐颗从 `runtime-parity` 取
-    （那颗包成员解压后大小相加；整包全量口径 —— 出包只收 server 后默认档 42.8，
+    （那颗包成员解压后大小相加；整包全量口径 —— 出包只收 server 后默认档 43.1，
     可选档的收窄差值未逐档重算），默认那颗作减法基准，实测 llama 在 win-x64：
-    CPU 落 **47.9** MiB → Vulkan **87.5**（+39.6）→ CUDA 13.4 **190.7**（+142.8）→
-    CUDA 12.4 **598.3**（+550.4）→ ROCm **1148.7**（+1100.8 MiB）—— 换 ROCm 是多占 1.1 GiB，
+    CPU 落 **59.2** MiB → Vulkan **98.8**（+39.6）→ CUDA 13.4 **202.0**（+142.8）→
+    CUDA 12.4 **609.8**（+550.6）→ ROCm **1160.5**（+1101.3 MiB）—— 换 ROCm 是多占 1.1 GiB，
     不是"多下 228 MiB"那么简单；whisper 在 win-x64 换 CUDA 12.4.0 落 **1161.2** MiB（+1139.1）。
     45 个可选档里 **29 个有数、16 个未知**（都是没读整包的 tar.gz 可选档）：未知的写
     `landed_mib: null` + `landed_note`，**不许写成 0**，也不许出现第三种来源（既没登记读到、
@@ -973,7 +979,7 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     **证据边界**：2026-10-21 三格都真出包了（run 39633525944）：Linux `deb` 3,237,370 B、
     Windows `nsis` 2,076,484 B、macOS `dmg` 3,152,248 B；包未签名、未公证；CLI 版本与 deb maintainer
     （tauri-bundler 取 identifier 第二段 `lilyco42`）仍只是静态核对。安装包只装外壳：引擎落地
-    win-x64 就是 104.7 MiB（只收 server；全量 115.6），权重 415 MB / 1.5 GB，都不进安装器。
+    win-x64 就是 105.0 MiB（只收 server；全量 126.9），权重 415 MB / 1.5 GB，都不进安装器。
 35. **国内下载层：慢在网络，别慢在设计与重试**（`shell/core/src/download.rs` + `tools/download_plan.py` +
     `pins/download-plan.json`）：传输不引 TLS 依赖，也不把 URL 拼进 shell 字符串 —— `CurlFetcher`
     调系统 `curl`，每个参数一个 argv，URL 只出现在 `--url` 后面；`--speed-limit 65536 --speed-time 30`

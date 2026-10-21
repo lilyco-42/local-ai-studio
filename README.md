@@ -273,9 +273,9 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   macOS 两个引擎是 `name_does_not_say`（不断言 Metal）。sd 的伴生包写 `cu12` 而 runtime 写 `cuda12`，
   拼法不同也必须配上同一颗。**这张表不说"这台机器的驱动能吃到哪一档"** —— 那要运行时问 `nvidia-smi`，
   属外壳（#25）。10 条源码变异体 × 13 条探针，外加一条链式核对（release 夹具 → 矩阵 → 换档表）；
-  **下载量小不等于占盘小**：llama 在 win-x64 的默认档落 47.9 MiB（整包全量；出包只收
-  server 后默认档 42.8，可选档的收窄差值未逐档重算），换 Vulkan 87.5（+39.6）、
-  换 CUDA 12.4 598.3（+550.4）、换 ROCm 1148.7（+1100.8 MiB）—— 45 个可选档里 29 个有数、
+  **下载量小不等于占盘小**：llama 在 win-x64 的默认档落 59.2 MiB（整包全量；出包只收
+  server 后默认档 43.1，可选档的收窄差值未逐档重算），换 Vulkan 98.8（+39.6）、
+  换 CUDA 12.4 609.8（+550.6）、换 ROCm 1160.5（+1101.3 MiB）—— 45 个可选档里 29 个有数、
   16 个（没读整包的 tar）写 `null` + 说明，**不许写成 0**。
   12 条源码变异体 × 16 条探针（新增"落地体积未知被写成 0"与"默认档缺落地体积不报"）；
   离线那层在 `ci.yml` 静态门禁，车道 `backends` 最后一步拿现取那份矩阵重算
@@ -404,13 +404,17 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   与"不改坏时五条探针全在位"的正向对照。
 - `tools/payload_plan.py` + `pins/payload-plan.json`：装机负载计划（出包前必须先有的数字）。
   按"没 CUDA 的 x64 / Apple silicon"选默认产物，zip 用 Range 读中央目录、tar.gz 读成员表
-  （都只读名字与大小，不解包、不执行）拿逐文件大小：引擎净负载 win 44.2 / linux 52.1 /
-  macOS 46.5 MiB，**全量落地** win 115.6 / linux 136.1 / macOS 124.9 MiB（都不含权重；
-  出包只收 server 后 win 实为 104.7 MiB，见下条）；
+  （都只读名字与大小，不解包、不执行）拿逐文件大小：引擎净负载 win 48.3 / linux 56.3 /
+  macOS 50.2 MiB，**全量落地** win 126.9 / linux 145.6 / macOS 132.9 MiB（都不含权重；
+  出包只收 server 后 win 实为 105.0 MiB，见下条）；
   `whisper-bin-x64.zip` 41 条里收 31、排除 10 个 `test-*.exe`，Linux 那个 tar 包同样数出 10 个测试程序。
   tar.gz 那三行是**取到临时文件后整包算过 sha256 并等于上游 release digest** 才算读到的
   （体积也要等于 release 声明，否则当截断）；zip 那几行只读了尾部中央目录，本来就没有整包字节，
   所以两种行的证据强度不同，产物里只有前者带 `verified_bytes`。
+  车道 `payload-plan` 的两步都按 `--plan pins/payload-plan.json` 跑 —— 出包读的就是这张表。
+  此前它读 `tests/fixtures` 里 2026-10-19 抓的 b11727 窗口：钉子换到 b11799 后旧附件仍在
+  GitHub 上，Range 读照样成功，车道绿着却检查的是旧包。现在重钉后要么读到新包，
+  要么红在"表里的产物没了"；夹具只留给单测回放。
   **whisper 上游根本没有 macOS 的可执行产物** —— b5454 唯一的 Apple 附件是
   `whisper-b5454-xcframework.zip`（200 条：framework/Headers + 各 slice 的库与 dSYM，
   没有 `whisper-cli`/`whisper-server`），所以字幕在 Apple silicon 上要么 CI 自己编、要么不做。
@@ -422,8 +426,10 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   `LICENSE`、`.metal` 这类非可执行数据原样保留。macOS 的 `libx.0.dylib` 是指向
   `libx.0.7.0.dylib` 的符号链接，链接本身也要落盘（否则 `@rpath` 那一环断了）。
   同名不同目录的成员不许静默覆盖；主二进制缺席、清单里残留被排除的东西、目录里留着压缩包都会红。
-  收窄后 win 默认档 112 → 57 个文件、115.6 → **104.7 MiB**（中央目录 uncompressed size 求和，
-  未下载整包；llama 51→24 / 42.8，whisper 41→16 / 16.9，sd 20→17 / 45.0）。
+  收窄后 win 默认档 113 → 57 个文件、126.9 → **105.0 MiB**（中央目录 uncompressed size 求和，
+  未下载整包；llama 52→24 / 43.1，whisper 41→16 / 16.9，sd 20→17 / 45.0）；
+  Linux/macOS 由同一次出包的 manifest 给出：145.6 → 124.7、132.9 → 119.1 MiB
+  （符号链接按链接本身计）。
   `--selfcheck` 18 条、`tests/test_pack_engine.py` 20 条（合成 zip/tar.gz，含 digest 不符、
   下载失败、链路链接与"塞回 CLI 必须红"）。
 - `tools/stage_payload.py` + `package.yml` 里的摆位步：把上面那份**扁平**的 `dist/<os>/<engine>/`
@@ -455,7 +461,7 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   均 0 跳过，`--help` 三次 rc=0 且输出含 `--port`）。IPC/UI 入口与
   发布落点（R2 写）仍未接。
 - `.github/workflows/installer.yml` + `tools/make_icons.py`：**安装包本身**，三平台各一个未签名包，
-  只装壳、不带引擎与权重（引擎 server-only 后 104.7 MiB + 权重 415 MB 起，装不进安装器）。矩阵 Windows `nsis` /
+  只装壳、不带引擎与权重（引擎 server-only 后 105.0 MiB + 权重 415 MB 起，装不进安装器）。矩阵 Windows `nsis` /
   macOS `dmg` / Linux `deb`，用钉住的 `tauri-apps/tauri-action`；CLI 显式传
   `npx --yes @tauri-apps/cli@2.12.3` —— 不传时 action 会自己 `npm install -g @tauri-apps/cli@v2`，
   浮在一个大版本上。`tauri.conf.json` 的 `bundle.active` 打开、targets 三档、图标五件；

@@ -13,6 +13,7 @@ sys.path.insert(0, os.path.join(HERE, "..", "tools"))
 import payload_plan as pp  # noqa: E402
 
 FIX = os.path.join(HERE, "fixtures")
+PLAN = os.path.join(HERE, "..", "pins", "payload-plan.json")
 
 
 def targets(**over):
@@ -132,6 +133,86 @@ class TestControlsAreLoadBearing(unittest.TestCase):
 
 
 class TestCommittedPlan(unittest.TestCase):
+    def load_plan(self):
+        import json
+        with open(PLAN, encoding="utf-8") as fh:
+            return json.load(fh)
+
+    def test_plan_mode_selects_the_committed_rows(self) -> None:
+        """车道曾经对着 b11727 夹具跑：钉子换到 b11799 后旧附件还在，车道一直绿着。
+        现在 --plan 的输入就是出包那张表，逐格必须等于它的 ok 行（缺口行也照原样保留）。"""
+        doc = self.load_plan()
+        out, bad = pp.plan(["win-x64", "linux-x64", "macos-arm64"], False, plan_path=PLAN)
+        self.assertEqual(bad, [])
+        committed = {(r["os"], r["capability"]): r.get("asset") for r in doc["rows"]}
+        got = {(r["os"], r["capability"]): r.get("asset") for r in out["rows"]}
+        self.assertEqual(got, committed)
+        releases = {(r["os"], r["capability"]): r.get("release") for r in doc["rows"]}
+        for r in out["rows"]:
+            if r["status"] == "ok":
+                self.assertIn(f"/{releases[r['os'], r['capability']]}/", r["url"])
+
+    def test_plan_mode_keeps_exact_verified_bytes(self) -> None:
+        """tar 行必须用实测整包字节当 expect_bytes —— 用 0.1 MiB 的圆整值会把截断查成通过。"""
+        doc = self.load_plan()
+        targets, skipped = pp.targets_from_plan(PLAN)
+        self.assertEqual(skipped, [])
+        for r in doc["rows"]:
+            if r["status"] != "ok":
+                continue
+            t = targets[f"{r['os']}/{r['capability']}"]
+            self.assertEqual((t["url"], t["digest"], t["release"]),
+                             (r["url"], r["digest"], r["release"]))
+            vb = r.get("verified_bytes") or {}
+            if vb.get("bytes"):
+                self.assertEqual(t["size"], vb["bytes"],
+                                 f"{r['asset']} 的 size 不是实测字节")
+
+    def test_plan_mode_live_reads_the_planned_assets(self) -> None:
+        """用替身条目表证明 --plan --live 读的是计划里那三个 URL，而不是夹具窗口里的旧包；
+        同时替身 whisper 表里的 test-* 仍被排除（排除规则真命中过）。"""
+        import json
+        seen = []
+
+        def fake(url):
+            seen.append(url)
+            for asset, rows in TABLES.items():
+                if asset.split(".")[0].rstrip("-") in url:
+                    return rows
+            raise AssertionError(f"替身表没覆盖这个 URL：{url}")
+
+        real = pp.ENTRIES_OVERRIDE
+        pp.ENTRIES_OVERRIDE = fake
+        try:
+            out, bad = pp.plan(["win-x64"], True, plan_path=PLAN)
+        finally:
+            pp.ENTRIES_OVERRIDE = real
+        self.assertEqual(bad, [])
+        with open(PLAN, encoding="utf-8") as fh:
+            doc = json.load(fh)
+        want = {r["url"] for r in doc["rows"] if r["os"] == "win-x64" and r["status"] == "ok"}
+        self.assertEqual(set(seen), want)
+        # 替身 whisper 表里放了 2 个 test-*，所以排除计数就是 2（真包是 10）—— 这里证的是
+        # 排除规则在 plan 模式下仍然真命中过，而不是数字本身
+        self.assertEqual(sum(r.get("excluded_count") or 0 for r in out["rows"]), 2)
+
+    def test_plan_mode_refuses_an_inconsistent_row(self) -> None:
+        """负向对照：手改过的计划（引擎对不上默认档 / 空表）必须当场报错，不能悄悄少一格。"""
+        import json
+        import tempfile
+        with tempfile.TemporaryDirectory() as d:
+            for name, rows in {
+                "wrong-engine": [{"os": "win-x64", "capability": "对话", "engine": "whisper",
+                                  "release": "x", "asset": "a.zip", "url": "https://x/a.zip",
+                                  "status": "ok"}],
+                "empty": [],
+            }.items():
+                p = os.path.join(d, name + ".json")
+                with open(p, "w", encoding="utf-8") as fh:
+                    json.dump({"rows": rows}, fh)
+                with self.assertRaises(SystemExit):
+                    pp.targets_from_plan(p)
+
     def test_plan_json_matches_the_measured_shape(self) -> None:
         p = os.path.join(HERE, "..", "pins", "payload-plan.json")
         with open(p, encoding="utf-8") as fh:
