@@ -14,11 +14,8 @@ use std::fs;
 use std::io::Write;
 use std::path::{Path, PathBuf};
 
-use sha2::{Digest, Sha256};
-
 use crate::download::{Fetcher, Policy};
 use crate::error::CoreError;
-use crate::hex_encode;
 use crate::manifest::sha256_file;
 
 /// 校验过的基址列表，顺序就是换源顺序。
@@ -75,7 +72,7 @@ pub fn fetch_object(
     if good(&target, bytes, &sha)? {
         return read_all(&target);
     }
-    fs::create_dir_all(objects)?;
+    fs::create_dir_all(target.parent().unwrap_or(objects))?;
     let part = with_suffix(&target, ".part");
     let chunk = with_suffix(&target, ".chunk");
 
@@ -327,6 +324,8 @@ fn encode_key(key: &str) -> String {
 mod tests {
     use super::*;
     use crate::download::FetchReply;
+    use crate::hex_encode;
+    use sha2::{Digest, Sha256};
     use std::collections::BTreeMap;
     use std::sync::atomic::{AtomicU64, Ordering};
 
