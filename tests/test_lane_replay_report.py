@@ -22,7 +22,7 @@ sys.path.insert(0, HERE)
 ASSERT_RX = re.compile(r"\bcheck\(|SystemExit|\bassert |sys\.exit\(")
 BLOCK_RX = re.compile(r"<<'PY'[^\n]*\n(.*?)\nPY", re.S)
 # 期望值不是估的：2026-10-20 按这两条正则数出来的（重数：本文件的 -v 输出那一行）
-EXPECTED_TOTAL = 18
+EXPECTED_TOTAL = 19
 EXPECTED_ASSERT = 13
 EXPECTED_REPLAYED = {
     ("headless-inference", "llama-server"),
