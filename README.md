@@ -302,8 +302,8 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
 - `tools/runtime_versions.py` + `pins/runtime-versions.json`：**能升到哪、能退回哪、每颗能不能校验也是表**。
   矩阵只覆盖钉住的那一个 ref；外壳要给"更新 / 回退 runtime"，就得知道相邻版本发不发同样的包。
   窗口按"翻到钉住那颗为止"取（100/页 × 至多 5 页），不是写死 12 —— llama 一天发 6 个 release，
-  固定窗口会装不下钉住那颗。**本次把 llama 从 b11727 重钉到 b11798 后，它已是窗口里最新的带产物版本
-  （0 个更新）**；**sd 还差 1 个（master-975 → master-982），覆盖面没变**；**whisper 的 `releases/latest` 是 v1.9.5、0 个产物**，真正能装的 b5454 正是我们钉的那颗
+  固定窗口会装不下钉住那颗。**本次把 llama 从 b11727 重钉到 b11798 时（2026-10-21T17:44Z 现取），
+  它是窗口里最新的带产物版本（0 个更新；上游随时会再发新版，这张表只报不跟）**；**sd 还差 1 个（master-975 → master-982），覆盖面没变**；**whisper 的 `releases/latest` 是 v1.9.5、0 个产物**，真正能装的 b5454 正是我们钉的那颗
   （9 个只有源码的标签单列，按 latest 取 runtime 会"成功但装不上"）；
   **回退边界是 digest 不是年龄**：v1.7.6 之前 13 个 release 上游没发 digest，可校验候选只有 16 个。
   窗口内 75 个 release / 66 个带产物 / 1021 行 runtime 资产 / 7 个附件 / 认不出的词 0；
