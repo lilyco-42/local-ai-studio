@@ -196,8 +196,8 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
 - `tools/launch_plan.py` + `pins/launch-plan.json`：**外壳该敲哪一行**，按钉住的 ref 读上游源码查。
   验收第 10 条（外壳持有唯一监听口、自己发 token、UI 永不直连引擎端口）能不能成立，取决于引擎
   自己支持什么开关，这是事实不是设计选择。量清楚的四件事：`llama-server` **有** `--api-key`
-  （`common/arg.cpp:3513`）且 `/health` 明写不查钥匙（`server.cpp:263`），CORS 默认 `*`
-  （`common.h:652`）但可以 `--cors-origins localhost` 只反射本机来源（`server-http.cpp:73-80`）；
+  （`common/arg.cpp:3533`）且 `/health` 明写不查钥匙（`server.cpp:280`），CORS 默认 `*`
+  （`common.h:656`）但可以 `--cors-origins localhost` 只反射本机来源（`server-http.cpp:75`）；
   `whisper-server` 只有
   `--host/--port`（`:251/252`），整份文件查不到 `--api-key`/`api_key`；`sd-server` 只有
   `--listen-ip/--listen-port`（`runtime.cpp:193/198`）；`oar` 根本没有服务形态，而且必须带子命令

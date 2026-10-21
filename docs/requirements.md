@@ -252,11 +252,12 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
    其实一条真信息都没有。所以现在每个候选 bash 都要先过双对照（故意写坏的文件必须非 0、
    故意写好的必须 0），过不了就换下一个，全都不过就报 `SKIP（unreliable/missing：原因）`
    而不是装成查过了。单测把"永远非 0""永远 0""跑不起来"三种假 bash 都钉住了。
-10. **外壳必须是唯一的监听口，引擎端口不许直接给 UI**（出处是 2026-10-20 读三家 pin ref 的源码，
+10. **外壳必须是唯一的监听口，引擎端口不许直接给 UI**（出处是 2026-10-21 重读 llama `b11798`
+   与 whisper/sd 的 pin ref 源码，
    见 [ADR-0001 的"三个 server 的接口与默认安全形状"](adr/0001-engines-from-upstream-binaries.md)）：
-   三家默认都只绑 loopback（llama `common.h:648`、whisper `server.cpp:59/65`、sd `runtime.h:22-23`），
-   这一条是安全的；但**鉴权与 CORS 不是** —— llama 有 `--api-key` 而默认为空（`arg.cpp:3513`）且
-   `cors_origins` 默认 `*`（`common.h:652`，`*` + 无 key 上游只打一句警告 `server.cpp:340`）；
+   三家默认都只绑 loopback（llama `common.h:652`、whisper `server.cpp:59/65`、sd `runtime.h:22-23`），
+   这一条是安全的；但**鉴权与 CORS 不是** —— llama 有 `--api-key` 而默认为空（`arg.cpp:3533-3534`）且
+   `cors_origins` 默认 `*`（`common.h:656`，`*` + 无 key 上游只打一句警告 `server.cpp:359`）；
    whisper 直接发 `Access-Control-Allow-Origin: *` 且**代码里没有任何 key 校验**（`server.cpp:738-740`）；
    sd 把请求的 `Origin` 原样反射进 ACAO 再配 `Allow-Credentials: true`（`main.cpp:123-131`）。
    也就是说：用户开着我们的应用再打开任意网页，那个网页就能驱动本机的模型 —— 对"本地自用的无审查对话"
@@ -536,7 +537,7 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
 
     | 能力 | 起法 | 引擎自己有没有鉴权 | 上游出处 |
     |---|---|---|---|
-    | 对话 | `llama-server -m … --host 127.0.0.1 --port … --cors-origins localhost --api-key …` | **有** `--api-key`；CORS 可收窄 | `common/arg.cpp:3513`；`--cors-origins` = `common/arg.cpp:3372`、默认 `*` = `common/common.h:652`、`localhost` 只反射本机来源 = `tools/server/server-http.cpp:73-80`；`/health` 那行明写 "public endpoint (no API key check)"（`tools/server/server.cpp:263`），所以带着钥匙也能探活 |
+    | 对话 | `llama-server -m … --host 127.0.0.1 --port … --cors-origins localhost --api-key …` | **有** `--api-key`；CORS 可收窄 | `common/arg.cpp:3533`；`--cors-origins` = `common/arg.cpp:3372`、默认 `*` = `common/common.h:656`、`localhost` 只反射本机来源 = `tools/server/server-http.cpp:336-345`（`origin_is_localhost` 在 `:75`）；`/health` 那行明写 "public endpoint (no API key check)"（`tools/server/server.cpp:280`），所以带着钥匙也能探活 |
     | 字幕 | `whisper-server -m … --host 127.0.0.1 --port …` | **没有**（整份 server.cpp 里 `--api-key` 与 `api_key` 都查不到） | `examples/server/server.cpp:251/252`；默认就绑 127.0.0.1（`:59`） |
     | 生图 | `sd-server --diffusion-model … --clip_l … --t5xxl … --vae … --listen-ip 127.0.0.1 --listen-port …` | **没有** | `examples/server/runtime.cpp:193/198`；四份额外权重的旗标逐个在 `examples/common/common.cpp:407/411/421/471` 查到 |
     | 文字识别 | `oar ocr --det … --rec … --dict … --device … --format json --output <目录> <图片…>` | 没有服务形态，一次任务一个进程 | `oar-ocr-cli/src/args.rs:10/49/59/84/90`（这份文件里没有 `--port/--listen/--api-key`） |

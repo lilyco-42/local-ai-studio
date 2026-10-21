@@ -703,7 +703,7 @@ jobs:
 
   launch-plan:
     # 外壳该用哪一条命令行起每一项能力。这一轮的四个事实全部按钉住的 ref 现查：
-    # llama 有 --api-key（common/arg.cpp:3513）且 /health 明写不查钥匙（server.cpp:263）；
+    # llama 有 --api-key（common/arg.cpp:3533）且 /health 明写不查钥匙（server.cpp:280）；
     # whisper 与 sd 只有 host/port，**没有任何鉴权旗标**，所以验收第 10 条那"唯一监听口"
     # 对它们只能靠绑 127.0.0.1；oar 没有服务形态，且 --det/--rec/--dict 必须一起给
     # （args.rs:59 requires_all）、--size 与它们互斥（args.rs:84 conflicts_with_all）。
