@@ -927,11 +927,11 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     总量），按 `fetch` 回调取字节、长度与 sha256 双验、同目录临时文件 + 重命名、根清单最后落、
     已正确的文件跳过；13 条离线测试覆盖篡改、短缺、坏根清单和路径逃逸。
     **证据边界**：2026-10-21 `package.yml`（run 39632180385）在三档 OS 上真跑了第 8 步（摆位 + `--check`）
-    与第 9 步（交付清单），三档 `engine-payload-<os>` 都上传成功；同日 run 39651683176 在 linux-x64
-    上做了消费者重放：删掉摆好的数据根，只凭清单装进空目录（94 个文件 / 156.3 MiB / 0 跳过），
-    再从装好的树起 `llama-server --help`（rc=0，输出含 `--port`）。所以"真实上游包能按合同落位"
-    与"清单足以还原能起引擎的树"都有 CI 证据；仍没有的是网络取数与 IPC 入口（#57），
-    以及 win/mac 真机上的"装完真能跑"。
+    与第 9 步（交付清单），三档 `engine-payload-<os>` 都上传成功；同日 run 39654853807 在**三档原生 runner**
+    上做了消费者重放：删掉摆好的数据根，只凭清单装进空目录（linux-x64 94 个文件 / 156.3 MiB、
+    win-x64 58 / 105.0、macos-arm64 33 / 158.4，均 0 跳过），再从装好的树起 `llama-server --help`
+    （三次 rc=0，输出含 `--port`）。所以"真实上游包能按合同落位"与"清单足以还原能起引擎的树"都有 CI 证据；
+    仍没有的是网络取数与 IPC 入口（#57），以及用户个人电脑上的"装完真能跑"。
     OCR 仍不在出包清单里，`not_in_manifest` 会点名 `文字识别/oar-ocr` —— 已知缺口，不是这一步的失败。
 34. **安装包本身：三平台各一个未签名包，只装壳**（`.github/workflows/installer.yml` + `tools/make_icons.py`）：
     矩阵 Windows `nsis` / macOS `dmg` / Linux `deb`；触发是 push main 上 `shell/**` 或自身 +

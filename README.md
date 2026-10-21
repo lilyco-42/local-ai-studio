@@ -429,9 +429,10 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
 - `shell/core/src/delivery.rs` + `examples/install_from_dir.rs`：外壳侧的清单消费者。逐项校验
   schema/os/键前缀/键与落点绑定/哈希/总量，按调用方给的 `fetch` 取字节，长度与 sha256 都对了
   才用同目录临时文件 + 重命名落盘，根清单最后落，已正确的文件跳过；13 条离线测试。CI 的
-  linux-x64 消费者重放把摆好的树复制成对象字典、删掉原树，只凭 `delivery-manifest.json` 装进
-  空目录（94 个文件 / 156.3 MiB / 0 跳过），再从装好的树起 `llama-server --help`（rc=0，
-  输出含 `--port`；run 39651683176）。网络取数与 IPC 入口仍未接。
+  消费者重放把摆好的树复制成对象字典、删掉原树，只凭 `delivery-manifest.json` 装进空目录，
+  再从装好的树起 `llama-server --help`：linux-x64 94 个文件 / 156.3 MiB、win-x64 58 / 105.0、
+  macos-arm64 33 / 158.4，三次 rc=0 且输出含 `--port`（run 39654853807，win/mac 在各自原生
+  runner 上执行）。网络取数与 IPC 入口仍未接。
 - `.github/workflows/installer.yml` + `tools/make_icons.py`：**安装包本身**，三平台各一个未签名包，
   只装壳、不带引擎与权重（引擎 server-only 后 104.7 MiB + 权重 415 MB 起，装不进安装器）。矩阵 Windows `nsis` /
   macOS `dmg` / Linux `deb`，用钉住的 `tauri-apps/tauri-action`；CLI 显式传
