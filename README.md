@@ -30,9 +30,9 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   `needs.X.outputs.Y` 也按 **job 自己的文本**查三件事：X 这个 job 存在、本 job 真 `needs` 它、
   X 真导出 Y —— 引用没导出的输出在 Actions 里拿到的是空字符串而不是报错，而"扫整份文件"那一版
   会让任何带 `needs:` 的 job 为别人的引用背锅（见 `docs/requirements.md` 验收第 5 条）。
-  车道分段与预跑的**计数**由 `tests/test_lane_replay_report.py` 钉住：六条 workflow 共 17 段 `<<'PY'`
+  车道分段与预跑的**计数**由 `tests/test_lane_replay_report.py` 钉住：六条 workflow 共 18 段 `<<'PY'`
   （`installer.yml` 与 `upstream-follow.yml` 没有 heredoc）、
-  其中 12 段含判据（认 `check(`/`SystemExit`/`assert`/`sys.exit(`）、本地预跑引用 8 个
+  其中 13 段含判据（认 `check(`/`SystemExit`/`assert`/`sys.exit(`）、本地预跑引用 8 个
   (job, 步骤名) 组合 —— 重数：`python -W error::ResourceWarning -m unittest tests.test_lane_replay_report -v`。
   这几个数以前只活在文档里，漂过三次，所以现在是断言不是散文。
   还会把车道 env 里每条 64 位十六进制的值（**按值形状认，不按键名**，否则 OCR 车道的

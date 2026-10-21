@@ -42,12 +42,26 @@ jobs:
           python-version: "3.12"
       - name: 离线对照（合成 zip 与 tar.gz，证明收集规则不是永远绿）
         run: python3 tools/pack_engine.py --selfcheck
-      - name: 用最新 release 现场选产物（不看 releases/latest：whisper 那个是 0 产物）
-        run: python3 tools/engine_probe.py --live --json /tmp/manifest.json
-      - name: 按这份 manifest 刷装机计划（逐文件读中央目录）
-        run: python3 tools/payload_plan.py --manifest /tmp/manifest.json --live --json /tmp/payload-plan.json
+      # 按钉值打包，不现场追最新：外壳运行时下载的就是 payload-plan 里那一颗，
+      # 现场取"最新"会让车道在上游每次发版时红，而产出的负载也不是外壳会认的那一份。
+      # 上游发新版是 upstream-follow 车道的报告项，重钉是一次显式提交。
+      - name: 钉值就是输入（这次要打哪些产物、每颗的 sha256 全在已提交的表里）
+        env:
+          OS_TAG: ${{ matrix.os_tag }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, os
+          plan = json.load(open("pins/payload-plan.json", encoding="utf-8"))
+          rows = [r for r in plan["os"][os.environ["OS_TAG"]]
+                  if r.get("status") in ("ok", "needs_extract")]
+          if not rows:
+              raise SystemExit(f"{os.environ['OS_TAG']}: 钉值里一个可打包的产物都没有")
+          for r in rows:
+              print(f"{r['capability']}: {r['engine']} {r['release']} {r['asset']} {r['digest']}")
+          PY
       - name: 下载 → 校上游 digest → 解包 → 逐文件清单
-        run: python3 tools/pack_engine.py --plan /tmp/payload-plan.json --os "${{ matrix.os_tag }}" --out "dist/${{ matrix.os_tag }}"
+        run: python3 tools/pack_engine.py --plan pins/payload-plan.json --os "${{ matrix.os_tag }}" --out "dist/${{ matrix.os_tag }}"
       - name: 清单要自洽，且负载目录里不许留压缩包
         env:
           OS_TAG: ${{ matrix.os_tag }}

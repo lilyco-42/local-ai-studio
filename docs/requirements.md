@@ -181,7 +181,7 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
    OCR 没有服务形态可测（见"技术前提"第 4 条的例外说明）。
    但覆盖度说的是**车道存在**，不是跑过 —— 跑过与否要看 Actions 的真实记录，目前为零。
 5. **车道里的 Python 片段要真编译**：`yaml_gate.py` 现在把六条 workflow 里的每段 `<<'PY'` 抽出来
-   `compile()`（本轮仍是 17 段 —— `upstream-follow.yml` 是纯命令车道、0 段；
+   `compile()`（本轮仍是 18 段 —— `upstream-follow.yml` 是纯命令车道、0 段；
    `python tools/yaml_gate.py` 自己会打印这个数，别信文档里的静态值），
    并验过它会红 —— 掺一段缩进错的 PY 进去，它按
    `文件:job#步骤 第N段` 报出语法错。这个能力是被我上一次写的车道逼出来的：
@@ -350,7 +350,7 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     不符、下载失败、链式 dylib 链接与"手工塞回一个 CLI 必须红"；另按
     `shell/core/src/manifest.rs` 重放出包清单的 serde 形状，7 个变异含字符串化体积、
     带路径的文件名与同名重复），
-    闸门现在同时解析六条 workflow（17 段 heredoc PY，`upstream-follow.yml` 0 段；重数：
+    闸门现在同时解析六条 workflow（18 段 heredoc PY，`upstream-follow.yml` 0 段；重数：
     `python3 tools/yaml_gate.py` 的 "编译了 N 段"那行）。
     车道仍 0 次执行，所以这一条给的是"出包这一步有路、有判据、有清单格式"，不是"包已经出出来"。
 16. **"只能靠 GitHub Actions 出包"这句本身要被验，不能当审美前提**：拆开四问，答案全部来自
@@ -1007,10 +1007,10 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
 判据本身也不能只靠"看上去对"，而且**这几个计数不许只活在散文里**：
 `tests/test_lane_replay_report.py` 把它们钉成断言，重数只要一条命令
 （`python -W error::ResourceWarning -m unittest tests.test_lane_replay_report -v`）。
-2026-10-20 实测：六条 workflow 合起来 **17 段** `<<'PY'`（`engine-live.yml` 14、`ci.yml` 2、
-`package.yml` 1、`shell.yml` 0、`installer.yml` 0、`upstream-follow.yml` 0；`yaml_gate.py` 会打同一份编译计数，
+2026-10-20 实测：六条 workflow 合起来 **18 段** `<<'PY'`（`engine-live.yml` 14、`ci.yml` 2、
+`package.yml` 2、`shell.yml` 0、`installer.yml` 0、`upstream-follow.yml` 0；`yaml_gate.py` 会打同一份编译计数，
 段数打 0 就意味着闸门什么都没查），
-其中 **12 段含判据**（认 `check(` / `SystemExit` / `assert` / `sys.exit(` —— 最后这个是这轮补的：
+其中 **13 段含判据**（认 `check(` / `SystemExit` / `assert` / `sys.exit(` —— 最后这个是这轮补的：
 `ocr-proof` 那段工具链版本闸就是靠 `sys.exit("工具链低于…")` 红的，只找前三个会漏），
 5 段是取数与打印。被本地预跑引用到的是 **8 个 (job, 步骤名) 组合**：
 `headless-inference 起常驻 llama-server`、`ocr-proof 认得出那个词`、`ocr-proof 编译 CLI`、
