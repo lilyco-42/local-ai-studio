@@ -98,7 +98,7 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
 
 ## 验收标准（在当前唯一可用验证手段 = GitHub Actions 下）
 
-1. `ci.yml`：917 个单测绿（重数：`python -W error::ResourceWarning -m unittest discover -s tests
+1. `ci.yml`：944 个单测绿（重数：`python -W error::ResourceWarning -m unittest discover -s tests
    -p "test_*.py"`；按文件数就 `python -m unittest tests.<模块名>`。2026-10-20 实测逐文件：
    `test_yaml_gate.py` 闸门自己（含 workflow 文件清单与磁盘覆盖对照）17、`test_lane_argv.py` 车道 ↔ 启动表一致（含 15 个 workflow 文本变异）10、
    `test_sideload.py` sideload 按内容认领（6 条源码变异体 + 三个真上游文件）22、
@@ -131,6 +131,8 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
    `test_bash_gate.py` `bash -n` 一好一坏双对照 9、
    `test_r2_manifest.py` 镜像清单 6、`test_lane_assertions.py` + `test_image_proof_block.py`
    车道判据 38 + 6 = 44、`test_png_proof.py` PNG 判据 25、`test_srt_proof.py` SRT 判据 20、
+   `test_wd_ipc_probe.py` WebDriver 真驱动窗口（会话请求 / status 与 data_root 判据 / UI 渲染证据 /
+   车道文本与已知坏对照）27、
    `test_recommend_image.py` 生图档位表 31、`test_machine_budget.py` 装机预算 21、
    `test_lane_replay_report.py` 给分段、预跑与 job 数计数，并把上面这份逐文件账按模块 import 复算
    （1 条正控 + 4 个计数变异 + 合写加法自洽），另按锚点复算 README 与两份文档里 7 处

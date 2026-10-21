@@ -112,6 +112,31 @@ jobs:
             kill "$app" 2>/dev/null || true
             wait "$app" 2>/dev/null || true
           '
+      - name: 真驱动窗口里的 IPC（WebDriver：status/data_root 与 UI 渲染）
+        if: matrix.os == 'ubuntu-latest'
+        timeout-minutes: 15
+        env:
+          GDK_BACKEND: x11
+          WEBKIT_DISABLE_COMPOSITING_MODE: "1"
+          WEBKIT_DISABLE_DMABUF_RENDERER: "1"
+          WEBKIT_DISABLE_SANDBOX_THIS_IS_DANGEROUS: "1"
+          LIBGL_ALWAYS_SOFTWARE: "1"
+          NO_AT_BRIDGE: "1"
+        run: |
+          sudo apt-get install -y xvfb webkit2gtk-driver
+          apt-cache policy webkit2gtk-driver | head -5
+          command -v WebKitWebDriver
+          WebKitWebDriver --version || true
+          if ! command -v tauri-driver >/dev/null 2>&1; then
+            cargo install tauri-driver --locked --version 2.1.0
+          fi
+          tauri-driver --version || true
+          cargo build --bin local-ai-studio-shell
+          xvfb-run -a -s "-screen 0 1024x768x24" python3 "$GITHUB_WORKSPACE/tools/wd_ipc_probe.py" \
+            --app "$PWD/target/debug/local-ai-studio-shell" \
+            --native-driver "$(command -v WebKitWebDriver)" \
+            --negative-control \
+            --timeout 180
       - name: 把首轮解析出的 Cargo.lock 留档（Tauri 依赖图目前未钉）
         if: matrix.os == 'ubuntu-latest'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4.6.2
