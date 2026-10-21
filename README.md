@@ -353,10 +353,16 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   单测全过，`app` 在 3 个操作系统上真的编出 Tauri 层并跑 3 条单测（Ubuntu 首编 1m30s，先装 WebKitGTK）；
   两个 crate 的首轮 `Cargo.lock` 已作为 artifact 产出（`shell-core-Cargo.lock`、`shell-app-Cargo.lock`），
   还没提交进仓库。Windows 第一次跑红在假服务器的 RST 竞态，修法是读到完整请求（头 + Content-Length
-  正文）再回包 —— 只有真跑才会发现。**窗口现在也真起过了**：2026-10-21 起 `app (ubuntu-latest)`
-  多一步，在 Xvfb 里启动构建出的二进制并等窗口（run 39658522639：标题 `Local AI Studio`、
-  980×720，窗口出现后又确认进程活了 2 s 才杀）。这一步只证 GTK/Tauri 窗口能创建、进程能存活；
-  窗口里的 JS/IPC 没被驱动、引擎没起，macOS/Windows 的 app job 跳过该步。
+  正文）再回包 —— 只有真跑才会发现。**窗口里的 JS 与 IPC 也真驱动过了**：2026-10-21 起
+  `app (ubuntu-latest)` 先起一次窗口（run 39658522639：标题 `Local AI Studio`、980×720），
+  再用 `tauri-driver` 2.1.0（`cargo install --locked --version 2.1.0`）+
+  `webkit2gtk-driver` 2.52.6 的 `/usr/bin/WebKitWebDriver` 连上窗口执行页面 JS
+  （run 39663865685，commit `bb68f29`）：`invoke('status')` 回 4 行（对话 resident / 字幕 on_demand /
+  文字识别 one_shot / 生图 on_demand，Linux 四格 `available=true`），`invoke('data_root')` 回
+  `/home/runner/.local/share/top.lilyco42.local-ai-studio`；页面标题是 `Local AI Studio`、
+  “找不到 Tauri IPC”提示条保持隐藏、状态条渲染成 `对话 · 未启动`，`#data-root` 与返回值逐字相同；
+  同一步还把能力名换成假的做已知坏对照，必须被拒。**边界**：只有 Ubuntu 这一档，没有点“启动引擎”、
+  没有联网 —— 证的是 IPC 桥与首屏渲染，不是四条能力的端到端链路；macOS/Windows 的 app job 跳过这两步。
 - `tools/action_pins.py` + `pins/actions.json`：**出包那只手自己也要钉住**。开工时三个
   workflow 里 4 个 `uses:` 全是浮动大版本 tag（`checkout@v4`、`setup-python@v5`、
   `upload-artifact@v4`、`download-artifact@v4`）—— 仓库对引擎/权重/工具带都定了

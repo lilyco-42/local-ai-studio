@@ -908,10 +908,13 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     2026-10-21 真跑的结果：`core` 三档各 **70 条**全过，`app` 三档各 **3 条**全过（Ubuntu 首编 1m30s）；
     首轮 `Cargo.lock` 已作为 `shell-core-Cargo.lock` / `shell-app-Cargo.lock` artifact 产出，
     但还没提交进仓库。离线另证 `python tools/shell_source.py --check`（问题 0 条）与 14 条 Python 单测。
-    这次不把"写了"说成"过了"：2026-10-21 起 `app (ubuntu-latest)` 多一步，在 Xvfb 里真起二进制并等到
-    窗口（run 39658522639：标题 `Local AI Studio`、980×720，窗口出现后进程又活 2 s 才被杀）。
-    这一步只证 GTK/Tauri 窗口能创建、进程能存活；窗口里的 JS/IPC 没被驱动、引擎没起，
-    macOS/Windows 的 app job 跳过该步。
+    这次不把"写了"说成"过了"：2026-10-21 起 `app (ubuntu-latest)` 在 Xvfb 里真起二进制并等到
+    窗口（run 39658522639：标题 `Local AI Studio`、980×720），随后用 `tauri-driver` 2.1.0 +
+    `WebKitWebDriver` 连上窗口执行页面 JS（run 39663865685，commit `bb68f29`）：`invoke('status')`
+    回 4 行（对话 resident / 字幕 on_demand / 文字识别 one_shot / 生图 on_demand，Linux 四格
+    `available=true`），`invoke('data_root')` 回 `/home/runner/.local/share/top.lilyco42.local-ai-studio`；
+    页面隐藏了 IPC 缺失提示、状态条是 `对话 · 未启动`、`#data-root` 与返回值逐字相同，另有一组
+    “假能力名必须被拒”的已知坏对照。边界：只有 Ubuntu，没起引擎、没联网，证的是 IPC 桥与首屏渲染。
 33. **出包产物到外壳目录之间的那一步补上了**：出包车道的产物是平铺的 `dist/<os>/<engine>/`，
     外壳只认 `<data>/runtime/<os>/<engine>/<version>/<asset-stem>/` + 根部的 `payload-manifest.json`，
     此前没有工具把两者接起来。`tools/stage_payload.py` 只从 `pins/shell-contract.json` 的
