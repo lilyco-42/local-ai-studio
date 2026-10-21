@@ -444,9 +444,11 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
 - `.github/workflows/engine-live.yml`：打真实 API 发现产物 → 下载 linux 引擎（不编译）→ 下载 pin 住的
   0.5B GGUF 并校 sha256 → 无头推理，要求真的抓到 `tokens per second > 0`；
   另有 os-inference-proof 逐条解压 `manifest["inferred"]` 里的产物，要求里面有 `.exe/.dll`。
-  **口径**：llama 与 sd 用 discover 现挑的**最新**产物（2026-10-21 是 b11797 / master-982），
+  **口径**：llama 与 sd 用 discover 现挑的**最新**产物（2026-10-21 夜里是 b11798 / master-982），
   不是 `payload-plan` 钉住的那两颗；whisper 与 OCR 才固定用钉值。所以这条车道证明的是
   "上游最新版 + 按钉值推导的 argv 仍然能跑"，钉住那颗的字节完整由 `backends` / 版本轴守。
+  b11798 顺手抓到一次真实漂移：包里新出现的 `llama` 是分发器（`serve/cli/download/version`），
+  `find | head -1` 选中它后 help 里没有任何补全参数 —— 实例定位因此改成只认 `llama-cli`。
 - `.github/workflows/upstream-follow.yml`：每天 03:17 UTC 现取 llama.cpp 的 release 窗口，只核对
   "钉住那颗还在不在、被没被重打包"与"候选还能不能覆盖三条 OS"；有新版本退出码仍是 0，
   钉值坏了才 1，报告 JSON 无论红绿都作为 artifact 留下。升级不在这条车道里自动做。

@@ -1063,7 +1063,11 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
    （4,265,146,304 B）后一次通过。以后修生图先看权重完整性，再怀疑 `.so`。
 4. **whisper 与 llama 的目录/产物名**：`find` 不限深度在 Linux 包上都找到了 `whisper-server` /
    `llama-server`；subtitle 第一次红是短音频被 `--min-blocks` 门槛挡掉（改成 1），不是路径或 CLI 名。
-   whisper 用钉住的 b5454，llama 用 discover 现挑的 b11797（口径见本节标题与 README）。
+   whisper 用钉住的 b5454，llama 用 discover 现挑的 b11797。同一晚的 b11798 把 `llama`
+   变成了分发器（help 里只有 serve/cli/download/version）：`find | head -1` 选中它后，
+   两个开关都不在 help 里，整步在跑模型之前就被 `grep &&` 的 `-e` 杀掉（run 39638448298）。
+   实例定位改成只认 `llama-cli`、开关探测改成 `if` 之后，b11798 跑出 53.9 tok/s
+   （run 39641510711）—— 这是"用最新版"车道该抓的上游漂移，不是钉值坏了。
 5. **runner 侧的 HF 直连**：可用 —— 415 MB 的 0.5B GGUF 与 4.27 GB 的 SD checkpoint 都从
    `huggingface.co` 直接下成功并按 pin 校过 sha256。国内出口不可用仍是真的，所以产品侧仍按
    ModelScope 首选、hf-mirror 备选（`pins/download-plan.json`）。
