@@ -110,51 +110,71 @@ jobs:
             --out "dist/${OS_TAG}/delivery-manifest.json"
       # 消费端重放：发布方把文件按对象键摆成"桶"，然后**删掉生产者那棵树**，
       # 让安装只能读对象目录 —— 证明它没有偷看数据根、只凭清单就能还原。
-      # 只有 linux-x64 能在 ubuntu runner 上真执行；win/mac 的产物只能装不能起。
-      - name: 消费端重放：清单 → 空数据根 → 从装好的树起 llama-server（仅 linux-x64）
+      # Linux 的产物能在 ubuntu runner 上真执行；win/mac 由下面的 engine-native
+      # 在各自的原生 runner 上做同一件事。
+      - name: 消费端重放：清单 → 空数据根 → 从装好的树起 llama-server（linux-x64）
         if: matrix.os_tag == 'linux-x64'
         env:
           OS_TAG: ${{ matrix.os_tag }}
         run: |
           set -euo pipefail
-          python3 - <<'PY'
-          import json, os, shutil
-          tag = os.environ["OS_TAG"]
-          with open(f"dist/{tag}/delivery-manifest.json", encoding="utf-8") as fh:
-              intake = json.load(fh)
-          root = f"/tmp/root-{tag}"
-          objects = f"/tmp/objects-{tag}"
-          rows = intake["files"] + [intake["manifest"]]
-          for row in rows:
-              dst = os.path.join(objects, row["key"])
-              os.makedirs(os.path.dirname(dst), exist_ok=True)
-              shutil.copyfile(os.path.join(root, row["dest"]), dst)
-          print(f"对象目录：{len(rows)} 个键（含根清单）")
-          PY
-          rm -rf "/tmp/root-${OS_TAG}"
+          rm -rf "/tmp/objects-${OS_TAG}" "/tmp/installed-${OS_TAG}"
           cargo run --quiet --manifest-path shell/core/Cargo.toml \
             --example install_from_dir -- \
             --manifest "dist/${OS_TAG}/delivery-manifest.json" \
+            --stage-from "/tmp/root-${OS_TAG}" \
             --objects "/tmp/objects-${OS_TAG}" \
-            --data "/tmp/installed-${OS_TAG}" --os "${OS_TAG}"
-          test -f "/tmp/installed-${OS_TAG}/payload-manifest.json"
-          SRV=$(find "/tmp/installed-${OS_TAG}/runtime" -type f -name llama-server | head -1)
-          test -n "$SRV" || { echo "装好的树里没有 llama-server"; find "/tmp/installed-${OS_TAG}" -maxdepth 4 -type d; exit 1; }
-          chmod +x "$SRV"
-          echo "== 从装好的树起：$SRV =="
-          # 只看"装载器解析完依赖并打印出用法"：llama.cpp 的 --help 走参数解析失败路径，
-          # rc 可能是 0 也可能是 1（上游 main 返回 1），所以 0/1 都收；崩溃/缺库是别的码。
-          set +e
-          LD_LIBRARY_PATH="$(dirname "$SRV")" timeout 60 "$SRV" --help > /tmp/llama-help.txt 2>&1
-          rc=$?
-          set -e
-          echo "llama-server --help rc=$rc"
-          grep -q -- "--port" /tmp/llama-help.txt || { echo "--help 里没有 --port"; tail -30 /tmp/llama-help.txt; exit 1; }
-          test "$rc" -eq 0 -o "$rc" -eq 1 || { echo "rc=$rc 不是 0/1（装载或启动失败）"; tail -30 /tmp/llama-help.txt; exit 1; }
-          echo "::notice::交付清单 → 空数据根 → llama-server --help 成功（$(find "/tmp/installed-${OS_TAG}" -type f | wc -l) 个文件）"
+            --data "/tmp/installed-${OS_TAG}" --os "${OS_TAG}" --run-help
       - name: 上传引擎负载与首启交付清单
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4.6.2
         with:
           name: engine-payload-${{ matrix.os_tag }}
           path: dist/${{ matrix.os_tag }}/
           retention-days: 14
+
+  # win/mac 的产物不能在 ubuntu 上执行：在各自的原生 runner 上重放同一份清单。
+  # 每格只取自己那一档 artifact，重新摆出数据根 → 变成对象字典 → 删树 → 装进空目录 → 真的起 llama-server。
+  engine-native:
+    needs: engine-payload
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os_tag: win-x64
+            runner: windows-latest
+          - os_tag: macos-arm64
+            runner: macos-14
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4.4.0
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5.6.0
+        with:
+          python-version: "3.12"
+      - name: 取回这一档的引擎负载
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093  # v4.3.0
+        with:
+          name: engine-payload-${{ matrix.os_tag }}
+          path: dist/${{ matrix.os_tag }}
+      - name: 摆回外壳认的 runtime 目录（只为重建对象字典）
+        shell: bash
+        env:
+          OS_TAG: ${{ matrix.os_tag }}
+        run: |
+          set -euo pipefail
+          rm -rf ".replay/staged-${OS_TAG}"
+          python tools/stage_payload.py --package "dist/${OS_TAG}" --data ".replay/staged-${OS_TAG}" --os "${OS_TAG}"
+          python tools/stage_payload.py --check --package "dist/${OS_TAG}" --data ".replay/staged-${OS_TAG}" --os "${OS_TAG}"
+      - name: 消费端重放：清单 → 空数据根 → 从装好的树起 llama-server
+        shell: bash
+        env:
+          OS_TAG: ${{ matrix.os_tag }}
+        run: |
+          set -euo pipefail
+          rm -rf ".replay/objects-${OS_TAG}" ".replay/installed-${OS_TAG}"
+          cargo run --quiet --manifest-path shell/core/Cargo.toml \
+            --example install_from_dir -- \
+            --manifest "dist/${OS_TAG}/delivery-manifest.json" \
+            --stage-from ".replay/staged-${OS_TAG}" \
+            --objects ".replay/objects-${OS_TAG}" \
+            --data ".replay/installed-${OS_TAG}" --os "${OS_TAG}" --run-help
