@@ -1005,8 +1005,8 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     curl 在真实网络上的重试/续传行为仍只有 Fake fetcher 的逻辑证据；R2 镜像仍是唯一缺口（#23）。
 36. **跟随上游 llama.cpp：定时只报不跟，重钉是一次显式动作**（`tools/follow_upstream.py` +
     `.github/workflows/upstream-follow.yml`）：上游一天发好几个包（b11727 → b11798 只隔了几天），
-    把"有新版本"当红，红就不再是信号。车道每天 03:17 UTC 现取窗口，只有钉值坏了
-    才红：钉住那颗从窗口里消失、产物被重打包（逐颗 name+size+sha256 对已提交捕获）、
+    把"有新版本"当红，红就不再是信号。车道在 03:17 / 09:17 / 15:17 / 21:17 UTC 四个时点现取窗口，
+    只有钉值坏了才红：钉住那颗从窗口里消失、产物被重打包（逐颗 name+size+sha256 对已提交捕获）、
     `backend-matrix` 与 `payload-plan` 钉的不是同一颗。新版本身退出码 0；候选丢我们真装的 target /
     出现认不出的后端词 / 没有上游 digest 只报 `blocked`，`--strict` 才当红。
     升级路径是显式命令：`--update --tag bNNNNN` 走 `payload_plan.rows_for` 的真路径量出三行
@@ -1014,7 +1014,10 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     该引擎的行。之后十份派生文件（3 份捕获 + 7 张表）只要还有旧 tag，退出码 2 并逐张打印重出
     命令 —— 半套重钉不许说成完成；自检用 8 类变异证明（含"换 tag 后别的引擎一个字节不许动"、
     "同 tag/回退必须拒绝"），`tests/test_follow_upstream.py` 20 条。
-    **证据边界**：这条车道的 `schedule` 至今没有被真正触发过（这台账号的 cron 会晚 1–3 小时、整槽丢）；
+    **证据边界**：首跑是 2026-10-21T20:12Z 的手动派发（run 39668207182）：窗口 25 个 release、
+    钉住 b11798 → 最新带产物 b11799（落后 1）、候选 b11799 可升，结论 `有新版本（只报不跟）`、
+    退出码 0，报告 JSON 照常上传。`schedule` 本身仍未被真正触发过（车道 15:28Z 才落地，
+    写这段时（20:14Z）第一个 cron 时点 21:17Z 还没到；这台账号的 cron 会晚 1–3 小时、整槽丢）；
     重钉前 2026-10-21T16:28Z 本地只读跑过一次 `--check --live`，读到 b11797、钉住 b11727 落后 50 个；
     重钉到 b11798 后 17:44Z 再跑一次：钉 b11798、落后 0、已最新、退出码 0 —— 证的是工具与
     GitHub API 的形状，不是 schedule 真会触发。

@@ -317,15 +317,18 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   16:20Z 再读问题 0 条。这就是 `--live` 只把"升级路径覆盖变窄"当提示、只把钉住那颗的完整性当红的原因。
   重数：`python3 tools/runtime_versions.py --selftest`、`--check`。
 - `tools/follow_upstream.py` + `.github/workflows/upstream-follow.yml`：**跟随上游 llama.cpp，
-  但新版只报不跟**。上游一天发好几个包，把"有新版本"当红，红就不再是信号；这条每天 03:17 UTC
-  现取窗口，只有钉住那颗被撤、被重打包、或与 `backend-matrix` 不是同一颗才红（退出码 1）。
+  但新版只报不跟**。上游一天发好几个包，把"有新版本"当红，红就不再是信号；这条在 03:17 / 09:17 /
+  15:17 / 21:17 UTC 四个时点现取窗口（这台账号的 cron 会晚 1–3 小时甚至整槽丢，四档只求别一整天没看），
+  只有钉住那颗被撤、被重打包、或与 `backend-matrix` 不是同一颗才红（退出码 1）。
   新版本身退出码 0，候选缺我们真装的 target / 有认不出的后端词 / 没 digest 只报 `blocked`
   （`--strict` 才红）。升级是显式动作：`--update --tag bNNNNN` 用 `payload_plan.rows_for` 的
   真路径量出三行（zip 读中央目录、tar 读成员表，不执行），`--apply` 只替换该引擎的行；十份派生
   文件（3 份捕获 + 7 张表）只要还带旧 tag 就退出码 2 并逐张打印重出命令，半套重钉不许说完成。
   8 类变异自检 + `tests/test_follow_upstream.py` 20 条；2026-10-21T17:44Z 重钉后本地只读实跑读到
-  b11798（钉 b11798、落后 0、已最新、rc=0）。**证据边界**：这条车道的 `schedule` 至今
-  没有被真正触发过（这台账号的 cron 实测晚 1–3 小时且会整槽丢）；同一套现取逻辑已在 `backends`
+  b11798（钉 b11798、落后 0、已最新、rc=0）。**首跑**是 2026-10-21T20:12Z 手动派发
+  （run 39668207182）：25 个 release 的窗口、钉住 b11798 → 最新带产物 b11799（落后 1）、候选可升，
+  结论 `有新版本（只报不跟）`、退出码 0，报告 JSON 照常上传。**证据边界**：`schedule` 本身仍未被
+  真正触发过（车道 15:28Z 才落地，写这段时 20:14Z、第一个 cron 时点 21:17Z 还没到）；同一套现取逻辑已在 `backends`
   车道末步跑过（101 个 release / 92 个带产物 / 0 问题），但"定时会不会落地"仍未知。
 - `tools/shell_contract.py` + `pins/shell-contract.json`：**把外壳必须遵守的合同钉成表**。
   只从已提交的五张表推导（launch-plan / backend-choice / runtime-versions / payload-plan /
@@ -469,9 +472,11 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   "上游最新版 + 按钉值推导的 argv 仍然能跑"，钉住那颗的字节完整由 `backends` / 版本轴守。
   b11798 顺手抓到一次真实漂移：包里新出现的 `llama` 是分发器（`serve/cli/download/version`），
   `find | head -1` 选中它后 help 里没有任何补全参数 —— 实例定位因此改成只认 `llama-cli`。
-- `.github/workflows/upstream-follow.yml`：每天 03:17 UTC 现取 llama.cpp 的 release 窗口，只核对
-  "钉住那颗还在不在、被没被重打包"与"候选还能不能覆盖三条 OS"；有新版本退出码仍是 0，
-  钉值坏了才 1，报告 JSON 无论红绿都作为 artifact 留下。升级不在这条车道里自动做。
+- `.github/workflows/upstream-follow.yml`：在 03:17 / 09:17 / 15:17 / 21:17 UTC 四个时点现取
+  llama.cpp 的 release 窗口，只核对"钉住那颗还在不在、被没被重打包"与"候选还能不能覆盖三条 OS"；
+  有新版本退出码仍是 0，钉值坏了才 1，报告 JSON 无论红绿都作为 artifact 留下。
+  升级不在这条车道里自动做。首跑是 2026-10-21T20:12Z 的手动派发（run 39668207182）：25 个 release
+  的窗口、钉住 b11798 → 最新带产物 b11799（落后 1）、结论 `有新版本（只报不跟）`、退出码 0。
 
 ## 这套 CI 能证明什么、不能证明什么
 
