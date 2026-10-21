@@ -136,6 +136,9 @@ jobs:
   # 每格只取自己那一档 artifact，重新摆出数据根 → 变成对象字典 → 删树 → 装进空目录 → 真的起 llama-server。
   engine-native:
     needs: engine-payload
+    # windows runner 的 Python 默认 cp1252，工具会打印中文；改成 UTF-8 输出。
+    env:
+      PYTHONUTF8: "1"
     strategy:
       fail-fast: false
       matrix:
