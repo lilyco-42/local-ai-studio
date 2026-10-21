@@ -905,15 +905,16 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     Windows 资源段要的那一颗（`tauri-build` 缺它会直接报错，而不是跳过）。
     **证据的边界**：`.github/workflows/shell.yml` 现在是两个 job —— `core` 与 `app` 各在 3 OS 跑
     `cargo test --all-targets`（`app` 在 Ubuntu 先装 WebKitGTK；两个 job 都上传首轮的 `Cargo.lock`）。
-    2026-10-21 真跑的结果：`core` 三档各 **70 条**全过，`app` 三档各 **3 条**全过（Ubuntu 首编 1m30s）；
+    2026-10-21 真跑的结果：`core` 三档各 **101 条**全过，`app` 三档各 **3 条**全过（Ubuntu 首编 1m30s）；
     首轮 `Cargo.lock` 已作为 `shell-core-Cargo.lock` / `shell-app-Cargo.lock` artifact 产出，
     但还没提交进仓库。离线另证 `python tools/shell_source.py --check`（问题 0 条）与 14 条 Python 单测。
     这次不把"写了"说成"过了"：2026-10-21 起 `app (ubuntu-latest)` 在 Xvfb 里真起二进制并等到
     窗口（run 39658522639：标题 `Local AI Studio`、980×720），随后用 `tauri-driver` 2.1.0 +
-    `WebKitWebDriver` 连上窗口执行页面 JS（run 39663865685，commit `bb68f29`）：`invoke('status')`
+    `WebKitWebDriver` 连上窗口执行页面 JS（run 39666591913，commit `163b0bd`）：`invoke('status')`
     回 4 行（对话 resident / 字幕 on_demand / 文字识别 one_shot / 生图 on_demand，Linux 四格
-    `available=true`），`invoke('data_root')` 回 `/home/runner/.local/share/top.lilyco42.local-ai-studio`；
-    页面隐藏了 IPC 缺失提示、状态条是 `对话 · 未启动`、`#data-root` 与返回值逐字相同，另有一组
+    `available=true`、`installed=false`——全新数据根还没有载荷清单），`invoke('data_root')` 回
+    `/home/runner/.local/share/top.lilyco42.local-ai-studio`；
+    页面隐藏了 IPC 缺失提示、状态条是 `对话 · 运行组件未安装`、`#data-root` 与返回值逐字相同，另有一组
     “假能力名必须被拒”的已知坏对照。边界：只有 Ubuntu，没起引擎、没联网，证的是 IPC 桥与首屏渲染。
 33. **出包产物到外壳目录之间的那一步补上了**：出包车道的产物是平铺的 `dist/<os>/<engine>/`，
     外壳只认 `<data>/runtime/<os>/<engine>/<version>/<asset-stem>/` + 根部的 `payload-manifest.json`，
@@ -1000,7 +1001,7 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     `download.rs` 的 curl 参数对表；另一条按 serde 语义重放整份计划 —— `schema` 是 u32、
     `bytes` 是 u64、速率有限、`file` 扁平且不重名，6 个变异各自必须红）。Rust 侧 `Plan::parse/from_file/item` 读同一份 JSON
     （重名必须报错），`download.rs` 20 条单测。
-    **证据边界**：这组 Rust 单测已随 `core` 在 3 个操作系统上真跑（各 70 条全过，2026-10-21）；
+    **证据边界**：这组 Rust 单测已随 `core` 在 3 个操作系统上真跑（各 101 条全过，2026-10-21，run 39666591913）；
     curl 在真实网络上的重试/续传行为仍只有 Fake fetcher 的逻辑证据；R2 镜像仍是唯一缺口（#23）。
 36. **跟随上游 llama.cpp：定时只报不跟，重钉是一次显式动作**（`tools/follow_upstream.py` +
     `.github/workflows/upstream-follow.yml`）：上游一天发好几个包（b11727 → b11798 只隔了几天），

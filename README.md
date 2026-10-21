@@ -112,7 +112,7 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   `ggml-large-v1.bin` 的 SSL EOF —— 它本来就排在最后；可达 ≠ 吞吐，排序仍按实测速率）。
   `shell/core/src/download.rs` 是这条计划的消费者：系统 curl 传输（不引 TLS crate）、Range 续传、
   低速/断流换源、收满 sha256 才从 `blobs/<sha>.part` 落成 `blobs/<sha>` 并硬链接到文件名；
-  这一组单测已随 `shell.yml` 的 `core` 在 3 个操作系统上真跑过（2026-10-21，各 70 条全过）。
+  这一组单测已随 `shell.yml` 的 `core` 在 3 个操作系统上真跑过（2026-10-21，各 101 条全过，run 39666591913）。
 - `tools/recommend_models.py` + `catalog/recommendations.json`：**给用户的**「我这台机器装哪个」表。
   `catalog/defaults.json` 那 6 条是车道最小样本（对话那颗 415 MB，只为跑通），不是推荐。
   四条规则都进产物、UI 要说得出为什么推荐它：半档 < `recommended_ram_gb` ≤ 档位（上游 llmfit 的数）、
@@ -349,7 +349,7 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   `shell/src-tauri`（Tauri 2）只做装配：`AppState` + 8 条 IPC 命令全部 `spawn_blocking`
   调 core，`shell/ui` 只有 IPC、没有网络 API、中英两套文案；`icons/icon.ico` 是 Windows
   资源段要的那一颗。
-  **这些代码现在真编过、真跑过了**：2026-10-21 `shell.yml` 的 `core` 在 3 个操作系统上各 70 条
+  **这些代码现在真编过、真跑过了**：2026-10-21 `shell.yml` 的 `core` 在 3 个操作系统上各 101 条
   单测全过，`app` 在 3 个操作系统上真的编出 Tauri 层并跑 3 条单测（Ubuntu 首编 1m30s，先装 WebKitGTK）；
   两个 crate 的首轮 `Cargo.lock` 已作为 artifact 产出（`shell-core-Cargo.lock`、`shell-app-Cargo.lock`），
   还没提交进仓库。Windows 第一次跑红在假服务器的 RST 竞态，修法是读到完整请求（头 + Content-Length
@@ -357,10 +357,11 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   `app (ubuntu-latest)` 先起一次窗口（run 39658522639：标题 `Local AI Studio`、980×720），
   再用 `tauri-driver` 2.1.0（`cargo install --locked --version 2.1.0`）+
   `webkit2gtk-driver` 2.52.6 的 `/usr/bin/WebKitWebDriver` 连上窗口执行页面 JS
-  （run 39663865685，commit `bb68f29`）：`invoke('status')` 回 4 行（对话 resident / 字幕 on_demand /
-  文字识别 one_shot / 生图 on_demand，Linux 四格 `available=true`），`invoke('data_root')` 回
+  （run 39666591913，commit `163b0bd`）：`invoke('status')` 回 4 行（对话 resident / 字幕 on_demand /
+  文字识别 one_shot / 生图 on_demand，Linux 四格 `available=true`、`installed=false`——全新数据根还没有
+  载荷清单），`invoke('data_root')` 回
   `/home/runner/.local/share/top.lilyco42.local-ai-studio`；页面标题是 `Local AI Studio`、
-  “找不到 Tauri IPC”提示条保持隐藏、状态条渲染成 `对话 · 未启动`，`#data-root` 与返回值逐字相同；
+  “找不到 Tauri IPC”提示条保持隐藏、状态条渲染成 `对话 · 运行组件未安装`，`#data-root` 与返回值逐字相同；
   同一步还把能力名换成假的做已知坏对照，必须被拒。**边界**：只有 Ubuntu 这一档，没有点“启动引擎”、
   没有联网 —— 证的是 IPC 桥与首屏渲染，不是四条能力的端到端链路；macOS/Windows 的 app job 跳过这两步。
 - `tools/action_pins.py` + `pins/actions.json`：**出包那只手自己也要钉住**。开工时三个
