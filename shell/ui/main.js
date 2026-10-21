@@ -12,7 +12,10 @@ const I18N = {
     idle: '未启动',
     running: '运行中',
     notInstalled: '运行组件未安装',
-    notInstalledHint: '引擎负载还没装进数据目录；点“启动引擎”会报出缺哪一份清单或文件。',
+    notInstalledHint: '引擎负载还没装进数据目录；点“安装运行组件”按清单下载并逐文件校验。',
+    payloadUnconfigured: '数据目录里还没有 payload-source.json：写入交付清单地址与下载基址后重开窗口，这里才会出现安装入口。',
+    installPayload: '安装运行组件',
+    installBusy: '安装运行组件… {seen}/{total}',
     unavailable: '本平台暂不提供',
     unavailableHint: '上游没有发布这一平台的引擎；这台机器只能装合同里有的能力。',
     oneShot: '一次性进程',
@@ -34,7 +37,7 @@ const I18N = {
     size: '尺寸',
     generate: '出图',
     dataDir: '数据目录',
-    payloadHint: '引擎与权重需由出包车道安装到数据目录；未安装时会直接报缺。',
+    payloadHint: '安装包只装外壳；引擎负载由“安装运行组件”从配置的源取回并逐文件校验。',
     needFile: '还没有选文件。',
     engineError: '引擎错误',
     emptyReply: '模型没有返回内容。'
@@ -50,7 +53,10 @@ const I18N = {
     idle: 'stopped',
     running: 'running',
     notInstalled: 'runtime not installed',
-    notInstalledHint: 'The engine payload is not in the data folder yet; Start engine reports which manifest or file is missing.',
+    notInstalledHint: 'The engine payload is not in the data folder yet; Install runtime fetches it from the configured source and verifies every file.',
+    payloadUnconfigured: 'No payload-source.json in the data folder yet: add the manifest URL and download bases, then reopen the window to get the install button.',
+    installPayload: 'Install runtime',
+    installBusy: 'Installing runtime… {seen}/{total}',
     unavailable: 'not available on this platform',
     unavailableHint: 'Upstream publishes no engine for this platform; only capabilities in the contract can be installed here.',
     oneShot: 'one-shot process',
@@ -72,7 +78,7 @@ const I18N = {
     size: 'Size',
     generate: 'Generate',
     dataDir: 'Data dir',
-    payloadHint: 'Engines and weights must be installed by the packaging lane; missing payloads are reported, not faked.',
+    payloadHint: 'The installer ships only the shell; Install runtime fetches engines from the configured source and verifies each file.',
     needFile: 'No file selected yet.',
     engineError: 'Engine error',
     emptyReply: 'The model returned no content.'
@@ -92,6 +98,7 @@ let busy = false;
 let statusRows = [];
 let unavailable = new Set();
 let history = [];
+let payloadSource = null;
 
 function loadLang() {
   try {
@@ -155,7 +162,7 @@ async function run(task) {
 }
 
 function setButtonsDisabled(value) {
-  document.querySelectorAll('main button, #engine-start, #engine-stop').forEach((node) => {
+  document.querySelectorAll('main button, #engine-start, #engine-stop, #payload-install').forEach((node) => {
     node.disabled = value || unavailable.has(node.dataset.capability);
   });
 }
@@ -216,6 +223,8 @@ async function refreshStatus() {
 function renderStatus() {
   const cap = TAB_CAP[activeTab];
   const row = statusRows.find((item) => item.capability === cap);
+  const installButton = el('payload-install');
+  installButton.hidden = true;
   if (row && row.available === false) {
     el('engine-chip').textContent = cap + ' · ' + t('unavailable');
     el('engine-state').textContent = cap + ' · ' + t('unavailableHint');
@@ -229,8 +238,10 @@ function renderStatus() {
   }
   if (row && row.installed === false) {
     el('engine-chip').textContent = cap + ' · ' + t('notInstalled');
-    el('engine-state').textContent = cap + ' · ' + t('notInstalledHint');
+    el('engine-state').textContent = cap + ' · ' + t(payloadSource ? 'notInstalledHint' : 'payloadUnconfigured');
+    installButton.hidden = !payloadSource;
     if (!busy) {
+      installButton.disabled = !payloadSource;
       el('engine-start').disabled = row.running === true;
       el('engine-stop').disabled = row.running !== true;
     }
@@ -260,6 +271,36 @@ async function stopEngine() {
   const capability = TAB_CAP[activeTab];
   await run(async () => {
     await invoke('stop_engine', { capability });
+  });
+}
+
+async function loadPayloadSource() {
+  try {
+    payloadSource = await invoke('payload_source');
+  } catch (err) {
+    payloadSource = null;
+    el('engine-state').textContent = String(err);
+  }
+}
+
+function listenPayloadProgress() {
+  const event = tauri && tauri.event;
+  if (!event || typeof event.listen !== 'function') return;
+  event.listen('payload-progress', (message) => {
+    const payload = message && message.payload;
+    if (!payload) return;
+    el('engine-state').textContent = t('installBusy')
+      .replace('{seen}', payload.seen)
+      .replace('{total}', payload.total);
+  }).catch(() => {
+    /* 拿不到进度通道不影响安装本身 */
+  });
+}
+
+async function installPayload() {
+  if (!payloadSource) return;
+  await run(async () => {
+    await invoke('install_payload');
   });
 }
 
@@ -359,6 +400,7 @@ function wire() {
     saveLang();
     applyLang();
   });
+  el('payload-install').addEventListener('click', installPayload);
   el('engine-start').addEventListener('click', startEngine);
   el('engine-stop').addEventListener('click', stopEngine);
   el('chat-send').addEventListener('click', sendChat);
@@ -376,6 +418,7 @@ function wire() {
 function init() {
   wire();
   selectTab('chat');
+  listenPayloadProgress();
   invoke('data_root')
     .then((value) => {
       el('data-root').textContent = value;
@@ -383,7 +426,7 @@ function init() {
     .catch((err) => {
       el('data-root').textContent = String(err);
     });
-  refreshStatus();
+  loadPayloadSource().then(refreshStatus);
   window.setInterval(() => {
     if (!busy) refreshStatus();
   }, 3000);

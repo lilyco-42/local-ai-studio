@@ -14,9 +14,88 @@ use std::fs;
 use std::io::Write;
 use std::path::{Path, PathBuf};
 
+use serde::Deserialize;
+
 use crate::download::{Fetcher, Policy};
 use crate::error::CoreError;
 use crate::manifest::sha256_file;
+
+/// 数据根里的源配置：交付清单从哪取、对象从哪些基址取。
+pub const SOURCE_NAME: &str = "payload-source.json";
+
+#[derive(Debug, Clone, Deserialize, PartialEq, Eq)]
+pub struct PayloadSource {
+    pub manifest_url: String,
+    pub bases: Vec<String>,
+}
+
+impl PayloadSource {
+    pub fn parse(text: &str) -> Result<Self, CoreError> {
+        let source: Self = serde_json::from_str(text).map_err(|e| {
+            CoreError::Download(format!("{SOURCE_NAME} 不是合法 JSON: {e}"))
+        })?;
+        if source.manifest_url.trim().is_empty() {
+            return Err(CoreError::Download(format!(
+                "{SOURCE_NAME} 没有 manifest_url"
+            )));
+        }
+        Ok(source)
+    }
+
+    /// 先验清单地址与基址，再决定要不要联网；返回的基址表就是换源顺序。
+    pub fn checked_bases(&self) -> Result<Bases, CoreError> {
+        check_base(&self.manifest_url)?;
+        Bases::parse(&self.bases)
+    }
+}
+
+/// 源配置不在 = 这台机器还没配首装来源，不是错误。
+pub fn load_source(path: &Path) -> Result<Option<PayloadSource>, CoreError> {
+    match fs::read_to_string(path) {
+        Ok(text) => Ok(Some(PayloadSource::parse(&text)?)),
+        Err(e) if e.kind() == std::io::ErrorKind::NotFound => Ok(None),
+        Err(e) => Err(CoreError::Download(format!(
+            "读 {} 失败: {e}",
+            path.display()
+        ))),
+    }
+}
+
+/// 取交付清单本身：先落到 `scratch`，非 200/206 或空体都删掉临时文件再报错。
+pub fn fetch_manifest(
+    url: &str,
+    scratch: &Path,
+    fetcher: &mut dyn Fetcher,
+) -> Result<Vec<u8>, CoreError> {
+    check_base(url)?;
+    if let Some(parent) = scratch.parent() {
+        fs::create_dir_all(parent)?;
+    }
+    let _ = fs::remove_file(scratch);
+    let reply = match fetcher.fetch_range(url, 0, scratch) {
+        Ok(reply) => reply,
+        Err(e) => {
+            let _ = fs::remove_file(scratch);
+            return Err(e);
+        }
+    };
+    if reply.status != 200 && reply.status != 206 {
+        let _ = fs::remove_file(scratch);
+        return Err(CoreError::Download(format!(
+            "取交付清单 {url} 返回 HTTP {}",
+            reply.status
+        )));
+    }
+    let body = fs::read(scratch).map_err(|e| {
+        CoreError::Download(format!("读交付清单 {} 失败: {e}", scratch.display()))
+    });
+    let _ = fs::remove_file(scratch);
+    let body = body?;
+    if body.is_empty() {
+        return Err(CoreError::Download(format!("交付清单 {url} 是空的")));
+    }
+    Ok(body)
+}
 
 /// 校验过的基址列表，顺序就是换源顺序。
 #[derive(Debug, Clone)]
@@ -365,6 +444,7 @@ mod tests {
         calls: Vec<(String, u64)>,
         honor_range: bool,
         truncate_once: Option<usize>,
+        force_status: Option<u16>,
     }
 
     impl Fake {
@@ -378,6 +458,7 @@ mod tests {
                 calls: Vec::new(),
                 honor_range: true,
                 truncate_once: None,
+                force_status: None,
             }
         }
 
@@ -395,6 +476,11 @@ mod tests {
             self.truncate_once = Some(n);
             self
         }
+
+        fn status(mut self, code: u16) -> Self {
+            self.force_status = Some(code);
+            self
+        }
     }
 
     impl Fetcher for Fake {
@@ -405,6 +491,15 @@ mod tests {
             dest: &Path,
         ) -> Result<FetchReply, CoreError> {
             self.calls.push((url.to_string(), from));
+            if let Some(status) = self.force_status {
+                fs::write(dest, b"")?;
+                return Ok(FetchReply {
+                    status,
+                    range_start: None,
+                    total: None,
+                    bytes: 0,
+                });
+            }
             let mut body = self
                 .bodies
                 .get(url)
@@ -671,5 +766,109 @@ mod tests {
             .to_string();
             assert!(err.contains("键"), "{bad}: {err}");
         }
+    }
+
+    fn source_text(manifest: &str, bases: &[&str]) -> String {
+        let list: Vec<String> = bases.iter().map(|b| format!("\"{b}\"")).collect();
+        format!(
+            r#"{{"manifest_url":"{manifest}","bases":[{}]}}"#,
+            list.join(",")
+        )
+    }
+
+    #[test]
+    fn a_source_binds_one_manifest_url_and_ordered_bases() {
+        let text = source_text(
+            "https://dl.example/payload/linux-x64/delivery-manifest.json",
+            &["https://a.example", "https://b.example/"],
+        );
+        let source = PayloadSource::parse(&text).unwrap();
+        let bases = source.checked_bases().unwrap();
+        assert_eq!(
+            bases.urls_for("payload/linux-x64/a.bin"),
+            vec![
+                "https://a.example/payload/linux-x64/a.bin".to_string(),
+                "https://b.example/payload/linux-x64/a.bin".to_string(),
+            ]
+        );
+    }
+
+    #[test]
+    fn a_source_with_public_http_or_no_bases_is_refused() {
+        let text = source_text("http://example.com/m.json", &["https://dl.example"]);
+        let err = PayloadSource::parse(&text)
+            .unwrap()
+            .checked_bases()
+            .unwrap_err()
+            .to_string();
+        assert!(err.contains("https"), "{err}");
+        let text = source_text("https://dl.example/m.json", &[]);
+        let err = PayloadSource::parse(&text)
+            .unwrap()
+            .checked_bases()
+            .unwrap_err()
+            .to_string();
+        assert!(err.contains("基址"), "{err}");
+        let err = PayloadSource::parse(r#"{"bases":[]}"#).unwrap_err().to_string();
+        assert!(err.contains("manifest_url"), "{err}");
+    }
+
+    #[test]
+    fn a_missing_source_file_is_none_but_a_broken_one_is_an_error() {
+        let d = TempDir::new("source");
+        let path = d.path().join(SOURCE_NAME);
+        assert!(load_source(&path).unwrap().is_none());
+        fs::write(&path, "{").unwrap();
+        assert!(load_source(&path).unwrap_err().to_string().contains("JSON"));
+        let text = source_text("https://dl.example/m.json", &["https://dl.example"]);
+        fs::write(&path, text).unwrap();
+        assert_eq!(load_source(&path).unwrap().unwrap().bases.len(), 1);
+    }
+
+    #[test]
+    fn a_manifest_is_fetched_and_the_scratch_file_is_removed() {
+        let d = TempDir::new("mani");
+        let url = "https://dl.example/payload/linux-x64/delivery-manifest.json";
+        let body: &[u8] = br#"{"schema":1}"#;
+        let mut fake = Fake::new(&[(url, body)]);
+        let scratch = d.path().join(".objects/delivery-manifest.json.part");
+        let got = fetch_manifest(url, &scratch, &mut fake).unwrap();
+        assert_eq!(got, body);
+        assert!(!scratch.exists());
+        assert_eq!(fake.calls, vec![(url.to_string(), 0)]);
+        assert!(d.path().join(".objects").is_dir());
+    }
+
+    #[test]
+    fn a_manifest_http_error_or_empty_body_leaves_no_scratch() {
+        let d = TempDir::new("manibad");
+        let url = "https://dl.example/m.json";
+        let scratch = d.path().join("m.part");
+        let body: &[u8] = b"{}";
+        let mut fake = Fake::new(&[(url, body)]).status(404);
+        let err = fetch_manifest(url, &scratch, &mut fake)
+            .unwrap_err()
+            .to_string();
+        assert!(err.contains("404"), "{err}");
+        assert!(!scratch.exists());
+
+        let empty: &[u8] = b"";
+        let mut fake = Fake::new(&[(url, empty)]);
+        let err = fetch_manifest(url, &scratch, &mut fake)
+            .unwrap_err()
+            .to_string();
+        assert!(err.contains("空"), "{err}");
+        assert!(!scratch.exists());
+    }
+
+    #[test]
+    fn a_manifest_url_over_public_http_is_refused_before_any_request() {
+        let d = TempDir::new("manihttp");
+        let mut fake = Fake::new(&[]);
+        let err = fetch_manifest("http://example.com/m.json", &d.path().join("m.part"), &mut fake)
+            .unwrap_err()
+            .to_string();
+        assert!(err.contains("https"), "{err}");
+        assert!(fake.calls.is_empty());
     }
 }

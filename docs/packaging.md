@@ -153,6 +153,7 @@ asset/OS/引擎不符等）；`tests/test_stage_payload.py` 10 条离线对照�
 多个基址按顺序换源、按对象键拼 URL（非安全字节转义）、断流后用 `.part` 长度发 Range 续传、
 哈希不符丢掉重下；基址只收 https，`http://127.0.0.1` 只给重放用（公网 http 会被拒）。
 25 条离线测试（清单消费 14 + 取数 11）覆盖篡改、短缺、坏根清单、路径逃逸、换源、续传和服务端忽略 Range。
+（2026-10-22 补首启入口后，取数这一侧共 17 条，合计 31 条。）
 
 CI 里的消费者重放（`examples/install_from_dir.rs`）分两遍：第一遍把 `/tmp/root-<os>` 复制成
 对象字典、**删掉原数据根**，只凭 `delivery-manifest.json` 装进空目录；第二遍用
@@ -164,11 +165,26 @@ run 39656642754 走 `http.server` 取数（同三档同数、均 0 跳过，三�
 `--port`）。HTTP 这一段是回环明文，真 HTTPS 基址仍未在重放里跑过（TLS 由同一 curl 层在权重
 车道承担）。这里的"真机"是 GitHub 托管的系统镜像，不是用户的个人电脑。
 
-**还没接上的一段**：数据根仍只在 CI 的 `/tmp` 或 `.replay` 里；`delivery-manifest.json` 给出了逐文件
-对象键与落点，外壳也能按它落盘，但**没有人往 R2 上传、也没有首启下载的 IPC 入口**。安装包车道只编壳（⑥），
-`download.rs` 只处理权重的平铺文件。把负载送到数据根仍是任务 #57 的待定动作：
-首启按这份清单逐文件从 R2 取（需他批准写桶；三档 105.0–158.4 MiB ≈ 117–176 s @ 0.90 MiB/s），
-或随安装包分发（按同一份清单计，win 105.0 / linux 156.3 / mac 158.4 MiB）。
+**首启入口已经接上（2026-10-22）**：数据根里放一份 `payload-source.json`，UI 就能把负载装进来：
+
+```json
+{
+  "manifest_url": "https://<基址>/payload/<os>/delivery-manifest.json",
+  "bases": ["https://<基址>"]
+}
+```
+
+`shell/src-tauri` 的 `payload_source` 只报告这份配置在不在（不在时 UI 说“还没有 payload-source.json”，
+不显示安装按钮）；`install_payload` 用系统 curl 取交付清单 → `Delivery::check(platform)` → 逐对象
+`fetch_object` 到 `<数据根>/.objects` → `delivery::install` 落盘，根清单最后写；`.objects` 成功后才删，
+失败留着断点续传。进度按文件数发 `payload-progress` 事件，UI 只在“未安装 + 有配置”时显示“安装运行组件”。
+基址仍只收 https（回环除外）；清单 os 与当前平台不符会在下载任何对象前拒绝。新增 6 条离线测试覆盖
+源配置缺失/坏 JSON/公网 http/空基址、清单 404 与空体（临时文件不残留）以及清单 URL 的 https 约束。
+
+**还没接上的一段**：谁把 `delivery-manifest.json` 与对象传进桶里、生产 HTTPS 基址填什么，都还没定
+（写 R2 需他批准；三档 105.0–158.4 MiB ≈ 117–176 s @ 0.90 MiB/s），或选择随安装包分发
+（按同一份清单计，win 105.0 / linux 156.3 / mac 158.4 MiB，由安装器把同一份配置写进数据根）。
+真实用户电脑上的首装也还没跑过（本机禁跑）。
 
 ## ⑥ 安装包本身怎么出？—— 三平台各一个未签名包，图标由 ICO 派生
 

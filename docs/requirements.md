@@ -905,9 +905,10 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     `llama|whisper|sd-server|oar-ocr|ggml` 都算）；HTTP 层自己实现（chunked/trailers/512 MiB 上限）、
     multipart、base64；对话请求强制 `stream=false`，字幕的 `file` 字段与 `response_format=srt`
     都从合同读，生图的 `poll_url` 只许回环地址。
-    `shell/src-tauri`（Tauri 2）只做装配：`AppState` 持有 supervisor 与数据根，8 条 IPC 命令
-    （status / data_root / start_engine / stop_engine / chat / transcribe / image / ocr）全部把
-    阻塞调用丢进 `spawn_blocking`，返回结构一律 `serde`；`status` 每行带 `available`
+    `shell/src-tauri`（Tauri 2）只做装配：`AppState` 持有 supervisor 与数据根，10 条 IPC 命令
+    （status / data_root / payload_source / install_payload / start_engine / stop_engine / chat /
+    transcribe / image / ocr）；安装与四条能力把阻塞工作丢进 `spawn_blocking`，
+    status / data_root / payload_source 只读本地状态，返回结构一律 `serde`；`status` 每行带 `available`
     （合同里有没有当前平台这一格），UI 据此禁用按钮并写"本平台暂不提供"，而不是点了才报错；
     UI（`shell/ui`）只调
     `window.__TAURI__.core.invoke`，没有网络 API，中英两套文案；`icons/icon.ico` 是
@@ -950,8 +951,12 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     已正确的文件跳过；清单消费侧 14 条离线测试覆盖篡改、短缺、坏根清单和路径逃逸。
     取数字节由 `shell/core/src/payload_fetch.rs` 接上：多个基址按顺序换源、按对象键拼 URL、
     断流后用 `.part` 长度发 Range 续传、哈希不符丢掉重下；基址只收 https（`127.0.0.1`/`localhost`
-    的 http 仅给 CI 重放，公网 http 在解析基址时就拒）。取数侧 11 条离线单测用假 Fetcher 覆盖换源、
-    续传、服务端忽略 Range、截断后继续和路径逃逸，不需要网络。
+    的 http 仅给 CI 重放，公网 http 在解析基址时就拒）。取数侧 17 条离线单测用假 Fetcher 覆盖换源、
+    续传、服务端忽略 Range、截断后继续和路径逃逸，以及源配置（`payload-source.json` 缺失/坏 JSON/
+    公网 http/空基址）与交付清单本身（404、空体、临时文件不残留），不需要网络。
+    **首启入口**：`payload_source` 报告数据根里有没有源配置，`install_payload` 取清单 → 校验平台 →
+    逐对象装进数据根，根清单最后写，`.objects` 成功后才删；UI 只在“未安装 + 有配置”时显示安装按钮，
+    进度按文件数发 `payload-progress`。离线单测只能证这条消费链，**真 HTTPS 与真实用户首装仍未跑过**。
     **证据边界**：2026-10-21 `package.yml`（run 39632180385）在三档 OS 上真跑了第 8 步（摆位 + `--check`）
     与第 9 步（交付清单），三档 `engine-payload-<os>` 都上传成功；同日 run 39654853807 在**三档原生 runner**
     上做了消费者重放：删掉摆好的数据根，只凭清单装进空目录（linux-x64 94 个文件 / 156.3 MiB、
@@ -959,7 +964,7 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     （三次 rc=0，输出含 `--port`）。所以"真实上游包能按合同落位"与"清单足以还原能起引擎的树"都有 CI 证据；
     出包车道现在还会把对象目录当 HTTP 远端再取一遍（`--base-url`；run 39656642754 三档均 0 跳过、
     同数落盘、`--help` 三次 rc=0，但这段是回环明文，真 HTTPS 基址仍未在重放里跑过），
-    仍没有的是**发布落点（R2 写）与 IPC/UI 入口**（#57），以及用户个人电脑上的"装完真能跑"。
+    仍没有的是**发布落点（R2 写）、生产 HTTPS 基址**（#57），以及用户个人电脑上的"装完真能跑"。
     OCR 仍不在出包清单里，`not_in_manifest` 会点名 `文字识别/oar-ocr` —— 已知缺口，不是这一步的失败。
 34. **安装包本身：三平台各一个未签名包，只装壳**（`.github/workflows/installer.yml` + `tools/make_icons.py`）：
     矩阵 Windows `nsis` / macOS `dmg` / Linux `deb`；触发是 push main 上 `shell/**` 或自身 +

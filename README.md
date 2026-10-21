@@ -351,8 +351,8 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   argv 全由合同/启动表渲染；HTTP 客户端自己实现（chunked/trailers/512 MiB 上限）并带
   chat / transcribe / image / ocr 四个调用。`tools/shell_source.py` 扫生产源码：引擎名、
   引擎旗标、引擎端口一律不许出现，`Command::new` 只有一处、`TcpListener::bind` 只有一处。
-  `shell/src-tauri`（Tauri 2）只做装配：`AppState` + 8 条 IPC 命令全部 `spawn_blocking`
-  调 core，`shell/ui` 只有 IPC、没有网络 API、中英两套文案；`icons/icon.ico` 是 Windows
+  `shell/src-tauri`（Tauri 2）只做装配：`AppState` + 10 条 IPC 命令调 core，耗时的调用
+  （安装、四条能力）都丢进 `spawn_blocking`，`status`/`data_root`/`payload_source` 只读本地状态。`shell/ui` 只有 IPC、没有网络 API、中英两套文案；`icons/icon.ico` 是 Windows
   资源段要的那一颗。
   **这些代码现在真编过、真跑过了**：2026-10-21 `shell.yml` 的 `core` 在 3 个操作系统上各 101 条
   单测全过，`app` 在 3 个操作系统上真的编出 Tauri 层并跑 3 条单测（Ubuntu 首编 1m30s，先装 WebKitGTK）；
@@ -453,13 +453,15 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
 - `shell/core/src/delivery.rs` + `shell/core/src/payload_fetch.rs` + `examples/install_from_dir.rs`：
   外壳侧的清单消费者。逐项校验 schema/os/键前缀/键与落点绑定/哈希/总量，按调用方给的 `fetch`
   取字节，长度与 sha256 都对了才用同目录临时文件 + 重命名落盘，根清单最后落，已正确的文件跳过；
-  25 条离线测试（清单消费 14 + 取数 11）。`payload_fetch` 负责真正取数：多个基址按顺序换源、按对象键拼 URL
+  31 条离线测试（清单消费 14 + 取数 17）。`payload_fetch` 负责真正取数：多个基址按顺序换源、按对象键拼 URL
   （非安全字节转义）、断流后用 `.part` 的长度发 Range 续传、哈希不符丢掉重下；基址只收
-  https，`http://127.0.0.1` 只给重放用（公网 http 会被拒）。CI 的消费者重放先走目录路径
+  https，`http://127.0.0.1` 只给重放用（公网 http 会被拒）。首启入口也在这两层之上：
+  `payload_source` 报告数据根里有没有 `payload-source.json`，`install_payload` 取交付清单、
+  校验平台后逐对象装进数据根，进度按文件数发 `payload-progress`；配置缺失时 UI 不显示安装按钮。CI 的消费者重放先走目录路径
   （run 39654853807：linux-x64 94 个文件 / 156.3 MiB、win-x64 58 / 105.0、macos-arm64 33 / 158.4），
   再用 `python -m http.server` 把对象目录当远端、走一遍 HTTP 取数路径（run 39656642754 三档同数、
-  均 0 跳过，`--help` 三次 rc=0 且输出含 `--port`）。IPC/UI 入口与
-  发布落点（R2 写）仍未接。
+  均 0 跳过，`--help` 三次 rc=0 且输出含 `--port`）。IPC/UI 入口已接（读数据根的
+  `payload-source.json`），发布落点（R2 写）与生产基址仍未定。
 - `.github/workflows/installer.yml` + `tools/make_icons.py`：**安装包本身**，三平台各一个未签名包，
   只装壳、不带引擎与权重（引擎 server-only 后 105.0 MiB + 权重 415 MB 起，装不进安装器）。矩阵 Windows `nsis` /
   macOS `dmg` / Linux `deb`，用钉住的 `tauri-apps/tauri-action`；CLI 显式传

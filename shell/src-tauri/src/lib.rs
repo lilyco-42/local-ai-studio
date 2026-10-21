@@ -13,6 +13,8 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             commands::status,
             commands::data_root,
+            commands::payload_source,
+            commands::install_payload,
             commands::start_engine,
             commands::stop_engine,
             commands::chat,
