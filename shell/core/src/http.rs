@@ -450,9 +450,30 @@ mod tests {
         let (tx, rx) = std::sync::mpsc::channel();
         thread::spawn(move || {
             let (mut s, _) = listener.accept().unwrap();
-            let mut buf = [0u8; 8192];
-            let n = s.read(&mut buf).unwrap();
-            tx.send(String::from_utf8_lossy(&buf[..n]).into_owned()).unwrap();
+            // 读到完整请求再回包。Windows 上"读一次→写响应→关连接"会与客户端写 body 竞态：
+            // 客户端还在写时收到 RST，读响应就报 os error 10054，红在一次与判据无关的时序上。
+            let mut buf = Vec::new();
+            let mut scratch = [0u8; 1024];
+            loop {
+                let n = s.read(&mut scratch).unwrap();
+                if n == 0 {
+                    break;
+                }
+                buf.extend_from_slice(&scratch[..n]);
+                let Some(head_end) = buf.windows(4).position(|w| w == b"\r\n\r\n") else {
+                    continue;
+                };
+                let head = String::from_utf8_lossy(&buf[..head_end]).to_ascii_lowercase();
+                let want: usize = head
+                    .lines()
+                    .find_map(|l| l.strip_prefix("content-length:"))
+                    .and_then(|v| v.trim().parse().ok())
+                    .unwrap_or(0);
+                if buf.len() >= head_end + 4 + want {
+                    break;
+                }
+            }
+            tx.send(String::from_utf8_lossy(&buf).into_owned()).unwrap();
             let _ = s.write_all(b"HTTP/1.1 200 OK\r\nContent-Length: 2\r\n\r\nok");
         });
         let r = request(
