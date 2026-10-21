@@ -11,6 +11,7 @@ pub mod download;
 pub mod error;
 pub mod http;
 pub mod manifest;
+pub mod payload_fetch;
 pub mod supervisor;
 
 pub use contract::{Contract, CONTRACT_JSON};

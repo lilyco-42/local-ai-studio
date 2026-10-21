@@ -426,13 +426,16 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   21 条离线对照（含真实合同落点、6 条源码变异体，以及删掉原树后只凭清单还原的
   消费端重放；坏对象或越界落点不许落根清单），2026-10-21 同一轮出包车道在三档 OS 上都生成了
   `delivery-manifest.json`（run 39632180385 第 9 步）。
-- `shell/core/src/delivery.rs` + `examples/install_from_dir.rs`：外壳侧的清单消费者。逐项校验
-  schema/os/键前缀/键与落点绑定/哈希/总量，按调用方给的 `fetch` 取字节，长度与 sha256 都对了
-  才用同目录临时文件 + 重命名落盘，根清单最后落，已正确的文件跳过；13 条离线测试。CI 的
-  消费者重放把摆好的树复制成对象字典、删掉原树，只凭 `delivery-manifest.json` 装进空目录，
-  再从装好的树起 `llama-server --help`：linux-x64 94 个文件 / 156.3 MiB、win-x64 58 / 105.0、
-  macos-arm64 33 / 158.4，三次 rc=0 且输出含 `--port`（run 39654853807，win/mac 在各自原生
-  runner 上执行）。网络取数与 IPC 入口仍未接。
+- `shell/core/src/delivery.rs` + `shell/core/src/payload_fetch.rs` + `examples/install_from_dir.rs`：
+  外壳侧的清单消费者。逐项校验 schema/os/键前缀/键与落点绑定/哈希/总量，按调用方给的 `fetch`
+  取字节，长度与 sha256 都对了才用同目录临时文件 + 重命名落盘，根清单最后落，已正确的文件跳过；
+  14 条离线测试。`payload_fetch` 负责真正取数：多个基址按顺序换源、按对象键拼 URL
+  （非安全字节转义）、断流后用 `.part` 的长度发 Range 续传、哈希不符丢掉重下；基址只收
+  https，`http://127.0.0.1` 只给重放用（公网 http 会被拒）。CI 的消费者重放先走目录路径，
+  再用 `python -m http.server` 把对象目录当远端、走一遍 HTTP 取数路径：linux-x64
+  94 个文件 / 156.3 MiB、win-x64 58 / 105.0、macos-arm64 33 / 158.4，三次 rc=0 且输出含
+  `--port`（run 39654853807 是目录路径；HTTP 路径由本轮 package run 复核）。IPC/UI 入口与
+  发布落点（R2 写）仍未接。
 - `.github/workflows/installer.yml` + `tools/make_icons.py`：**安装包本身**，三平台各一个未签名包，
   只装壳、不带引擎与权重（引擎 server-only 后 104.7 MiB + 权重 415 MB 起，装不进安装器）。矩阵 Windows `nsis` /
   macOS `dmg` / Linux `deb`，用钉住的 `tauri-apps/tauri-action`；CLI 显式传

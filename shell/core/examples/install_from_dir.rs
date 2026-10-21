@@ -1,12 +1,14 @@
-//! CI 重放用：把对象目录当成"远端"，只凭交付清单把数据根装出来。
+//! CI 重放用：把对象目录或 HTTP 基址当成"远端"，只凭交付清单把数据根装出来。
 //!
-//! 对象目录按清单里的 `key` 平铺（`<objects>/<key>`），和将来 HTTPS 桶里的键
-//! 一一对应；所以这个例子跑通 = 清单 → 合同落点 → 逐文件校验这条消费路径跑通。
+//! 对象目录按清单里的 `key` 平铺（`<objects>/<key>`），和 HTTPS 桶里的键一一对应；
+//! 所以这个例子跑通 = 清单 → 合同落点 → 逐文件校验这条消费路径跑通。
 //!
 //! `--stage-from <数据根>` 先按清单把一棵已经摆好的树复制成对象目录，再删掉那棵树；
-//! 之后的安装只能读对象目录，证明没有偷看生产者。`--run-help` 从装好的树里找
-//! `llama-server` 跑一次 `--help`：只看"装载器能解析依赖并打印用法"，所以 rc 收 0/1，
-//! 但输出里必须有 `--port`。两个开关都只给 CI 用，生产路径仍是 `delivery::install`。
+//! `--base-url <基址>`（可重复）换成经 `download::Fetcher`（系统 curl）按 `基址/键` 取，
+//! 多个基址按顺序换源、断点续传、过哈希才落进对象目录。两者只能选一个。
+//! `--run-help` 从装好的树里找 `llama-server` 跑一次 `--help`：只看"装载器能解析依赖并打印用法"，
+//! 所以 rc 收 0/1，但输出里必须有 `--port`。这些开关只给 CI 用，生产路径仍是
+//! `payload_fetch` + `delivery::install`。
 
 use std::env;
 use std::fs::{self, File};
@@ -17,6 +19,8 @@ use std::thread::sleep;
 use std::time::{Duration, Instant};
 
 use local_ai_studio_core::delivery::{install, Delivery, DeliveryFile};
+use local_ai_studio_core::download::{CurlFetcher, Policy};
+use local_ai_studio_core::payload_fetch::{fetch_object, Bases};
 use local_ai_studio_core::CoreError;
 
 struct Args {
@@ -25,12 +29,13 @@ struct Args {
     data: PathBuf,
     os: String,
     stage_from: Option<PathBuf>,
+    bases: Vec<String>,
     run_help: bool,
 }
 
 fn usage() -> String {
     "--manifest <delivery-manifest.json> --objects <dir> --data <dir> --os <platform> \
-     [--stage-from <已摆好的数据根>] [--run-help]"
+     [--stage-from <已摆好的数据根> | --base-url <https 基址> ...] [--run-help]"
         .into()
 }
 
@@ -40,6 +45,7 @@ fn parse() -> Result<Args, String> {
     let mut data = None;
     let mut os = None;
     let mut stage_from = None;
+    let mut bases = Vec::new();
     let mut run_help = false;
     let mut it = env::args().skip(1);
     while let Some(flag) = it.next() {
@@ -54,8 +60,12 @@ fn parse() -> Result<Args, String> {
             "--data" => data = Some(PathBuf::from(value)),
             "--os" => os = Some(value),
             "--stage-from" => stage_from = Some(PathBuf::from(value)),
+            "--base-url" => bases.push(value),
             other => return Err(format!("不认识的参数 {other}")),
         }
+    }
+    if stage_from.is_some() && !bases.is_empty() {
+        return Err("--stage-from 与 --base-url 只能选一个".into());
     }
     Ok(Args {
         manifest: manifest.ok_or_else(usage)?,
@@ -63,6 +73,7 @@ fn parse() -> Result<Args, String> {
         data: data.ok_or_else(usage)?,
         os: os.ok_or_else(usage)?,
         stage_from,
+        bases,
         run_help,
     })
 }
@@ -218,18 +229,44 @@ fn run_help(bin: &Path) -> Result<(), CoreError> {
 
 fn run(args: &Args) -> Result<(), CoreError> {
     let delivery = Delivery::from_file(&args.manifest)?;
+    let bases = if args.bases.is_empty() {
+        None
+    } else {
+        Some(Bases::parse(&args.bases)?)
+    };
     if let Some(stage) = &args.stage_from {
         let n = build_objects(&delivery, stage, &args.objects)?;
         println!("对象目录：{n} 个键（含根清单），生产者那棵树已删掉");
     }
-    let objects = &args.objects;
-    let report = install(&delivery, &args.os, &args.data, |key| {
-        let path = objects.join(key);
-        fs::read(&path).map_err(|e| {
-            CoreError::Manifest(format!("对象 {} 读不出来: {e}", path.display()))
-        })
-    })?;
     let total: u64 = delivery.files.iter().map(|f| f.bytes).sum();
+    let report = if let Some(bases) = &bases {
+        println!(
+            "取字节：{} 个基址，按顺序换源；对象目录 {}",
+            args.bases.len(),
+            args.objects.display()
+        );
+        let mut fetcher = CurlFetcher::new();
+        install(&delivery, &args.os, &args.data, |key| {
+            let (bytes, sha) = delivery.expected(key)?;
+            fetch_object(
+                bases,
+                key,
+                bytes,
+                sha,
+                &args.objects,
+                &mut fetcher,
+                Policy::default(),
+            )
+        })?
+    } else {
+        let objects = &args.objects;
+        install(&delivery, &args.os, &args.data, |key| {
+            let path = objects.join(key);
+            fs::read(&path).map_err(|e| {
+                CoreError::Manifest(format!("对象 {} 读不出来: {e}", path.display()))
+            })
+        })?
+    };
     println!(
         "{}: 装好 {} 个文件（跳过 {} 个已就位），{:.1} MiB；根清单在 {}",
         args.os,

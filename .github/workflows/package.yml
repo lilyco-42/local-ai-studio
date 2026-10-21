@@ -16,6 +16,9 @@ on:
       - "tools/stage_payload.py"
       - "tools/payload_intake.py"
       - "shell/core/src/delivery.rs"
+      - "shell/core/src/download.rs"
+      - "shell/core/src/lib.rs"
+      - "shell/core/src/payload_fetch.rs"
       - "shell/core/examples/install_from_dir.rs"
       - "pins/payload-plan.json"
       - "pins/shell-contract.json"
@@ -110,21 +113,42 @@ jobs:
             --out "dist/${OS_TAG}/delivery-manifest.json"
       # 消费端重放：发布方把文件按对象键摆成"桶"，然后**删掉生产者那棵树**，
       # 让安装只能读对象目录 —— 证明它没有偷看数据根、只凭清单就能还原。
-      # Linux 的产物能在 ubuntu runner 上真执行；win/mac 由下面的 engine-native
-      # 在各自的原生 runner 上做同一件事。
-      - name: 消费端重放：清单 → 空数据根 → 从装好的树起 llama-server（linux-x64）
+      # 第二遍把这个对象目录用 python http.server 当成"远端"，走 payload_fetch 的
+      # 换源/续传/哈希路径重新取一遍，再起 llama-server。Linux 的产物能在 ubuntu
+      # runner 上真执行；win/mac 由下面的 engine-native 在各自的原生 runner 上做同一件事。
+      - name: 消费端重放：对象目录 + HTTP 基址 → 空数据根 → 起 llama-server（linux-x64）
         if: matrix.os_tag == 'linux-x64'
         env:
           OS_TAG: ${{ matrix.os_tag }}
         run: |
           set -euo pipefail
-          rm -rf "/tmp/objects-${OS_TAG}" "/tmp/installed-${OS_TAG}"
+          OBJ="/tmp/objects-${OS_TAG}"
+          SRC_DATA="/tmp/installed-src-${OS_TAG}"
+          HTTP_OBJ="/tmp/objects-http-${OS_TAG}"
+          DATA="/tmp/installed-${OS_TAG}"
+          rm -rf "$OBJ" "$SRC_DATA" "$HTTP_OBJ" "$DATA"
           cargo run --quiet --manifest-path shell/core/Cargo.toml \
             --example install_from_dir -- \
             --manifest "dist/${OS_TAG}/delivery-manifest.json" \
             --stage-from "/tmp/root-${OS_TAG}" \
-            --objects "/tmp/objects-${OS_TAG}" \
-            --data "/tmp/installed-${OS_TAG}" --os "${OS_TAG}" --run-help
+            --objects "$OBJ" \
+            --data "$SRC_DATA" --os "${OS_TAG}"
+          python3 -m http.server 18765 --bind 127.0.0.1 --directory "$OBJ" > "/tmp/http-${OS_TAG}.log" 2>&1 &
+          SRV=$!
+          trap 'kill "$SRV" 2>/dev/null || true' EXIT
+          i=0
+          while [ "$i" -lt 50 ]; do
+            if curl -fsS -o /dev/null "http://127.0.0.1:18765/"; then break; fi
+            i=$((i + 1))
+            sleep 0.2
+          done
+          curl -fsS -o /dev/null "http://127.0.0.1:18765/" || { cat "/tmp/http-${OS_TAG}.log"; exit 1; }
+          cargo run --quiet --manifest-path shell/core/Cargo.toml \
+            --example install_from_dir -- \
+            --manifest "dist/${OS_TAG}/delivery-manifest.json" \
+            --base-url "http://127.0.0.1:18765" \
+            --objects "$HTTP_OBJ" \
+            --data "$DATA" --os "${OS_TAG}" --run-help
       - name: 上传引擎负载与首启交付清单
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4.6.2
         with:
@@ -168,16 +192,36 @@ jobs:
           rm -rf ".replay/staged-${OS_TAG}"
           python tools/stage_payload.py --package "dist/${OS_TAG}" --data ".replay/staged-${OS_TAG}" --os "${OS_TAG}"
           python tools/stage_payload.py --check --package "dist/${OS_TAG}" --data ".replay/staged-${OS_TAG}" --os "${OS_TAG}"
-      - name: 消费端重放：清单 → 空数据根 → 从装好的树起 llama-server
+      - name: 消费端重放：对象目录 + HTTP 基址 → 空数据根 → 起 llama-server
         shell: bash
         env:
           OS_TAG: ${{ matrix.os_tag }}
         run: |
           set -euo pipefail
-          rm -rf ".replay/objects-${OS_TAG}" ".replay/installed-${OS_TAG}"
+          OBJ=".replay/objects-${OS_TAG}"
+          SRC_DATA=".replay/installed-src-${OS_TAG}"
+          HTTP_OBJ=".replay/objects-http-${OS_TAG}"
+          DATA=".replay/installed-${OS_TAG}"
+          rm -rf "$OBJ" "$SRC_DATA" "$HTTP_OBJ" "$DATA"
           cargo run --quiet --manifest-path shell/core/Cargo.toml \
             --example install_from_dir -- \
             --manifest "dist/${OS_TAG}/delivery-manifest.json" \
             --stage-from ".replay/staged-${OS_TAG}" \
-            --objects ".replay/objects-${OS_TAG}" \
-            --data ".replay/installed-${OS_TAG}" --os "${OS_TAG}" --run-help
+            --objects "$OBJ" \
+            --data "$SRC_DATA" --os "${OS_TAG}"
+          python -m http.server 18765 --bind 127.0.0.1 --directory "$OBJ" > ".replay/http-${OS_TAG}.log" 2>&1 &
+          SRV=$!
+          trap 'kill "$SRV" 2>/dev/null || true' EXIT
+          i=0
+          while [ "$i" -lt 50 ]; do
+            if curl -fsS -o /dev/null "http://127.0.0.1:18765/"; then break; fi
+            i=$((i + 1))
+            sleep 0.2
+          done
+          curl -fsS -o /dev/null "http://127.0.0.1:18765/" || { cat ".replay/http-${OS_TAG}.log"; exit 1; }
+          cargo run --quiet --manifest-path shell/core/Cargo.toml \
+            --example install_from_dir -- \
+            --manifest "dist/${OS_TAG}/delivery-manifest.json" \
+            --base-url "http://127.0.0.1:18765" \
+            --objects "$HTTP_OBJ" \
+            --data "$DATA" --os "${OS_TAG}" --run-help

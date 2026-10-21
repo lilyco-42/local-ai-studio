@@ -70,6 +70,16 @@ impl Delivery {
         Self::parse(&text)
     }
 
+    /// 按对象键反查清单里的期望值（取数的调用方用它决定要下多少字节、对哪个哈希）。
+    pub fn expected(&self, key: &str) -> Result<(u64, &str), CoreError> {
+        self.files
+            .iter()
+            .chain(std::iter::once(&self.manifest))
+            .find(|row| row.key == key)
+            .map(|row| (row.bytes, row.sha256.as_str()))
+            .ok_or_else(|| CoreError::Manifest(format!("清单里没有对象键 {key}")))
+    }
+
     /// 整张表先验一遍再碰盘：任何一条不合规都不许开始下载。
     pub fn check(&self, platform: &str) -> Result<(), CoreError> {
         if self.schema != 1 {
@@ -433,6 +443,17 @@ mod tests {
                 .cloned()
                 .ok_or_else(|| CoreError::Manifest(format!("对象目录里没有 {key}")))
         }
+    }
+
+    #[test]
+    fn expected_looks_up_file_rows_and_the_root_manifest() {
+        let (delivery, _) = sample();
+        let row = &delivery.files[1];
+        assert_eq!(delivery.expected(&row.key).unwrap(), (row.bytes, row.sha256.as_str()));
+        let m = &delivery.manifest;
+        assert_eq!(delivery.expected(&m.key).unwrap(), (m.bytes, m.sha256.as_str()));
+        let err = delivery.expected("payload/linux-x64/nope").unwrap_err().to_string();
+        assert!(err.contains("没有对象键"), "{err}");
     }
 
     #[test]

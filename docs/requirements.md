@@ -921,17 +921,23 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     `--check` 重算并逐键相等，拒绝多余/缺失、两个引擎同目标、越界前缀，输出不含绝对路径。
     `tests/test_payload_intake.py` 21 条（真实合同落点、两个数据根同一份字节、13 条合成自测、
     6 条源码变异体，以及消费端重放：删掉原数据根后只凭对象字典按清单还原，按外壳
-    `verify_payload` 的顺序逐文件验过；坏对象/缺对象/越界或重复落点时根清单不许落）。这份 `delivery-manifest.json` 随 artifact 上传，**没有任何写桶或首启
-    下载动作** —— #57 的 A/B 仍未定。
+    `verify_payload` 的顺序逐文件验过；坏对象/缺对象/越界或重复落点时根清单不许落）。这份
+    `delivery-manifest.json` 随 artifact 上传，**没有写桶或生产发布动作** —— 取数目前只发生在
+    CI 重放；首启路径的发布落点仍是 #57 的 A/B。
     外壳侧新增 `shell/core/src/delivery.rs`：解析同一份清单（schema/os/前缀/键与落点绑定/哈希/
     总量），按 `fetch` 回调取字节、长度与 sha256 双验、同目录临时文件 + 重命名、根清单最后落、
-    已正确的文件跳过；13 条离线测试覆盖篡改、短缺、坏根清单和路径逃逸。
+    已正确的文件跳过；14 条离线测试覆盖篡改、短缺、坏根清单和路径逃逸。
+    取数字节由 `shell/core/src/payload_fetch.rs` 接上：多个基址按顺序换源、按对象键拼 URL、
+    断流后用 `.part` 长度发 Range 续传、哈希不符丢掉重下；基址只收 https（`127.0.0.1`/`localhost`
+    的 http 仅给 CI 重放，公网 http 在解析基址时就拒）。单测用假 Fetcher 覆盖换源、续传、
+    服务端忽略 Range、截断后继续和路径逃逸，不需要网络。
     **证据边界**：2026-10-21 `package.yml`（run 39632180385）在三档 OS 上真跑了第 8 步（摆位 + `--check`）
     与第 9 步（交付清单），三档 `engine-payload-<os>` 都上传成功；同日 run 39654853807 在**三档原生 runner**
     上做了消费者重放：删掉摆好的数据根，只凭清单装进空目录（linux-x64 94 个文件 / 156.3 MiB、
     win-x64 58 / 105.0、macos-arm64 33 / 158.4，均 0 跳过），再从装好的树起 `llama-server --help`
     （三次 rc=0，输出含 `--port`）。所以"真实上游包能按合同落位"与"清单足以还原能起引擎的树"都有 CI 证据；
-    仍没有的是网络取数与 IPC 入口（#57），以及用户个人电脑上的"装完真能跑"。
+    出包车道现在还会把对象目录当 HTTP 远端再取一遍（`--base-url`，本轮 package run 复核），
+    仍没有的是**发布落点（R2 写）与 IPC/UI 入口**（#57），以及用户个人电脑上的"装完真能跑"。
     OCR 仍不在出包清单里，`not_in_manifest` 会点名 `文字识别/oar-ocr` —— 已知缺口，不是这一步的失败。
 34. **安装包本身：三平台各一个未签名包，只装壳**（`.github/workflows/installer.yml` + `tools/make_icons.py`）：
     矩阵 Windows `nsis` / macOS `dmg` / Linux `deb`；触发是 push main 上 `shell/**` 或自身 +
