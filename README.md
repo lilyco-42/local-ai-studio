@@ -365,7 +365,10 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   载荷清单），`invoke('data_root')` 回
   `/home/runner/.local/share/top.lilyco42.local-ai-studio`；页面标题是 `Local AI Studio`、
   “找不到 Tauri IPC”提示条保持隐藏、状态条渲染成 `对话 · 运行组件未安装`，`#data-root` 与返回值逐字相同；
-  同一步还把能力名换成假的做已知坏对照，必须被拒。**边界**：只有 Ubuntu 这一档，没有点“启动引擎”、
+  同一步还把能力名换成假的做已知坏对照，必须被拒；最后按 `pins/shell-contract.json` 在同一个数据根
+  摆一份**合成**清单与 3 字节占位文件，要求只有对话那一行翻成 `installed=true`、状态条回到
+  `对话 · 未启动`——`installed=true` 这一侧的正控。占位文件不是载荷，起引擎时仍会逐文件验哈希并拒掉。
+  **边界**：只有 Ubuntu 这一档，没有点“启动引擎”、
   没有联网 —— 证的是 IPC 桥与首屏渲染，不是四条能力的端到端链路；macOS/Windows 的 app job 跳过这两步。
 - `tools/action_pins.py` + `pins/actions.json`：**出包那只手自己也要钉住**。开工时三个
   workflow 里 4 个 `uses:` 全是浮动大版本 tag（`checkout@v4`、`setup-python@v5`、

@@ -4,9 +4,11 @@
 会话请求的形状、status 的字段与能力集合、data_root 的绝对路径、UI 渲染证据，
 以及"车道真的调用了这套判据并带了已知坏对照"。
 """
+import json
 import os
 import re
 import sys
+import tempfile
 import time
 import unittest
 
@@ -18,6 +20,7 @@ import wd_ipc_probe as wd  # noqa: E402
 ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 WF = os.path.join(ROOT, ".github", "workflows", "shell.yml")
 MAIN_JS = os.path.join(ROOT, "shell", "ui", "main.js")
+CONTRACT = os.path.join(ROOT, "pins", "shell-contract.json")
 
 
 def row(name, **overrides):
@@ -142,6 +145,79 @@ class TestStatusGate(unittest.TestCase):
             wd.check_status({"capability": "对话"})
 
 
+class TestInstalledMapGate(unittest.TestCase):
+    def want(self):
+        return {name: name == "对话" for name in wd.EXPECTED_CAPABILITIES}
+
+    def test_only_the_planted_capability_is_true(self) -> None:
+        data = rows()
+        data[0]["installed"] = True
+        wd.check_installed_map(data, self.want())
+
+    def test_another_row_flipping_true_is_rejected(self) -> None:
+        data = rows()
+        data[0]["installed"] = True
+        data[1]["installed"] = True
+        with self.assertRaisesRegex(wd.ProbeError, "installed 期望"):
+            wd.check_installed_map(data, self.want())
+
+
+class TestPlantedPayload(unittest.TestCase):
+    def setUp(self) -> None:
+        self.tmp = tempfile.TemporaryDirectory()
+        self.root = os.path.join(self.tmp.name, "data")
+
+    def tearDown(self) -> None:
+        self.tmp.cleanup()
+
+    def test_expand_data_dir_replaces_the_placeholder(self) -> None:
+        path = wd.expand_data_dir("<data>/runtime/linux-x64/llama/b1/x",
+                                  "/home/runner/.local/share/app")
+        self.assertEqual(path, "/home/runner/.local/share/app/runtime/linux-x64/llama/b1/x")
+
+    def test_expand_data_dir_rejects_escapes_and_relative_roots(self) -> None:
+        for template in ("<data>/../etc", "<data>/a//b", "<data>/a\\b", "runtime/x"):
+            with self.subTest(template=template), self.assertRaises(ValueError):
+                wd.expand_data_dir(template, "/data")
+        with self.assertRaises(ValueError):
+            wd.expand_data_dir("<data>/runtime", "relative/root")
+
+    def test_plant_writes_a_manifest_matching_the_contract_cell(self) -> None:
+        info = wd.plant_payload(self.root, CONTRACT, capability="对话", platform="linux-x64", size=3)
+        with open(info["manifest"], encoding="utf-8") as fh:
+            manifest = json.load(fh)
+        with open(CONTRACT, encoding="utf-8") as fh:
+            cell = json.load(fh)["capabilities"]["对话"]["os"]["linux-x64"]
+        self.assertEqual(manifest["os"], "linux-x64")
+        self.assertEqual(len(manifest["engines"]), 1)
+        entry = manifest["engines"][0]
+        self.assertEqual(entry["engine"], "llama")
+        self.assertEqual(entry["asset"], cell["default_asset"])
+        self.assertEqual(entry["status"], "ok")
+        self.assertEqual(entry["files"][0]["file"], "probe-presence.bin")
+        self.assertEqual(entry["files"][0]["bytes"], 3)
+        self.assertRegex(entry["files"][0]["sha256"], r"^[0-9a-f]{64}$")
+        self.assertEqual(info["dir"], wd.expand_data_dir(cell["asset_dir"], self.root))
+        self.assertEqual(os.path.dirname(info["file"]), info["dir"])
+        self.assertEqual(os.path.getsize(info["file"]), 3)
+
+    def test_plant_is_idempotent_and_leaves_no_temp_file(self) -> None:
+        wd.plant_payload(self.root, CONTRACT)
+        wd.plant_payload(self.root, CONTRACT)
+        leftovers = [name for name in os.listdir(self.root) if name.endswith(".probe-tmp")]
+        self.assertEqual(leftovers, [])
+
+    def test_plant_refuses_a_non_server_capability(self) -> None:
+        with self.assertRaisesRegex(ValueError, "不是 server"):
+            wd.plant_payload(self.root, CONTRACT, capability="文字识别")
+
+    def test_plant_refuses_unknown_capability_or_platform(self) -> None:
+        with self.assertRaises(ValueError):
+            wd.plant_payload(self.root, CONTRACT, capability="不存在")
+        with self.assertRaises(ValueError):
+            wd.plant_payload(self.root, CONTRACT, platform="plan9-x64")
+
+
 class TestDataRootGate(unittest.TestCase):
     def test_linux_and_windows_absolute_paths_pass(self) -> None:
         wd.check_data_root("/home/runner/.local/share/local-ai-studio")
@@ -243,6 +319,7 @@ class TestWorkflow(unittest.TestCase):
             '--app "$PWD/target/debug/local-ai-studio-shell"',
             '--native-driver "$(command -v WebKitWebDriver)"',
             "--expect-not-installed",
+            "--plant-payload 对话",
             "--negative-control",
         ):
             with self.subTest(needle=needle):

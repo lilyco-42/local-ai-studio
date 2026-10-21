@@ -23,6 +23,7 @@ import urllib.request
 
 # 与 shell/ui/main.js 的 TAB_CAP 一致：这四个名字是 UI 与后端的接缝，改名了这里必须跟着红。
 EXPECTED_CAPABILITIES = ("对话", "字幕", "文字识别", "生图")
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 REQUIRED_STATUS_FIELDS = (
     "capability", "engine", "available", "installed", "running",
     "pid", "port", "idle_secs_left", "lifecycle",
@@ -129,6 +130,65 @@ def check_data_root(value) -> None:
         raise ProbeError(f"data_root 应是非空字符串，实际 {value!r}")
     if not is_absolute_path(value):
         raise ProbeError(f"data_root 不是绝对路径：{value!r}")
+
+
+def check_installed_map(rows, want: dict) -> None:
+    got = {row["capability"]: row["installed"] for row in rows}
+    if got != want:
+        raise ProbeError(f"status.installed 期望 {want}，实际 {got}")
+
+
+def expand_data_dir(template: str, data_root: str) -> str:
+    if not is_absolute_path(data_root):
+        raise ValueError(f"data_root 必须是绝对路径：{data_root!r}")
+    prefix = "<data>/"
+    if not template.startswith(prefix):
+        raise ValueError(f"合同里的目录不是以 {prefix!r} 开头：{template!r}")
+    rest = template[len(prefix):]
+    if "\\" in rest or any(part in ("", ".", "..") for part in rest.split("/")):
+        raise ValueError(f"合同目录里有反斜杠、空段或 ..：{template!r}")
+    sep = "\\" if "\\" in data_root and "/" not in data_root else "/"
+    return data_root.rstrip("/\\") + sep + sep.join(rest.split("/"))
+
+
+def plant_payload(data_root: str, contract_path: str, capability: str = "对话",
+                  platform: str = "linux-x64", size: int = 3) -> dict:
+    """摆一份**合成**清单与占位文件，只为把 status 的 installed 翻成 true。
+
+    它证明的是"清单条目在、体积对得上"这条安静判据真的接在 IPC 上；占位文件不是可执行载荷，
+    start_engine 的逐文件哈希仍会拒绝它。引擎、资产名与目录全部来自合同表，这里不写死。
+    """
+    with open(contract_path, encoding="utf-8") as fh:
+        contract = json.load(fh)
+    cap = contract["capabilities"].get(capability)
+    cell = (cap or {}).get("os", {}).get(platform)
+    if not cap or not cell:
+        raise ValueError(f"合同里没有 {capability} / {platform}")
+    if cap.get("mode") != "server":
+        raise ValueError(f"{capability} 不是 server 形态（mode={cap.get('mode')!r}），装机记录不适用")
+    asset = cell.get("default_asset")
+    template = cell.get("asset_dir") or cell.get("version_dir")
+    if not asset or not template:
+        raise ValueError(f"{capability} / {platform} 缺默认资产或目录：{cell!r}")
+    directory = expand_data_dir(template, data_root)
+    os.makedirs(directory, exist_ok=True)
+    name = "probe-presence.bin"
+    with open(os.path.join(directory, name), "wb") as fh:
+        fh.write(b"\0" * size)
+    manifest = {
+        "os": platform,
+        "engines": [{
+            "engine": cap["engine"], "status": "ok", "asset": asset,
+            "files": [{"file": name, "bytes": size, "sha256": "0" * 64}],
+        }],
+    }
+    manifest_path = os.path.join(data_root, "payload-manifest.json")
+    tmp = manifest_path + ".probe-tmp"
+    with open(tmp, "w", encoding="utf-8") as fh:
+        json.dump(manifest, fh, ensure_ascii=False)
+    os.replace(tmp, manifest_path)
+    return {"manifest": manifest_path, "dir": directory, "file": os.path.join(directory, name),
+            "engine": cap["engine"], "asset": asset, "bytes": size}
 
 
 def check_ui(state, data_root: str, expected_title: str = "Local AI Studio", chip_suffix=None) -> None:
@@ -268,7 +328,8 @@ def run(args) -> int:
         poll_until(lambda: driver.execute(sid, READY_JS) is True, deadline, "页面里的 window.__TAURI__")
 
         rows = invoke(driver, sid, "status")
-        check_status(rows, installed=False if args.expect_not_installed else None)
+        fresh = args.expect_not_installed or bool(args.plant_payload)
+        check_status(rows, installed=False if fresh else None)
         say("status: " + " / ".join(
             f"{row['capability']}(available={row['available']},installed={row['installed']},"
             f"running={row['running']},lifecycle={row['lifecycle']})"
@@ -283,7 +344,7 @@ def run(args) -> int:
             if not isinstance(state, dict) or state.get("chip") in (None, "…") or not state.get("data_root_text"):
                 return None
             # 首帧是“未启动”，要等 refreshStatus 回来才会变成“运行组件未安装”。
-            if args.expect_not_installed and not state["chip"].endswith("运行组件未安装"):
+            if fresh and not state["chip"].endswith("运行组件未安装"):
                 return None
             return state
 
@@ -291,9 +352,42 @@ def run(args) -> int:
         check_ui(
             state,
             root,
-            chip_suffix="运行组件未安装" if args.expect_not_installed else None,
+            chip_suffix="运行组件未安装" if fresh else None,
         )
         say(f"ui: title={state['title']!r} boot_hidden={state['boot_hidden']} chip={state['chip']!r}")
+
+        if args.plant_payload:
+            fixture = plant_payload(root, args.contract, capability=args.plant_payload,
+                                    platform=args.platform)
+            say(f"plant: {fixture['manifest']}（{fixture['engine']} / {fixture['asset']}，"
+                f"{fixture['file']} 占位 {fixture['bytes']} B）")
+            want = {name: name == args.plant_payload for name in EXPECTED_CAPABILITIES}
+            flip_deadline = time.monotonic() + min(60.0, args.timeout)
+
+            def installed_now():
+                current = invoke(driver, sid, "status")
+                check_status(current)
+                check_installed_map(current, want)
+                return current
+
+            rows = poll_until(installed_now, flip_deadline, "status 把刚摆好的载荷报成 installed=true")
+            say("status(装上后): " + " / ".join(
+                f"{row['capability']}(installed={row['installed']})" for row in rows))
+
+            def flipped():
+                current = driver.execute(sid, UI_STATE_JS)
+                if not isinstance(current, dict) or not isinstance(current.get("chip"), str):
+                    return None
+                if current["chip"].endswith("运行组件未安装"):
+                    return None
+                return current
+
+            state = poll_until(flipped, flip_deadline, "状态条从“运行组件未安装”翻成就绪")
+            check_ui(state, root)
+            want_chip = f"{args.plant_payload} · 未启动"
+            if state["chip"] != want_chip:
+                raise ProbeError(f"装上载荷后状态条是 {state['chip']!r}，期望 {want_chip!r}")
+            say(f"ui(装上后): chip={state['chip']!r}")
 
         if args.negative_control:
             spoofed = EXPECTED_CAPABILITIES[:-1] + ("不存在的能力",)
@@ -327,6 +421,12 @@ def main(argv=None) -> int:
         action="store_true",
         help="全新数据根：要求四行 installed 全为 false，且状态条显示“运行组件未安装”",
     )
+    parser.add_argument("--contract", default=os.path.join(ROOT, "pins", "shell-contract.json"),
+                        help="装机目录与资产名只从这张合同表取（默认仓库里那份）")
+    parser.add_argument("--platform", default="linux-x64",
+                        help="合同里的 OS 键；这条车道只在 Linux 上跑")
+    parser.add_argument("--plant-payload", metavar="CAPABILITY", default=None,
+                        help="在数据根摆一份合成清单+占位文件，要求该能力 installed 翻成 true（其余仍 false）")
     parser.add_argument("--log", default=os.path.join(tempfile.gettempdir(), "wd-ipc-probe.log"))
     args = parser.parse_args(argv)
     try:

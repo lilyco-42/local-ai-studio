@@ -98,7 +98,7 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
 
 ## 验收标准（在当前唯一可用验证手段 = GitHub Actions 下）
 
-1. `ci.yml`：951 个单测绿（重数：`python -W error::ResourceWarning -m unittest discover -s tests
+1. `ci.yml`：959 个单测绿（重数：`python -W error::ResourceWarning -m unittest discover -s tests
    -p "test_*.py"`；按文件数就 `python -m unittest tests.<模块名>`。2026-10-20 实测逐文件：
    `test_yaml_gate.py` 闸门自己（含 workflow 文件清单与磁盘覆盖对照）17、`test_lane_argv.py` 车道 ↔ 启动表一致（含 15 个 workflow 文本变异）10、
    `test_sideload.py` sideload 按内容认领（6 条源码变异体 + 三个真上游文件）22、
@@ -132,7 +132,8 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
    `test_r2_manifest.py` 镜像清单 6、`test_lane_assertions.py` + `test_image_proof_block.py`
    车道判据 38 + 6 = 44、`test_png_proof.py` PNG 判据 25、`test_srt_proof.py` SRT 判据 20、
    `test_wd_ipc_probe.py` WebDriver 真驱动窗口（会话请求 / status 与 data_root 判据 / UI 渲染证据 /
-   车道文本与已知坏对照 / `installed=false` 与"运行组件未安装"状态条）34、
+   车道文本与已知坏对照 / `installed=false` 与"运行组件未安装"状态条 /
+   按合同摆合成载荷后 `installed` 只对对话翻成 true 且状态条回到就绪）42、
    `test_recommend_image.py` 生图档位表 31、`test_machine_budget.py` 装机预算 21、
    `test_lane_replay_report.py` 给分段、预跑与 job 数计数，并把上面这份逐文件账按模块 import 复算
    （1 条正控 + 4 个计数变异 + 合写加法自洽），另按锚点复算 README 与两份文档里 7 处
@@ -915,7 +916,10 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     `available=true`、`installed=false`——全新数据根还没有载荷清单），`invoke('data_root')` 回
     `/home/runner/.local/share/top.lilyco42.local-ai-studio`；
     页面隐藏了 IPC 缺失提示、状态条是 `对话 · 运行组件未安装`、`#data-root` 与返回值逐字相同，另有一组
-    “假能力名必须被拒”的已知坏对照。边界：只有 Ubuntu，没起引擎、没联网，证的是 IPC 桥与首屏渲染。
+    “假能力名必须被拒”的已知坏对照；最后按合同在同一个数据根摆一份合成清单 + 3 字节占位文件，
+    要求只有对话翻成 `installed=true`、状态条回到 `对话 · 未启动`（`installed=true` 的正控；
+    占位文件不是载荷，起引擎仍会验哈希并拒绝）。边界：只有 Ubuntu，没起引擎、没联网，
+    证的是 IPC 桥与首屏渲染。
 33. **出包产物到外壳目录之间的那一步补上了**：出包车道的产物是平铺的 `dist/<os>/<engine>/`，
     外壳只认 `<data>/runtime/<os>/<engine>/<version>/<asset-stem>/` + 根部的 `payload-manifest.json`，
     此前没有工具把两者接起来。`tools/stage_payload.py` 只从 `pins/shell-contract.json` 的
