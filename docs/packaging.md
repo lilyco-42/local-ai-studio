@@ -152,15 +152,17 @@ asset/OS/引擎不符等）；`tests/test_stage_payload.py` 10 条离线对照�
 落盘，根清单最后落；已正确的文件跳过（幂等）。`shell/core/src/payload_fetch.rs` 负责真正取数：
 多个基址按顺序换源、按对象键拼 URL（非安全字节转义）、断流后用 `.part` 长度发 Range 续传、
 哈希不符丢掉重下；基址只收 https，`http://127.0.0.1` 只给重放用（公网 http 会被拒）。
-14 条离线测试覆盖篡改、短缺、坏根清单、路径逃逸、换源、续传和服务端忽略 Range。
+25 条离线测试（清单消费 14 + 取数 11）覆盖篡改、短缺、坏根清单、路径逃逸、换源、续传和服务端忽略 Range。
 
 CI 里的消费者重放（`examples/install_from_dir.rs`）分两遍：第一遍把 `/tmp/root-<os>` 复制成
 对象字典、**删掉原数据根**，只凭 `delivery-manifest.json` 装进空目录；第二遍用
 `python -m http.server` 把这个对象目录当成远端，`--base-url http://127.0.0.1:18765` 走一遍
 `payload_fetch` 的取数字节路径，再装进另一个空目录并从装好的树起 `llama-server --help`。
-目录路径已有三档原生 runner 证据（run 39654853807：linux-x64 94 个文件 / 156.3 MiB、
-win-x64 58 / 105.0、macos-arm64 33 / 158.4，三次 `--help` 都是 rc=0）；HTTP 路径由本轮
-package run 复核。这里的"真机"是 GitHub 托管的系统镜像，不是用户的个人电脑。
+目录路径与 HTTP 路径三档都有原生 runner 证据：run 39654853807 走目录（linux-x64 94 个文件 /
+156.3 MiB、win-x64 58 / 105.0、macos-arm64 33 / 158.4，均 0 跳过，三次 `--help` rc=0）；
+run 39656642754 走 `http.server` 取数（同三档同数、均 0 跳过，三次 `--help` rc=0 且输出含
+`--port`）。HTTP 这一段是回环明文，真 HTTPS 基址仍未在重放里跑过（TLS 由同一 curl 层在权重
+车道承担）。这里的"真机"是 GitHub 托管的系统镜像，不是用户的个人电脑。
 
 **还没接上的一段**：数据根仍只在 CI 的 `/tmp` 或 `.replay` 里；`delivery-manifest.json` 给出了逐文件
 对象键与落点，外壳也能按它落盘，但**没有人往 R2 上传、也没有首启下载的 IPC 入口**。安装包车道只编壳（⑥），
