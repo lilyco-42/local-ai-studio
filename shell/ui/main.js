@@ -11,6 +11,8 @@ const I18N = {
     tabImage: '生图',
     idle: '未启动',
     running: '运行中',
+    notInstalled: '运行组件未安装',
+    notInstalledHint: '引擎负载还没装进数据目录；点“启动引擎”会报出缺哪一份清单或文件。',
     unavailable: '本平台暂不提供',
     unavailableHint: '上游没有发布这一平台的引擎；这台机器只能装合同里有的能力。',
     oneShot: '一次性进程',
@@ -47,6 +49,8 @@ const I18N = {
     tabImage: 'Images',
     idle: 'stopped',
     running: 'running',
+    notInstalled: 'runtime not installed',
+    notInstalledHint: 'The engine payload is not in the data folder yet; Start engine reports which manifest or file is missing.',
     unavailable: 'not available on this platform',
     unavailableHint: 'Upstream publishes no engine for this platform; only capabilities in the contract can be installed here.',
     oneShot: 'one-shot process',
@@ -211,21 +215,29 @@ async function refreshStatus() {
 
 function renderStatus() {
   const cap = TAB_CAP[activeTab];
-  if (activeTab === 'ocr') {
-    el('engine-chip').textContent = cap + ' · ' + t('oneShot');
-    return;
-  }
   const row = statusRows.find((item) => item.capability === cap);
-  if (!row) {
-    el('engine-chip').textContent = cap + ' · ' + t('idle');
-    el('engine-state').textContent = cap + ' · ' + t('idle');
-    return;
-  }
-  if (row.available === false) {
+  if (row && row.available === false) {
     el('engine-chip').textContent = cap + ' · ' + t('unavailable');
     el('engine-state').textContent = cap + ' · ' + t('unavailableHint');
     el('engine-start').disabled = true;
     el('engine-stop').disabled = true;
+    return;
+  }
+  if (activeTab === 'ocr') {
+    el('engine-chip').textContent = cap + ' · ' + t('oneShot');
+    return;
+  }
+  if (row && row.installed === false) {
+    el('engine-chip').textContent = cap + ' · ' + t('notInstalled');
+    el('engine-state').textContent = cap + ' · ' + t('notInstalledHint');
+    if (!busy) {
+      el('engine-start').disabled = row.running === true;
+      el('engine-stop').disabled = row.running !== true;
+    }
+    return;
+  }  if (!row) {
+    el('engine-chip').textContent = cap + ' · ' + t('idle');
+    el('engine-state').textContent = cap + ' · ' + t('idle');
     return;
   }
   const state = row.running ? t('running') + ' (:' + row.port + ')' : t('idle');

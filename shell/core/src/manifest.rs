@@ -71,41 +71,7 @@ impl Manifest {
 
 /// 盘上目录与清单必须逐个文件对得上：只报"哈希不对"会漏掉多塞进来的 DLL。
 pub fn verify_dir(entry: &ManifestEngine, dir: &Path) -> Result<usize, CoreError> {
-    if entry.status != "ok" {
-        return Err(CoreError::Manifest(format!(
-            "{} 的出包状态是 {:?}，不是 ok",
-            entry.engine, entry.status
-        )));
-    }
-    if entry.files.is_empty() {
-        return Err(CoreError::Manifest(format!("{} 的清单是空的", entry.engine)));
-    }
-    let mut want: BTreeMap<String, (u64, String)> = BTreeMap::new();
-    for f in &entry.files {
-        if f.file.is_empty()
-            || f.file.contains('/')
-            || f.file.contains('\\')
-            || f.file == "."
-            || f.file == ".."
-        {
-            return Err(CoreError::Manifest(format!(
-                "{:?} 不是扁平文件名",
-                f.file
-            )));
-        }
-        if f.sha256.len() != 64 || !f.sha256.chars().all(|c| c.is_ascii_hexdigit()) {
-            return Err(CoreError::Manifest(format!(
-                "{} 的 sha256 不是 64 位十六进制",
-                f.file
-            )));
-        }
-        if want
-            .insert(f.file.clone(), (f.bytes, f.sha256.to_ascii_lowercase()))
-            .is_some()
-        {
-            return Err(CoreError::Manifest(format!("清单里 {} 出现两次", f.file)));
-        }
-    }
+    let want = wanted(entry)?;
     if !dir.is_dir() {
         return Err(CoreError::Manifest(format!("{} 不是目录", dir.display())));
     }
@@ -148,6 +114,77 @@ pub fn verify_dir(entry: &ManifestEngine, dir: &Path) -> Result<usize, CoreError
         )));
     }
     Ok(seen)
+}
+
+/// 只查"在不在、体积对不对"，不读内容。给 status 的 `installed` 用：
+/// 每次轮询都复算上百 MiB 的 sha256 不现实；起进程前的 `verify_dir` 仍逐文件验哈希，
+/// 所以 `installed=true` 不等于"已经验过内容"。
+pub fn files_present(entry: &ManifestEngine, dir: &Path) -> Result<usize, CoreError> {
+    let want = wanted(entry)?;
+    if !dir.is_dir() {
+        return Err(CoreError::Manifest(format!("{} 不是目录", dir.display())));
+    }
+    let mut seen = 0usize;
+    for (name, (bytes, _sha)) in &want {
+        let path = dir.join(name);
+        let meta = fs::metadata(&path).map_err(|e| {
+            CoreError::Manifest(format!("{}: 不在盘上（{e}）", path.display()))
+        })?;
+        if !meta.is_file() {
+            return Err(CoreError::Manifest(format!(
+                "{} 不是普通文件",
+                path.display()
+            )));
+        }
+        if meta.len() != *bytes {
+            return Err(CoreError::Manifest(format!(
+                "{name}: 清单写 {} 字节，盘上是 {}",
+                bytes,
+                meta.len()
+            )));
+        }
+        seen += 1;
+    }
+    Ok(seen)
+}
+
+fn wanted(entry: &ManifestEngine) -> Result<BTreeMap<String, (u64, String)>, CoreError> {
+    if entry.status != "ok" {
+        return Err(CoreError::Manifest(format!(
+            "{} 的出包状态是 {:?}，不是 ok",
+            entry.engine, entry.status
+        )));
+    }
+    if entry.files.is_empty() {
+        return Err(CoreError::Manifest(format!("{} 的清单是空的", entry.engine)));
+    }
+    let mut want: BTreeMap<String, (u64, String)> = BTreeMap::new();
+    for f in &entry.files {
+        if f.file.is_empty()
+            || f.file.contains('/')
+            || f.file.contains('\\')
+            || f.file == "."
+            || f.file == ".."
+        {
+            return Err(CoreError::Manifest(format!(
+                "{:?} 不是扁平文件名",
+                f.file
+            )));
+        }
+        if f.sha256.len() != 64 || !f.sha256.chars().all(|c| c.is_ascii_hexdigit()) {
+            return Err(CoreError::Manifest(format!(
+                "{} 的 sha256 不是 64 位十六进制",
+                f.file
+            )));
+        }
+        if want
+            .insert(f.file.clone(), (f.bytes, f.sha256.to_ascii_lowercase()))
+            .is_some()
+        {
+            return Err(CoreError::Manifest(format!("清单里 {} 出现两次", f.file)));
+        }
+    }
+    Ok(want)
 }
 
 pub fn sha256_file(path: &Path) -> Result<String, CoreError> {
@@ -266,6 +303,42 @@ mod tests {
         dir.write("a.exe", b"alphA!");
         let err = verify_dir(&m, dir.path()).unwrap_err().to_string();
         assert!(err.contains("字节"), "{err}");
+    }
+
+    #[test]
+    fn presence_checks_sizes_but_not_contents() {
+        let dir = TempDir::new("present");
+        let m = two_files(&dir);
+        dir.write("a.exe", b"ALPHA");
+        assert!(files_present(&m, dir.path()).is_ok());
+        assert!(verify_dir(&m, dir.path()).is_err(), "内容不一致必须由 verify_dir 抓");
+    }
+
+    #[test]
+    fn presence_reports_a_missing_file() {
+        let dir = TempDir::new("present-missing");
+        let m = two_files(&dir);
+        fs::remove_file(dir.path().join("b.dll")).unwrap();
+        let err = files_present(&m, dir.path()).unwrap_err().to_string();
+        assert!(err.contains("b.dll"), "{err}");
+    }
+
+    #[test]
+    fn presence_reports_a_size_mismatch() {
+        let dir = TempDir::new("present-size");
+        let m = two_files(&dir);
+        dir.write("a.exe", b"alpha!");
+        let err = files_present(&m, dir.path()).unwrap_err().to_string();
+        assert!(err.contains("字节"), "{err}");
+    }
+
+    #[test]
+    fn presence_tolerates_extra_files_that_startup_will_refuse() {
+        let dir = TempDir::new("present-extra");
+        let m = two_files(&dir);
+        dir.write("evil.dll", b"x");
+        assert!(files_present(&m, dir.path()).is_ok());
+        assert!(verify_dir(&m, dir.path()).is_err());
     }
 
     #[test]

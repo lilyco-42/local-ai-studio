@@ -24,7 +24,7 @@ import urllib.request
 # 与 shell/ui/main.js 的 TAB_CAP 一致：这四个名字是 UI 与后端的接缝，改名了这里必须跟着红。
 EXPECTED_CAPABILITIES = ("对话", "字幕", "文字识别", "生图")
 REQUIRED_STATUS_FIELDS = (
-    "capability", "engine", "available", "running",
+    "capability", "engine", "available", "installed", "running",
     "pid", "port", "idle_secs_left", "lifecycle",
 )
 
@@ -89,7 +89,7 @@ def is_absolute_path(value: str) -> bool:
     return value.startswith("/") or re.match(r"^[A-Za-z]:[\\/]", value) is not None
 
 
-def check_status(rows, expected=EXPECTED_CAPABILITIES) -> None:
+def check_status(rows, expected=EXPECTED_CAPABILITIES, installed=None) -> None:
     if not isinstance(rows, list):
         raise ProbeError(f"status 应是数组，实际是 {type(rows).__name__}")
     if len(rows) != len(expected):
@@ -103,7 +103,7 @@ def check_status(rows, expected=EXPECTED_CAPABILITIES) -> None:
             raise ProbeError(f"status[{index}] 缺字段 {missing}")
         if not isinstance(row["capability"], str) or not row["capability"]:
             raise ProbeError(f"status[{index}].capability 不是非空字符串：{row['capability']!r}")
-        for key in ("available", "running"):
+        for key in ("available", "installed", "running"):
             if not isinstance(row[key], bool):
                 raise ProbeError(f"status[{index}].{key} 不是布尔值：{row[key]!r}")
         for key in ("engine", "lifecycle"):
@@ -118,6 +118,10 @@ def check_status(rows, expected=EXPECTED_CAPABILITIES) -> None:
         raise ProbeError(f"status 有重复能力：{names}")
     if set(names) != set(expected):
         raise ProbeError(f"status 的能力集合是 {sorted(names)}，期望 {sorted(expected)}")
+    if installed is not None:
+        wrong = [(row["capability"], row["installed"]) for row in rows if row["installed"] is not installed]
+        if wrong:
+            raise ProbeError(f"status.installed 期望全是 {installed}，实际 {wrong}")
 
 
 def check_data_root(value) -> None:
@@ -127,7 +131,7 @@ def check_data_root(value) -> None:
         raise ProbeError(f"data_root 不是绝对路径：{value!r}")
 
 
-def check_ui(state, data_root: str, expected_title: str = "Local AI Studio") -> None:
+def check_ui(state, data_root: str, expected_title: str = "Local AI Studio", chip_suffix=None) -> None:
     if not isinstance(state, dict):
         raise ProbeError(f"UI 状态不是对象：{state!r}")
     if state.get("title") != expected_title:
@@ -139,6 +143,8 @@ def check_ui(state, data_root: str, expected_title: str = "Local AI Studio") -> 
     chip = state.get("chip")
     if not isinstance(chip, str) or not chip.startswith("对话 · "):
         raise ProbeError(f"引擎状态条没有渲染对话能力：{chip!r}")
+    if chip_suffix is not None and not chip.endswith(chip_suffix):
+        raise ProbeError(f"引擎状态条没显示 {chip_suffix!r}：{chip!r}")
     if state.get("data_root_text") != data_root:
         raise ProbeError(f"UI 的数据目录 {state.get('data_root_text')!r} 与 data_root 返回值 {data_root!r} 不一致")
 
@@ -262,9 +268,10 @@ def run(args) -> int:
         poll_until(lambda: driver.execute(sid, READY_JS) is True, deadline, "页面里的 window.__TAURI__")
 
         rows = invoke(driver, sid, "status")
-        check_status(rows)
+        check_status(rows, installed=False if args.expect_not_installed else None)
         say("status: " + " / ".join(
-            f"{row['capability']}(available={row['available']},running={row['running']},lifecycle={row['lifecycle']})"
+            f"{row['capability']}(available={row['available']},installed={row['installed']},"
+            f"running={row['running']},lifecycle={row['lifecycle']})"
             for row in rows))
 
         root = invoke(driver, sid, "data_root")
@@ -273,12 +280,19 @@ def run(args) -> int:
 
         def settled():
             state = driver.execute(sid, UI_STATE_JS)
-            if isinstance(state, dict) and state.get("chip") not in (None, "…") and state.get("data_root_text"):
-                return state
-            return None
+            if not isinstance(state, dict) or state.get("chip") in (None, "…") or not state.get("data_root_text"):
+                return None
+            # 首帧是“未启动”，要等 refreshStatus 回来才会变成“运行组件未安装”。
+            if args.expect_not_installed and not state["chip"].endswith("运行组件未安装"):
+                return None
+            return state
 
         state = poll_until(settled, deadline, "UI 把 status / data_root 渲染出来")
-        check_ui(state, root)
+        check_ui(
+            state,
+            root,
+            chip_suffix="运行组件未安装" if args.expect_not_installed else None,
+        )
         say(f"ui: title={state['title']!r} boot_hidden={state['boot_hidden']} chip={state['chip']!r}")
 
         if args.negative_control:
@@ -308,6 +322,11 @@ def main(argv=None) -> int:
     parser.add_argument("--native-port", type=int, default=4445)
     parser.add_argument("--timeout", type=float, default=180.0, help="建会话之后等页面与 UI 的总预算（秒）")
     parser.add_argument("--negative-control", action="store_true", help="同时证明这套判据能红")
+    parser.add_argument(
+        "--expect-not-installed",
+        action="store_true",
+        help="全新数据根：要求四行 installed 全为 false，且状态条显示“运行组件未安装”",
+    )
     parser.add_argument("--log", default=os.path.join(tempfile.gettempdir(), "wd-ipc-probe.log"))
     args = parser.parse_args(argv)
     try:

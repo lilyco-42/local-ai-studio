@@ -148,6 +148,8 @@ pub struct Status {
     pub capability: String,
     pub engine: String,
     pub available: bool,
+    /// 清单与文件在位、体积对得上；不读内容，不等于"已经验过哈希"（那一步在起进程前）。
+    pub installed: bool,
     pub running: bool,
     pub pid: Option<u32>,
     pub port: Option<u16>,
@@ -268,6 +270,10 @@ impl Supervisor {
                 capability: name.clone(),
                 engine: cap.engine.clone(),
                 available,
+                installed: cap
+                    .os
+                    .get(self.platform)
+                    .is_some_and(|cell| self.installed_quietly(cap, cell)),
                 running,
                 pid,
                 port,
@@ -276,6 +282,41 @@ impl Supervisor {
             });
         }
         out
+    }
+
+    /// 只看清单与文件体积：`status` 会被反复调用，不能每次重算上百 MiB 的 sha256。
+    fn installed_quietly(&self, cap: &Capability, cell: &OsCell) -> bool {
+        let Ok(manifest) = Manifest::from_file(&self.manifest_path()) else {
+            return false;
+        };
+        if manifest.os != self.platform {
+            return false;
+        }
+        let entry = if cap.mode == "server" {
+            let Some(asset) = cell.default_asset.as_deref() else {
+                return false;
+            };
+            match manifest.for_engine(&cap.engine, asset) {
+                Ok(entry) => entry,
+                Err(_) => return false,
+            }
+        } else {
+            match manifest.for_engine_without_asset(&cap.engine) {
+                Ok(entry) => entry,
+                Err(_) => return false,
+            }
+        };
+        let Some(template) = cell
+            .asset_dir
+            .as_deref()
+            .or(cell.version_dir.as_deref())
+        else {
+            return false;
+        };
+        let Ok(dir) = contract::expand_dir(template, &self.data_root) else {
+            return false;
+        };
+        manifest::files_present(entry, &dir).is_ok()
     }
 
     fn manifest_path(&self) -> PathBuf {
@@ -1077,6 +1118,56 @@ mod tests {
             .unwrap_err()
             .to_string();
         assert!(err.contains("载荷清单") && err.contains("ocr-manifest"), "{err}");
+        let _ = fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn a_fresh_data_root_reports_every_capability_as_not_installed() {
+        let dir = std::env::temp_dir().join(format!("lasc-sup-fresh-{}", std::process::id()));
+        fs::create_dir_all(&dir).unwrap();
+        let mut s =
+            Supervisor::new(embedded(), "win-x64", "8GB", dir.clone(), "auto").unwrap();
+        assert!(s.status().iter().all(|r| !r.installed));
+        let _ = fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn status_says_whether_the_payload_files_are_there() {
+        let dir = std::env::temp_dir().join(format!("lasc-sup-installed-{}", std::process::id()));
+        fs::create_dir_all(&dir).unwrap();
+        let c = embedded();
+        let cap = c.capability("对话").unwrap();
+        let cell = cap.os.get("win-x64").unwrap();
+        let asset = cell.default_asset.as_deref().unwrap();
+        let runtime = contract::expand_dir(cell.asset_dir.as_deref().unwrap(), &dir).unwrap();
+        fs::create_dir_all(&runtime).unwrap();
+        let body = b"bin";
+        fs::write(runtime.join("llama-server.exe"), body).unwrap();
+        let manifest = json!({
+            "os": "win-x64",
+            "engines": [{
+                "engine": "llama",
+                "status": "ok",
+                "asset": asset,
+                "files": [{
+                    "file": "llama-server.exe",
+                    "bytes": body.len(),
+                    "sha256": "0".repeat(64)
+                }]
+            }]
+        });
+        fs::write(dir.join("payload-manifest.json"), manifest.to_string()).unwrap();
+        let mut s =
+            Supervisor::new(embedded(), "win-x64", "8GB", dir.clone(), "auto").unwrap();
+        let rows = s.status();
+        assert!(rows.iter().find(|r| r.capability == "对话").unwrap().installed);
+        assert!(!rows.iter().find(|r| r.capability == "字幕").unwrap().installed);
+        fs::write(runtime.join("llama-server.exe"), b"bin!").unwrap();
+        let rows = s.status();
+        assert!(
+            !rows.iter().find(|r| r.capability == "对话").unwrap().installed,
+            "体积对不上必须翻回 false"
+        );
         let _ = fs::remove_dir_all(&dir);
     }
 

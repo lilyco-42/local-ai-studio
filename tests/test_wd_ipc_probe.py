@@ -22,7 +22,8 @@ MAIN_JS = os.path.join(ROOT, "shell", "ui", "main.js")
 
 def row(name, **overrides):
     base = {
-        "capability": name, "engine": "llama", "available": True, "running": False,
+        "capability": name, "engine": "llama", "available": True, "installed": False,
+        "running": False,
         "pid": None, "port": None, "idle_secs_left": None, "lifecycle": "resident",
     }
     base.update(overrides)
@@ -121,6 +122,21 @@ class TestStatusGate(unittest.TestCase):
         with self.assertRaisesRegex(wd.ProbeError, "pid 既不是 null 也不是整数"):
             wd.check_status(bad)
 
+    def test_installed_must_be_boolean(self) -> None:
+        bad = rows()
+        bad[0]["installed"] = "false"
+        with self.assertRaisesRegex(wd.ProbeError, "installed 不是布尔值"):
+            wd.check_status(bad)
+
+    def test_fresh_installation_expectation_passes_when_all_are_false(self) -> None:
+        wd.check_status(rows(), installed=False)
+
+    def test_fresh_installation_expectation_rejects_an_installed_row(self) -> None:
+        bad = rows()
+        bad[1]["installed"] = True
+        with self.assertRaisesRegex(wd.ProbeError, "installed 期望全是 False"):
+            wd.check_status(bad, installed=False)
+
     def test_non_list_is_rejected(self) -> None:
         with self.assertRaisesRegex(wd.ProbeError, "应是数组"):
             wd.check_status({"capability": "对话"})
@@ -165,6 +181,15 @@ class TestUiGate(unittest.TestCase):
     def test_wrong_title_is_rejected(self) -> None:
         with self.assertRaisesRegex(wd.ProbeError, "标题"):
             wd.check_ui(ui_state(title="about:blank"), ui_state()["data_root_text"])
+
+    def test_not_installed_chip_suffix_passes_match(self) -> None:
+        state = ui_state(chip="对话 · 运行组件未安装")
+        wd.check_ui(state, state["data_root_text"], chip_suffix="运行组件未安装")
+
+    def test_not_installed_chip_suffix_rejects_the_idle_chip(self) -> None:
+        state = ui_state(chip="对话 · 未启动")
+        with self.assertRaisesRegex(wd.ProbeError, "运行组件未安装"):
+            wd.check_ui(state, state["data_root_text"], chip_suffix="运行组件未安装")
 
 
 class TestPolling(unittest.TestCase):
@@ -217,6 +242,7 @@ class TestWorkflow(unittest.TestCase):
             "$GITHUB_WORKSPACE/tools/wd_ipc_probe.py",
             '--app "$PWD/target/debug/local-ai-studio-shell"',
             '--native-driver "$(command -v WebKitWebDriver)"',
+            "--expect-not-installed",
             "--negative-control",
         ):
             with self.subTest(needle=needle):
