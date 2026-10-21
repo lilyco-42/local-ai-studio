@@ -1,9 +1,9 @@
 {
- "sha256": "8ba2001a408f93b59b03ed61052b54084b62d4d11f211fc1a9ee7c11490440b9",
- "bytes": 259753,
+ "sha256": "6e93280b98a431fc4bfadf70f2645b18d7acdde56b393ea2b3f7a2dd60d2c710",
+ "bytes": 259775,
  "crlf": 0,
  "engines": 3,
  "releases": 75,
- "captured_at": "2026-10-20",
+ "captured_at": "2026-10-21",
  "how": "GitHub releases 列表：per_page=100、每页翻到包含钉住那颗为止，只取 tag / published_at / asset 的 name+size+digest。不下载任何包。"
 }

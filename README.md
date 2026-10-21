@@ -302,13 +302,13 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
 - `tools/runtime_versions.py` + `pins/runtime-versions.json`：**能升到哪、能退回哪、每颗能不能校验也是表**。
   矩阵只覆盖钉住的那一个 ref；外壳要给"更新 / 回退 runtime"，就得知道相邻版本发不发同样的包。
   窗口按"翻到钉住那颗为止"取（100/页 × 至多 5 页），不是写死 12 —— llama 一天发 6 个 release，
-  固定窗口装不下我们钉的 b11727。实测 **llama 的 b11727 上面还有 12 个带产物的版本**（最新 b11748），
-  覆盖面没变；**whisper 的 `releases/latest` 是 v1.9.5、0 个产物**，真正能装的 b5454 正是我们钉的那颗
+  固定窗口会装不下钉住那颗。**本次把 llama 从 b11727 重钉到 b11798 后，它已是窗口里最新的带产物版本
+  （0 个更新）**；**sd 还差 1 个（master-975 → master-982），覆盖面没变**；**whisper 的 `releases/latest` 是 v1.9.5、0 个产物**，真正能装的 b5454 正是我们钉的那颗
   （9 个只有源码的标签单列，按 latest 取 runtime 会"成功但装不上"）；
   **回退边界是 digest 不是年龄**：v1.7.6 之前 13 个 release 上游没发 digest，可校验候选只有 16 个。
   窗口内 75 个 release / 66 个带产物 / 1021 行 runtime 资产 / 7 个附件 / 认不出的词 0；
   钉住那颗的 47 颗产物名与矩阵逐颗相等（同一个 release，两张表不许漂）。
-  18 条源码变异体 × 24 条探针 + 窗口元数据夹具（`tests/fixtures/release-window.json`，259,753 B），
+  18 条源码变异体 × 24 条探针 + 窗口元数据夹具（`tests/fixtures/release-window.json`，259,775 B），
   漂移只报不跟。现取车道用 `--live` 口径：只核对钉住那颗还在、产物没被重打包；上游又发新版
   不算红（实测抓完半小时后 llama 又发了 5 个版本 —— 按"有新版本"红会让这条道永远红）。
   2026-10-21 车道 `backends` 末步原样跑了这条现取：三个仓库窗口内 101 个 release（带产物 92 个）、
@@ -323,8 +323,8 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   （`--strict` 才红）。升级是显式动作：`--update --tag bNNNNN` 用 `payload_plan.rows_for` 的
   真路径量出三行（zip 读中央目录、tar 读成员表，不执行），`--apply` 只替换该引擎的行；十份派生
   文件（3 份捕获 + 7 张表）只要还带旧 tag 就退出码 2 并逐张打印重出命令，半套重钉不许说完成。
-  8 类变异自检 + `tests/test_follow_upstream.py` 19 条；2026-10-21T16:28Z 本地只读实跑读到 b11797
-  （钉 b11727、落后 50 个、最新带产物 b11797、rc=0）。**证据边界**：这条车道的 `schedule` 至今
+  8 类变异自检 + `tests/test_follow_upstream.py` 20 条；2026-10-21T17:44Z 重钉后本地只读实跑读到
+  b11798（钉 b11798、落后 0、已最新、rc=0）。**证据边界**：这条车道的 `schedule` 至今
   没有被真正触发过（这台账号的 cron 实测晚 1–3 小时且会整槽丢）；同一套现取逻辑已在 `backends`
   车道末步跑过（101 个 release / 92 个带产物 / 0 问题），但"定时会不会落地"仍未知。
 - `tools/shell_contract.py` + `pins/shell-contract.json`：**把外壳必须遵守的合同钉成表**。

@@ -157,7 +157,7 @@ class TestArtifact(unittest.TestCase):
         e = artifact()["engines"]["llama"]["os"]["win-x64"]
         cuda124 = [o for o in e["options"] if o["backend"] == "cuda" and o["version"] == "12.4"][0]
         self.assertEqual(cuda124["cudart"]["asset"], "cudart-llama-bin-win-cuda-12.4-x64.zip")
-        self.assertEqual(cuda124["extra_mib_vs_default"], 236.3)
+        self.assertEqual(cuda124["extra_mib_vs_default"], 236.6)
         self.assertEqual(cuda124["cudart"]["mib"], 373.3)
         self.assertTrue(bc.HEX64.match(cuda124["cudart"]["sha256"]))
 

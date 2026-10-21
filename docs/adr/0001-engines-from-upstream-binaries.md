@@ -199,10 +199,10 @@ Vulkan，不必退回 CPU 的"几分钟一张"**。所以这条能力的设计�
 
 | 包 | 条目 | 关键事实 |
 |---|---|---|
-| `llama-win-cpu-x64.zip` | 51 | `llama-cli.exe`、**`llama-server.exe`**、`llama.exe`、`llama-completion.exe`、`llama-bench.exe`、`llama-tts.exe`、`llama-quantize.exe`、`llama-mtmd-cli.exe`/`llava`/`qwen2vl`（多模态）、`ggml-rpc-server.exe`。**没有 `llama-simple`，也没有 `llama-completions`** |
+| `llama-b11798-bin-win-cpu-x64.zip` | 52 | `llama-cli.exe`、**`llama-server.exe`**、`llama.exe`（b11798 起是分发器，只有 `serve/cli/download/version`）、`llama-completion.exe`、`llama-bench.exe`、`llama-tts.exe`、`llama-quantize.exe`、`llama-mtmd-cli.exe`/`llava`/`qwen2vl`（多模态）、`ggml-rpc-server.exe`、`llama-connect.exe`、`llama-fit-params.exe`。**没有 `llama-simple`，也没有 `llama-completions`** |
 | `whisper-bin-x64.zip` | 41 | 全在 `Release/` 子目录；`whisper-cli.exe` **和** `main.exe` 同时存在，另有 **`whisper-server.exe`**、**`whisper-vad-speech-segments.exe`**、`whisper-quantize/bench/stream/talk-llama/lsp.exe`，以及 8 个 `test-*.exe`、`wchess.exe`、`parakeet-*.exe`、`SDL2.dll` |
 | `sd-...-Linux-Ubuntu-24.04-x86_64.zip` | 35 | 平铺根目录：`sd-cli`、**`sd-server`**（无扩展名），外加一整层运行时闭包 `libggml{,-base}.so`（含 `.so.0.27.0` 版本名）、14 个 `libggml-cpu-<微架构>.so`、`libstable-diffusion.so`、`libwebp/libwebpmux/libsharpyuv/libwebm.so`，两个 `.txt` 出处说明 |
-| `llama-b11727-bin-ubuntu-x64.tar.gz` | 61 | **Linux 包比 Windows 多一层同名目录** `llama-b11727/`：里面有 `llama-server`、`libllama.so`（+`.so.0.7.0`）、21 个 `libggml-cpu-*.so`。整包下回并算 sha256 == 上游 digest ✓ |
+| `llama-b11798-bin-ubuntu-x64.tar.gz` | 62 | **Linux 包比 Windows 多一层同名目录** `llama-b11798/`：里面有 `llama-server`、`libllama-server-impl.so`、`libllama.so`（+`.so.0`/`.so.0.7.0`）、14 个 `libggml-cpu-*.so`。整包下回并算 sha256 == 上游 digest ✓（2026-10-21 重钉时重测） |
 | `whisper-bin-ubuntu-x64.tar.gz` | 47 | 同样多一层目录 `whisper-bin-ubuntu-x64/`：`whisper-cli`、`whisper-server`、`libwhisper.so`（+`.so.1`）。整包 sha256 == 上游 digest ✓ —— 车道里 `find -maxdepth 2` 正是为这一层写的 |
 
 （这三行里 sd 那条与上表同源：早先用 `zip_peek` 只读中央目录；本轮改成**整包下回算 sha256**，
@@ -216,15 +216,16 @@ Vulkan，不必退回 CPU 的"几分钟一张"**。所以这条能力的设计�
    在 0.8–1 MiB/s 的下载与秒级加载面前是不可接受的。这也正好是 LM Studio 的形态（本地 OpenAI 兼容接口）。
    2026-10-19 补：这条决定原本四条能力车道**一条都没碰过**（全是 one-shot CLI），现在
    `headless-inference` 多了一步真起 `llama-server` 并走 `/v1/chat/completions` 拿非空文本 ——
-   判据的路由与字段名按 `b11727` 源码核过（见 requirements.md 的出处表），但**这一步同样一次都没跑过**，
-   所以它证明的是"这个形状有车道了"，不是"常驻服务在这台 runner 上起得来"。
+   判据的路由与字段名按 `b11798` 源码核过（见 requirements.md 的出处表）。
+   2026-10-21 的 run 39641510711 里这一步已真跑通过；同一 run 的无头 CLI 跑出 53.9 tok/s。
    whisper / sd 两个 server 形态在 2026-10-20 也各有了自己的一步：`subtitle-proof` 起
    `whisper-server` 打 `POST /inference`（multipart，`response_format=srt`，判据要 `x-subrip` 与
    连续编号的 SRT），`image-proof` 起 `sd-server` 走 `POST /sdcpp/v1/img_gen` → 轮询 `poll_url` →
    解 `result.images[0].b64_json` → 与 CLI 那条共用同一套 PNG 判据。
    sd-server 的名字不再是推测：Linux 包条目表里 `sd-cli`/`sd-server` 平铺在根（上表），
    whisper 那份也整包核过（47 个条目里有 `whisper-server`，整包 sha256 与车道钉的值相等）。
-   **同样一次都没跑过** —— 加上 llama 那条，现在是"三个 server 都有车道、零次执行"。
+   **2026-10-21 的 run 39641510711 里三条 server 车道（llama / whisper / sd）全部成功**，
+   CLI 那条同 run 跑出 53.9 tok/s。
 2. **`llama-bench` 已经在包里** → "给你这台机器实测多少 tok/s"这类 LM Studio 式能力，
    不需要自己写基准，直接调上游产物即可。
 3. **字幕这条不需要自研分段**：`whisper-cli` 的 `-osrt, --output-srt` 在
@@ -255,13 +256,13 @@ sd `master-975-95b3090` 的 `--steps/--width/--height/--sampling-method/--diffus
 上面第 1 条约束说"外壳起常驻服务"，但当时只有条目表证明这三个二进制存在。这一节把"真起起来要调什么、
 默认安不安全"读出来，出处都是钉住的 ref 的行号：
 
-| 事项 | llama.cpp `b11727` | whisper.cpp `b5454` | sd.cpp `95b3090…` |
+| 事项 | llama.cpp `b11798` | whisper.cpp `b5454` | sd.cpp `95b3090…` |
 |---|---|---|---|
-| 就绪探测 | `GET /health`（`tools/server/server.cpp:263`） | `GET /health`（`examples/server/server.cpp:1218-1227`）：**未就绪回 503** + `{"status":"loading model"}` | 没有 /health；但**模型先加载完才 `listen`**（`main.cpp:92-98` 建上下文、`:152` 才 listen），所以 `GET /v1/models`（`routes_openai.cpp:253`）能答就是就绪 —— 车道就用它。`GET /sdapi/v1/progress`（`api.md:282-299`）另有用于看忙闲 |
-| 默认监听 | `hostnames = {"127.0.0.1"}`（`common/common.h:648`） | `127.0.0.1:8080`（`server.cpp:59/65`） | `127.0.0.1:1234`（`examples/server/runtime.h:22-23`） |
-| 鉴权 | `--api-key`（`common/arg.cpp:3513-3514`），**默认为空**（`common.h:665`） | **没有任何 key/auth**（全文无此字段） | **同样没有** |
-| CORS | `cors_origins = "*"` 是默认（`common.h:652`）；`*` + 无 key 时上游只**警告**（`server.cpp:340-342`） | `Access-Control-Allow-Origin: *`（`server.cpp:738-740`，allow-headers 里写着 `authorization` 但没有代码校验它） | pre-routing 把请求的 `Origin` **原样反射**进 ACAO，并配 `Allow-Credentials: true`、Methods/Headers `*`（`examples/server/main.cpp:123-131`） |
-| 主调用 | `POST /v1/chat/completions`（`server.cpp:274`）→ `choices[].message.content`（`server-task.cpp:422/434`） | `POST /inference` **multipart**（字段 `file`，`server.cpp:826/839`） | `POST /sdcpp/v1/img_gen`、A1111 的 `POST /sdapi/v1/txt2img`、OpenAI 的 `POST /v1/images/generations` → `data[].b64_json`（`api.md:28/38/56/132`） |
+| 就绪探测 | `GET /health`（`tools/server/server.cpp:280`） | `GET /health`（`examples/server/server.cpp:1218-1227`）：**未就绪回 503** + `{"status":"loading model"}` | 没有 /health；但**模型先加载完才 `listen`**（`main.cpp:92-98` 建上下文、`:152` 才 listen），所以 `GET /v1/models`（`routes_openai.cpp:253`）能答就是就绪 —— 车道就用它。`GET /sdapi/v1/progress`（`api.md:282-299`）另有用于看忙闲 |
+| 默认监听 | `hostnames = {"127.0.0.1"}`（`common/common.h:652`） | `127.0.0.1:8080`（`server.cpp:59/65`） | `127.0.0.1:1234`（`examples/server/runtime.h:22-23`） |
+| 鉴权 | `--api-key`（`common/arg.cpp:3533-3534`），**默认为空**（`common/common.h:669`） | **没有任何 key/auth**（全文无此字段） | **同样没有** |
+| CORS | `cors_origins = "*"` 是默认（`common/common.h:656`）；`*` + 无 key 时上游只**警告**（`tools/server/server.cpp:359`） | `Access-Control-Allow-Origin: *`（`server.cpp:738-740`，allow-headers 里写着 `authorization` 但没有代码校验它） | pre-routing 把请求的 `Origin` **原样反射**进 ACAO，并配 `Allow-Credentials: true`、Methods/Headers `*`（`examples/server/main.cpp:123-131`） |
+| 主调用 | `POST /v1/chat/completions`（`tools/server/server.cpp:291`）→ `choices[].message.content`（`tools/server/server-task.cpp:422`；`usage.tokens_predicted` 在 `:340`） | `POST /inference` **multipart**（字段 `file`，`server.cpp:826/839`） | `POST /sdcpp/v1/img_gen`、A1111 的 `POST /sdapi/v1/txt2img`、OpenAI 的 `POST /v1/images/generations` → `data[].b64_json`（`api.md:28/38/56/132`） |
 | 白送的能力 | `/props`（运行时真值） | **SRT 由服务端渲染**：`response_format=srt` 逐段拼 `序号 / HH:MM:SS,mmm --> / 文本`，content-type `application/x-subrip`，支持 `offset_n` 与 diarize（`server.cpp:1022-1042`）；`verbose_json` 给 `segments[].text/from/to/words/no_speech_prob`（`1065-1156`）；`POST /load` 热切换权重（字段 `model` 是**文件路径**，`1175-1200`） | **job 模型 + 取消 + 实时预览**：`queued/generating/completed/failed/cancelled` + `queue_position`（`api.md:393-420`）、`GET /sdcpp/v1/jobs/{id}` 带 `preview.b64_json`（边采样边更新）、`POST /sdcpp/v1/jobs/{id}/cancel`、`GET /sdcpp/v1/capabilities` 的 `features_by_mode`（`lora/hires/vae_tiling/cache/cancel_*/preview`，`api.md:630-650`） |
 
 四条设计后果：
@@ -275,15 +276,14 @@ sd `master-975-95b3090` 的 `--steps/--width/--height/--sampling-method/--diffus
    "统一成一个 OpenAI 兼容网关"的想法只在对话那侧成立 —— UI/调度抽象要按"每能力一个本地服务"设计。
 3. **功能分层有可探测的出处**：sd 的 `capabilities` 与 llama 的 `/props` 是运行时真值，
    "支持不支持 lora/hires/preview/取消"不许写死在代码里（此前按后端检测分层只解决了一半）。
-4. **三条 server 车道都写好了，但都还没跑过**（llama = `headless-inference#4`、
+4. **三条 server 车道已在 2026-10-21 的 run 39641510711 里全部跑通**（llama = `headless-inference#4`、
    whisper = `subtitle-proof` 最后一步、sd = `image-proof` 最后一步）。
    这一节的行号级证据不必等 CI：`pins/citations.json` 里三家共 **44 条** `file:line` 声明
    （2026-10-20 实测计数）由 `citation-drift` 车道逐条核对**那一行的内容**
    （`tools/citation_check.py`，先跑 `--selftest` 证明"明知是错的"能被认出来；
    子串在文件里命中不唯一就不配进表）。上游挪行或改默认值会红，红字带上游实际那一行写了什么。
-   仍然要等真跑的只有三类：服务在这台 runner 上起不起来、异步任务的耗时量级、
-   以及"请求体参数被吃掉"这件事在 sd 那条路上是不是真的（判据已经把 `Steps:`/IHDR 钉死，
-   红是红得清楚，但清不清楚也得跑一次才知道）。
+   那次 run 还证掉了"请求体参数有没有被吃掉"（image 判据读 IHDR + `tEXt` 的 `Steps:` 已过）；
+   异步任务的耗时量级只在这个 2 核 runner 上有数，不代表用户机器。
 
 ## 分发源可达性（2026-10-19 从 CN 服务器 lain42.top 实测：HEAD 之外再做区间 GET，2 MiB 一组、4 MiB 重复三轮）
 

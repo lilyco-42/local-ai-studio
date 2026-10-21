@@ -42,7 +42,7 @@ ATTACHMENT = re.compile(r"\.(txt|json|sha256|md5|css|html|md)$|\.jar(\.zip)?$", 
 
 RULE = {
     "window": "每个引擎从最新往下翻，**翻到钉住那一颗为止**（上限 MAX_PAGES 页 × PER_PAGE 个）。"
-              "llama 一天就发 6 个 release，固定 12 个的窗口根本装不下我们钉的 b11727 —— "
+              "llama 一天就发 6 个 release，固定 12 个的窗口根本装不下我们钉住的那颗 —— "
               "窗口不含钉值时'能退回哪'这句就不成立，所以这是政策不是手感",
     "window_shape": "产物里逐引擎记 pages_fetched / per_page / captured / oldest_captured_tag，"
                     "窗口大小是被量出来的数，不是猜的",
@@ -324,7 +324,7 @@ def _get(url: str) -> list:
 def fetch(dest: str, repos: dict, pinned: dict, per_page: int = PER_PAGE) -> None:
     """从最新往下翻，翻到包含钉住那一颗为止（上限 MAX_PAGES 页）。
 
-    为什么要翻而不是写死 12：llama 一天发 6 个 release，固定窗口根本装不下我们钉的 b11727；
+    为什么要翻而不是写死 12：llama 一天发 6 个 release，固定窗口根本装不下我们钉住的那颗；
     窗口不含钉值时"能退回哪"这句就是空的 —— 而这张表看起来仍然是完整的一张表。
     """
     out = {}
@@ -420,18 +420,23 @@ def selftest() -> int:
     if not any("不在捕获的" in x for x in build(c2, matrix, plan)[1]):
         bad.append(f"钉住的 {drop} 被从窗口里删掉时没红")
     # ③ 最新那个带产物的版本里，把我们真装的那一档删掉 —— 必须报"这条升级路现在不能走"。
+    # 刚重钉完时窗口里没有更新的版本，所以这里合成一颗：判据不能因为"恰好最新"而失去对照。
     c3 = json.loads(json.dumps(caps))
-    for key, entry in c3.items():
-        engine = next(e for e, v in matrix["engines"].items() if v["repo"] == key.split("@")[0])
-        os_want = shipped_combos(plan)[engine][0]
-        for r in entry["releases"]:
-            keep = [x for x in r["assets"] if ATTACHMENT.search(x["name"])
-                    or bd.classify(x["name"], r["tag"])["kind"] != "runtime"
-                    or bd.classify(x["name"], r["tag"])["os"] != os_want]
-            if len(keep) < len(r["assets"]):
-                r["assets"] = keep
-                break
-        break
+    key3 = sorted(c3)[0]
+    engine3 = next(e for e, v in matrix["engines"].items() if v["repo"] == key3.split("@")[0])
+    pin3 = matrix["engines"][engine3]["release"]
+    cand3 = json.loads(json.dumps(next(r for r in c3[key3]["releases"] if r["tag"] == pin3)))
+    cand3["tag"] = "b99999"
+    cand3["assets"] = [dict(a, name=a["name"].replace(pin3, "b99999"))
+                       for a in cand3["assets"]]
+    os_want = shipped_combos(plan)[engine3][0]
+    keep = [x for x in cand3["assets"] if ATTACHMENT.search(x["name"])
+            or bd.classify(x["name"], "b99999")["kind"] != "runtime"
+            or bd.classify(x["name"], "b99999")["os"] != os_want]
+    if len(keep) == len(cand3["assets"]):
+        bad.append(f"合成候选没删掉 {engine3} 在 {os_want} 的产物 —— 这条探针没打到地方")
+    cand3["assets"] = keep
+    c3[key3]["releases"].insert(0, cand3)
     _d3, p3 = build(c3, matrix, plan)
     if not any("升级路" in x or "找不到" in x for x in p3):
         bad.append("新版本丢掉真装的那一档时没红")

@@ -355,78 +355,88 @@ def update(plan: dict, engine: str, tag: str, release: dict, apply: bool) -> int
 def plan_row_repo(release: dict, engine: str) -> str:
     return ep.UPSTREAM[engine]["repo"]
 
-
 def selftest() -> int:
     bad: list[str] = []
     plan, matrix = load(PAYLOAD), load(MATRIX)
     caps, assets = load(CAPTURES), load(ASSETS)
-    base = evaluate(caps, plan, matrix, assets)
-    if base["decision"] != "newer_available" or base["behind"] != 12:
-        bad.append(f"正输入应报落后 12 个可升版本，现为 {base['decision']} / {base['behind']}")
+    pin = pinned_release(plan, "llama")
+    repo = matrix["engines"]["llama"]["repo"]
+    key = f"{repo}@{pin}"
+    new_tag = "b99999"
+
+    def with_candidate(c: dict) -> dict:
+        """合成一颗比钉值新的 release：刚重钉完窗口里没有新版，判据也不能失去正向对照。"""
+        rel = copy.deepcopy(next(r for r in c[key]["releases"] if r["tag"] == pin))
+        rel["tag"] = new_tag
+        rel["published_at"] = "2099-01-01T00:00:00Z"
+        rel["assets"] = [dict(a, name=a["name"].replace(pin, new_tag))
+                         for a in rel["assets"]]
+        c[key]["releases"].insert(0, rel)
+        return c
+
+    caps2 = with_candidate(copy.deepcopy(caps))
+    base = evaluate(caps2, plan, matrix, assets)
+    if base["decision"] != "newer_available" or base["behind"] != 1:
+        bad.append(f"合成一颗新版后应报落后 1 个可升版本，现为 {base['decision']} / {base['behind']}")
+    if base["candidate"] != new_tag:
+        bad.append(f"候选应是最新那颗 {new_tag}，现为 {base['candidate']}")
     if base["red"]:
         bad.append("新版本本身被当成了红")
     if base["candidate_missing"] or base["candidate_unknown"] or base["candidate_no_digest"]:
         bad.append(f"候选自检不过：{base['candidate_missing']} / {base['candidate_unknown']}")
     # ① 窗口里没有更新的版本 → up_to_date，不是 red
-    c1 = copy.deepcopy(caps)
-    key = f"{base['repo']}@{base['pinned']}"
-    c1[key]["releases"] = [r for r in c1[key]["releases"]
-                           if ep.release_rank(r["tag"]) <= ep.release_rank(base["pinned"])]
-    r1 = evaluate(c1, plan, matrix, assets)
+    r1 = evaluate(copy.deepcopy(caps), plan, matrix, assets)
     if r1["decision"] != "up_to_date" or r1["red"]:
         bad.append(f"没有新版时应 up_to_date 且不红，现为 {r1['decision']}")
     # ② 钉住那颗被重打包 → 必须红
-    c2 = copy.deepcopy(caps)
-    pin_rel = next(r for r in c2[key]["releases"] if r["tag"] == base["pinned"])
-    rt = runtime_assets(pin_rel)[0]
-    rt["sha256"] = "f" * 64
+    c2 = copy.deepcopy(caps2)
+    pin_rel = next(r for r in c2[key]["releases"] if r["tag"] == pin)
+    runtime_assets(pin_rel)[0]["sha256"] = "f" * 64
     r2 = evaluate(c2, plan, matrix, assets)
     if r2["decision"] != "pinned_damaged" or not r2["red"]:
         bad.append(f"钉值被重打包时没红：{r2['decision']}")
     # ③ 钉住那颗被撤标签 → 必须红
-    c3 = copy.deepcopy(caps)
-    c3[key]["releases"] = [r for r in c3[key]["releases"] if r["tag"] != base["pinned"]]
+    c3 = copy.deepcopy(caps2)
+    c3[key]["releases"] = [r for r in c3[key]["releases"] if r["tag"] != pin]
     r3 = evaluate(c3, plan, matrix, assets)
     if r3["decision"] != "pinned_damaged":
         bad.append(f"钉住那颗被撤时没红：{r3['decision']}")
     # ④ 候选丢掉真装的 win-x64/cpu → blocked，但不红（上游发版本身不是红）
-    c4 = copy.deepcopy(caps)
-    cand = next(r for r in c4[key]["releases"] if r["tag"] == base["latest_runtime_tag"])
-    cand["assets"] = [a for a in cand["assets"]
-                      if not (bd.classify(a["name"], cand["tag"])["os"] == "win-x64"
-                              and bd.classify(a["name"], cand["tag"])["backend"] == "cpu")]
+    c4 = copy.deepcopy(caps2)
+    cand4 = next(r for r in c4[key]["releases"] if r["tag"] == new_tag)
+    cand4["assets"] = [a for a in cand4["assets"]
+                       if not (bd.classify(a["name"], new_tag)["os"] == "win-x64"
+                               and bd.classify(a["name"], new_tag)["backend"] == "cpu")]
     r4 = evaluate(c4, plan, matrix, assets)
     if r4["decision"] != "blocked" or r4["red"]:
         bad.append(f"候选丢档时应 blocked 且不红，现为 {r4['decision']}")
     if not r4["candidate_missing"]:
         bad.append("候选丢档没被点名")
     # ⑤ 候选产物没 digest → blocked
-    c5 = copy.deepcopy(caps)
-    cand5 = next(r for r in c5[key]["releases"] if r["tag"] == base["latest_runtime_tag"])
+    c5 = copy.deepcopy(caps2)
+    cand5 = next(r for r in c5[key]["releases"] if r["tag"] == new_tag)
     runtime_assets(cand5)[0]["sha256"] = ""
     r5 = evaluate(c5, plan, matrix, assets)
     if r5["decision"] != "blocked" or not r5["candidate_no_digest"]:
         bad.append(f"候选缺 digest 时应 blocked：{r5['decision']}")
     # ⑥ 候选多了一个认不出的后端词 → blocked（新词必须人来认）
-    c6 = copy.deepcopy(caps)
-    cand6 = next(r for r in c6[key]["releases"] if r["tag"] == base["latest_runtime_tag"])
-    cand6["assets"].append({"name": f"llama-{cand6['tag']}-bin-ubuntu-hip-x64.tar.gz",
+    c6 = copy.deepcopy(caps2)
+    cand6 = next(r for r in c6[key]["releases"] if r["tag"] == new_tag)
+    cand6["assets"].append({"name": f"llama-{new_tag}-bin-ubuntu-hip-x64.tar.gz",
                             "size": 1, "sha256": "0" * 64})
     r6 = evaluate(c6, plan, matrix, assets)
     if r6["decision"] != "blocked" or not r6["candidate_unknown"]:
         bad.append(f"候选新后端词没被拦：{r6['decision']}")
     # ⑦ proposal 的 apply 只替换该引擎的行，另外两个引擎原样；旧 tag 仍被点名
-    tag7 = base["latest_runtime_tag"]
-
     def fake_entries(url):
         if url.endswith(".zip"):
-            return [{"name": f"llama-{tag7}/llama-server.exe", "size": 10, "packed": 5},
-                    {"name": f"llama-{tag7}/llama-server-impl.dll", "size": 10, "packed": 5}]
-        return [{"name": f"llama-{tag7}/llama-server", "size": 10, "packed": None}]
+            return [{"name": f"llama-{new_tag}/llama-server.exe", "size": 10, "packed": 5},
+                    {"name": f"llama-{new_tag}/llama-server-impl.dll", "size": 10, "packed": 5}]
+        return [{"name": f"llama-{new_tag}/llama-server", "size": 10, "packed": None}]
 
     old_override = pp.ENTRIES_OVERRIDE
     pp.ENTRIES_OVERRIDE = fake_entries
-    rel7 = as_ep_release(next(r for r in caps[key]["releases"] if r["tag"] == tag7))
+    rel7 = as_ep_release(next(r for r in caps2[key]["releases"] if r["tag"] == new_tag))
     # 窗口捕获只存 name/size/sha256（版本轴不需要 URL）；真 GitHub release 带下载地址。
     for a in rel7["assets"]:
         a["browser_download_url"] = f"https://example.invalid/{a['name']}"
@@ -443,14 +453,14 @@ def selftest() -> int:
         if others != {"whisper", "sd"}:
             bad.append(f"apply 动了别的引擎：{others}")
         if {r["release"] for r in new_plan["rows"]
-            if r.get("engine") == "llama"} != {base["latest_runtime_tag"]}:
+            if r.get("engine") == "llama"} != {new_tag}:
             bad.append("apply 没把三行都换成候选 tag")
         if len(new_plan["rows"]) != len(plan["rows"]):
             bad.append("apply 改了总行数")
     # ⑧ 回退/同标签必须拒绝
     with contextlib.redirect_stdout(io.StringIO()):
-        same = update(plan, "llama", base["pinned"],
-                      {"tag_name": base["pinned"], "assets": []}, False)
+        same = update(plan, "llama", pin,
+                      {"tag_name": pin, "assets": []}, False)
     if same != 1:
         bad.append("把同一颗 tag 当成更新时没拒绝")
     print("---- 结论 ----  baseline =", {k: base[k] for k in

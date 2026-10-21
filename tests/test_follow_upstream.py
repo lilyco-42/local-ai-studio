@@ -4,6 +4,9 @@
 - 上游一天发好几个版本 —— 把"有新版"当红，红就不再是信号；
 - 反向也危险 —— 把"钉住那颗被撤/被重打包"也放过去，钉值就悄悄失去证据。
 所以每条"不该红"的用例都配一条"该红"的正向对照，apply 那条还要求别的引擎一个字节不许动。
+
+"有新版"这一侧用合成候选（把钉住那颗改名后插到窗口顶部）：钉值一旦追平上游，
+真实窗口里就没有更新的版本，判据不能靠"钉值恰好落后"才验得动。
 """
 import contextlib
 import copy
@@ -26,7 +29,7 @@ CAP = os.path.join(HERE, "fixtures", "release-window.json")
 ASSETS = os.path.join(HERE, "fixtures", "backend_assets.json")
 PLAN = os.path.join(ROOT, "pins", "payload-plan.json")
 MATRIX = os.path.join(ROOT, "pins", "backend-matrix.json")
-TAG = "b11748"      # b11727 之后第 12 个带产物的版本，也是窗口捕获里最新的一颗
+CAND = "b99999"
 
 
 def load(path):
@@ -42,32 +45,51 @@ def key_of(plan):
     return f"{fu.ep.UPSTREAM['llama']['repo']}@{fu.pinned_release(plan, 'llama')}"
 
 
+def pin_of(plan):
+    return fu.pinned_release(plan, "llama")
+
+
 def release_of(caps, tag):
     return next(r for r in caps[key_of(load(PLAN))]["releases"] if r["tag"] == tag)
 
 
+def with_candidate(caps, plan):
+    """把钉住那颗改个更新的 tag 插到窗口顶部，当作上游刚发的候选。"""
+    pin = pin_of(plan)
+    key = key_of(plan)
+    rel = copy.deepcopy(next(r for r in caps[key]["releases"] if r["tag"] == pin))
+    rel["tag"] = CAND
+    rel["published_at"] = "2099-01-01T00:00:00Z"
+    rel["assets"] = [dict(a, name=a["name"].replace(pin, CAND)) for a in rel["assets"]]
+    caps[key]["releases"].insert(0, rel)
+    return rel
+
+
 def fake_entries(url):
     if url.endswith(".zip"):
-        return [{"name": f"llama-{TAG}/llama-server.exe", "size": 10, "packed": 5},
-                {"name": f"llama-{TAG}/llama-server-impl.dll", "size": 10, "packed": 5}]
-    return [{"name": f"llama-{TAG}/llama-server", "size": 10, "packed": None}]
+        return [{"name": f"llama-{CAND}/llama-server.exe", "size": 10, "packed": 5},
+                {"name": f"llama-{CAND}/llama-server-impl.dll", "size": 10, "packed": 5}]
+    return [{"name": f"llama-{CAND}/llama-server", "size": 10, "packed": None}]
 
 
-def fake_release(tag=TAG):
+def fake_release(tag=CAND):
     """窗口捕获只有 name/size/sha256；真 GitHub release 还带下载地址，`rows_for` 要用。"""
-    rel = fu.as_ep_release(release_of(load(CAP), tag))
+    caps = load(CAP)
+    with_candidate(caps, load(PLAN))
+    rel = fu.as_ep_release(release_of(caps, tag))
     for a in rel["assets"]:
         a["browser_download_url"] = f"https://example.invalid/{a['name']}"
     return rel
 
 
 class TestEvaluate(unittest.TestCase):
-    def test_baseline_is_a_report_not_a_red(self):
+    def test_newer_candidate_is_a_report_not_a_red(self):
         caps, plan, matrix, assets = base_inputs()
+        with_candidate(caps, plan)
         r = fu.evaluate(caps, plan, matrix, assets)
         self.assertEqual(r["decision"], "newer_available")
-        self.assertEqual(r["behind"], 12)
-        self.assertEqual(r["candidate"], TAG)
+        self.assertEqual(r["behind"], 1)
+        self.assertEqual(r["candidate"], CAND)
         self.assertIs(r["red"], False)
         self.assertEqual(r["pinned_damage"], [])
         self.assertEqual(r["candidate_missing"], [])
@@ -76,7 +98,7 @@ class TestEvaluate(unittest.TestCase):
 
     def test_repackaged_pin_is_red(self):
         caps, plan, matrix, assets = base_inputs()
-        rt = fu.runtime_assets(release_of(caps, "b11727"))[0]
+        rt = fu.runtime_assets(release_of(caps, pin_of(plan)))[0]
         rt["sha256"] = "f" * 64
         r = fu.evaluate(caps, plan, matrix, assets)
         self.assertEqual(r["decision"], "pinned_damaged")
@@ -85,7 +107,8 @@ class TestEvaluate(unittest.TestCase):
     def test_removed_pin_is_red(self):
         caps, plan, matrix, assets = base_inputs()
         k = key_of(plan)
-        caps[k]["releases"] = [r for r in caps[k]["releases"] if r["tag"] != "b11727"]
+        pin = pin_of(plan)
+        caps[k]["releases"] = [r for r in caps[k]["releases"] if r["tag"] != pin]
         r = fu.evaluate(caps, plan, matrix, assets)
         self.assertEqual(r["decision"], "pinned_damaged")
         self.assertIs(r["red"], True)
@@ -100,18 +123,19 @@ class TestEvaluate(unittest.TestCase):
     def test_up_to_date_is_not_red(self):
         caps, plan, matrix, assets = base_inputs()
         k = key_of(plan)
+        pin = pin_of(plan)
         caps[k]["releases"] = [r for r in caps[k]["releases"]
-                               if fu.ep.release_rank(r["tag"]) <= fu.ep.release_rank("b11727")]
+                               if fu.ep.release_rank(r["tag"]) <= fu.ep.release_rank(pin)]
         r = fu.evaluate(caps, plan, matrix, assets)
         self.assertEqual(r["decision"], "up_to_date")
         self.assertIs(r["red"], False)
 
     def test_candidate_missing_a_shipped_target_blocks(self):
         caps, plan, matrix, assets = base_inputs()
-        cand = release_of(caps, TAG)
+        cand = with_candidate(caps, plan)
         cand["assets"] = [a for a in cand["assets"]
-                          if not (bd.classify(a["name"], TAG)["os"] == "win-x64"
-                                  and bd.classify(a["name"], TAG)["backend"] == "cpu")]
+                          if not (bd.classify(a["name"], CAND)["os"] == "win-x64"
+                                  and bd.classify(a["name"], CAND)["backend"] == "cpu")]
         r = fu.evaluate(caps, plan, matrix, assets)
         self.assertEqual(r["decision"], "blocked")
         self.assertIs(r["red"], False, "上游发版本身不是红")
@@ -119,23 +143,24 @@ class TestEvaluate(unittest.TestCase):
 
     def test_candidate_without_a_digest_blocks(self):
         caps, plan, matrix, assets = base_inputs()
-        fu.runtime_assets(release_of(caps, TAG))[0]["sha256"] = ""
+        cand = with_candidate(caps, plan)
+        fu.runtime_assets(cand)[0]["sha256"] = ""
         r = fu.evaluate(caps, plan, matrix, assets)
         self.assertEqual(r["decision"], "blocked")
         self.assertEqual(len(r["candidate_no_digest"]), 1)
 
     def test_unrecognised_backend_word_blocks(self):
         caps, plan, matrix, assets = base_inputs()
-        release_of(caps, TAG)["assets"].append(
-            {"name": f"llama-{TAG}-bin-ubuntu-hip-x64.tar.gz", "size": 1,
-             "sha256": "0" * 64})
+        cand = with_candidate(caps, plan)
+        cand["assets"].append({"name": f"llama-{CAND}-bin-ubuntu-hip-x64.tar.gz",
+                               "size": 1, "sha256": "0" * 64})
         r = fu.evaluate(caps, plan, matrix, assets)
         self.assertEqual(r["decision"], "blocked")
         self.assertTrue(r["candidate_unknown"])
 
     def test_matrix_disagreeing_with_the_plan_is_red(self):
         caps, plan, matrix, assets = base_inputs()
-        matrix["engines"]["llama"]["release"] = "b11748"
+        matrix["engines"]["llama"]["release"] = "b11769"
         r = fu.evaluate(caps, plan, matrix, assets)
         self.assertEqual(r["decision"], "pinned_damaged")
 
@@ -153,8 +178,9 @@ class TestRowsAndApply(unittest.TestCase):
         plan = load(PLAN)
         rows, bad = self.build(plan)
         self.assertEqual(bad, [])
-        self.assertEqual([r["os"] for r in rows], ["win-x64", "linux-x64", "macos-arm64"])
-        self.assertTrue(all(r["release"] == TAG for r in rows))
+        self.assertEqual([r["os"] for r in rows], fu.shipped_os(plan, "llama"))
+        self.assertEqual({r["os"] for r in rows}, {"win-x64", "linux-x64", "macos-arm64"})
+        self.assertTrue(all(r["release"] == CAND for r in rows))
         self.assertTrue(all(r["digest"].startswith("sha256:") for r in rows))
         self.assertTrue(all(r["status"] == "ok" for r in rows))
 
@@ -168,7 +194,7 @@ class TestRowsAndApply(unittest.TestCase):
             after = [r for r in new["os"][label] if r.get("engine") != "llama"]
             self.assertEqual(after, before, f"{label} 里别的引擎/gap 行被改动了")
         self.assertEqual({r["release"] for r in new["rows"] if r.get("engine") == "llama"},
-                         {TAG})
+                         {CAND})
         for label in new["os"]:
             want = round(sum((r.get("archive_mib") or 0) for r in new["os"][label]), 1)
             self.assertEqual(new["totals_mib"][label], want)
@@ -182,7 +208,8 @@ class TestRowsAndApply(unittest.TestCase):
 
     def test_update_refuses_a_same_or_older_tag(self):
         plan = load(PLAN)
-        for tag in ("b11727", "b11700"):
+        pin = pin_of(plan)
+        for tag in (pin, "b11700"):
             with contextlib.redirect_stdout(io.StringIO()):
                 rc = fu.update(plan, "llama", tag, {"tag_name": tag, "assets": []}, False)
             self.assertEqual(rc, 1, tag)
@@ -196,15 +223,15 @@ class TestRowsAndApply(unittest.TestCase):
             fu.PAYLOAD, pp.ENTRIES_OVERRIDE = tmp, fake_entries
             try:
                 with contextlib.redirect_stdout(io.StringIO()) as out:
-                    rc = fu.update(load(PLAN), "llama", TAG, fake_release(), True)
+                    rc = fu.update(load(PLAN), "llama", CAND, fake_release(), True)
             finally:
                 fu.PAYLOAD, pp.ENTRIES_OVERRIDE = old_payload, old_override
             self.assertEqual(rc, 2)
             self.assertIn("退出码 2", out.getvalue())
             doc = load(tmp)
             self.assertEqual({r["release"] for r in doc["rows"]
-                              if r.get("engine") == "llama"}, {TAG})
-            self.assertEqual(fu.pinned_release(load(PLAN), "llama"), "b11727",
+                              if r.get("engine") == "llama"}, {CAND})
+            self.assertEqual(fu.pinned_release(load(PLAN), "llama"), pin_of(load(PLAN)),
                              "committed plan 不该被这条测试改动")
 
     def test_dependents_list_matches_the_files_on_disk(self):
@@ -212,7 +239,7 @@ class TestRowsAndApply(unittest.TestCase):
             self.assertTrue(os.path.isfile(os.path.join(ROOT, path)), path)
 
     def test_residual_names_every_table_still_carrying_the_old_tag(self):
-        stale = {p for p, _cmd in fu.residual(ROOT, "b11727")}
+        stale = {p for p, _cmd in fu.residual(ROOT, pin_of(load(PLAN)))}
         self.assertEqual(len(stale), len(fu.DEPENDENTS), "有派生表没被扫到或被静默跳过")
         self.assertIn("pins/backend-matrix.json", stale)
         self.assertIn("pins/runtime-versions.json", stale)
@@ -231,21 +258,27 @@ class TestCliExitCode(unittest.TestCase):
             json.dump(caps, fh, ensure_ascii=False)
         return path
 
-    def test_new_release_exits_zero(self):
+    def test_up_to_date_exits_zero(self):
         self.assertEqual(self.run_check(), 0)
+
+    def test_newer_candidate_exits_zero(self):
+        def mutate(caps):
+            with_candidate(caps, load(PLAN))
+        with tempfile.TemporaryDirectory() as d:
+            self.assertEqual(self.run_check("--captures", self.write_caps(d, mutate)), 0)
 
     def test_damaged_pin_exits_one(self):
         def mutate(caps):
-            fu.runtime_assets(release_of(caps, "b11727"))[0]["sha256"] = "f" * 64
+            fu.runtime_assets(release_of(caps, pin_of(load(PLAN))))[0]["sha256"] = "f" * 64
         with tempfile.TemporaryDirectory() as d:
             self.assertEqual(self.run_check("--captures", self.write_caps(d, mutate)), 1)
 
     def test_blocked_candidate_only_fails_under_strict(self):
         def mutate(caps):
-            cand = release_of(caps, TAG)
+            cand = with_candidate(caps, load(PLAN))
             cand["assets"] = [a for a in cand["assets"]
-                              if not (bd.classify(a["name"], TAG)["os"] == "win-x64"
-                                      and bd.classify(a["name"], TAG)["backend"] == "cpu")]
+                              if not (bd.classify(a["name"], CAND)["os"] == "win-x64"
+                                      and bd.classify(a["name"], CAND)["backend"] == "cpu")]
         with tempfile.TemporaryDirectory() as d:
             path = self.write_caps(d, mutate)
             self.assertEqual(self.run_check("--captures", path), 0)

@@ -98,7 +98,7 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
 
 ## 验收标准（在当前唯一可用验证手段 = GitHub Actions 下）
 
-1. `ci.yml`：916 个单测绿（重数：`python -W error::ResourceWarning -m unittest discover -s tests
+1. `ci.yml`：917 个单测绿（重数：`python -W error::ResourceWarning -m unittest discover -s tests
    -p "test_*.py"`；按文件数就 `python -m unittest tests.<模块名>`。2026-10-20 实测逐文件：
    `test_yaml_gate.py` 闸门自己（含 workflow 文件清单与磁盘覆盖对照）17、`test_lane_argv.py` 车道 ↔ 启动表一致（含 15 个 workflow 文本变异）10、
    `test_sideload.py` sideload 按内容认领（6 条源码变异体 + 三个真上游文件）22、
@@ -106,7 +106,7 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
    `test_backend_choice.py` 换档表（12 条源码变异体 × 16 条探针，输入是三份已钉产物）25、
    `test_runtime_parity.py` server 在场表（11 条源码变异体 × 15 条探针 + 捕获夹具字节复核）21、
    `test_runtime_versions.py` runtime 版本轴（18 条源码变异体 × 24 条探针 + 窗口元数据夹具）21、
-   `test_follow_upstream.py` 上游跟随判定与 re-pin 流程（19 条，含"新版不红 / 钉值被撤或被重打包才红"）19、
+   `test_follow_upstream.py` 上游跟随判定与 re-pin 流程（20 条，含"新版不红 / 钉值被撤或被重打包才红"）20、
    `test_shell_contract.py` 外壳合同（14 条源码变异体 × 24 条探针，输入是五张已钉产物 +
    serde 形状重放 12 个变异）19、
    `test_shell_source.py` 外壳源码结构闸门（7 条核心变异体 + 2 条 UI 负控 + 1 条包装层负控 +
@@ -828,11 +828,12 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     → `pins/runtime-versions.json`。约束第 3 条写"引擎按 runtime 打包、可替换"，矩阵却只覆盖
     **钉住的那一个 ref**，版本轴一句都没有 —— 外壳的"更新 runtime / 回退 runtime"就靠这张表。
     **窗口是翻出来的，不是写死的**：每个仓库从最新往下翻，翻到钉住那颗为止（100/页 × 至多 5 页，
-    再裁到至少 25 个）。llama 一天发 6 个 release，固定 12 个的窗口装不下我们钉的 b11727 ——
+    再裁到至少 25 个）。llama 一天发 6 个 release，固定 12 个的窗口会装不下钉住那颗 ——
     窗口不含钉值时"能退回哪"这句就不成立，而表看起来仍然完整。
     实测三件事：
-    ① **llama 钉的 b11727 上面已有 12 个带产物的版本**（最新 b11748），但覆盖面没变
-    （`os_lost`/`os_added` 都为空）—— "能升"与"升完还发同样的包"是两个数，都得在表里；
+    ① **本次把 llama 从 b11727 重钉到 b11798 后，它已是窗口里最新的带产物版本（0 个更新）**；
+    **sd 还差 1 个（master-975 → master-982），覆盖面没变**（`os_lost`/`os_added` 都为空）——
+    "能升"与"升完还发同样的包"是两个数，都得在表里；
     ② **whisper 的 `releases/latest` 是 v1.9.5，0 个产物**，真正能装的 b5454 正是我们钉的那颗；
     窗口里 9 个只有源码的标签，`latest_runtime_tag` 与 `pinned` 相同。外壳按 `releases/latest`
     取 runtime 会"检查更新成功、装不上任何东西"；
@@ -846,7 +847,7 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     新版本若丢掉我们真装的 OS 直接红。
     18 条源码变异体 × 24 条探针（含"0 产物的标签也当候选"、"verifiable 不看 digest"、
     "latest 是否带产物不进漂移比对"、"真装 OS 丢了不报"、"live 口径把新版当红"）。捕获
-    `tests/fixtures/release-window.json`（259,753 B，sha256 记在 `.meta.json` 并由测试复算字节，
+    `tests/fixtures/release-window.json`（259,775 B，sha256 记在 `.meta.json` 并由测试复算字节，
     只有 tag / published_at / asset 的 name+size+digest 三种元数据），没有 runner 也能离线重算。
     车道 `backends` 最后四步：判据本身 / 单测 / 离线对表 / **现取三个仓库的窗口核对钉值**。
     最后一步用 `--live` 口径：**只核对钉住那颗还在、产物没被重打包、真装 OS 没变**；
@@ -979,8 +980,8 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     **证据边界**：这组 Rust 单测已随 `core` 在 3 个操作系统上真跑（各 70 条全过，2026-10-21）；
     curl 在真实网络上的重试/续传行为仍只有 Fake fetcher 的逻辑证据；R2 镜像仍是唯一缺口（#23）。
 36. **跟随上游 llama.cpp：定时只报不跟，重钉是一次显式动作**（`tools/follow_upstream.py` +
-    `.github/workflows/upstream-follow.yml`）：上游一天发好几个包（钉住的 b11727 到 2026-10-20
-    已到 b11755），把"有新版本"当红，红就不再是信号。车道每天 03:17 UTC 现取窗口，只有钉值坏了
+    `.github/workflows/upstream-follow.yml`）：上游一天发好几个包（b11727 → b11798 只隔了几天），
+    把"有新版本"当红，红就不再是信号。车道每天 03:17 UTC 现取窗口，只有钉值坏了
     才红：钉住那颗从窗口里消失、产物被重打包（逐颗 name+size+sha256 对已提交捕获）、
     `backend-matrix` 与 `payload-plan` 钉的不是同一颗。新版本身退出码 0；候选丢我们真装的 target /
     出现认不出的后端词 / 没有上游 digest 只报 `blocked`，`--strict` 才当红。
@@ -988,18 +989,19 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     （zip 读中央目录、tar 读成员表；只下载与读取，不执行），`--apply` 只替换 payload-plan 里
     该引擎的行。之后十份派生文件（3 份捕获 + 7 张表）只要还有旧 tag，退出码 2 并逐张打印重出
     命令 —— 半套重钉不许说成完成；自检用 8 类变异证明（含"换 tag 后别的引擎一个字节不许动"、
-    "同 tag/回退必须拒绝"），`tests/test_follow_upstream.py` 19 条。
+    "同 tag/回退必须拒绝"），`tests/test_follow_upstream.py` 20 条。
     **证据边界**：这条车道的 `schedule` 至今没有被真正触发过（这台账号的 cron 会晚 1–3 小时、整槽丢）；
-    2026-10-21T16:28Z 本地只读跑过一次 `--check --live`，读到 b11797、钉住 b11727 落后 50 个
-    （最新带产物 b11797）、退出码 0 —— 证的是工具与 GitHub API 的形状，不是 schedule 真会触发。
+    重钉前 2026-10-21T16:28Z 本地只读跑过一次 `--check --live`，读到 b11797、钉住 b11727 落后 50 个；
+    重钉到 b11798 后 17:44Z 再跑一次：钉 b11798、落后 0、已最新、退出码 0 —— 证的是工具与
+    GitHub API 的形状，不是 schedule 真会触发。
     同一套现取逻辑已在 `engine-live` 的 `backends` 末步真跑（101 个 release / 92 个带产物 / 0 问题）。
 
 ## 车道判据的出处（全部按**钉住的那个 ref** 核过，不是按 HEAD 记的）
 
 | 车道 | 判据依赖的东西 | 出处 |
 |---|---|---|
-| `headless-inference` | 速率行 + 独立证明"真的吐了字"；关对话模式的真实拼法 | llama.cpp `b11727`：**库里** `src/llama-context.cpp:4657/4659` 会打 `%8.2f tokens per second`，但 **llama-cli 不调它** —— CLI 只在 `--show-timings`（`common/arg.cpp:1798`）下打 `[ Prompt: %.1f t/s | Generation: %.1f t/s ]`（`tools/cli/cli-context.cpp:655-660`）。判据因此两种写法都认，并另加一条与格式无关的证据：stdout 必须有非空白内容。抓不到速率时先怀疑格式（红字里顺带打 help 里的 timings/perf 开关），不再把结论写成"推理没跑起来"。关对话的真实拼法是 `-no-cnv`/`--no-conversation`（`arg.cpp:1907`），交互风险由 `< /dev/null` 兜死；`-t/-n/-ngl` 也都在 `common/arg.cpp`（**不在** `common/common.cpp`） |
-| `headless-inference`（常驻 server） | 路由名、响应字段名、**服务二进制与 CLI 是不是同一个文件** | llama.cpp `b11727`：`GET /health` = `tools/server/server.cpp:263`（返回带 `"status"`）、`POST /v1/chat/completions` = `274`、`choices[].message.content` = `tools/server/server-task.cpp:422/434`（老 `/completion` 用 `choices[].text`，判据两种都吃）、`usage.tokens_predicted` = `340`。二进制是 `llama-server` **和** `libllama-server-impl.so` 成对的（zip 条目表），所以这一步自己 `find llama-server` 并带 `LD_LIBRARY_PATH`，不复用上一步挑中的 CLI。`tokens_predicted` 缺失时**只跳过不断言**（这个键历史上叫过 `completion_tokens`，写死会养出一条永远红的车道），非空文本那条才是硬证据 |
+| `headless-inference` | 速率行 + 独立证明"真的吐了字"；关对话模式的真实拼法 | llama.cpp `b11798`：**库里** `src/llama-context.cpp:4657/4659` 会打 `%8.2f tokens per second`，但 **llama-cli 不调它** —— CLI 只在 `--show-timings`（`common/arg.cpp:1797`）下打 `[ Prompt: %.1f t/s | Generation: %.1f t/s ]`（`tools/cli/cli-context.cpp:655-660`）。判据因此两种写法都认，并另加一条与格式无关的证据：stdout 必须有非空白内容。抓不到速率时先怀疑格式（红字里顺带打 help 里的 timings/perf 开关），不再把结论写成"推理没跑起来"。关对话的真实拼法是 `-no-cnv`/`--no-conversation`（`arg.cpp:1907`），交互风险由 `< /dev/null` 兜死；`-t/-n/-ngl` 也都在 `common/arg.cpp`（**不在** `common/common.cpp`） |
+| `headless-inference`（常驻 server） | 路由名、响应字段名、**服务二进制与 CLI 是不是同一个文件** | llama.cpp `b11798`：`GET /health` = `tools/server/server.cpp:280`（返回带 `"status"`）、`POST /v1/chat/completions` = `291`、`choices[].message.content` = `tools/server/server-task.cpp:422`（老 `/completion` 用 `choices[].text`，判据两种都吃）、`usage.tokens_predicted` = `340`。二进制是 `llama-server` **和** `libllama-server-impl.so` 成对的（zip/tar 条目表都核过），所以这一步自己 `find llama-server` 并带 `LD_LIBRARY_PATH`，不复用上一步挑中的 CLI。`tokens_predicted` 缺失时**只跳过不断言**（这个键历史上叫过 `completion_tokens`，写死会养出一条永远红的车道），非空文本那条才是硬证据 |
 | `subtitle-proof` | `-osrt/--output-srt`、`-of/--output-file`、`-l`、`-m`、`-f`、`-t`；**产出文件叫什么** | whisper.cpp `b5454` 的 `examples/cli/cli.cpp:183/190/197/201/202/159`；不给 `-of` 时输出名从输入名推（同文件 `1136`）。**`-of` 要的是基名**：`fout_factory::open` 把扩展名直接拼在后面（`1165-1166`），写 `-of jfk.srt` 会得到 `jfk.srt.srt` —— 原车道就是这么写的，第一次跑必红且原因很怪。现在判据靠 `ls jfk*.srt` 发现真名，红字区分"命名变了"和"没产出字幕" |
 | `subtitle-proof`（常驻 server） | 服务二进制在不在包里、就绪态怎么认、multipart 字段名、SRT 由谁渲染 | whisper.cpp `b5454`：`whisper-server` **实测在** `whisper-bin-ubuntu-x64.tar.gz` 深度 1（2026-10-20 整包列条目，且整包 sha256 == 车道里钉的 `a72becf1…`）；`GET /health` 加载期回 **503** + `loading model`（`examples/server/server.cpp:1218-1224`），就绪回 `{"status":"ok"}`（`:1221`）—— 所以探测写成 `curl -fsS` **并且**要求正文含 `ok`，少一样都能把"还在加载"看成"服务不行/服务行了"；`POST /inference`（`:62/826`）的音频字段必须叫 `file`（`:831`，缺了直接 400），其余参数一律走 multipart 字段（`:482-622` 清一色 `has_file`）；`response_format=srt` 时服务端逐段拼 `序号/起 --> 止/正文` 并以 `application/x-subrip` 回吐（`:1037-1041`），编号是 `i+1+offset_n` 而请求不发 `offset_n`，所以判据要求从 1 连续。判据本体是 `tools/srt_proof.py`（20 条单测：本仓库拼的 spec 形状 + 另外两个项目留下的真 SRT 当独立生产者语料） |
 | `image-proof` | 参数写在**产物的 tEXt** 里而不是日志里 | sd.cpp `master-975-95b3090`：`examples/common/common.cpp:3239/3269` 拼 `Steps:`/`Size:` → `examples/common/media_io.cpp` 交给 `stbi_write_png(..., parameters)` → `thirdparty/stb_image_write.h:1210` 落成 `tEXt`、关键字 `parameters` |
@@ -1010,13 +1012,13 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
 | `subtitle-tiers` | 字幕档位表的四个来源与"哪一条不许我们替上游补数字" | whisper.cpp `b5454`：`README.md:138-144` 是 `Model \| Disk \| Mem` 表（`Mem` 列 tiny `~273 MB` → large `~3.9 GB`，`:140` 已进 `pins/citations.json`）；`models/README.md:63` 明写 **Models are multilingual unless the model name includes `.en`**（顺序按这条排）、同一文件 `:67` 明写 **`for-tests-` 前缀的模型文件是空的**（收集清单按名字排掉）；`models/download-ggml-model.sh:9` 写死宿主 `src="https://huggingface.co/ggerganov/whisper.cpp"`（下载源从脚本读出来，不硬编码在我们代码里）。哈希只有一家给：同一次捕获里 HF `tree.lfs.oid` 有 47 条、ModelScope 对该仓库 **0 条** → 整轴 `single`，`ggml-tiny.bin` 的 oid 与 `pins/models.json` 那颗 pin 逐字节相同（正向对照）。上游自己不一致的两处也记进产物 `upstream_deltas`：白名单有 `small.en-tdrz` 而宿主无此文件；宿主有 4 个 `.en-q8_0` 而白名单没列 |
 | `image-tiers` | 生图这一档**为什么只能给算术下限、不能给内存承诺**，以及三条来源各自的位置 | sd.cpp `95b3090`：`docs/performance.md:143` 分段执行的容量检查留 `128 MiB of headroom`、`:145` 保住 `512 MiB device` 底线、`:102` 的 `--offload-to-cpu`（那一行 `--offload-to-cpu` 在文件里命中 6 次，所以进表的是 "saving VRAM without reducing generation speed" —— 子串不唯一就不配进这张表）、`README.md:157` 把内存/显存这件事推到这份文档（**上游给的是运行时策略，不是一张静态表**）；`docs/sd.md:5` 明写 SD1.5 的出处是 `huggingface.co/stable-diffusion-v1-5/stable-diffusion-v1-5` 的 **safetensors** —— GGUF 量化全在社区仓库，所以候选池只能由上游搜索推导。文件级哈希与字幕那行同一套机制（HF `tree.lfs.oid` × ModelScope `Sha256`），实测这次 338 行里 191 行两家一致 |
 | `machine-budget` | 这一条几乎不依赖上游 file:line —— 它的输入是**已提交那五张表的数字**加一张实测吞吐表；唯一的外部依据是「每个家族在主体之外还要不要外挂权重」 | sd.cpp `95b3090`：`docs/sd.md` 的 txt2img 例子五行 —— `:13` SD1.5 只给 `-m`（`sd-example-sd15-only-model`）、`:14` SDXL 要 `--vae`（`sd-example-sdxl-needs-vae`）、`:15` sd3_medium 那颗文件名自带 clips/t5xxl（`sd-example-sd3-medium-selfcontained`）、`:16` flux 要 `--vae --clip_l --t5xxl`（`sd-flux-needs-companions`）、`:17` sd3.5_large 要 `--clip_l --clip_g --t5xxl`（`sd-sd35-needs-encoders`），五条都由 `citation-drift` 逐行查；吞吐 `4.2 / 0.25 MiB/s` 不是上游声明，是 `tools/r2_manifest.py` 里那次 lain42.top 实测，所以产物里 `measured_at_exit` 写明是哪台机器量的 |
-| `launch-plan` | 外壳起每一项能力该敲哪些旗标、引擎自己有没有鉴权 | llama.cpp `b11727`：`--api-key` = `common/arg.cpp:3513`，`/health` 那行注释 `public endpoint (no API key check)` = `tools/server/server.cpp:263`（相邻的 `/v1/health` :264 注释一模一样，所以 expect 加长到只命中 263）。whisper.cpp `b5454`：只有 `--host`/`--port`（`examples/server/server.cpp:252/251`），默认绑 127.0.0.1（`:59`），整份文件查不到 `--api-key`/`api_key` —— 缺席也是一条被扫出来的判据。stable-diffusion.cpp `95b3090`：`--listen-ip`/`--listen-port` = `examples/server/runtime.cpp:193/198`，四份编码器旗标 = `examples/common/common.cpp:407/411/421/471`。oar-ocr `84817f5`：`name = "oar"` `oar-ocr-cli/src/args.rs:10`、子命令 `Ocr(Ocr),` `:49`、`requires_all = ["rec", "dict"]` `:59`、`conflicts_with_all = ["det", "rec", "dict"]` `:84`、位置参数 `INPUTS` `:90` —— 这份文件里没有 `--port`/`--listen`/`--api-key`。以上九条都进了 `pins/citations.json`（现 82 条），并由 `tools/launch_plan.py` 的 28 条 needle 与 8 条缺席声明在车道里逐条现查 |
+| `launch-plan` | 外壳起每一项能力该敲哪些旗标、引擎自己有没有鉴权 | llama.cpp `b11798`：`--api-key` = `common/arg.cpp:3533`，`/health` 那行注释 `public endpoint (no API key check)` = `tools/server/server.cpp:280`（相邻的 `/v1/health` :281 注释一模一样，所以 expect 加长到只命中 280）。whisper.cpp `b5454`：只有 `--host`/`--port`（`examples/server/server.cpp:252/251`），默认绑 127.0.0.1（`:59`），整份文件查不到 `--api-key`/`api_key` —— 缺席也是一条被扫出来的判据。stable-diffusion.cpp `95b3090`：`--listen-ip`/`--listen-port` = `examples/server/runtime.cpp:193/198`，四份编码器旗标 = `examples/common/common.cpp:407/411/421/471`。oar-ocr `84817f5`：`name = "oar"` `oar-ocr-cli/src/args.rs:10`、子命令 `Ocr(Ocr),` `:49`、`requires_all = ["rec", "dict"]` `:59`、`conflicts_with_all = ["det", "rec", "dict"]` `:84`、位置参数 `INPUTS` `:90` —— 这份文件里没有 `--port`/`--listen`/`--api-key`。以上九条都进了 `pins/citations.json`（现 82 条），并由 `tools/launch_plan.py` 的 28 条 needle 与 8 条缺席声明在车道里逐条现查 |
 | `install-deps` | 安装包车道第一步该 `apt-get install` 什么、镜像 readme 里在不在 | Tauri `2e513e3f`：`<TabItem label="Debian">` = `src/content/docs/start/prerequisites.mdx:29`，族里最后一颗点名的 `libayatana-appindicator3-dev` = `:40`（整页唯一命中），安装命令首行 `sudo apt install libwebkit2gtk-4.1-dev` = `:33`；**整页搜 `gstreamer` 命中 0 次** —— 旧文档里那句"+ gstreamer 插件族"没有出处，已删。runner-images `b4067e48`：包表形状靠 `| libssl-dev             | 3.0.13-0ubuntu3.16 |` = `images/ubuntu/Ubuntu2404-Readme.md:289` 证明（不然逐字查全是 `not_listed` 只可能是读错了表），工具链 `- Node.js 22.23.3` = `:26`、`- Rust 1.99.1` = `:140`。在场判语只说 `listed / not_listed`，产物 `verdict_legend` 明写"readme 没提到 ≠ 机器上没装"，真要证明装没装得看车道打印 `pkg-config --modversion webkit2gtk-4.1` |
 | `lane-argv` | 车道真敲的那一行是否与 `pins/launch-plan.json` 一致 | **不是上游声明，是本仓库两份产物互相核对**：读 `.github/workflows/engine-live.yml`（pyyaml），按表里的 `binaries` / `bind` / `flags_absent` / `omit` / `subcommand` 查。九种改坏 workflow 文本的对照全被报（含 `$SRV` 换成 `:` 的"只 find 不 exec"）；判据不吃注释与 heredoc 正文，这条本身也有正反对照。上游那五处旗标事实的出处仍归 `launch-plan` 那一行 |
 | `sideload` | 用户手上的文件能不能按内容认领 | 三个**真实下载的上游文件**（`tests/fixtures/sideload/`，都 <30 KB）：两颗钉过的字典 + `ppocrv5_latin_dict.txt` 的另一颗同名不同字节者。同一串 sha256 取自 GitHub API 的 `asset.digest`（复现命令连同两颗 tag 的体积与 digest 一起记在 `tests/fixtures/sideload.meta.json` 的 reproduce 字段 —— 那条 jq 里有竖线，写进这张表会打断一行），meta 记完整串、测试按 meta 复算字节。`.gguf` 文件头不在这一层解读（归 CI/外壳里的 gguf-parser），产物 `rule.header` 写明了这条边界 |
-| `backends` | 分层与 runtime 可替换这两句有多少可选面 | 三个 ref 的 release 表按 `pins/payload-plan.json` 钉的那一个现取（`gh api repos/<repo>/releases/tags/<tag>` 的 name / size / digest）：llama `b11727` 36 个、whisper `b5454` 12 个、sd `master-975-95b3090` 9 个 = 57，与 ADR-0001 那句"36 个产物"逐条对得上。真实捕获钉在 `tests/fixtures/backend_assets.json`（sha256 记在 `.meta.json`，测试复算字节），车道 `backends` 的现取步骤再现取一次对表；同一 job 后四步是换档表（`--selftest` / 单测 / 离线对表 / 拿现取那份矩阵重算） |
+| `backends` | 分层与 runtime 可替换这两句有多少可选面 | 三个 ref 的 release 表按 `pins/payload-plan.json` 钉的那一个现取（`gh api repos/<repo>/releases/tags/<tag>` 的 name / size / digest）：llama `b11798` 36 个、whisper `b5454` 12 个、sd `master-975-95b3090` 9 个 = 57，与 ADR-0001 那句"36 个产物"逐条对得上。真实捕获钉在 `tests/fixtures/backend_assets.json`（sha256 记在 `.meta.json`，测试复算字节），车道 `backends` 的现取步骤再现取一次对表；同一 job 后四步是换档表（`--selftest` / 单测 / 离线对表 / 拿现取那份矩阵重算） |
 | `backends`（server 在场那四步） | "每一档包里都有外壳要 exec 的那个文件"这句话的前提 | zip **中央目录的成员文件名表**（`tools/zip_peek.py` 用 HTTP Range 读尾部，每颗约 1 MiB，不解压不运行）+ 真装默认档那 3 颗 `.tar.gz` 的**成员表**（`payload_plan.read_tar_entries`：取整包后先要求"字节数 == release 声明"与"整包 sha256 == 上游 digest"，才读 `tarfile.getmembers()`）；31 颗钉在 `tests/fixtures/parity-captures.json`（44,548 B，sha256 记 `.meta.json` 并由测试复算字节）；可执行名不在这张表里定义，只从 `launch_plan.SERVER_BASE` 取（那条出处见上面两行），源码里出现字面量由一条 ast 扫描拒绝 |
-| 引擎与权重输入 | 上游 `digest` 就是内容哈希 | 五个包整包下回实算相等（llama b11727、whisper b5454、sd 95b3090、qwen 415 MB、SD1.5 1.5 GB），见 `pins/models.json` 的 `bytes_verified` |
+| 引擎与权重输入 | 上游 `digest` 就是内容哈希 | 五个包整包下回实算相等（llama b11798、whisper b5454、sd 95b3090、qwen 415 MB、SD1.5 1.5 GB），见 `pins/models.json` 的 `bytes_verified` |
 
 写这张表的理由：CI 现在一次都跑不了，而"日志里会出现某串"这类假设一旦错，
 车道第一次跑就会红在无关的地方 —— `image-proof` 原本就是这么错的（它去 grep 日志，

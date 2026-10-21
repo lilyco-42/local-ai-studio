@@ -765,7 +765,7 @@ jobs:
     # tar.gz 的整包成员表（字节数与上游 digest 都对上才算读到），证明每一档都有外壳要 exec 的
     # 那个 server —— "换个 asset 就换个后端"这句话的前提。不解压、不运行任何东西。
     # 最后四步是"版本轴"：能升到哪、能退回哪、每颗能不能校验。窗口是**翻到钉住那颗为止**
-    # （llama 一天发 6 个 release，固定 12 个装不下我们钉的 b11727）；whisper 的 latest
+    # （llama 一天发 6 个 release，固定 12 个装不下我们钉的那颗）；whisper 的 latest
     # 指向 0 产物标签、往回退到 v1.7.6 之前上游没发 digest —— 两个坑都是表里的一列。
     timeout-minutes: 10
     runs-on: ubuntu-latest
@@ -1293,7 +1293,7 @@ jobs:
       - name: 无头推理，要求真的产出 token
         run: |
           FLAG=""
-          # 候选名单按 b11727 的 common/arg.cpp:1907 补全 —— 那一版写的是 `-no-cnv` 与
+          # 候选名单按 b11798 的 common/arg.cpp:1907 补全 —— 那一版写的是 `-no-cnv` 与
           # `--no-conversation`（单数），上一版只试 `--no-cnv`/`--no-conversations`，
           # 两个都不存在，于是这条永远走"当作默认不进对话"的兜底分支。
           # 兜底本身也不要再依赖"上游大概默认关了对话"这种猜测：下面用 `< /dev/null`
@@ -1302,7 +1302,7 @@ jobs:
             if grep -qF -- "$cand" help.txt; then FLAG="$cand"; break; fi
           done
           echo "关闭对话模式的开关：[${FLAG:-help 里没有，靠 /dev/null 兜底}]"
-          # 速率那一行不是白给的：b11727 的 llama-cli 只在 `--show-timings` 下打印
+          # 速率那一行不是白给的：b11798 的 llama-cli 只在 `--show-timings` 下打印
           # `[ Prompt: %.1f t/s | Generation: %.1f t/s ]`（tools/cli/cli-context.cpp:655-660），
           # 而库里那句 "tokens per second"（src/llama-context.cpp:4657）这个 CLI 根本不调。
           TIMING=""
@@ -1330,9 +1330,9 @@ jobs:
       - name: 起常驻 llama-server，走 OpenAI 兼容接口再产一次 token
         # ADR 的实现约束第 1 条是"外壳起常驻服务，而不是每个任务起一次进程"——
         # 但四条能力车道全是 one-shot CLI，那个决定一次都没被车道碰过。这条补上。
-        # 路由与字段名按 b11727 源码核过，不是照 OpenAI 文档猜的：
-        #   GET  /health                server.cpp:263（返回里带 "status"）
-        #   POST /v1/chat/completions   server.cpp:274
+        # 路由与字段名按 b11798 源码核过，不是照 OpenAI 文档猜的：
+        #   GET  /health                server.cpp:280（返回里带 "status"）
+        #   POST /v1/chat/completions   server.cpp:291
         #   choices[].message.content   server-task.cpp:422/434
         #   usage.tokens_predicted      server-task.cpp:340
         # 服务二进制与 CLI 是**两个文件**（包里还有 libllama-server-impl.so 成对），

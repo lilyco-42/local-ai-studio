@@ -4,8 +4,8 @@
 为什么单独要这一件事：验收第 10 条说"外壳持有唯一监听口、自己发 token、UI 永不直连引擎端口"，
 可这三条能不能成立取决于**引擎自己支持什么**。本轮全部按钉住的 ref 读上游源码量清楚了：
 
-  * `llama-server` 有 `--api-key`（`common/arg.cpp:3513`），且 `/health` 明写是
-    "public endpoint (no API key check)"（`tools/server/server.cpp:263`）→ 带钥匙也能探活；
+  * `llama-server` 有 `--api-key`（`common/arg.cpp:3533`），且 `/health` 明写是
+    "public endpoint (no API key check)"（`tools/server/server.cpp:280`）→ 带钥匙也能探活；
   * `whisper-server` 只有 `--host/--port`（`examples/server/server.cpp:251-252`），
     **没有任何鉴权旗标**；
   * `sd-server` 只有 `--listen-ip/--listen-port`（`examples/server/runtime.cpp:193/198`），
@@ -44,7 +44,19 @@ import citation_check  # 复用"按 pin 住的 ref 取上游原文"那套（含�
 import file_index as fi    # 首启队列由它算：argv 点的每一颗都必须能在队列里找到  # noqa: E402
 
 OUT = os.path.join(ROOT, "pins", "launch-plan.json")
-LLAMA = ("ggml-org/llama.cpp", "b11727")
+
+
+def pinned_release(engine: str) -> str:
+    """llama 的 ref 跟着 payload-plan 走 —— 写死一个 tag，重钉时这张表会嘴上说新、出处还旧。"""
+    with open(os.path.join(ROOT, "pins", "payload-plan.json"), encoding="utf-8") as fh:
+        tags = {r.get("release") for r in json.load(fh)["rows"]
+                if r.get("engine") == engine and r.get("status") == "ok"}
+    if len(tags) != 1:
+        raise SystemExit(f"payload-plan 里 {engine} 的 release 不唯一：{sorted(tags)}")
+    return tags.pop()
+
+
+LLAMA = ("ggml-org/llama.cpp", pinned_release("llama"))
 WHISPER = ("ggml-org/whisper.cpp", "b5454")
 SD = ("leejet/stable-diffusion.cpp", "95b3090664d019fcf8fa032a44d1d4793ba244b8")
 OCR = ("GreatV/oar-ocr", "84817f58")
@@ -87,9 +99,9 @@ SPEC = {
         "auth": {"engine_supports_api_key": True,
                  "argv": ["--api-key", "{token}"],
                  "note": "llama 有 --api-key；即便这样外壳仍是唯一监听口"},
-        # 上游默认 CORS 是 `*`（common/common.h:652）。验收第 10 条第①句要的是"收窄到应用来源"，
+        # 上游默认 CORS 是 `*`（common/common.h:656）。验收第 10 条第①句要的是"收窄到应用来源"，
         # 而 llama 对 special value `localhost` 的语义是：只反射 host 为 localhost/127.0.0.1/::1
-        # 的 Origin（tools/server/server-http.cpp:335-342，`origin_is_localhost` 在 :73-80）。
+        # 的 Origin（tools/server/server-http.cpp:336-345，`origin_is_localhost` 在 :75）。
         # 外壳自己反代时不发 Origin、UI 也不直连，所以这一层是纵深防御而不是主防线。
         "cors": {"argv": ["--cors-origins", "localhost"],
                  "cite": ["llama-cors-flag", "llama-cors-star", "llama-cors-warn"],

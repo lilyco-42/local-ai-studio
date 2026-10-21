@@ -4,9 +4,10 @@
 捕获在 `tests/fixtures/release-window.json`，所以没有 runner 也能离线重算。
 
 这里钉住的三个数是量出来的、也是这张表存在的理由：
-`llama` 钉住的 b11727 上面还有 12 个带产物的版本但覆盖面没变；
+`llama` 钉住的 b11798 就是窗口里最新一颗带产物的版本，它下面 25 个候选的覆盖面没变；
 `whisper` 的 `releases/latest` 是 v1.9.5（0 产物），真正能装的 b5454 正是我们钉的那颗；
 `whisper` 往回退的边界不是最老的标签，而是 v1.7.6 —— 再往前 13 个 release 上游没发 digest。
+`sd` 钉住的 master-975 落后 1 个带产物的版本（master-982），升级仍是一次显式动作。
 """
 from __future__ import annotations
 
@@ -33,9 +34,26 @@ CAP = os.path.join(ROOT, "tests", "fixtures", "release-window.json")
 MATRIX = os.path.join(ROOT, "pins", "backend-matrix.json")
 PLAN = os.path.join(ROOT, "pins", "payload-plan.json")
 
-LLAMA = "ggml-org/llama.cpp@b11727"
+LPN = "b11798"
+LLAMA = f"ggml-org/llama.cpp@{LPN}"
 WHISPER = "ggml-org/whisper.cpp@b5454"
 SD = "leejet/stable-diffusion.cpp@master-975-95b3090"
+
+
+def pinned_tag() -> str:
+    return next(r["release"] for r in plan()["rows"]
+                if r.get("engine") == "llama" and r.get("status") == "ok")
+
+
+def add_candidate(c: dict, tag: str = "b99999") -> str:
+    """在窗口顶部合成一颗比钉值新的 release：判据不该只在"恰好落后"时才有正向对照。"""
+    pin = pinned_tag()
+    rel = copy.deepcopy(next(r for r in c[LLAMA]["releases"] if r["tag"] == pin))
+    rel["tag"] = tag
+    rel["published_at"] = "2099-01-01T00:00:00Z"
+    rel["assets"] = [dict(a, name=a["name"].replace(pin, tag)) for a in rel["assets"]]
+    c[LLAMA]["releases"].insert(0, rel)
+    return tag
 
 
 def load(path: str) -> dict:
@@ -103,7 +121,7 @@ class TestArtifact(unittest.TestCase):
 
     def test_window_contains_the_pin_with_room_on_both_sides(self) -> None:
         """窗口必须翻到钉住那一颗，而且它下面还有更老的；否则"能退回哪"是空的。"""
-        want = {"llama": ("b11727", "b11713"), "sd": ("master-975-95b3090", "master-944-8cc5ad8"),
+        want = {"llama": ("b11798", "b11769"), "sd": ("master-975-95b3090", "master-945-a1ded76"),
                 "whisper": ("b5454", "v1.7.2")}
         for e, body in artifact()["engines"].items():
             tags = [r["tag"] for r in body["releases"]]
@@ -125,24 +143,26 @@ class TestArtifact(unittest.TestCase):
                          ["v1.9.5", "v1.9.4", "v1.9.3", "v1.7.5", "b2365", "v1.7.4",
                           "v1.7.3", "v1.7.3-pre", "v1.7.2"])
 
-    def test_llama_pin_is_twelve_runtime_releases_behind(self) -> None:
+    def test_llama_pin_is_latest_in_window(self) -> None:
         e = artifact()["engines"]["llama"]
-        self.assertEqual(e["pinned"], "b11727")
-        self.assertEqual(e["latest_runtime_tag"], "b11748")
-        self.assertEqual(e["newer_runtime_releases"], 12)
+        self.assertEqual(e["pinned"], LPN)
+        self.assertEqual(pinned_tag(), LPN)
+        self.assertEqual(e["latest_runtime_tag"], LPN)
+        self.assertEqual(e["newer_runtime_releases"], 0)
         self.assertEqual(len(e["verifiable_tags"]), 25)
         self.assertIn(e["pinned"], e["verifiable_tags"])
         self.assertEqual(e["older_without_digest_tags"], [])
 
-    def test_sd_pin_is_already_latest(self) -> None:
+    def test_sd_is_one_runtime_release_behind(self) -> None:
         e = artifact()["engines"]["sd"]
-        self.assertEqual(e["newer_runtime_releases"], 0)
-        self.assertEqual(e["latest_runtime_tag"], e["pinned"])
+        self.assertEqual(e["pinned"], "master-975-95b3090")
+        self.assertEqual(e["newer_runtime_releases"], 1)
+        self.assertEqual(e["latest_runtime_tag"], "master-982-0518b34")
 
     def test_capability_delta_records_coverage_is_unchanged(self) -> None:
         d = artifact()["capability_delta"]
-        self.assertEqual([x["engine"] for x in d], ["llama"])
-        self.assertEqual((d[0]["from"], d[0]["to"]), ("b11727", "b11748"))
+        self.assertEqual([x["engine"] for x in d], ["sd"])
+        self.assertEqual((d[0]["from"], d[0]["to"]), ("master-975-95b3090", "master-982-0518b34"))
         self.assertEqual((d[0]["os_lost"], d[0]["os_added"]), ([], []))
         self.assertEqual(d[0]["runtime_releases_in_window"], 25)
         self.assertIn("只报不跟", d[0]["because"])
@@ -321,8 +341,8 @@ class TestSourceMutants(unittest.TestCase):
                 and w["newest_older_release_with_digest"] is None)
             out["g 升级只报不跟"] = (
                 len(fresh["capability_delta"]) == 1
-                and fresh["capability_delta"][0]["engine"] == "llama"
-                and fresh["engines"]["llama"]["newer_runtime_releases"] == 12)
+                and fresh["capability_delta"][0]["engine"] == "sd"
+                and fresh["engines"]["llama"]["newer_runtime_releases"] == 0)
             c1 = copy.deepcopy(committed)
             c1["engines"]["whisper"]["latest_has_runtime"] = True
             out["h 改 latest 指针被叫"] = any(
@@ -340,24 +360,26 @@ class TestSourceMutants(unittest.TestCase):
                 "release 序列变了" in x for x in mod.drift(committed, c4))
 
             c5 = copy.deepcopy(caps)
+            pin = pinned_tag()
             for r in c5[LLAMA]["releases"]:
-                if r["tag"] == "b11727":
+                if r["tag"] == pin:
                     for a in r["assets"]:
                         if a["sha256"] and not rv.ATTACHMENT.search(a["name"]) \
-                                and mod.bd.classify(a["name"], "b11727")["kind"] == "runtime":
+                                and mod.bd.classify(a["name"], pin)["kind"] == "runtime":
                             a["sha256"] = ""
                             break
                     break
             out["l 钉值缺 digest 被报"] = any(
                 "没有上游 digest" in x for x in mod.build(c5, m, p)[1])
             c6 = copy.deepcopy(caps)
-            c6[LLAMA]["releases"] = [r for r in c6[LLAMA]["releases"] if r["tag"] != "b11727"]
+            c6[LLAMA]["releases"] = [r for r in c6[LLAMA]["releases"] if r["tag"] != pin]
             out["m 钉值出窗口被报"] = any(
                 "不在捕获的" in x for x in mod.build(c6, m, p)[1])
             c7 = copy.deepcopy(caps)
-            newest = next(r for r in c7[LLAMA]["releases"] if r["tag"] == "b11748")
+            tag7 = add_candidate(c7)
+            newest = next(r for r in c7[LLAMA]["releases"] if r["tag"] == tag7)
             newest["assets"] = [a for a in newest["assets"]
-                                if mod.bd.classify(a["name"], "b11748").get("os") != "win-x64"]
+                                if mod.bd.classify(a["name"], tag7).get("os") != "win-x64"]
             out["n 新版本丢真装档被报"] = any(
                 "升级路" in x for x in mod.build(c7, m, p)[1])
             c8 = copy.deepcopy(caps)
@@ -366,20 +388,21 @@ class TestSourceMutants(unittest.TestCase):
             out["o 认不出的词被报"] = any(
                 "认不出的名字" in x for x in mod.build(c8, m, p)[1])
             c9 = copy.deepcopy(caps)
-            newest_l = next(r for r in c9[LLAMA]["releases"] if r["tag"] == "b11748")
+            tag9 = add_candidate(c9)
+            newest_l = next(r for r in c9[LLAMA]["releases"] if r["tag"] == tag9)
             for a in newest_l["assets"]:
-                if mod.bd.classify(a["name"], "b11748")["kind"] == "runtime":
+                if mod.bd.classify(a["name"], tag9)["kind"] == "runtime":
                     a["sha256"] = ""
             fresh9, _p9 = mod.build(c9, m, p)
             out["q 缺 digest 的版本不进可校验候选"] = (
-                "b11748" in fresh9["engines"]["llama"]["unverifiable_tags"]
-                and "b11748" not in fresh9["engines"]["llama"]["verifiable_tags"]
-                and "b11727" in fresh9["engines"]["llama"]["verifiable_tags"])
+                tag9 in fresh9["engines"]["llama"]["unverifiable_tags"]
+                and tag9 not in fresh9["engines"]["llama"]["verifiable_tags"]
+                and pin in fresh9["engines"]["llama"]["verifiable_tags"])
             c10 = copy.deepcopy(caps)
             for r in c10[LLAMA]["releases"]:
-                if r["tag"] == "b11727":
+                if r["tag"] == pin:
                     r["assets"] = [a for a in r["assets"]
-                                   if a["name"] != "llama-b11727-bin-android-arm64.tar.gz"]
+                                   if a["name"] != f"llama-{pin}-bin-android-arm64.tar.gz"]
                     break
             out["r 钉值产物与矩阵对不上被报"] = any(
                 "矩阵数出" in x for x in mod.build(c10, m, p)[1])
@@ -387,9 +410,9 @@ class TestSourceMutants(unittest.TestCase):
             m11 = copy.deepcopy(m)
             # 整档消失（不是某颗包消失）：win-x64 的所有 runtime 产物都从两张表里拿掉，
             # 这样产物名集合仍然一致，只有"我们真装的 OS 没了"这一条会红。
-            pinned_c = next(r for r in c11[LLAMA]["releases"] if r["tag"] == "b11727")
+            pinned_c = next(r for r in c11[LLAMA]["releases"] if r["tag"] == pin)
             gone_assets = {a["name"] for a in pinned_c["assets"]
-                           if mod.bd.classify(a["name"], "b11727")["os"] == "win-x64"}
+                           if mod.bd.classify(a["name"], pin)["os"] == "win-x64"}
             pinned_c["assets"] = [a for a in pinned_c["assets"]
                                   if a["name"] not in gone_assets]
             m11["engines"]["llama"]["rows"] = [
@@ -398,7 +421,7 @@ class TestSourceMutants(unittest.TestCase):
                 "在这一版的产物名里找不到" in x for x in mod.build(c11, m11, p)[1])
             c12 = copy.deepcopy(caps)
             for r in c12[LLAMA]["releases"]:
-                if r["tag"] != "b11727":
+                if r["tag"] != pin:
                     for a in r["assets"]:
                         a["sha256"] = ""
             out["t 可校验候选不足两个被报"] = any(
