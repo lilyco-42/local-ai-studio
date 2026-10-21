@@ -1271,8 +1271,13 @@ jobs:
         run: |
           # 候选名来自 zip 中央目录实测（tools/zip_peek.py 读 llama-win-cpu-x64.zip 的条目表）：
           # 包里有 llama-cli / llama-completion / llama / llama-server，**没有** llama-simple 或 llama-completions。
-          BIN=$(find engine -type f \( -name 'llama-cli' -o -name 'llama-completion' -o -name 'llama' \) | head -1)
-          test -n "$BIN" || { echo "上游没有预期的可执行文件，需要更新选择逻辑"; exit 1; }
+          # b11798 起 `llama` 变成了分发器（`Usage: llama <command> [options]`，只有 serve/cli/download/version），
+          # 它的 --help 里没有任何补全参数；把 `llama` 放进候选表再 `head -1`，
+          # 选中谁就取决于 tar 解包顺序 —— 上一版正是这样选中分发器的。只认 llama-cli，
+          # 没有再退 llama-completion，**绝不静默退到 `llama`**。
+          BIN=$(find engine -type f -name 'llama-cli' | head -1)
+          test -n "$BIN" || BIN=$(find engine -type f -name 'llama-completion' | head -1)
+          test -n "$BIN" || { echo "包里没有 llama-cli / llama-completion（只有分发器 llama？）—— 需要更新选择逻辑"; exit 1; }
           echo "BIN=$BIN" >> "$GITHUB_ENV"
           chmod +x "$BIN"
           ldd "$BIN" | grep -i "not found" && exit 1 || echo "动态库齐全"
@@ -1301,7 +1306,10 @@ jobs:
           # `[ Prompt: %.1f t/s | Generation: %.1f t/s ]`（tools/cli/cli-context.cpp:655-660），
           # 而库里那句 "tokens per second"（src/llama-context.cpp:4657）这个 CLI 根本不调。
           TIMING=""
-          grep -qF -- "--show-timings" help.txt && TIMING=--show-timings
+          # 不要写成 `grep ... && TIMING=...`：GitHub 的默认 shell 带 `-e`，
+          # 上游哪天删了这个开关，grep 的非零退出会在跑模型之前把整步杀掉，
+          # 看到的红点就变成"没这一行"而不是"推理失败"。
+          if grep -qF -- "--show-timings" help.txt; then TIMING=--show-timings; fi
           echo "要速率行的开关：[${TIMING:-help 里没有 --show-timings}]"
           timeout 900 "$BIN" -m model.gguf ${FLAG:+"$FLAG"} ${TIMING:+"$TIMING"} -t 1 -ngl 0 -n 24 \
             -p "Reply with exactly one word: hello" > out.txt 2> err.txt < /dev/null
