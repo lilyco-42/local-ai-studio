@@ -28,6 +28,13 @@ SD3.5-medium/large 与 `city96/…`）；对话在 `Qwen/Qwen2.5-0.5B-Instruct-G
    断点续传在这里不是加分项而是必需项（三家源都验过支持 Range/206）。
 2. 对话与字幕的首装体量是可以接受的（395.9 + 181.3 MiB ≈ 8–11 分钟）；OCR 几乎免费。
 3. 真要"装机就能玩"，能默认装的只有 OCR 和 tiny/base 级 ASR。
+4. **这一行还不能"装完就出图"**：2026-10-21 的 `image-proof` 实测，`Q4_0.gguf` 的
+   `metadata_kv_count=0`（1,131 个张量），sd.cpp 读不到版本字段，`-m` 直接报
+   `get sd version from file failed: ''`；`--diffusion-model` 那条路要另配 VAE/CLIP。
+   车道因此改用完整 checkpoint `v1-5-pruned-emaonly.safetensors`（4,265,146,304 B，
+   UNet+VAE+CLIP 在同一文件），pin 在 `pins/proof-weights.json`（HF `tree.lfs.oid` ==
+   ModelScope `Sha256`，零下载）。产品侧的默认行仍是 Q4_0 —— **这张表只统计体积与耗时，
+   不代表那一颗单独可用**；默认行要不要换成完整 checkpoint 属于产品决定，不是车道能替它拍的。
 
 ## pin 规则：GitHub 给、HF 与 R2 不给，而 HF 还多一个会咬人的假哈希
 
@@ -71,6 +78,7 @@ CDN 内容寻址路径 + 跨源总长 —— **两家各自独立给哈希且相
 | 文件 | sha256 | 大小 | 方法与凭据 |
 |---|---|---|---|
 | `stable-diffusion-v1-5-pruned-emaonly-Q4_0.gguf`（生图默认） | `b8944e9fe0b69b36ae1b5bb0185b3a7b8ef14347fe0fa9af6c64c4829022261f` | **1,566,768,416 B** | **零下载**：ModelScope 元数据 `Sha256` == 它 CDN 的 `lfs-objects/<2>/<2>/<60>` 还原值，总长又与**另一家**的 `lfs.size` 一致 |
+| `v1-5-pruned-emaonly.safetensors`（车道生图权重，非默认档） | `6ce0161689b3853acaa03779ec93eafe75a02f4ced659bee03f50797806fa2fa` | **4,265,146,304 B** | **零下载**：HF `tree.lfs.oid` == ModelScope `repo/files` 的 `Sha256`；两家 `content-length` / `lfs.size` 同为 4,265,146,304 B。整包字节未下载，pin 记在 `pins/proof-weights.json` |
 | `qwen2.5-0.5b-instruct-q2_k.gguf`（对话车道默认） | `9ee36184e616dfc76df4f5dd66f908dbde6979524ae36e6cefb67f532f798cb8` | 415,182,688 B | 同上，**零下载**三条一致。这颗原先只是写进 yaml 的数字，今天才由工具复现出来 —— 复现前后才算钉过 |
 | `ggml-tiny.bin`（字幕默认权重） | `be07e048e1e599ad46341c8d2a135645097a538221678b7acdd1b1919c6e1b21` | 77,691,713 B | 主源 hf-mirror 整包；总长 == 实收；**huggingface.co 直连的头 4 MiB 与尾 4 MiB 与主源逐字节相同** |
 | `samples/jfk.wav`（车道样本，已知答案） | `59dfb9a4acb36fe2a2affc14bacbee2920ff435cb13cc314a08c13f66ba7860e` | 352,078 B | raw.githubusercontent 整包 + github.com 同段对照；**另与 git 自己的 blob sha1 `3184d372cd2f…` 相等**（git 是内容寻址，这算独立一道旁证） |

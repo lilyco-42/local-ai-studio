@@ -60,7 +60,9 @@ RULE = {
     "drift": "上游发了新 release 只报不跟（与 pins/actions.json 同一条纪律）：产物里写清"
              "pinned 之上新增了几个带产物的版本，升级是一次改动+一次复核，不是一个自动动作",
     "capability": "相邻版本之间少了哪些 引擎×OS 组合记进 capability_delta。**丢的恰好是我们装的那一档**"
-                  "（payload-plan 的默认档组合）就直接红，不许只记一笔差异",
+                  "（payload-plan 的默认档组合）在离线对表/重抓时直接红，不许只记一笔差异；"
+                  "但 --live 现取口径下它只是提醒：钉住那颗没动时，上游新版本缺哪一档是下一次"
+                  "显式重钉的输入，不是这次核对的对象",
 }
 
 
@@ -108,7 +110,8 @@ def summarize_release(tag: str, published: str, name: str, assets: list, repo: s
             "verifiable": bool(runtime) and not missing}
 
 
-def build(captures: dict, matrix: dict, plan: dict) -> tuple[dict, list[str]]:
+def build(captures: dict, matrix: dict, plan: dict, live: bool = False,
+          advisory: list[str] | None = None) -> tuple[dict, list[str]]:
     problems: list[str] = []
     combos = shipped_combos(plan)
     pinned = {e: v["release"] for e, v in matrix["engines"].items()}
@@ -179,8 +182,14 @@ def build(captures: dict, matrix: dict, plan: dict) -> tuple[dict, list[str]]:
             gone = sorted(set(mine["os_covered"]) - set(newest["os_covered"]))
             hit_shipped = sorted(set(gone) & set(combos[engine]))
             if hit_shipped:
-                problems.append(f"{engine}: 从 {tag} 升到 {newest['tag']} 会丢掉真装的那几档 {hit_shipped} —— "
-                                "这条升级路现在不能走")
+                line = (f"{engine}: 从 {tag} 升到 {newest['tag']} 会丢掉真装的那几档 {hit_shipped} —— "
+                        "这条升级路现在不能走")
+                # 只报不跟：新版本缺档不改变已钉住那颗是否可用。现取车道把它当一句提醒，
+                # 离线对表/重抓时仍然红 —— 逼人重看升级路，别把提醒悄悄吞掉。
+                if live and advisory is not None:
+                    advisory.append(line)
+                else:
+                    problems.append(line)
             deltas.append({"engine": engine, "from": tag, "to": newest["tag"],
                            # 这是"窗口里还有多少个带产物的版本"，不是"漂了几个"——
                            # 后者是 engines[engine].newer_runtime_releases（钉住那颗上面有几个）。
@@ -493,7 +502,10 @@ def main(argv: list[str]) -> int:
     if a.selftest:
         return selftest()
     matrix, plan = load(MATRIX), load(PAYLOAD)
-    doc, problems = build(load(a.captures), matrix, plan)
+    advisory: list[str] = []
+    doc, problems = build(load(a.captures), matrix, plan, live=a.live, advisory=advisory)
+    for x in advisory:
+        print("NOTE（只报不跟）:", x)
     if a.check:
         bad = compare(load(a.out), doc, a.live) + problems
         for x in bad:

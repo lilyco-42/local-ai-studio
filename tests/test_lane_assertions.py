@@ -262,7 +262,7 @@ class TestResidentServiceLanes(unittest.TestCase):
         产物里的 Steps: 3 / 256x256 才能证明参数是从请求体吃进去的。
         只查启动那一行 —— 判据那一步自己也要传 --steps 3，全局查会把自己查红。"""
         body = lane_replay.body(*self.IMG)
-        start = [l for l in body.split("\n") if '"$SRV" "$MODEL_ARG" sd.gguf' in l]
+        start = [l for l in body.split("\n") if '"$SRV" -m sd.safetensors' in l]
         self.assertEqual(len(start), 1, body)
         for f in ("--steps", "--width", "--height"):
             self.assertNotIn(f, start[0],

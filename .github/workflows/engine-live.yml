@@ -545,7 +545,10 @@ jobs:
           # 判据不在这里内联，走 tools/srt_proof.py：编号连续、时间戳单调、每块有正文、
           # 已知答案命中、Content-Type 是 subrip —— 每条都有离线对照单测（CI 现在跑不起来，
           # 只能靠"好样本必须过、坏样本必须红在对应那一句"来证明判据本身不是摆设）。
-          python3 tools/srt_proof.py --file srv.srt --min-blocks 4 \
+          # --min-blocks 1 不是放过：jfk.wav 只有 11 秒，tiny 模型把它落成 1 个完整块是真实结果
+          # （上一次要求 4 块，红在样本长度上而不是判据上）。多块解析由 tests/test_srt_proof.py
+          # 的多块夹具守着，这里要证明的是"服务端真渲染出一份可解析的 SRT"。
+          python3 tools/srt_proof.py --file srv.srt --min-blocks 1 \
             --expect-any 'country|ask not' --content-type "$CT"
           echo "::notice::字幕这条常驻服务路也通了（POST /inference → application/x-subrip）"
 
@@ -1004,11 +1007,17 @@ jobs:
 
   image-proof:
     # 第四项能力（生图）。分工是刻意的：**引擎走 discover 实时发现的产物**（上游每天出 nightly，
-    # 钉死引擎就等于天天红，而且测的还是旧版），**权重钉死**（1,494.2 MiB，
-    # pin 由 ModelScope 元数据 Sha256 + 其 CDN 内容寻址路径 + 跨源总长三条一致立起来，零下载）。
+    # 钉死引擎就等于天天红，而且测的还是旧版），**权重钉死**。
+    # 权重换过一次，原因写在失败里而不是手感里：上一颗 Q4_0 GGUF（1,494.2 MiB）是**只含 UNet**
+    # 的扩散模型（metadata_kv_count=0、1,131 个张量），sd.cpp 读不到版本字段，`-m` 起不来
+    # （get sd version from file failed: ''），`--diffusion-model` 那条路又需要 VAE/CLIP 两个伴生件。
+    # 现在钉的是**完整 checkpoint** `v1-5-pruned-emaonly.safetensors`（4,265,146,304 B，4,067.6 MiB），
+    # UNet+VAE+CLIP 在同一个文件里 —— 这正是 `-m` / `--model` 要吃的东西。
+    # pin 由 HF `tree.lfs.oid` 与 ModelScope `Sha256` 两处元数据一致立起来（零下载），
+    # 下载时再按同一个 sha256 复核整包。
     # 旗标全部在 examples/common/common.cpp 与 examples/cli/main.cpp 的选项表里查到过：
     #   -m/--model、--diffusion-model、--width/--height（默认 512）、--steps（默认 20）、
-    #   --cfg-scale、--sampling-method、-o/--output。仍按对话那条路的做法：先看 -h 再决定用哪个。
+    #   --cfg-scale、--sampling-method、-o/--output。
     # 强判据：产物 PNG 自己得带着参数。上游把参数写进 PNG 的 tEXt 块（keyword="parameters"），
     # 不是打到日志里 —— 2026-10-19 读源码确认：common.cpp:3239/3269 拼 "Steps: N" 与 "Size: WxH"，
     # 但 get_image_params() 只是 return，媒体写出走 media_io.cpp 的 stbi_write_png(..., parameters)，
@@ -1021,9 +1030,9 @@ jobs:
     timeout-minutes: 60
     runs-on: ubuntu-latest
     env:
-      WEIGHT_FILE: stable-diffusion-v1-5-pruned-emaonly-Q4_0.gguf
-      WEIGHT_SIZE: "1566768416"
-      WEIGHT_SHA256: b8944e9fe0b69b36ae1b5bb0185b3a7b8ef14347fe0fa9af6c64c4829022261f
+      WEIGHT_FILE: v1-5-pruned-emaonly.safetensors
+      WEIGHT_SIZE: "4265146304"
+      WEIGHT_SHA256: 6ce0161689b3853acaa03779ec93eafe75a02f4ced659bee03f50797806fa2fa
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4.4.0
         # 常驻服务那一步要调 tools/png_proof.py。
@@ -1047,21 +1056,20 @@ jobs:
       - name: 取权重并按钉住的 sha256 复核
         run: |
           ok=""
-          for u in "https://www.modelscope.cn/models/second-state/stable-diffusion-v1-5-GGUF/resolve/master/$WEIGHT_FILE" \
-                   "https://hf-mirror.com/second-state/stable-diffusion-v1-5-GGUF/resolve/main/$WEIGHT_FILE"; do
+          for u in "https://www.modelscope.cn/models/AI-ModelScope/stable-diffusion-v1-5/resolve/master/$WEIGHT_FILE" \
+                   "https://hf-mirror.com/stable-diffusion-v1-5/stable-diffusion-v1-5/resolve/main/$WEIGHT_FILE"; do
             echo "试 $u"
-            if curl -sSL --fail --max-time 2400 -o sd.gguf "$u"; then ok=yes; break; fi
+            if curl -sSL --fail --max-time 2400 -o sd.safetensors "$u"; then ok=yes; break; fi
           done
           test -n "$ok" || { echo "两个源都没下到权重"; exit 1; }
-          test "$(stat -c %s sd.gguf)" = "$WEIGHT_SIZE" || { echo "权重体积不符"; exit 1; }
-          echo "$WEIGHT_SHA256  sd.gguf" | sha256sum -c -
-          head -c 4 sd.gguf | od -c | head -2 | sed 's/^/  文件头: /'
+          test "$(stat -c %s sd.safetensors)" = "$WEIGHT_SIZE" || { echo "权重体积不符"; exit 1; }
+          echo "$WEIGHT_SHA256  sd.safetensors" | sha256sum -c -
+          head -c 4 sd.safetensors | od -c | head -2 | sed 's/^/  文件头: /'
       - name: 生成一张小图，并要求日志证明参数生效
         run: |
-          MODEL_ARG=--diffusion-model
-          grep -q -- "--diffusion-model" "$RUNNER_TEMP/help.txt" || MODEL_ARG=-m
-          echo "用 $MODEL_ARG 传模型"
-          timeout 1800 "$BIN" "$MODEL_ARG" sd.gguf -p "a red cube on a table" \
+          # 完整 checkpoint 走 -m：sd.cpp 用它一次加载 UNet/VAE/CLIP；
+          # --diffusion-model 只接受纯扩散权重（上一颗 UNet-only GGUF 就是那样用的，但缺伴生件起不来）。
+          timeout 1800 "$BIN" -m sd.safetensors -p "a red cube on a table" \
             --steps 3 --width 256 --height 256 -o out.png -v > gen.log 2>&1 \
             || { echo "sd-cli 非零退出："; tail -30 gen.log; exit 1; }
           ls -l out.png || { echo "没产出 out.png"; tail -20 gen.log; exit 1; }
@@ -1111,7 +1119,7 @@ jobs:
               sys.exit(f"画布是 {w}x{h}，不是请求的 256x256")
           print("元数据片段 =", params[:220].replace("\n", " | "))
           PY
-          echo "::notice::生图车道通过：引擎 ${{ needs.discover.outputs.sd_tag }} + 钉住的 Q4_0 权重，3 步 256x256 出合法 PNG"
+          echo "::notice::生图车道通过：引擎 ${{ needs.discover.outputs.sd_tag }} + 钉住的 SD1.5 完整 checkpoint，3 步 256x256 出合法 PNG"
       - name: 起常驻 sd-server，用异步任务接口再出一张图
         # 上面那条是 one-shot CLI。外壳要的是常驻服务（ADR 实现约束第 1 条），
         # 而 sd-server 这条路一次都没跑过 —— 尤其是"参数从 HTTP 请求体进去"这一节，
@@ -1134,10 +1142,7 @@ jobs:
           test -n "$SRV" || { echo "包里没有 sd-server，包里有什么："; find e -maxdepth 2 -type f | head -40; exit 1; }
           chmod +x "$SRV"
           "$SRV" --help > srv_help.txt 2>&1 < /dev/null || true
-          # 模型旗标名在 CLI 与 server 之间可能不同，所以按 server 自己的 help 决定，不沿用上面算好的值。
-          MODEL_ARG=--diffusion-model
-          grep -q -- "--diffusion-model" srv_help.txt || MODEL_ARG=-m
-          echo "用 $MODEL_ARG 传模型给 sd-server"
+          # 完整 checkpoint 用 -m（与 CLI 那条同一个理由）；不再按 help 猜 --diffusion-model。
           PORT=1234
           LARGS=()
           if grep -q -- "--listen-port" srv_help.txt; then
@@ -1145,7 +1150,7 @@ jobs:
           else
             echo "help 里没有 --listen-port，改用上游默认 127.0.0.1:1234（examples/server/runtime.cpp:198）"
           fi
-          "$SRV" "$MODEL_ARG" sd.gguf ${LARGS[@]+"${LARGS[@]}"} > srv.log 2>&1 &
+          "$SRV" -m sd.safetensors ${LARGS[@]+"${LARGS[@]}"} > srv.log 2>&1 &
           SRV_PID=$!
           trap 'kill $SRV_PID 2>/dev/null || true' EXIT
           ready=""

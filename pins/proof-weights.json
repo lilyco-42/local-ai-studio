@@ -1,0 +1,13 @@
+{
+ "v1-5-pruned-emaonly.safetensors": {
+  "bytes_verified": null,
+  "provenance": "2026-10-21 零下载立 pin：HF tree.lfs.oid 与 ModelScope repo/files 的 Sha256 同为 6ce0161689b3853acaa03779ec93eafe75a02f4ced659bee03f50797806fa2fa；HF 响应 content-length 与 ModelScope lfs.size 同为 4,265,146,304 B。两个分发方各自给哈希，整包字节尚未下载复核。",
+  "sha256": "6ce0161689b3853acaa03779ec93eafe75a02f4ced659bee03f50797806fa2fa",
+  "size": 4265146304,
+  "sources": [
+   "https://www.modelscope.cn/models/AI-ModelScope/stable-diffusion-v1-5/resolve/master/v1-5-pruned-emaonly.safetensors",
+   "https://hf-mirror.com/stable-diffusion-v1-5/stable-diffusion-v1-5/resolve/main/v1-5-pruned-emaonly.safetensors"
+  ],
+  "used_by": "engine-live.yml 的 image-proof。完整 checkpoint（UNet+VAE+CLIP 同一文件）走 sd.cpp 的 -m；上一颗 Q4_0 GGUF 只有 UNet（metadata_kv_count=0），sd.cpp 读不到版本字段。这张表只服务车道，不进内置默认档 —— 产品侧生图默认行是否换成它还没定。"
+ }
+}

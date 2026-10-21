@@ -10015,7 +10015,7 @@
  "rule": {
   "attachments": "nightly-tag.txt / *.jar / checksum 这类附件不参与后端与平台分类，单独计数（它们是上游的附属文件，不是可执行产物）",
   "candidates": "只有**带 runtime 产物**的 release 才是升级/回退的候选；0 产物的源标签（whisper 的 vX.Y.Z）单列在 source_only_tags 里，并且明写 latest 指针就落在它上面 —— 这就是不许按 releases/latest 取 runtime 的原因",
-  "capability": "相邻版本之间少了哪些 引擎×OS 组合记进 capability_delta。**丢的恰好是我们装的那一档**（payload-plan 的默认档组合）就直接红，不许只记一笔差异",
+  "capability": "相邻版本之间少了哪些 引擎×OS 组合记进 capability_delta。**丢的恰好是我们装的那一档**（payload-plan 的默认档组合）在离线对表/重抓时直接红，不许只记一笔差异；但 --live 现取口径下它只是提醒：钉住那颗没动时，上游新版本缺哪一档是下一次显式重钉的输入，不是这次核对的对象",
   "digest": "runtime 资产带上游 digest（sha256）才叫「可校验」。这条是量出来的边界：whisper 早年那批 release 根本没有 digest 字段，所以回退深度不是「翻到最老」，而是 oldest_verifiable_tag。不可校验的版本单列在 unverifiable_tags 里，不冒充候选，也不许当噪音删掉",
   "drift": "上游发了新 release 只报不跟（与 pins/actions.json 同一条纪律）：产物里写清pinned 之上新增了几个带产物的版本，升级是一次改动+一次复核，不是一个自动动作",
   "pinned": "钉住那颗必须在窗口内，且它的产物名集合必须与 pins/backend-matrix.json 逐颗一致 —— 两张表读的是同一个 release，对不上就是有一份旧了",

@@ -408,7 +408,12 @@ class TestSourceMutants(unittest.TestCase):
             for e in c13["engines"].values():
                 e["latest_tag"] = "更新的标签"
                 e["newer_runtime_releases"] = 999
-            out["v live 口径不把新版当红"] = mod.pin_drift(committed, c13) == []
+            advisory = []
+            live_problems = mod.build(c7, m, p, live=True, advisory=advisory)[1]
+            out["v live 口径不把新版当红"] = (
+                mod.pin_drift(committed, c13) == []
+                and not any("升级路" in x for x in live_problems)
+                and any("升级路" in x for x in advisory))
             out["v2 两种口径不是同一种"] = (
                 mod.compare(committed, c13, live=True) == []
                 and mod.compare(committed, c13) != [])

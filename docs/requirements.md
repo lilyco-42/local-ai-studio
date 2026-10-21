@@ -162,15 +162,21 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
    字幕（`subtitle-proof` 出带时间戳且内容对得上的 SRT）、文字识别（`ocr-proof`：CI 里 `cargo build`
    出 `oar`，用钉住的 tiny det/rec/dict 认出一张自画合成图里的已知词）、
    生图（`image-proof`：引擎用 discover 实时发现的产物 + 上游 digest 复核，权重钉死
-   `b8944e9f…`/1,566,768,416 B，3 步 256x256 出合法 PNG，并**读 PNG 自己的 IHDR 与
+   `6ce01616…`/4,265,146,304 B —— SD1.5 **完整 checkpoint**（UNet+VAE+CLIP 同一文件，走 `-m`），
+   3 步 256x256 出合法 PNG，并**读 PNG 自己的 IHDR 与
    `tEXt`/`parameters` 块**要求 `Steps: 3`、`Size: WxH` 与实际画布一致 —— 证明参数真被吃进去并写进产物，
    不是随便跑出一张图。判据读产物而非日志，是 2026-10-19 读上游源码定下的：
    `get_image_params()` 只 return，参数由 `stbi_write_png` 落成 tEXt，日志里根本没有那两行）。
+   **2026-10-21 换过权重**：上一颗 `stable-diffusion-v1-5-pruned-emaonly-Q4_0.gguf` 只有 UNet
+   （`metadata_kv_count=0`、1,131 个张量），sd.cpp 读不到版本字段，`-m` 报
+   `get sd version from file failed: ''`；`--diffusion-model` 那条路又需要 VAE/CLIP 伴生件。
+   完整 checkpoint 的 pin 在 `pins/proof-weights.json`：HF `tree.lfs.oid` 与 ModelScope
+   `repo/files` 的 `Sha256` 同为 `6ce01616…`，两家的总长同为 4,265,146,304 B（零下载，未算整包字节）。
    这条判据本身还有 6 条离线回放单测（合成合法/缺元数据/步数错/尺寸不一致/画布不是 256/非 PNG），
    2026-10-20 又把同一段判据抽成 `tools/png_proof.py` 并加了 25 条单测（含"与车道那段内联判据
    逐案同生同死"的一致性用例），因为常驻服务那条路要把 b64 解开再判，两处必须说同一句话。
    生图这条刻意分工：引擎不钉（上游每天出 nightly，钉死等于天天红且测的是旧版），
-   权重钉死（1.5 GB，那一步的 curl 预算是 2,400 s，整条 job 现在是 60 min）。
+   权重钉死（4,265,146,304 B，那一步的 curl 预算是 2,400 s，整条 job 现在是 60 min）。
    **并且对话/字幕/生图三项各有"真起常驻服务再调 HTTP"的一步了**（2026-10-20）：
    `headless-inference#4` 走 `/v1/chat/completions`，`subtitle-proof#5` 起 `whisper-server`
    打 `POST /inference`（multipart，`response_format=srt`）并要求响应是 `x-subrip`，
@@ -1033,8 +1039,9 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
 
 ## 第一次真跑要盯什么（车道至今 0 次执行，这些是静态审计之后剩下的未知）
 
-1. **timeout 够不够**：`image-proof` 2026-10-20 从 45 提到 60 min（1.5 GB 权重 + 一次 CLI 出图
-   + 一次常驻服务出图），`subtitle-proof` 从 20 提到 30 min（多起一次 whisper-server），
+1. **timeout 够不够**：`image-proof` 2026-10-20 从 45 提到 60 min（2026-10-21 权重换成
+   4,265,146,304 B 的完整 checkpoint，并要跑两次模型加载；60 min 没跟着改，仍按第一次实跑回填），
+   `subtitle-proof` 从 20 提到 30 min（多起一次 whisper-server），
    `ocr-proof` 是 34 min（2 核 runner 上 `cargo build --release` 要过 ort / onig / tokenizers 的编译），
    `headless-inference` 是 35 min。这四个数全是估的，第一次跑就要按实际耗时改回来，
    别把"超时"读成"能力不行"。
