@@ -85,8 +85,8 @@ pub fn multipart_body(
     out
 }
 
-pub fn new_boundary() -> String {
-    format!("----local-ai-studio-{}", crate::token_hex(16))
+pub fn new_boundary() -> Result<String, CoreError> {
+    Ok(format!("----local-ai-studio-{}", crate::token_hex(16)?))
 }
 
 /// 外壳只连自己的回环端口；这里不做重定向跟随，避免被上游带去别的地址。

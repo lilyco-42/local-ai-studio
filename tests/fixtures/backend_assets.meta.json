@@ -1,12 +1,12 @@
 {
- "sha256": "ce6946470b47eb9a94452fd1f743d68b5592d1daf01acdfe4dcc348c026944d6",
- "size": 10970,
  "captured_at": "2026-10-20",
  "how": "gh api repos/<repo>/releases/tags/<tag> 取每个 asset 的 name / size / digest(=sha256)，三个 ref 都按 pins/payload-plan.json 钉的那一个",
+ "note": "只留 name / size / sha256 / id 四个字段 —— 这张表要回答的是「有哪些后端可换、各多大、哈希是多少」，下载 URL 由 payload-plan 那边给。digest 是 GitHub 自己算的内容哈希，不是文件名里读的。",
  "refs": {
   "ggml-org/llama.cpp@b11727": 36,
   "ggml-org/whisper.cpp@b5454": 12,
   "leejet/stable-diffusion.cpp@master-975-95b3090": 9
  },
- "note": "只留 name / size / sha256 / id 四个字段 —— 这张表要回答的是「有哪些后端可换、各多大、哈希是多少」，下载 URL 由 payload-plan 那边给。digest 是 GitHub 自己算的内容哈希，不是文件名里读的。"
+ "sha256": "b671c5e2ca03503745131e71d364fa09612908b90805a5abcf6515898cac0430",
+ "size": 10621
 }

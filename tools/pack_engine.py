@@ -213,7 +213,10 @@ def extract_into(archive: str, keep: list[dict], out_dir: str) -> list[str]:
                 dst = os.path.join(out_dir, entry["dst"])
                 with z.open(entry["src"]) as fin, open(dst, "wb") as fout:
                     shutil.copyfileobj(fin, fout)
-                land(dst, entry.get("mode") or 0)
+                # zip 的权限位不可信：Windows 造的包给 0，Python 的 zipfile 默认写 0600。
+                # 只有归档明确带了执行位才照抄，否则一律 0755（zip 这条道只走 Windows 产物）。
+                mode = entry.get("mode") or 0
+                land(dst, mode if mode & 0o111 else 0o755)
     else:
         want = {e["src"]: e for e in files}
         with tarfile.open(archive, "r:*") as t:

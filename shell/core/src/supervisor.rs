@@ -22,6 +22,7 @@ pub const OCR_TIMEOUT: Duration = Duration::from_secs(600);
 const OCR_GAP: &str = "已知缺口 ocr-manifest：OCR 的二进制由 CI 现编，\
 出包车道还没把它写进 payload-manifest.json";
 
+#[derive(Debug)]
 pub struct LaunchPlan {
     pub program: PathBuf,
     pub args: Vec<String>,
@@ -430,7 +431,7 @@ impl Supervisor {
                         "{name}: 钥匙模式却没写字节数"
                     )));
                 }
-                Some(crate::token_hex(bytes))
+                Some(crate::token_hex(bytes)?)
             }
             _ => None,
         };
@@ -576,7 +577,7 @@ impl Supervisor {
         if let Some(lang) = language {
             fields.insert("language".into(), lang.to_string());
         }
-        let boundary = http::new_boundary();
+        let boundary = http::new_boundary()?;
         let body = http::multipart_body(
             &boundary,
             &[FormFile {
@@ -852,13 +853,15 @@ mod tests {
         Contract::embedded().unwrap()
     }
 
+    static NO_EXTRA: BTreeMap<String, String> = BTreeMap::new();
+
     fn ctx(root: &Path) -> LaunchContext<'_> {
         LaunchContext {
             data_root: root,
             tier: "8GB",
             port: 51234,
             token: Some("deadbeef"),
-            extra: &BTreeMap::new(),
+            extra: &NO_EXTRA,
         }
     }
 
