@@ -98,7 +98,7 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
 
 ## 验收标准（在当前唯一可用验证手段 = GitHub Actions 下）
 
-1. `ci.yml`：914 个单测绿（重数：`python -W error::ResourceWarning -m unittest discover -s tests
+1. `ci.yml`：916 个单测绿（重数：`python -W error::ResourceWarning -m unittest discover -s tests
    -p "test_*.py"`；按文件数就 `python -m unittest tests.<模块名>`。2026-10-20 实测逐文件：
    `test_yaml_gate.py` 闸门自己（含 workflow 文件清单与磁盘覆盖对照）17、`test_lane_argv.py` 车道 ↔ 启动表一致（含 15 个 workflow 文本变异）10、
    `test_sideload.py` sideload 按内容认领（6 条源码变异体 + 三个真上游文件）22、
@@ -123,7 +123,7 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
    `test_payload_plan.py` 装机负载（含 tar 成员表与缺口点名）19、
    `test_pack_engine.py` 出包逻辑与 server-only 收窄（含符号链接闭包、只留一个可执行文件、
    清单 serde 形状 1 条正控 + 7 个变异）20、
-   `test_stage_payload.py` 出包产物→外壳 runtime 摆位（含真实合同落点与 9 条负向）10、
+   `test_stage_payload.py` 出包产物→外壳 runtime 摆位（含真实合同落点、soname 链接解真身与 11 条负向）12、
    `test_payload_intake.py` 首启交付清单（真实合同落点 / 两个数据根同一份字节 / 6 条源码变异体 / 消费端重放）21、
    `test_make_icons.py` 图标从 ICO 派生（PNG 尺寸 / ICNS chunk 覆盖 / 预乘缩放无黑边 /
    已提交图标可复算 + 篡改与缺件必须红 + 重压缩同一张图必须认、改一个像素必须拒）10、
@@ -895,7 +895,7 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     `asset_dir`（没有就 `version_dir`）推导落点，逐文件复核体积与 sha256 后复制，
     目标目录已有清单外文件时**拒绝而不是覆盖**，文件名带 `/` `\` `..` 一律拒绝，
     `payload-manifest.json` **最后**才落盘（半套目录不会配上一份完整清单）；`--check` 复核已摆放目录，
-    `--selftest` 用合成合同/合成包证明 13 条判据会红，`tests/test_stage_payload.py` 10 条
+    `--selftest` 用合成合同/合成包证明 13 条判据会红，`tests/test_stage_payload.py` 12 条
     （含真实合同里 whisper 的落点、改合同落点必须跟着改、第二条引擎失败时根部无清单）。
     CI：`package.yml` 在三档负载解包后、上传前各摆一次并 `--check`（不执行任何二进制）。
     同一 job 接着跑 `tools/payload_intake.py`：读摆好的数据根，逐文件给出

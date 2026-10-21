@@ -140,6 +140,59 @@ class TestStage(unittest.TestCase):
                 sp.stage(pkg, data, "win-x64", contract)
             self.assertTrue(os.path.isfile(ghost), "拒绝时不许顺手删用户目录里的东西")
 
+    def _symlink_or_skip(self, target: str, link: str) -> None:
+        try:
+            os.symlink(target, link)
+        except (OSError, NotImplementedError) as exc:
+            self.skipTest(f"这个平台不让建符号链接（{exc}）—— CI 的 ubuntu 车道会跑这一段")
+
+    def _append_manifest_row(self, pkg: str, name: str, payload: bytes) -> None:
+        mpath = os.path.join(pkg, sp.MANIFEST_NAME)
+        with open(mpath, encoding="utf-8") as fh:
+            doc = json.load(fh)
+        doc["engines"][0]["files"].append({
+            "file": name, "bytes": len(payload),
+            "sha256": hashlib.sha256(payload).hexdigest()})
+        with open(mpath, "w", encoding="utf-8") as fh:
+            json.dump(doc, fh)
+
+    def test_soname_symlink_lands_as_the_real_file(self) -> None:
+        # Linux/macOS 归档里 libggml-base.so 是 libggml-base.so.0 的符号链接；
+        # 目标目录只收普通文件，所以必须按真身复制（Windows 那边压根建不了链接）。
+        with tempfile.TemporaryDirectory() as d:
+            contract = write_contract(d, two_engines())
+            pkg = write_pkg(d, "win-x64", [{
+                "engine": "llama", "asset": "llama.zip",
+                "files": {"llama-server.exe": b"bin", "libggml-base.so.0": b"real"}}])
+            self._symlink_or_skip("libggml-base.so.0",
+                                  os.path.join(pkg, "llama", "libggml-base.so"))
+            self._append_manifest_row(pkg, "libggml-base.so", b"real")
+            data = os.path.join(d, "data")
+            sp.stage(pkg, data, "win-x64", contract)
+            target = os.path.join(data, "runtime", "win-x64", "llama", "b1", "llama-pkg")
+            link = os.path.join(target, "libggml-base.so")
+            self.assertFalse(os.path.islink(link))
+            with open(link, "rb") as fh:
+                self.assertEqual(fh.read(), b"real")
+            self.assertEqual(len(sp.check(pkg, data, "win-x64", contract)["verified"]), 1)
+
+    def test_symlink_escaping_the_package_is_refused(self) -> None:
+        with tempfile.TemporaryDirectory() as d:
+            contract = write_contract(d, two_engines())
+            pkg = write_pkg(d, "win-x64", [{
+                "engine": "llama", "asset": "llama.zip",
+                "files": {"llama-server.exe": b"bin"}}])
+            outside = os.path.join(d, "secret.txt")
+            with open(outside, "wb") as fh:
+                fh.write(b"secret")
+            self._symlink_or_skip(outside, os.path.join(pkg, "llama", "evil.so"))
+            self._append_manifest_row(pkg, "evil.so", b"secret")
+            data = os.path.join(d, "data")
+            with self.assertRaises(sp.StageError) as ctx:
+                sp.stage(pkg, data, "win-x64", contract)
+            self.assertIn("出包目录外", str(ctx.exception))
+            self.assertFalse(os.path.exists(os.path.join(data, sp.MANIFEST_NAME)))
+
     def test_check_detects_tamper_and_extra(self) -> None:
         with tempfile.TemporaryDirectory() as d:
             contract = write_contract(d, two_engines())

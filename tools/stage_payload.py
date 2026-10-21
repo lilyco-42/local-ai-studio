@@ -103,9 +103,24 @@ def scan_dir(path: str) -> set[str]:
     return found
 
 
-def copy_verified(src: str, dst: str, want_bytes: int, want_sha: str) -> None:
-    """写到同目录临时文件，复核哈希后再原子替换 —— 中途失败不留下半颗文件。"""
-    if os.path.islink(src) or not os.path.isfile(src):
+def copy_verified(src: str, dst: str, want_bytes: int, want_sha: str, root: str) -> None:
+    """写到同目录临时文件，复核哈希后再原子替换 —— 中途失败不留下半颗文件。
+
+    Linux/macOS 的归档里 soname 链（`libggml-base.so` → `libggml-base.so.0`）是符号链接，
+    目标目录只收普通文件，所以按链接解到的真身复制；真身必须仍在这次出包的目录里，
+    否则归档可以借一条链接把出包机上的任意文件塞进用户的数据根。
+    """
+    if os.path.islink(src):
+        real = os.path.realpath(src)
+        root_real = os.path.realpath(root)
+        try:
+            inside = os.path.commonpath([root_real, real]) == root_real
+        except ValueError:              # Windows 上跨盘符
+            inside = False
+        if not inside:
+            raise StageError(f"符号链接指到出包目录外: {src} → {real}")
+        src = real
+    if not os.path.isfile(src):
         raise StageError(f"源文件不是普通文件: {src}")
     got_bytes = os.path.getsize(src)
     if got_bytes != want_bytes:
@@ -228,7 +243,7 @@ def stage(package: str, data_root: str, os_label: str,
         for f in files:
             src = os.path.join(package, engine, f["file"])
             dst = os.path.join(target, f["file"])
-            copy_verified(src, dst, f["bytes"], f["sha256"])
+            copy_verified(src, dst, f["bytes"], f["sha256"], os.path.join(package, engine))
         total = _verify_tree(entry, target)
         staged.append({"engine": engine, "capability": row["capability"], "asset": asset,
                        "dir": os.path.relpath(target, data_root).replace(os.sep, "/"),
