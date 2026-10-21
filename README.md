@@ -112,7 +112,7 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   `ggml-large-v1.bin` 的 SSL EOF —— 它本来就排在最后；可达 ≠ 吞吐，排序仍按实测速率）。
   `shell/core/src/download.rs` 是这条计划的消费者：系统 curl 传输（不引 TLS crate）、Range 续传、
   低速/断流换源、收满 sha256 才从 `blobs/<sha>.part` 落成 `blobs/<sha>` 并硬链接到文件名；
-  这一组单测已随 `shell.yml` 的 `core` 在 3 个操作系统上真跑过（2026-10-21，各 101 条全过，run 39666591913）。
+  这一组单测已随 `shell.yml` 的 `core` 在 3 个操作系统上真跑过（2026-10-21，各 107 条全过，run 39682992984）。
 - `tools/recommend_models.py` + `catalog/recommendations.json`：**给用户的**「我这台机器装哪个」表。
   `catalog/defaults.json` 那 6 条是车道最小样本（对话那颗 415 MB，只为跑通），不是推荐。
   四条规则都进产物、UI 要说得出为什么推荐它：半档 < `recommended_ram_gb` ≤ 档位（上游 llmfit 的数）、
@@ -354,8 +354,8 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   `shell/src-tauri`（Tauri 2）只做装配：`AppState` + 10 条 IPC 命令调 core，耗时的调用
   （安装、四条能力）都丢进 `spawn_blocking`，`status`/`data_root`/`payload_source` 只读本地状态。`shell/ui` 只有 IPC、没有网络 API、中英两套文案；`icons/icon.ico` 是 Windows
   资源段要的那一颗。
-  **这些代码现在真编过、真跑过了**：2026-10-21 `shell.yml` 的 `core` 在 3 个操作系统上各 101 条
-  单测全过，`app` 在 3 个操作系统上真的编出 Tauri 层并跑 3 条单测（Ubuntu 首编 1m30s，先装 WebKitGTK）；
+  **这些代码现在真编过、真跑过了**：2026-10-21 `shell.yml` 的 `core` 在 3 个操作系统上各 107 条
+  单测全过（run 39682992984），`app` 在 3 个操作系统上真的编出 Tauri 层并跑 3 条单测（Ubuntu 首编 1m30s，先装 WebKitGTK）；
   两个 crate 的首轮 `Cargo.lock` 已作为 artifact 产出（`shell-core-Cargo.lock`、`shell-app-Cargo.lock`），
   还没提交进仓库。Windows 第一次跑红在假服务器的 RST 竞态，修法是读到完整请求（头 + Content-Length
   正文）再回包 —— 只有真跑才会发现。**窗口里的 JS 与 IPC 也真驱动过了**：2026-10-21 起

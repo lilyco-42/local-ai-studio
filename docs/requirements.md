@@ -915,7 +915,7 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     Windows 资源段要的那一颗（`tauri-build` 缺它会直接报错，而不是跳过）。
     **证据的边界**：`.github/workflows/shell.yml` 现在是两个 job —— `core` 与 `app` 各在 3 OS 跑
     `cargo test --all-targets`（`app` 在 Ubuntu 先装 WebKitGTK；两个 job 都上传首轮的 `Cargo.lock`）。
-    2026-10-21 真跑的结果：`core` 三档各 **101 条**全过，`app` 三档各 **3 条**全过（Ubuntu 首编 1m30s）；
+    2026-10-21 真跑的结果：`core` 三档各 **107 条**全过（run 39682992984），`app` 三档各 **3 条**全过（Ubuntu 首编 1m30s）；
     首轮 `Cargo.lock` 已作为 `shell-core-Cargo.lock` / `shell-app-Cargo.lock` artifact 产出，
     但还没提交进仓库。离线另证 `python tools/shell_source.py --check`（问题 0 条）与 14 条 Python 单测。
     这次不把"写了"说成"过了"：2026-10-21 起 `app (ubuntu-latest)` 在 Xvfb 里真起二进制并等到
@@ -1018,7 +1018,7 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     `download.rs` 的 curl 参数对表；另一条按 serde 语义重放整份计划 —— `schema` 是 u32、
     `bytes` 是 u64、速率有限、`file` 扁平且不重名，6 个变异各自必须红）。Rust 侧 `Plan::parse/from_file/item` 读同一份 JSON
     （重名必须报错），`download.rs` 20 条单测。
-    **证据边界**：这组 Rust 单测已随 `core` 在 3 个操作系统上真跑（各 101 条全过，2026-10-21，run 39666591913）；
+    **证据边界**：这组 Rust 单测已随 `core` 在 3 个操作系统上真跑（各 107 条全过，2026-10-21，run 39682992984）；
     curl 在真实网络上的重试/续传行为仍只有 Fake fetcher 的逻辑证据；R2 镜像仍是唯一缺口（#23）。
 36. **跟随上游 llama.cpp：定时只报不跟，重钉是一次显式动作**（`tools/follow_upstream.py` +
     `.github/workflows/upstream-follow.yml`）：上游一天发好几个包（b11727 → b11798 只隔了几天），

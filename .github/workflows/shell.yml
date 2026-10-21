@@ -61,7 +61,7 @@ jobs:
         run: |
           rustc --version
           cargo --version
-      - name: 单测（编 Tauri 用法与 8 条 IPC 命令，不跑窗口）
+      - name: 单测（编 Tauri 用法与 10 条 IPC 命令，不跑窗口）
         run: cargo test --all-targets
       - name: 真起一次窗口（Xvfb，只到窗口出现，不起引擎、不联网）
         if: matrix.os == 'ubuntu-latest'
