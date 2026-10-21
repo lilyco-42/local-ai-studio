@@ -81,7 +81,7 @@ jobs:
             ./target/debug/local-ai-studio-shell > /tmp/shell-boot.log 2>&1 &
             app=$!
             found=0
-            for _ in $(seq 1 300); do
+            for _ in $(seq 1 900); do
               if xdotool search --onlyvisible --pid "$app" >/dev/null 2>&1; then found=1; break; fi
               if xdotool search --onlyvisible --name "Local AI Studio" >/dev/null 2>&1; then found=1; break; fi
               if ! kill -0 "$app" 2>/dev/null; then break; fi

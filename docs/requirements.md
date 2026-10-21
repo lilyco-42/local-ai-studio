@@ -906,7 +906,10 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     2026-10-21 真跑的结果：`core` 三档各 **70 条**全过，`app` 三档各 **3 条**全过（Ubuntu 首编 1m30s）；
     首轮 `Cargo.lock` 已作为 `shell-core-Cargo.lock` / `shell-app-Cargo.lock` artifact 产出，
     但还没提交进仓库。离线另证 `python tools/shell_source.py --check`（问题 0 条）与 14 条 Python 单测。
-    这次不把"写了"说成"过了"；仍没证的是"窗口真的能开"——两条车道都不起窗口、不起引擎。
+    这次不把"写了"说成"过了"：2026-10-21 起 `app (ubuntu-latest)` 多一步，在 Xvfb 里真起二进制并等到
+    窗口（run 39658522639：标题 `Local AI Studio`、980×720，窗口出现后进程又活 2 s 才被杀）。
+    这一步只证 GTK/Tauri 窗口能创建、进程能存活；窗口里的 JS/IPC 没被驱动、引擎没起，
+    macOS/Windows 的 app job 跳过该步。
 33. **出包产物到外壳目录之间的那一步补上了**：出包车道的产物是平铺的 `dist/<os>/<engine>/`，
     外壳只认 `<data>/runtime/<os>/<engine>/<version>/<asset-stem>/` + 根部的 `payload-manifest.json`，
     此前没有工具把两者接起来。`tools/stage_payload.py` 只从 `pins/shell-contract.json` 的

@@ -353,7 +353,10 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   单测全过，`app` 在 3 个操作系统上真的编出 Tauri 层并跑 3 条单测（Ubuntu 首编 1m30s，先装 WebKitGTK）；
   两个 crate 的首轮 `Cargo.lock` 已作为 artifact 产出（`shell-core-Cargo.lock`、`shell-app-Cargo.lock`），
   还没提交进仓库。Windows 第一次跑红在假服务器的 RST 竞态，修法是读到完整请求（头 + Content-Length
-  正文）再回包 —— 只有真跑才会发现。仍未证的是"窗口真的能开"：车道只跑 `cargo test`，不起窗口、不起引擎。
+  正文）再回包 —— 只有真跑才会发现。**窗口现在也真起过了**：2026-10-21 起 `app (ubuntu-latest)`
+  多一步，在 Xvfb 里启动构建出的二进制并等窗口（run 39658522639：标题 `Local AI Studio`、
+  980×720，窗口出现后又确认进程活了 2 s 才杀）。这一步只证 GTK/Tauri 窗口能创建、进程能存活；
+  窗口里的 JS/IPC 没被驱动、引擎没起，macOS/Windows 的 app job 跳过该步。
 - `tools/action_pins.py` + `pins/actions.json`：**出包那只手自己也要钉住**。开工时三个
   workflow 里 4 个 `uses:` 全是浮动大版本 tag（`checkout@v4`、`setup-python@v5`、
   `upload-artifact@v4`、`download-artifact@v4`）—— 仓库对引擎/权重/工具带都定了
