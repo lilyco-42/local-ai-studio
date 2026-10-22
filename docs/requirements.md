@@ -1049,7 +1049,9 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     重钉到 b11798 后 17:44Z 再跑一次：钉 b11798、落后 0、已最新、退出码 0 —— 证的是工具与
     GitHub API 的形状，不是 schedule 真会触发。20:40Z 又显式重钉到 b11799（窗口 25 个 release、
     落后 0、已最新，离线 `--check` 退出码 0），十份派生文件与三份捕获同步重出；2026-10-22T05:40Z
-    再重钉到 b11804（落后 0、已最新），本轮离线对表与单测交由 GitHub Actions 复核。
+    再重钉到 b11804（落后 0、已最新），本轮由 GitHub Actions 复核全绿：ci 39730079194（972 条单测
+    OK，skipped=1）/ shell 39730079402 / package 39730079234 / installer 39730079302 /
+    engine-live 39730079204（无头推理 27.0 tok/s、三个 server 车道均成功）。
     同一套现取逻辑已在 `engine-live` 的 `backends` 末步真跑（101 个 release / 92 个带产物 / 0 问题）。
 
 ## 车道判据的出处（全部按**钉住的那个 ref** 核过，不是按 HEAD 记的）
@@ -1074,7 +1076,7 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
 | `sideload` | 用户手上的文件能不能按内容认领 | 三个**真实下载的上游文件**（`tests/fixtures/sideload/`，都 <30 KB）：两颗钉过的字典 + `ppocrv5_latin_dict.txt` 的另一颗同名不同字节者。同一串 sha256 取自 GitHub API 的 `asset.digest`（复现命令连同两颗 tag 的体积与 digest 一起记在 `tests/fixtures/sideload.meta.json` 的 reproduce 字段 —— 那条 jq 里有竖线，写进这张表会打断一行），meta 记完整串、测试按 meta 复算字节。`.gguf` 文件头不在这一层解读（归 CI/外壳里的 gguf-parser），产物 `rule.header` 写明了这条边界 |
 | `backends` | 分层与 runtime 可替换这两句有多少可选面 | 三个 ref 的 release 表按 `pins/payload-plan.json` 钉的那一个现取（`gh api repos/<repo>/releases/tags/<tag>` 的 name / size / digest）：llama `b11804` 36 个、whisper `b5454` 12 个、sd `master-975-95b3090` 9 个 = 57，与 ADR-0001 那句"36 个产物"逐条对得上。真实捕获钉在 `tests/fixtures/backend_assets.json`（sha256 记在 `.meta.json`，测试复算字节），车道 `backends` 的现取步骤再现取一次对表；同一 job 后四步是换档表（`--selftest` / 单测 / 离线对表 / 拿现取那份矩阵重算） |
 | `backends`（server 在场那四步） | "每一档包里都有外壳要 exec 的那个文件"这句话的前提 | zip **中央目录的成员文件名表**（`tools/zip_peek.py` 用 HTTP Range 读尾部，每颗约 1 MiB，不解压不运行）+ 真装默认档那 3 颗 `.tar.gz` 的**成员表**（`payload_plan.read_tar_entries`：取整包后先要求"字节数 == release 声明"与"整包 sha256 == 上游 digest"，才读 `tarfile.getmembers()`）；当前判据读 30 颗（27 颗 zip + 3 颗 tar），整份捕获 70 颗 / 117,621 B 钉在 `tests/fixtures/parity-captures.json`（sha256 记 `.meta.json` 并由测试复算字节）；可执行名不在这张表里定义，只从 `launch_plan.SERVER_BASE` 取（那条出处见上面两行），源码里出现字面量由一条 ast 扫描拒绝 |
-| 引擎与权重输入 | 上游 `digest` 就是内容哈希 | 五个包整包下回实算相等（llama b11798、whisper b5454、sd 95b3090、qwen 415 MB、SD1.5 1.5 GB），见 `pins/models.json` 的 `bytes_verified` |
+| 引擎与权重输入 | 上游 `digest` 就是内容哈希 | 引擎包在 `package` 车道里逐颗整包 sha256 == 上游 digest 才算过（本轮 run 39730079234，win/linux/macOS 三档全绿）；权重 qwen 415 MB / SD1.5 1.5 GB 见 `pins/models.json` 的 `bytes_verified` |
 
 写这张表的理由：CI 现在一次都跑不了，而"日志里会出现某串"这类假设一旦错，
 车道第一次跑就会红在无关的地方 —— `image-proof` 原本就是这么错的（它去 grep 日志，
