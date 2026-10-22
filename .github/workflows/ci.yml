@@ -42,6 +42,7 @@ jobs:
           python tools/shell_source.py --check
           python tools/starter_pin.py --check
           python tools/starter_pin.py --selftest
+          python tools/bundle_payload.py --selftest
           python - <<'PY'
           import ast,sys
           for f in ("tools/engine_probe.py","tests/test_engine_probe.py",
