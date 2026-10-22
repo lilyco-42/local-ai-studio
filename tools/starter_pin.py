@@ -109,8 +109,11 @@ def problems(doc: dict, root: Path = ROOT) -> list[str]:
     size = model.get("bytes")
     if isinstance(size, bool) or not isinstance(size, int) or size <= 0:
         bad.append("model.bytes 必须是正整数")
-    if not SHA256.match(str(model.get("sha256") or "")):
+    sha = str(model.get("sha256") or "")
+    if not SHA256.match(sha):
         bad.append("model.sha256 必须是 64 位小写十六进制")
+    elif len(set(sha)) == 1:
+        bad.append("model.sha256 是单一字符重复（如全零），这是占位符而不是内容哈希")
     if model.get("license") not in ALLOWED_LICENSES:
         bad.append(f"model.license 不在允许清单 {sorted(ALLOWED_LICENSES)}")
     if not str(model.get("base_model") or ""):
