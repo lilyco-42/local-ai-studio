@@ -164,6 +164,9 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
    真下 527 MB 按 pin 校验，然后用**外壳同款**引擎（`pins/payload-plan.json` 里的 b11804）起
    `llama-server`，走带 `--api-key` 的 `/v1/chat/completions` 要求 `tokens_predicted > 0` 且文本非空。
    注意 0.6B 这个尺寸在 Qwen3.5 里不存在（官方最小 0.8B），表里保留 `requested/resolved` 两档，不悄悄改名。
+   **2026-10-22 真跑通过**（run 39773338208，job 119806042048）：pin/live 对表一致，503 MiB 从 hf-mirror
+   落地并复算 sha256，`/props` 401 与两条 Origin 的 CORS 负向对照成立，`enable_thinking:false` 下
+   `content = '<think>\n\n</think>\n\nHello'`、`tokens_predicted > 0`。
 3. 目录可达性探针（`catalog_probe.py`）三条判据全过：泛词有结果、正向对照命中精确仓库、负向对照 0 条。
 4. **车道覆盖度**：四项能力**都有执行车道了** —— 对话（`headless-inference` 抓 tokens/s）、
    字幕（`subtitle-proof` 出带时间戳且内容对得上的 SRT）、文字识别（`ocr-proof`：CI 里 `cargo build`
