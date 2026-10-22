@@ -138,6 +138,101 @@ def check_data_root(value) -> None:
         raise ProbeError(f"data_root 不是绝对路径：{value!r}")
 
 
+def check_hardware(doc) -> None:
+    """hardware_profile 的形状：OS/架构、CPU 核数、一个带 label 的后端与加速器列表。"""
+    if not isinstance(doc, dict):
+        raise ProbeError(f"hardware_profile 应回对象，实际是 {type(doc).__name__}")
+    for key in ("os", "arch"):
+        if not isinstance(doc.get(key), str) or not doc[key]:
+            raise ProbeError(f"hardware_profile.{key} 不是非空字符串：{doc.get(key)!r}")
+    cpu = doc.get("cpu")
+    if not isinstance(cpu, dict) or isinstance(cpu.get("cores"), bool) \
+            or not isinstance(cpu.get("cores"), int) or cpu["cores"] < 1:
+        raise ProbeError(f"hardware_profile.cpu 形状不对：{cpu!r}")
+    backend = doc.get("backend")
+    if not isinstance(backend, dict):
+        raise ProbeError(f"hardware_profile.backend 不是对象：{backend!r}")
+    if not isinstance(backend.get("label"), str) or not backend["label"]:
+        raise ProbeError(f"hardware_profile.backend 缺 label：{backend!r}")
+    if not isinstance(backend.get("accelerated"), bool):
+        raise ProbeError(f"hardware_profile.backend.accelerated 不是布尔值：{backend!r}")
+    if not isinstance(doc.get("accelerators"), list):
+        raise ProbeError(f"hardware_profile.accelerators 不是数组：{doc.get('accelerators')!r}")
+
+
+def starter_expect(pin_path: str | None = None) -> dict:
+    """从已提交的 pin 取 UI 必须显示的三个值 —— 不让探针自己抄一份模型身份。"""
+    path = pin_path or os.path.join(ROOT, "pins", "starter.json")
+    with open(path, encoding="utf-8") as fh:
+        doc = json.load(fh)
+    return {
+        "id": doc["model"]["id"],
+        "license": doc["model"]["license"],
+        "ram": doc["fit"]["ram_mib_min"],
+    }
+
+
+def check_starter_view(doc, expect: dict) -> None:
+    if not isinstance(doc, dict):
+        raise ProbeError(f"starter_status 应回对象，实际是 {type(doc).__name__}")
+    for key in ("installed",):
+        if not isinstance(doc.get(key), bool):
+            raise ProbeError(f"starter_status.{key} 不是布尔值：{doc.get(key)!r}")
+    for key in ("id", "file", "license"):
+        if not isinstance(doc.get(key), str) or not doc[key]:
+            raise ProbeError(f"starter_status.{key} 不是非空字符串：{doc.get(key)!r}")
+    if isinstance(doc.get("bytes"), bool) or not isinstance(doc.get("bytes"), int) or doc["bytes"] <= 0:
+        raise ProbeError(f"starter_status.bytes 不是正整数：{doc.get('bytes')!r}")
+    if doc.get("ram_mib_min") != expect["ram"]:
+        raise ProbeError(f"starter_status.ram_mib_min 是 {doc.get('ram_mib_min')!r}，pin 是 {expect['ram']}")
+    if doc.get("id") != expect["id"] or doc.get("license") != expect["license"]:
+        raise ProbeError(
+            f"starter_status 的身份/许可与 pin 不符：{doc.get('id')!r}/{doc.get('license')!r}"
+            f" ≠ {expect['id']!r}/{expect['license']!r}"
+        )
+
+
+def check_hub_default(view) -> None:
+    """默认关闭也预显命令，但命令里只能是 lain42.top，且 node_id 还没生成。"""
+    if not isinstance(view, dict):
+        raise ProbeError(f"hub_config 应回对象，实际是 {type(view).__name__}")
+    if view.get("enabled") is not False:
+        raise ProbeError(f"中心服务器默认应是关闭，实际 enabled={view.get('enabled')!r}")
+    if view.get("host") != "lain42.top":
+        raise ProbeError(f"中心服务器 host 是 {view.get('host')!r}，期望 'lain42.top'")
+    command = view.get("ssh_command")
+    if not isinstance(command, str) or not command.startswith("ssh -i "):
+        raise ProbeError(f"默认配置应预显一条 ssh 命令：{command!r}")
+    if "-o IdentitiesOnly=yes" not in command or "lain42.top" not in command:
+        raise ProbeError(f"预显的 ssh 命令少了 IdentitiesOnly 或中心主机：{command!r}")
+    if view.get("node_id") != "":
+        raise ProbeError(f"还没保存过就生成了 node_id：{view.get('node_id')!r}")
+
+
+def check_feature_strips(state, hardware: dict, expect: dict, fresh: bool) -> None:
+    """页面上必须真的画出硬件与入门档；fresh 时中心服务器必须是关的。"""
+    if state.get("env_hidden") is not False:
+        raise ProbeError("硬件条没显示（#env 仍 hidden）")
+    backend_text = str(state.get("env_backend") or "")
+    if hardware["backend"]["label"] not in backend_text:
+        raise ProbeError(f"硬件条没画后端 {hardware['backend']['label']!r}：{backend_text!r}")
+    cpu_text = str(state.get("env_cpu") or "")
+    os_arch = f"{hardware['os']}/{hardware['arch']}"
+    if os_arch not in cpu_text:
+        raise ProbeError(f"硬件条没画 {os_arch!r}：{cpu_text!r}")
+    chips = state.get("env_accel_chips")
+    if isinstance(chips, bool) or not isinstance(chips, int) or chips < 1:
+        raise ProbeError(f"加速器区连“无加速器”占位都没画：chips={chips!r}")
+    if state.get("starter_hidden") is not False:
+        raise ProbeError("入门档卡片没显示（#starter 仍 hidden）")
+    meta = str(state.get("starter_meta") or "")
+    missing = [name for name in ("id", "license", "ram") if str(expect[name]) not in meta]
+    if missing:
+        raise ProbeError(f"入门档卡片没写 {missing}：{meta!r}")
+    if fresh and state.get("hub_enabled") is not False:
+        raise ProbeError("全新数据根里中心服务器开关不该是开的")
+
+
 def check_installed_map(rows, want: dict) -> None:
     got = {row["capability"]: row["installed"] for row in rows}
     if got != want:
@@ -368,7 +463,14 @@ return {
   engine_state: document.getElementById('engine-state').textContent,
   install_hidden: document.getElementById('payload-install').hidden,
   install_disabled: document.getElementById('payload-install').disabled,
-  data_root_text: document.getElementById('data-root').textContent
+  data_root_text: document.getElementById('data-root').textContent,
+  env_hidden: document.getElementById('env').hidden,
+  env_backend: document.getElementById('env-backend').textContent,
+  env_cpu: document.getElementById('env-cpu').textContent,
+  env_accel_chips: document.getElementById('env-accel').children.length,
+  starter_hidden: document.getElementById('starter').hidden,
+  starter_meta: document.getElementById('starter-meta').textContent,
+  hub_enabled: document.getElementById('hub-enabled').checked
 };
 """
 
@@ -500,6 +602,31 @@ def run(args) -> int:
             chip_suffix="运行组件未安装" if fresh else None,
         )
         say(f"ui: title={state['title']!r} boot_hidden={state['boot_hidden']} chip={state['chip']!r}")
+
+        expect = starter_expect()
+        hw = invoke(driver, sid, "hardware_profile")
+        check_hardware(hw)
+        check_starter_view(invoke(driver, sid, "starter_status"), expect)
+        if args.expect_not_installed:
+            check_hub_default(invoke(driver, sid, "hub_config"))
+
+        def strips_ready():
+            current = driver.execute(sid, UI_STATE_JS)
+            if not isinstance(current, dict):
+                return None
+            if current.get("env_hidden") is not False or current.get("starter_hidden") is not False:
+                return None
+            if not current.get("env_backend") or not current.get("starter_meta"):
+                return None
+            return current
+
+        state = poll_until(strips_ready, deadline, "硬件条与入门档卡片渲染出来")
+        check_feature_strips(state, hw, expect, fresh=bool(args.expect_not_installed))
+        say(f"ui(硬件): {state['env_backend']!r} / {state['env_cpu']!r} / "
+            f"{state['env_accel_chips']} 个加速器 chip")
+        say(f"ui(入门档): {state['starter_meta']!r}")
+        if args.expect_not_installed:
+            say("ui(中心服务器): 默认关闭，SSH 命令只作预览")
 
         if args.plant_payload:
             fixture = plant_payload(root, args.contract, capability=args.plant_payload,

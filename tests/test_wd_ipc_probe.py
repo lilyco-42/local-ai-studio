@@ -44,6 +44,44 @@ def ui_state(**overrides):
     base = {
         "title": "Local AI Studio", "tauri": True, "boot_hidden": True,
         "chip": "对话 · 未启动", "data_root_text": "/home/runner/.local/share/local-ai-studio",
+        "env_hidden": False, "env_backend": "CPU 推理 · CPU",
+        "env_cpu": "x · 4 核 · 8.0 GiB · linux/x86_64", "env_accel_chips": 1,
+        "starter_hidden": False,
+        "starter_meta": "lainlives/Qwen3.5-0.8B-uncensored · apache-2.0 · 建议内存 ≥ 1024 MiB",
+        "hub_enabled": False,
+    }
+    base.update(overrides)
+    return base
+
+
+def hw_doc(**overrides):
+    base = {
+        "os": "linux", "arch": "x86_64",
+        "cpu": {"arch": "x86_64", "cores": 4, "brand": "x"},
+        "ram_mib": 8192, "accelerators": [],
+        "backend": {"id": "cpu", "label": "CPU", "accelerated": False, "reason": "没找到加速器"},
+    }
+    base.update(overrides)
+    return base
+
+
+def starter_view(**overrides):
+    with open(os.path.join(ROOT, "pins", "starter.json"), encoding="utf-8") as fh:
+        pin = json.load(fh)
+    model = pin["model"]
+    base = {
+        "installed": False, "id": model["id"], "file": model["file"],
+        "bytes": model["bytes"], "size_mib": (model["bytes"] + 1048575) // 1048576,
+        "license": model["license"], "ram_mib_min": pin["fit"]["ram_mib_min"], "path": None,
+    }
+    base.update(overrides)
+    return base
+
+
+def hub_view(**overrides):
+    base = {
+        "enabled": False, "host": "lain42.top", "ssh_user": "", "ssh_key": "~/.ssh/lain42_ed25519",
+        "node_id": "", "ssh_command": "ssh -i ~/.ssh/lain42_ed25519 -o IdentitiesOnly=yes lain42.top",
     }
     base.update(overrides)
     return base
@@ -396,6 +434,62 @@ class TestUiGate(unittest.TestCase):
         state = ui_state(chip="对话 · 未启动")
         with self.assertRaisesRegex(wd.ProbeError, "运行组件未安装"):
             wd.check_ui(state, state["data_root_text"], chip_suffix="运行组件未安装")
+
+
+class TestFeatureStrips(unittest.TestCase):
+    def test_hardware_starter_and_default_hub_pass(self) -> None:
+        expect = wd.starter_expect()
+        wd.check_hardware(hw_doc())
+        wd.check_starter_view(starter_view(), expect)
+        wd.check_hub_default(hub_view())
+        wd.check_feature_strips(ui_state(), hw_doc(), expect, fresh=True)
+
+    def test_hardware_and_strip_mutations_are_rejected(self) -> None:
+        expect = wd.starter_expect()
+        hw_cases = {
+            "缺架构": hw_doc(arch=""),
+            "核数为 0": hw_doc(cpu={"cores": 0}),
+            "backend 缺 label": hw_doc(backend={"accelerated": False}),
+            "accelerated 不是布尔": hw_doc(backend={"label": "CPU", "accelerated": "no"}),
+            "accelerators 不是数组": hw_doc(accelerators={}),
+        }
+        for label, doc in hw_cases.items():
+            with self.subTest(label=label), self.assertRaises(wd.ProbeError):
+                wd.check_hardware(doc)
+        starter_cases = {
+            "许可与 pin 不符": starter_view(license="gpl-3.0"),
+            "内存门槛与 pin 不符": starter_view(ram_mib_min=1),
+            "bytes 是 0": starter_view(bytes=0),
+            "installed 不是布尔": starter_view(installed="false"),
+        }
+        for label, doc in starter_cases.items():
+            with self.subTest(label=label), self.assertRaises(wd.ProbeError):
+                wd.check_starter_view(doc, expect)
+        strip_cases = {
+            "硬件条被藏起来": ui_state(env_hidden=True),
+            "后端标签没画": ui_state(env_backend="GPU 加速"),
+            "系统架构没画": ui_state(env_cpu="x · 4 核 · 8.0 GiB"),
+            "加速器区是空的": ui_state(env_accel_chips=0),
+            "入门档卡片被藏起来": ui_state(starter_hidden=True),
+            "卡片没写许可": ui_state(starter_meta="lainlives/Qwen3.5-0.8B-uncensored"),
+            "中心服务器默认是开的": ui_state(hub_enabled=True),
+        }
+        for label, state in strip_cases.items():
+            with self.subTest(label=label), self.assertRaises(wd.ProbeError):
+                wd.check_feature_strips(state, hw_doc(), expect, fresh=True)
+
+    def test_default_hub_mutations_are_rejected(self) -> None:
+        cases = {
+            "默认开着": hub_view(enabled=True),
+            "主机不对": hub_view(host="evil.example"),
+            "命令不是 ssh": hub_view(ssh_command="bash -c whoami"),
+            "命令少了 IdentitiesOnly": hub_view(ssh_command="ssh -i ~/.ssh/key lain42.top"),
+            "命令没指向中心": hub_view(ssh_command="ssh -i ~/.ssh/key -o IdentitiesOnly=yes other.example"),
+            "还没保存就有 node_id": hub_view(node_id="a" * 32),
+        }
+        for label, view in cases.items():
+            with self.subTest(label=label), self.assertRaises(wd.ProbeError):
+                wd.check_hub_default(view)
 
 
 class TestPolling(unittest.TestCase):

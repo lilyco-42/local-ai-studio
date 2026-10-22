@@ -51,6 +51,7 @@ const I18N = {
     starterReady: '已就绪（{mib} MiB）。启动对话引擎就会用它。',
     starterBusy: '正在下载并校验…支持断点续传，约 {mib} MiB。',
     starterInstall: '下载入门模型',
+    starterMeta: '{id} · {license} · 建议内存 ≥ {ram} MiB',
     hubTitle: '可选：接入 lain42.top 算力中心',
     hubHint: '只保存开关和一条命令；外壳不自动连接、不开入站端口。积分与结算都在服务端，客户端不碰支付。',
     hubEnable: '启用（仅保存配置）',
@@ -110,6 +111,7 @@ const I18N = {
     starterReady: 'Ready ({mib} MiB). Starting the chat engine will use it.',
     starterBusy: 'Downloading and verifying… resumable, about {mib} MiB.',
     starterInstall: 'Download starter model',
+    starterMeta: '{id} · {license} · needs ≥ {ram} MiB RAM',
     hubTitle: 'Optional: join the lain42.top compute hub',
     hubHint: 'Only a toggle and a command are saved. The shell never connects on its own and opens no inbound port. Credits and payouts live server-side; the client never touches payments.',
     hubEnable: 'Enable (saves config only)',
@@ -326,6 +328,10 @@ function renderStarter() {
   const mib = starter.size_mib || Math.round((starter.bytes || 0) / 1048576);
   const button = el('starter-install');
   const state = el('starter-state');
+  el('starter-meta').textContent = t('starterMeta')
+    .replace('{id}', starter.id || '')
+    .replace('{license}', starter.license || '')
+    .replace('{ram}', starter.ram_mib_min || 0);
   if (starter.installed) {
     state.textContent = t('starterReady').replace('{mib}', mib);
     button.hidden = true;
