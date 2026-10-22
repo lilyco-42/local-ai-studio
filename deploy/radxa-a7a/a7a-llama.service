@@ -1,0 +1,19 @@
+[Unit]
+Description=Radxa A7A local llama.cpp OpenAI API
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/radxa/a7a-ai
+ExecStart=/home/radxa/a7a-ai/llama-b11804/llama-server -m /home/radxa/a7a-ai/models/qwen2.5-0.5b-instruct-q2_k.gguf --host 127.0.0.1 --port 8081 -t 4 -tb 4 -c 2048 -np 1 -ngl 0 --api-key-file /home/radxa/a7a-ai/run/api.key --no-webui
+Restart=on-failure
+RestartSec=10
+TimeoutStopSec=20
+NoNewPrivileges=yes
+UMask=0077
+StandardOutput=append:/dev/shm/a7a-llama.log
+StandardError=inherit
+
+[Install]
+WantedBy=default.target
