@@ -62,15 +62,17 @@ application as a Tauri binary for macOS, Linux and Windows"，最新 release 是
 
 顺手把这张表存在的理由说完：**在这一轮之前，三个 workflow 里 4 个 `uses:` 全是浮动大版本 tag**
 （`actions/checkout@v4`、`actions/setup-python@v5`、`actions/upload-artifact@v4`、
-`actions/download-artifact@v4`，共 44 处；**现在这张表记的是 62 处 / 6 个 workflow / 5 个 action**
-—— `launch-plan` 加了一处 `download-artifact` 去吃 `file-index` 那份首启队列报告，`backends` 那条
+`actions/download-artifact@v4`，共 44 处；**现在这张表记的是 66 处 / 6 个 workflow / 5 个 action**
+—— `installer.yml` 的 `payload` job 带进 checkout / setup-python / upload-artifact 各一处，
+`bundle` job 再带进一处 download-artifact 取回内置载荷，`launch-plan` 加了一处 `download-artifact`
+去吃 `file-index` 那份首启队列报告，`backends` 那条
 新车道又带进 checkout 与 setup-python 各一处，`installer.yml` 再带进 checkout 与 tauri-action 各一处，
 `starter-model` 再带进 checkout 与 setup-python 各一处，`ocr-proof` 补了 1 处 checkout，
 `engine-native` 再带进 checkout / setup-python / download-artifact 各一处，
 `upstream-follow.yml` 带进 checkout / setup-python / upload-artifact 各一处；
 **另有 4 处是补漏**：上一版扫描表没列 `shell.yml`，它从进仓库起就有 2 个 checkout + 2 个
 upload-artifact 没被数过（"49 处"因此少算）。计数不靠这句话自证：
-`python3 tools/action_pins.py --check` 会按五份 workflow 重数一遍）。仓库对引擎、权重、工具带都定了"release + sha256"，
+`python3 tools/action_pins.py --check` 会按六份 workflow 重数一遍）。仓库对引擎、权重、工具带都定了"release + sha256"，
 唯独真正执行出包的那只手跟着别人随时会移动的 tag 走。现在：
 
 | action | 钉住的 commit | 来自哪个 tag | runtime / 输入数 | 许可 |

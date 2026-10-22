@@ -422,7 +422,7 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   workflow 里 4 个 `uses:` 全是浮动大版本 tag（`checkout@v4`、`setup-python@v5`、
   `upload-artifact@v4`、`download-artifact@v4`）—— 仓库对引擎/权重/工具带都定了
   "release + sha256"，唯独真正跑包的东西跟着别人随时会移动的 tag 走。
-  现在六条 workflow / 5 个 action / **62 处 uses** 全部是 40 位 commit SHA，尾注留着记它来自哪个
+  现在六条 workflow / 5 个 action / **66 处 uses** 全部是 40 位 commit SHA，尾注留着记它来自哪个
   tag（重数：`python3 tools/action_pins.py --check`；上一版表漏了 `shell.yml` 的 4 处，
   是这轮把它补进扫描表时才数出来的）：`checkout 11d5960a…`(v4.4.0)、`setup-python a26af69b…`(v5.6.0)、
   `upload-artifact ea165f8d…`(v4.6.2)、`download-artifact d3f86a10…`(v4.3.0)，都是 MIT、`node20`。

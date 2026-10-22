@@ -1,7 +1,7 @@
 {
  "counts": {
   "distinct": 5,
-  "uses_total": 62,
+  "uses_total": 66,
   "workflow_files": 6
  },
  "pins": [
@@ -41,7 +41,7 @@
    "workflows": {
     ".github/workflows/ci.yml": 1,
     ".github/workflows/engine-live.yml": 21,
-    ".github/workflows/installer.yml": 1,
+    ".github/workflows/installer.yml": 2,
     ".github/workflows/package.yml": 2,
     ".github/workflows/shell.yml": 2,
     ".github/workflows/upstream-follow.yml": 1
@@ -69,6 +69,7 @@
    "uses": "actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093",
    "workflows": {
     ".github/workflows/engine-live.yml": 2,
+    ".github/workflows/installer.yml": 1,
     ".github/workflows/package.yml": 1
    }
   },
@@ -97,6 +98,7 @@
    "workflows": {
     ".github/workflows/ci.yml": 1,
     ".github/workflows/engine-live.yml": 15,
+    ".github/workflows/installer.yml": 1,
     ".github/workflows/package.yml": 2,
     ".github/workflows/upstream-follow.yml": 1
    }
@@ -122,6 +124,7 @@
    "uses": "actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02",
    "workflows": {
     ".github/workflows/engine-live.yml": 7,
+    ".github/workflows/installer.yml": 1,
     ".github/workflows/package.yml": 1,
     ".github/workflows/shell.yml": 2,
     ".github/workflows/upstream-follow.yml": 1

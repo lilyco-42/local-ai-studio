@@ -38,7 +38,7 @@ REPLAY_FILES = ("tests/test_lane_assertions.py", "tests/test_image_proof_block.p
 # 每张 workflow 的 job 数（2026-10-20 实测；docs/toolbelt.md 那句"其余 21 条 job 一次都没跑过"
 # 就靠这个数与它绑在一起）：加一条 job 必须同时改文档里那句
 EXPECTED_JOBS = {"engine-live.yml": 23, "ci.yml": 1, "package.yml": 2, "shell.yml": 2,
-                 "installer.yml": 1, "upstream-follow.yml": 1}
+                 "installer.yml": 2, "upstream-follow.yml": 1}
 
 
 def blocks():
