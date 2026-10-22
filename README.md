@@ -146,7 +146,7 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   `ggml-large-v1.bin` 的 SSL EOF —— 它本来就排在最后；可达 ≠ 吞吐，排序仍按实测速率）。
   `shell/core/src/download.rs` 是这条计划的消费者：系统 curl 传输（不引 TLS crate）、Range 续传、
   低速/断流换源、收满 sha256 才从 `blobs/<sha>.part` 落成 `blobs/<sha>` 并硬链接到文件名；
-  这一组单测已随 `shell.yml` 的 `core` 在 3 个操作系统上真跑过（2026-10-22，各 133 条全过，run 39773338125）。
+  这一组单测已随 `shell.yml` 的 `core` 在 3 个操作系统上真跑过（2026-10-22，各 133 条全过，run 39774726047）。
 - `tools/recommend_models.py` + `catalog/recommendations.json`：**给用户的**「我这台机器装哪个」表。
   `catalog/defaults.json` 那 6 条是车道最小样本（对话那颗 415 MB，只为跑通），不是推荐。
   四条规则都进产物、UI 要说得出为什么推荐它：半档 < `recommended_ram_gb` ≤ 档位（上游 llmfit 的数）、
@@ -365,9 +365,9 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   （落后 0、已最新、rc=0）；2026-10-22T05:40Z 重钉到 b11804（落后 0、已最新），本轮由 GitHub Actions
   复核全绿：ci 39730079194（972 条单测 OK，skipped=1）/ shell 39730079402 / package 39730079234 /
   installer 39730079302 / engine-live 39730079204（无头推理 27.0 tok/s、三个 server 车道均成功）。
-  入门档分支上又复核了一遍：ci 39773602591（990 条单测 OK，skipped=1）/ shell 39773338125
+  入门档分支上又复核了一遍：ci 39774726103（993 条单测 OK，skipped=1）/ shell 39774726047
   （core 三档各 133 条、app 三档各 3 条）/ package 39772879110 / engine-live 39773338208
-  （`starter-model` 与 `headless-inference` 两条车道均成功）。
+  （23 条 job 全绿，`starter-model` 真下 503 MiB 并产出 token）。
   **首跑**是 2026-10-21T20:12Z 手动派发
   （run 39668207182）：25 个 release 的窗口、钉住 b11798 → 最新带产物 b11799（落后 1）、候选可升，
   结论 `有新版本（只报不跟）`、退出码 0，报告 JSON 照常上传。**`schedule` 已实跑**：
@@ -397,7 +397,7 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   （安装、四条能力）都丢进 `spawn_blocking`，`status`/`data_root`/`payload_source` 只读本地状态。`shell/ui` 只有 IPC、没有网络 API、中英两套文案；`icons/icon.ico` 是 Windows
   资源段要的那一颗。
   **这些代码现在真编过、真跑过了**：2026-10-22 `shell.yml` 的 `core` 在 3 个操作系统上各 133 条
-  单测全过（run 39773338125），`app` 在 3 个操作系统上真的编出 Tauri 层并跑 3 条单测（Ubuntu 首编 1m50s，先装 WebKitGTK）；
+  单测全过（run 39774726047），`app` 在 3 个操作系统上真的编出 Tauri 层并跑 3 条单测（Ubuntu 首编 1m16s，先装 WebKitGTK）；
   两个 crate 的首轮 `Cargo.lock` 已作为 artifact 产出（`shell-core-Cargo.lock`、`shell-app-Cargo.lock`），
   还没提交进仓库。Windows 第一次跑红在假服务器的 RST 竞态，修法是读到完整请求（头 + Content-Length
   正文）再回包 —— 只有真跑才会发现。**窗口里的 JS 与 IPC 也真驱动过了**：2026-10-21 起
@@ -412,6 +412,10 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   同一步还把能力名换成假的做已知坏对照，必须被拒；最后按 `pins/shell-contract.json` 在同一个数据根
   摆一份**合成**清单与 3 字节占位文件，要求只有对话那一行翻成 `installed=true`、状态条回到
   `对话 · 未启动`——`installed=true` 这一侧的正控。占位文件不是载荷，起引擎时仍会逐文件验哈希并拒掉。
+  本次（run 39774726047，job 119810691485）再把三条新界面逐字核了一遍：硬件条读到
+  `CPU 推理 · CPU` / `AMD EPYC 9V74 80-Core Processor · 4 核 · 15.6 GiB · linux/x86_64` / 1 个加速器 chip；
+  入门档卡片写着 `lainlives/Qwen3.5-0.8B-uncensored · apache-2.0 · 建议内存 ≥ 1024 MiB`；
+  中心服务器默认关闭，预显的 SSH 命令只作预览。
   **边界**：只有 Ubuntu 这一档，没有点“启动引擎”、
   没有联网 —— 证的是 IPC 桥与首屏渲染，不是四条能力的端到端链路；macOS/Windows 的 app job 跳过这两步。
 - `tools/action_pins.py` + `pins/actions.json`：**出包那只手自己也要钉住**。开工时三个

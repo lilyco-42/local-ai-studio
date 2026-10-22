@@ -121,8 +121,9 @@ python tools/toolbelt_pins.py --fixtures tests/fixtures           # 离线回放
   退出码不作判据（runner 上一个模型都没有），判据是 stdout 必须能解析成 JSON、help 里必须有 `--json`。
 - 执行已真跑：2026-10-21 仓库转 public 后，这条车道（`toolbelt-pins`）与 `engine-live.yml` 里
   其余 21 条 job 全绿（run 39633380193）；`ci.yml`、`package.yml`、`shell.yml` 也都真跑过。
-  2026-10-22 新增 `starter-model` 后是 23 条；新车道同日已真跑（run 39773338208，job 119806042048）：
-  pin 与上游对表、503 MiB 按 sha256 落地、401 与 CORS 负向对照、`enable_thinking:false` 产出 token。重数：
+  2026-10-22 新增 `starter-model` 后是 23 条；同一 run（39773338208）23 条 job 全绿，新车道
+  （job 119806042048）真跑了 pin 对表、503 MiB 按 sha256 落地、401 与 CORS 负向对照、
+  `enable_thinking:false` 产出 token。重数：
   `python -c "import yaml;print(len(yaml.safe_load(open('.github/workflows/engine-live.yml',encoding='utf-8'))['jobs']))"` → 23。
 
 ## 国内出口能不能把这些二进制拉下来（2026-10-19 实测）

@@ -926,7 +926,7 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     Windows 资源段要的那一颗（`tauri-build` 缺它会直接报错，而不是跳过）。
     **证据的边界**：`.github/workflows/shell.yml` 现在是两个 job —— `core` 与 `app` 各在 3 OS 跑
     `cargo test --all-targets`（`app` 在 Ubuntu 先装 WebKitGTK；两个 job 都上传首轮的 `Cargo.lock`）。
-    2026-10-22 真跑的结果：`core` 三档各 **133 条**全过（run 39773338125），`app` 三档各 **3 条**全过（Ubuntu 首编 1m50s）；
+    2026-10-22 真跑的结果：`core` 三档各 **133 条**全过（run 39774726047），`app` 三档各 **3 条**全过（Ubuntu 首编 1m16s）；
     首轮 `Cargo.lock` 已作为 `shell-core-Cargo.lock` / `shell-app-Cargo.lock` artifact 产出，
     但还没提交进仓库。离线另证 `python tools/shell_source.py --check`（问题 0 条）与 14 条 Python 单测。
     这次不把"写了"说成"过了"：2026-10-21 起 `app (ubuntu-latest)` 在 Xvfb 里真起二进制并等到
@@ -939,7 +939,11 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     “假能力名必须被拒”的已知坏对照；最后按合同在同一个数据根摆一份合成清单 + 3 字节占位文件，
     要求只有对话翻成 `installed=true`、状态条回到 `对话 · 未启动`（`installed=true` 的正控；
     占位文件不是载荷，起引擎仍会验哈希并拒绝）。边界：只有 Ubuntu，没起引擎、没联网，
-    证的是 IPC 桥与首屏渲染。
+    证的是 IPC 桥与首屏渲染。2026-10-22 的 run 39774726047（job 119810691485）在同一真窗口里
+    又核了三条新界面：硬件条 `CPU 推理 · CPU` /
+    `AMD EPYC 9V74 80-Core Processor · 4 核 · 15.6 GiB · linux/x86_64` / 1 个加速器 chip；
+    入门档 `lainlives/Qwen3.5-0.8B-uncensored · apache-2.0 · 建议内存 ≥ 1024 MiB`；
+    中心服务器默认关闭，预显的 SSH 命令只作预览。
 33. **出包产物到外壳目录之间的那一步补上了**：出包车道的产物是平铺的 `dist/<os>/<engine>/`，
     外壳只认 `<data>/runtime/<os>/<engine>/<version>/<asset-stem>/` + 根部的 `payload-manifest.json`，
     此前没有工具把两者接起来。`tools/stage_payload.py` 只从 `pins/shell-contract.json` 的
@@ -1037,7 +1041,7 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     `download.rs` 的 curl 参数对表；另一条按 serde 语义重放整份计划 —— `schema` 是 u32、
     `bytes` 是 u64、速率有限、`file` 扁平且不重名，6 个变异各自必须红）。Rust 侧 `Plan::parse/from_file/item` 读同一份 JSON
     （重名必须报错），`download.rs` 20 条单测。
-    **证据边界**：这组 Rust 单测已随 `core` 在 3 个操作系统上真跑（各 133 条全过，2026-10-22，run 39773338125）；
+    **证据边界**：这组 Rust 单测已随 `core` 在 3 个操作系统上真跑（各 133 条全过，2026-10-22，run 39774726047）；
     curl 在真实网络上的重试/续传行为仍只有 Fake fetcher 的逻辑证据；R2 镜像仍是唯一缺口（#23）。
 36. **跟随上游 llama.cpp：定时只报不跟，重钉是一次显式动作**（`tools/follow_upstream.py` +
     `.github/workflows/upstream-follow.yml`）：上游一天发好几个包（b11727 → b11798 只隔了几天），
@@ -1062,9 +1066,9 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     再重钉到 b11804（落后 0、已最新），本轮由 GitHub Actions 复核全绿：ci 39730079194（972 条单测
     OK，skipped=1）/ shell 39730079402 / package 39730079234 / installer 39730079302 /
     engine-live 39730079204（无头推理 27.0 tok/s、三个 server 车道均成功）。
-    入门档分支上再复核：ci 39773602591（990 条单测 OK，skipped=1）/ shell 39773338125
+    入门档分支上再复核：ci 39774726103（993 条单测 OK，skipped=1）/ shell 39774726047
     （core 三档各 133 条、app 三档各 3 条）/ package 39772879110 / engine-live 39773338208
-    （`starter-model` 与 `headless-inference` 两条车道均成功）。
+    （23 条 job 全绿，`starter-model` 真下 503 MiB 并产出 token）。
     同一套现取逻辑已在 `engine-live` 的 `backends` 末步真跑（101 个 release / 92 个带产物 / 0 问题）。
 
 ## 车道判据的出处（全部按**钉住的那个 ref** 核过，不是按 HEAD 记的）
