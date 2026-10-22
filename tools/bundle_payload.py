@@ -305,6 +305,7 @@ def _fixture(root: str, platform: str = "linux-x64") -> tuple[str, str]:
 
 
 def selftest() -> int:
+    global _copy_verified
     cases: list[tuple[str, bool, str]] = []
 
     def expect_red(label: str, fn) -> None:
