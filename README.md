@@ -40,6 +40,9 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   不联网；`--live` 用 HF API 复核 revision/体积/LFS sha256/许可；`--download` 在 CI 里真下
   527 MB 并复算哈希。负向对照覆盖漂浮 revision、http、路径穿越、许可证、磁盘预算等 11 类改坏。
   引擎版本必须能在 `pins/payload-plan.json` 的 llama 钉值里找到，不允许“工具自己同意自己”。
+  已在 `engine-live` 的 `starter-model` 车道真跑（2026-10-22，run 39773338208）：pin 与上游
+  revision / 体积 / 哈希 / 许可一致，503 MiB 权重复算 sha256 后落到 runner，常驻 llama-server
+  在 401 与 CORS 收窄下用 `enable_thinking:false` 产出了 token。
 - `shell/core/src/hardware.rs`：CPU/GPU/NPU 只读探测（`nvidia-smi`、`vulkaninfo`、`lspci`、
   PowerShell CIM、`/proc`、`/sys`），判据全在纯函数 `classify()` 里，测试注入夹具而不是
   依赖跑测试的那台机器；挑出 CUDA/ROCm/Vulkan/Metal/OpenVINO/QNN/RKNPU 中第一个可用后端，
@@ -143,7 +146,7 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   `ggml-large-v1.bin` 的 SSL EOF —— 它本来就排在最后；可达 ≠ 吞吐，排序仍按实测速率）。
   `shell/core/src/download.rs` 是这条计划的消费者：系统 curl 传输（不引 TLS crate）、Range 续传、
   低速/断流换源、收满 sha256 才从 `blobs/<sha>.part` 落成 `blobs/<sha>` 并硬链接到文件名；
-  这一组单测已随 `shell.yml` 的 `core` 在 3 个操作系统上真跑过（2026-10-21，各 107 条全过，run 39682992984）。
+  这一组单测已随 `shell.yml` 的 `core` 在 3 个操作系统上真跑过（2026-10-22，各 133 条全过，run 39773338125）。
 - `tools/recommend_models.py` + `catalog/recommendations.json`：**给用户的**「我这台机器装哪个」表。
   `catalog/defaults.json` 那 6 条是车道最小样本（对话那颗 415 MB，只为跑通），不是推荐。
   四条规则都进产物、UI 要说得出为什么推荐它：半档 < `recommended_ram_gb` ≤ 档位（上游 llmfit 的数）、
@@ -362,6 +365,9 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   （落后 0、已最新、rc=0）；2026-10-22T05:40Z 重钉到 b11804（落后 0、已最新），本轮由 GitHub Actions
   复核全绿：ci 39730079194（972 条单测 OK，skipped=1）/ shell 39730079402 / package 39730079234 /
   installer 39730079302 / engine-live 39730079204（无头推理 27.0 tok/s、三个 server 车道均成功）。
+  入门档分支上又复核了一遍：ci 39773602591（990 条单测 OK，skipped=1）/ shell 39773338125
+  （core 三档各 133 条、app 三档各 3 条）/ package 39772879110 / engine-live 39773338208
+  （`starter-model` 与 `headless-inference` 两条车道均成功）。
   **首跑**是 2026-10-21T20:12Z 手动派发
   （run 39668207182）：25 个 release 的窗口、钉住 b11798 → 最新带产物 b11799（落后 1）、候选可升，
   结论 `有新版本（只报不跟）`、退出码 0，报告 JSON 照常上传。**`schedule` 已实跑**：
@@ -390,8 +396,8 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   `shell/src-tauri`（Tauri 2）只做装配：`AppState` + 10 条 IPC 命令调 core，耗时的调用
   （安装、四条能力）都丢进 `spawn_blocking`，`status`/`data_root`/`payload_source` 只读本地状态。`shell/ui` 只有 IPC、没有网络 API、中英两套文案；`icons/icon.ico` 是 Windows
   资源段要的那一颗。
-  **这些代码现在真编过、真跑过了**：2026-10-21 `shell.yml` 的 `core` 在 3 个操作系统上各 107 条
-  单测全过（run 39682992984），`app` 在 3 个操作系统上真的编出 Tauri 层并跑 3 条单测（Ubuntu 首编 1m30s，先装 WebKitGTK）；
+  **这些代码现在真编过、真跑过了**：2026-10-22 `shell.yml` 的 `core` 在 3 个操作系统上各 133 条
+  单测全过（run 39773338125），`app` 在 3 个操作系统上真的编出 Tauri 层并跑 3 条单测（Ubuntu 首编 1m50s，先装 WebKitGTK）；
   两个 crate 的首轮 `Cargo.lock` 已作为 artifact 产出（`shell-core-Cargo.lock`、`shell-app-Cargo.lock`），
   还没提交进仓库。Windows 第一次跑红在假服务器的 RST 竞态，修法是读到完整请求（头 + Content-Length
   正文）再回包 —— 只有真跑才会发现。**窗口里的 JS 与 IPC 也真驱动过了**：2026-10-21 起

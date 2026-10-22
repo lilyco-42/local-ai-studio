@@ -922,7 +922,7 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     Windows 资源段要的那一颗（`tauri-build` 缺它会直接报错，而不是跳过）。
     **证据的边界**：`.github/workflows/shell.yml` 现在是两个 job —— `core` 与 `app` 各在 3 OS 跑
     `cargo test --all-targets`（`app` 在 Ubuntu 先装 WebKitGTK；两个 job 都上传首轮的 `Cargo.lock`）。
-    2026-10-21 真跑的结果：`core` 三档各 **107 条**全过（run 39682992984），`app` 三档各 **3 条**全过（Ubuntu 首编 1m30s）；
+    2026-10-22 真跑的结果：`core` 三档各 **133 条**全过（run 39773338125），`app` 三档各 **3 条**全过（Ubuntu 首编 1m50s）；
     首轮 `Cargo.lock` 已作为 `shell-core-Cargo.lock` / `shell-app-Cargo.lock` artifact 产出，
     但还没提交进仓库。离线另证 `python tools/shell_source.py --check`（问题 0 条）与 14 条 Python 单测。
     这次不把"写了"说成"过了"：2026-10-21 起 `app (ubuntu-latest)` 在 Xvfb 里真起二进制并等到
@@ -1033,7 +1033,7 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     `download.rs` 的 curl 参数对表；另一条按 serde 语义重放整份计划 —— `schema` 是 u32、
     `bytes` 是 u64、速率有限、`file` 扁平且不重名，6 个变异各自必须红）。Rust 侧 `Plan::parse/from_file/item` 读同一份 JSON
     （重名必须报错），`download.rs` 20 条单测。
-    **证据边界**：这组 Rust 单测已随 `core` 在 3 个操作系统上真跑（各 107 条全过，2026-10-21，run 39682992984）；
+    **证据边界**：这组 Rust 单测已随 `core` 在 3 个操作系统上真跑（各 133 条全过，2026-10-22，run 39773338125）；
     curl 在真实网络上的重试/续传行为仍只有 Fake fetcher 的逻辑证据；R2 镜像仍是唯一缺口（#23）。
 36. **跟随上游 llama.cpp：定时只报不跟，重钉是一次显式动作**（`tools/follow_upstream.py` +
     `.github/workflows/upstream-follow.yml`）：上游一天发好几个包（b11727 → b11798 只隔了几天），
@@ -1058,6 +1058,9 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     再重钉到 b11804（落后 0、已最新），本轮由 GitHub Actions 复核全绿：ci 39730079194（972 条单测
     OK，skipped=1）/ shell 39730079402 / package 39730079234 / installer 39730079302 /
     engine-live 39730079204（无头推理 27.0 tok/s、三个 server 车道均成功）。
+    入门档分支上再复核：ci 39773602591（990 条单测 OK，skipped=1）/ shell 39773338125
+    （core 三档各 133 条、app 三档各 3 条）/ package 39772879110 / engine-live 39773338208
+    （`starter-model` 与 `headless-inference` 两条车道均成功）。
     同一套现取逻辑已在 `engine-live` 的 `backends` 末步真跑（101 个 release / 92 个带产物 / 0 问题）。
 
 ## 车道判据的出处（全部按**钉住的那个 ref** 核过，不是按 HEAD 记的）
