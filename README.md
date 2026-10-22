@@ -261,9 +261,9 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   非空，`"{token}"` 原样传进去算不合格）与 `--cors-origins localhost`；同一段还必须有
   **无钥匙访问 `/props` 得 401** 的断言和**两个不同 Origin**（本机被反射 / 非本机拿不到 ACAO）
   的对照 —— 旗标传对了不等于门禁生效。
-  实测 4 项能力各一段、问题 0 条；15 种 workflow 文本变异全被报（含丢钥匙、占位符、变量未赋值、
+  实测四项能力都认出来（对话两段：无头 + 入门档）、问题 0 条；15 种 workflow 文本变异全被报（含丢钥匙、占位符、变量未赋值、
   丢 CORS、401 被改成 200、只剩一个来源），正向对照是"0 问题必须建立在
-  4 段都认出来之上"（重数：`python3 tools/lane_argv.py`，已挂在 `ci.yml` 静态门禁）。
+  5 段都认出来之上"（重数：`python3 tools/lane_argv.py`，已挂在 `ci.yml` 静态门禁）。
 - `tools/sideload_lookup.py` + `pins/sideload-index.json`：**用户从别处弄来的权重，按内容认领**。
   六张已钉表摊平成 `sha256 → 身份`（实测 354 串哈希 / 420 行身份 / 30 个同名不同哈希的文件名），
   结论四种：`known_by_hash`（认领，带能力与证据等级）、`name_matches_hash_differs`（名字钉过但字节

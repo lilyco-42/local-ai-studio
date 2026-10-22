@@ -683,11 +683,11 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     只带旗标、不做运行时对照，证明不了门禁真的生效。
     判据只吃 shell 那一层：`#` 注释与 heredoc 正文都先滤掉（本仓库真出过一次"判据钉着注释"的事故），
     并且注释里带 `--api-key`、heredoc 里打印 `--api-key` 都不许让它红 —— 这两条各有一组对照。
-    实测（2026-10-20）：四项能力各认出一段常驻 server 的步骤，**问题 0 条**；把 workflow 文本改坏
-    15 种（绑 0.0.0.0 / 绑变量 / 不传绑地址 / 给 whisper 或 sd 加 `--api-key` / 把 llama 的常驻那步改成
+    实测（2026-10-20）：四项能力都认出来（对话两段：无头 + 入门档），**问题 0 条**；把 workflow 文本改坏
+    15 种（绑 0.0.0.0 / 绑变量 / 不传绑地址 / 给 whisper 或 sd 加 `--api-key` / 把 llama 常驻步骤都改成
     找 CLI / 去掉 `oar` 子命令 / 带 `--size` / 只 find 不 exec / 改掉二进制名 / llama 丢钥匙 /
     钥匙传占位符 / 钥匙变量没赋值 / llama 丢 CORS / 401 被改成 200 / 非本机来源被换成同一来源）
-    15 种全被报出来，正向对照"真实 workflow 必须 0 问题且认出 4 段"防止"0 问题"其实是"什么都没认出来"。
+    15 种全被报出来，正向对照"真实 workflow 必须 0 问题且认出 5 段"防止"0 问题"其实是"什么都没认出来"。
     重数：`python3 tools/lane_argv.py --selftest`、`python3 tools/lane_argv.py`、
     `python -m unittest tests.test_lane_argv`。
 
