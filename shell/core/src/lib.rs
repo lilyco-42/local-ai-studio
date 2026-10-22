@@ -5,6 +5,7 @@
 //! 源码里不写死引擎名、旗标或端口。
 
 pub mod base64;
+pub mod bundled;
 pub mod contract;
 pub mod delivery;
 pub mod download;
