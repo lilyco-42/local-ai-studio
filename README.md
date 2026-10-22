@@ -15,10 +15,41 @@
 "只能靠 GitHub Actions 出包"这条硬约束本身的可行性（runner 缺什么、包该装什么）见
 [docs/packaging.md](docs/packaging.md)；
 选型/热切换/GGUF 估算这些**不自研**的部分见 [docs/toolbelt.md](docs/toolbelt.md)（llmfit、llama-swap、
-gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）。
+gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）；
+可选算力中心的边界见 [docs/adr/0002-personal-compute-hub.md](docs/adr/0002-personal-compute-hub.md)。
+
+## 小白路径：三步跑起第一只模型
+
+1. **装外壳 + 运行组件**（引擎是上游预编译产物，不自研、不在本机编译）。
+2. **点“下载入门模型”**：`pins/starter.json` 里钉住的是
+   `lainlives/Qwen3.5-0.8B-uncensored` 的 Q4_K_M（527,495,776 B，sha256 已钉）。
+   用户点名的 0.6B 在 Qwen3.5 里不存在（官方最小 0.8B），表里用 `requested/resolved` 两档
+   把这件事写明，不悄悄换名字。下载支持断点续传，过哈希才落成正式文件。
+3. **启动对话引擎**：外壳只把命令行里**唯一**的 `.gguf` 权重占位符换成这只入门权重；
+   生图的四个伴生权重、字幕的 `.bin` 都不动。硬件条会显示 CPU/GPU/NPU 探测结果与推荐后端
+   （“检测到”不等于“已装对应加速档”；默认交付的是 CPU 档）。
+
+入门档只在**对话**能力上生效：生图 8GB/4GB 档的 argv 里也只有一个 `.gguf`，
+所以“唯一占位符”这条规则单独不够，`Supervisor::launch_extra()` 还按能力名加了一道闸。
+可选中心 `lain42.top` 默认关闭；打开只保存开关并显示一条 SSH 命令，外壳不自动连接、
+不开入站端口、不碰积分与支付。真连、换积分、提现都在服务端与用户的终端里完成。
 
 ## 现在有什么
 
+- `tools/starter_pin.py` + `pins/starter.json`：随身入门档的 pin 与校验器。`--check` 只读仓库、
+  不联网；`--live` 用 HF API 复核 revision/体积/LFS sha256/许可；`--download` 在 CI 里真下
+  527 MB 并复算哈希。负向对照覆盖漂浮 revision、http、路径穿越、许可证、磁盘预算等 11 类改坏。
+  引擎版本必须能在 `pins/payload-plan.json` 的 llama 钉值里找到，不允许“工具自己同意自己”。
+- `shell/core/src/hardware.rs`：CPU/GPU/NPU 只读探测（`nvidia-smi`、`vulkaninfo`、`lspci`、
+  PowerShell CIM、`/proc`、`/sys`），判据全在纯函数 `classify()` 里，测试注入夹具而不是
+  依赖跑测试的那台机器；挑出 CUDA/ROCm/Vulkan/Metal/OpenVINO/QNN/RKNPU 中第一个可用后端，
+  没有就如实回落 CPU。检测到加速器 ≠ 已安装对应引擎档，UI 的 title 里写了这句话。
+- `shell/core/src/starter.rs`：把入门权重落到 `data_root/models/`，复用 `download.rs` 的
+  续传/换源/过哈希才落盘；`installed_path()` 只做长度检查，下载完成后再做一次完整 sha256 复核。
+  只替换对话命令行里唯一的 `.gguf` 占位符，且由 `Supervisor::launch_extra()` 限定在“对话”能力上。
+- `shell/core/src/hub.rs` + [ADR-0002](docs/adr/0002-personal-compute-hub.md)：可选中心
+  `lain42.top` 的开关、稳定 `node_id` 与展示用 SSH 命令。默认关闭、不联网、不执行 SSH、
+  不读私钥、不碰积分支付。
 - `tools/engine_probe.py`：吸收三家命名差异（`cuda-12.4` vs `cuda-12.4.0` vs 名字里带 `Ubuntu-24.04`，
   sd 的文件名只带 sha 不带 tag 里的 `975-`），按"引擎 + 平台 + 后端族 + 架构"选 target；
   同 target 冲突先比 release 构建号再比后端版本；**不看 `releases/latest`**（whisper.cpp 的 latest 是 0 产物）。
@@ -30,9 +61,9 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   `needs.X.outputs.Y` 也按 **job 自己的文本**查三件事：X 这个 job 存在、本 job 真 `needs` 它、
   X 真导出 Y —— 引用没导出的输出在 Actions 里拿到的是空字符串而不是报错，而"扫整份文件"那一版
   会让任何带 `needs:` 的 job 为别人的引用背锅（见 `docs/requirements.md` 验收第 5 条）。
-  车道分段与预跑的**计数**由 `tests/test_lane_replay_report.py` 钉住：六条 workflow 共 18 段 `<<'PY'`
+  车道分段与预跑的**计数**由 `tests/test_lane_replay_report.py` 钉住：六条 workflow 共 20 段 `<<'PY'`
   （`installer.yml` 与 `upstream-follow.yml` 没有 heredoc）、
-  其中 13 段含判据（认 `check(`/`SystemExit`/`assert`/`sys.exit(`）、本地预跑引用 8 个
+  其中 15 段含判据（认 `check(`/`SystemExit`/`assert`/`sys.exit(`）、本地预跑引用 8 个
   (job, 步骤名) 组合 —— 重数：`python -W error::ResourceWarning -m unittest tests.test_lane_replay_report -v`。
   这几个数以前只活在文档里，漂过三次，所以现在是断言不是散文。
   还会把车道 env 里每条 64 位十六进制的值（**按值形状认，不按键名**，否则 OCR 车道的

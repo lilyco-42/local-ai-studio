@@ -98,7 +98,7 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
 
 ## 验收标准（在当前唯一可用验证手段 = GitHub Actions 下）
 
-1. `ci.yml`：972 个单测绿（重数：`python -W error::ResourceWarning -m unittest discover -s tests
+1. `ci.yml`：990 个单测绿（重数：`python -W error::ResourceWarning -m unittest discover -s tests
    -p "test_*.py"`；按文件数就 `python -m unittest tests.<模块名>`。2026-10-20 实测逐文件：
    `test_yaml_gate.py` 闸门自己（含 workflow 文件清单与磁盘覆盖对照）17、`test_lane_argv.py` 车道 ↔ 启动表一致（含 15 个 workflow 文本变异）10、
    `test_sideload.py` sideload 按内容认领（6 条源码变异体 + 三个真上游文件）22、
@@ -112,7 +112,7 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
    `test_shell_source.py` 外壳源码结构闸门（7 条核心变异体 + 2 条 UI 负控 + 1 条包装层负控 +
    3 条 IPC 对表、Rust 分隔符平衡含 raw string、能力可用性 1 条正控 + 2 个变异、
    i18n 键集与引用 1 条正控 + 5 个变异）16、
-   `test_toolbelt_pins.py` 工具带钉表 14、
+   `test_toolbelt_pins.py` 工具带钉表 14、`test_starter_pin.py` 入门档 pin 与车道覆盖 18、
    `test_catalog_snapshot.py` 目录快照与侧表 16、`test_citation_check.py` 出处闸门 22、
    `test_strength_derivation.py` 强度级从 pin 字段推导 19、
    `test_ocr_build_surface.py` OCR 依赖面 15、`test_ocr_language_pins.py` OCR 语言轴 31、
@@ -159,7 +159,11 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
    `headless-inference` 在 CPU runner 上对话真抓到 `tokens per second > 0`，**并且同一个包再起的
    常驻 `llama-server` 走 OpenAI 兼容 `/v1/chat/completions` 也真的产出非空文本**（ADR 的实现约束
    第 1 条"外壳起常驻服务而非一次一进程"原本一次都没被车道碰过）；
-   `subtitle-proof` 用钉好的引擎+权重+已知答案样本跑出一份**带时间戳且内容对得上**的 SRT。
+   `subtitle-proof` 用钉好的引擎+权重+已知答案样本跑出一份**带时间戳且内容对得上**的 SRT；
+   `starter-model` 对入门档做三件事：离线复核 `pins/starter.json`、用 HF API 对表 revision/体积/LFS sha256/许可、
+   真下 527 MB 按 pin 校验，然后用**外壳同款**引擎（`pins/payload-plan.json` 里的 b11804）起
+   `llama-server`，走带 `--api-key` 的 `/v1/chat/completions` 要求 `tokens_predicted > 0` 且文本非空。
+   注意 0.6B 这个尺寸在 Qwen3.5 里不存在（官方最小 0.8B），表里保留 `requested/resolved` 两档，不悄悄改名。
 3. 目录可达性探针（`catalog_probe.py`）三条判据全过：泛词有结果、正向对照命中精确仓库、负向对照 0 条。
 4. **车道覆盖度**：四项能力**都有执行车道了** —— 对话（`headless-inference` 抓 tokens/s）、
    字幕（`subtitle-proof` 出带时间戳且内容对得上的 SRT）、文字识别（`ocr-proof`：CI 里 `cargo build`
@@ -190,7 +194,7 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
    OCR 没有服务形态可测（见"技术前提"第 4 条的例外说明）。
    但覆盖度说的是**车道存在**，不是跑过 —— 跑过与否要看 Actions 的真实记录，目前为零。
 5. **车道里的 Python 片段要真编译**：`yaml_gate.py` 现在把六条 workflow 里的每段 `<<'PY'` 抽出来
-   `compile()`（本轮 18 段 —— `upstream-follow.yml` 是纯命令车道、0 段；
+   `compile()`（本轮 20 段 —— `upstream-follow.yml` 是纯命令车道、0 段；
    `python tools/yaml_gate.py` 自己会打印这个数，别信文档里的静态值），
    并验过它会红 —— 掺一段缩进错的 PY 进去，它按
    `文件:job#步骤 第N段` 报出语法错。这个能力是被我上一次写的车道逼出来的：
@@ -372,7 +376,7 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     不符、下载失败、链式 dylib 链接与"手工塞回一个 CLI 必须红"；另按
     `shell/core/src/manifest.rs` 重放出包清单的 serde 形状，7 个变异含字符串化体积、
     带路径的文件名与同名重复），
-    闸门现在同时解析六条 workflow（18 段 heredoc PY，`upstream-follow.yml` 0 段；重数：
+    闸门现在同时解析六条 workflow（20 段 heredoc PY，`upstream-follow.yml` 0 段；重数：
     `python3 tools/yaml_gate.py` 的 "编译了 N 段"那行）。
     2026-10-21 出包车道（run 39632180385）在三档 OS 上真跑了这一步（bundle 自检与单测都过，
     三档 `engine-payload-<os>` 真的产出），所以这条现在既有判据、也有"包真的出出来"的证据；
@@ -1085,10 +1089,10 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
 判据本身也不能只靠"看上去对"，而且**这几个计数不许只活在散文里**：
 `tests/test_lane_replay_report.py` 把它们钉成断言，重数只要一条命令
 （`python -W error::ResourceWarning -m unittest tests.test_lane_replay_report -v`）。
-2026-10-21 实测：六条 workflow 合起来 **18 段** `<<'PY'`（`engine-live.yml` 14、`ci.yml` 2、
+2026-10-22 实测：六条 workflow 合起来 **20 段** `<<'PY'`（`engine-live.yml` 16、`ci.yml` 2、
 `package.yml` 2、`shell.yml` 0、`installer.yml` 0、`upstream-follow.yml` 0；`yaml_gate.py` 会打同一份编译计数，
 段数打 0 就意味着闸门什么都没查），
-其中 **13 段含判据**（认 `check(` / `SystemExit` / `assert` / `sys.exit(` —— 最后这个是这轮补的：
+其中 **15 段含判据**（认 `check(` / `SystemExit` / `assert` / `sys.exit(` —— 最后这个是这轮补的：
 `ocr-proof` 那段工具链版本闸就是靠 `sys.exit("工具链低于…")` 红的，只找前三个会漏），
 5 段是取数与打印。被本地预跑引用到的是 **8 个 (job, 步骤名) 组合**：
 `headless-inference 起常驻 llama-server`、`ocr-proof 认得出那个词`、`ocr-proof 编译 CLI`、
