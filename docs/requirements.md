@@ -646,11 +646,13 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
 
 24. **出包那只手自己也要钉住**（`tools/action_pins.py` → `pins/actions.json`）：
     硬约束是"只能靠 GitHub Actions 出包"，那么 workflow 里每个 `uses:` 就是那条路径本身。
-    这一轮之前它们全是**浮动大版本 tag**（4 个 action、开工时 44 处；现在这张表记 **56 处 /
+    这一轮之前它们全是**浮动大版本 tag**（4 个 action、开工时 44 处；现在这张表记 **62 处 /
     6 个 workflow / 5 个 action**：`launch-plan` 加了一处 `download-artifact` 去吃队列报告，
     `backends` 那条新车道又带进 `checkout` 与 `setup-python` 各一处，`installer.yml` 带进
     `checkout` 与 `tauri-action` 各一处，`upstream-follow.yml` 带进 `checkout` / `setup-python` /
-    `upload-artifact` 各一处；**另有 4 处是补漏** —— 上一版扫描表没列 `shell.yml`，
+    `upload-artifact` 各一处；`ocr-proof` 补 1 处 `checkout`，`engine-native` 带进 `checkout` /
+    `setup-python` / `download-artifact` 各一处，`starter-model` 再带进 `checkout` 与
+    `setup-python` 各一处；**另有 4 处是补漏** —— 上一版扫描表没列 `shell.yml`，
     它从进仓库那天起就有 2 个 `checkout` + 2 个 `upload-artifact` 没被数过，"49 处"因此少算 —
     重数：`python3 tools/action_pins.py --check`），
     今天全部改成 40 位 commit SHA，

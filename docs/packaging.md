@@ -62,9 +62,11 @@ application as a Tauri binary for macOS, Linux and Windows"，最新 release 是
 
 顺手把这张表存在的理由说完：**在这一轮之前，三个 workflow 里 4 个 `uses:` 全是浮动大版本 tag**
 （`actions/checkout@v4`、`actions/setup-python@v5`、`actions/upload-artifact@v4`、
-`actions/download-artifact@v4`，共 44 处；**现在这张表记的是 56 处 / 6 个 workflow / 5 个 action**
+`actions/download-artifact@v4`，共 44 处；**现在这张表记的是 62 处 / 6 个 workflow / 5 个 action**
 —— `launch-plan` 加了一处 `download-artifact` 去吃 `file-index` 那份首启队列报告，`backends` 那条
 新车道又带进 checkout 与 setup-python 各一处，`installer.yml` 再带进 checkout 与 tauri-action 各一处，
+`starter-model` 再带进 checkout 与 setup-python 各一处，`ocr-proof` 补了 1 处 checkout，
+`engine-native` 再带进 checkout / setup-python / download-artifact 各一处，
 `upstream-follow.yml` 带进 checkout / setup-python / upload-artifact 各一处；
 **另有 4 处是补漏**：上一版扫描表没列 `shell.yml`，它从进仓库起就有 2 个 checkout + 2 个
 upload-artifact 没被数过（"49 处"因此少算）。计数不靠这句话自证：
