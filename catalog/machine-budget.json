@@ -34,15 +34,15 @@
      "download_bytes": 22241184297,
      "download_gib": 20.71,
      "engine_download_mib": 56.3,
-     "engine_landed_mib": 145.6,
+     "engine_landed_mib": 145.7,
      "engine_minutes_at_github_rate": 67.0,
      "engine_rows": [
       {
-       "asset": "llama-b11799-bin-ubuntu-x64.tar.gz",
+       "asset": "llama-b11804-bin-ubuntu-x64.tar.gz",
        "capability": "对话",
        "download_mib": 21.3,
        "engine": "llama",
-       "landed_mib": 53.8,
+       "landed_mib": 53.9,
        "status": "ok"
       },
       {
@@ -80,15 +80,15 @@
      "download_bytes": 22234787983,
      "download_gib": 20.71,
      "engine_download_mib": 50.2,
-     "engine_landed_mib": 132.9,
+     "engine_landed_mib": 133.0,
      "engine_minutes_at_github_rate": 59.8,
      "engine_rows": [
       {
-       "asset": "llama-b11799-bin-macos-arm64.tar.gz",
+       "asset": "llama-b11804-bin-macos-arm64.tar.gz",
        "capability": "对话",
        "download_mib": 15.4,
        "engine": "llama",
-       "landed_mib": 39.0,
+       "landed_mib": 39.1,
        "status": "ok"
       },
       {
@@ -125,18 +125,18 @@
     },
     "win-x64": {
      "deferred_image_bytes": 10079502016,
-     "download_bytes": 22232795689,
+     "download_bytes": 22232900546,
      "download_gib": 20.71,
-     "engine_download_mib": 48.3,
-     "engine_landed_mib": 126.9,
-     "engine_minutes_at_github_rate": 57.5,
+     "engine_download_mib": 48.4,
+     "engine_landed_mib": 127.0,
+     "engine_minutes_at_github_rate": 57.6,
      "engine_rows": [
       {
-       "asset": "llama-b11799-bin-win-cpu-x64.zip",
+       "asset": "llama-b11804-bin-win-cpu-x64.zip",
        "capability": "对话",
-       "download_mib": 22.9,
+       "download_mib": 23.0,
        "engine": "llama",
-       "landed_mib": 59.2,
+       "landed_mib": 59.3,
        "status": "ok"
       },
       {
@@ -156,16 +156,16 @@
        "status": "ok"
       }
      ],
-     "first_run_bytes": 12153293673,
+     "first_run_bytes": 12153398530,
      "first_run_gib": 11.32,
      "first_run_ideal_all_modelscope_minutes": 46.0,
-     "first_run_minutes_at_measured_rate": 288.3,
-     "first_run_seconds_at_fastest_sources": 17300.462285,
-     "first_run_worst_case_hours_at_slowest_measured": 13.89,
+     "first_run_minutes_at_measured_rate": 288.5,
+     "first_run_seconds_at_fastest_sources": 17307.605101,
+     "first_run_worst_case_hours_at_slowest_measured": 13.9,
      "ideal_all_modelscope_minutes": 84.1,
-     "minutes_at_measured_rate": 326.5,
+     "minutes_at_measured_rate": 326.6,
      "missing_capabilities": [],
-     "total_seconds_at_fastest_sources": 19589.167569,
+     "total_seconds_at_fastest_sources": 19596.310385,
      "unknown_landed_sizes": [],
      "worst_case_hours_at_slowest_measured": 24.58
     }
@@ -468,15 +468,15 @@
      "download_bytes": 6228936529,
      "download_gib": 5.8,
      "engine_download_mib": 56.3,
-     "engine_landed_mib": 145.6,
+     "engine_landed_mib": 145.7,
      "engine_minutes_at_github_rate": 67.0,
      "engine_rows": [
       {
-       "asset": "llama-b11799-bin-ubuntu-x64.tar.gz",
+       "asset": "llama-b11804-bin-ubuntu-x64.tar.gz",
        "capability": "对话",
        "download_mib": 21.3,
        "engine": "llama",
-       "landed_mib": 53.8,
+       "landed_mib": 53.9,
        "status": "ok"
       },
       {
@@ -514,15 +514,15 @@
      "download_bytes": 6222540215,
      "download_gib": 5.8,
      "engine_download_mib": 50.2,
-     "engine_landed_mib": 132.9,
+     "engine_landed_mib": 133.0,
      "engine_minutes_at_github_rate": 59.8,
      "engine_rows": [
       {
-       "asset": "llama-b11799-bin-macos-arm64.tar.gz",
+       "asset": "llama-b11804-bin-macos-arm64.tar.gz",
        "capability": "对话",
        "download_mib": 15.4,
        "engine": "llama",
-       "landed_mib": 39.0,
+       "landed_mib": 39.1,
        "status": "ok"
       },
       {
@@ -559,18 +559,18 @@
     },
     "win-x64": {
      "deferred_image_bytes": 2132586944,
-     "download_bytes": 6220547921,
+     "download_bytes": 6220652778,
      "download_gib": 5.79,
-     "engine_download_mib": 48.3,
-     "engine_landed_mib": 126.9,
-     "engine_minutes_at_github_rate": 57.5,
+     "engine_download_mib": 48.4,
+     "engine_landed_mib": 127.0,
+     "engine_minutes_at_github_rate": 57.6,
      "engine_rows": [
       {
-       "asset": "llama-b11799-bin-win-cpu-x64.zip",
+       "asset": "llama-b11804-bin-win-cpu-x64.zip",
        "capability": "对话",
-       "download_mib": 22.9,
+       "download_mib": 23.0,
        "engine": "llama",
-       "landed_mib": 59.2,
+       "landed_mib": 59.3,
        "status": "ok"
       },
       {
@@ -590,16 +590,16 @@
        "status": "ok"
       }
      ],
-     "first_run_bytes": 4087960977,
+     "first_run_bytes": 4088065834,
      "first_run_gib": 3.81,
      "first_run_ideal_all_modelscope_minutes": 15.5,
-     "first_run_minutes_at_measured_rate": 164.5,
-     "first_run_seconds_at_fastest_sources": 9869.311512,
+     "first_run_minutes_at_measured_rate": 164.6,
+     "first_run_seconds_at_fastest_sources": 9876.454328,
      "first_run_worst_case_hours_at_slowest_measured": 5.35,
      "ideal_all_modelscope_minutes": 23.5,
-     "minutes_at_measured_rate": 172.6,
+     "minutes_at_measured_rate": 172.7,
      "missing_capabilities": [],
-     "total_seconds_at_fastest_sources": 10353.548035,
+     "total_seconds_at_fastest_sources": 10360.690851,
      "unknown_landed_sizes": [],
      "worst_case_hours_at_slowest_measured": 7.61
     }
@@ -804,15 +804,15 @@
      "download_bytes": 12452772905,
      "download_gib": 11.6,
      "engine_download_mib": 56.3,
-     "engine_landed_mib": 145.6,
+     "engine_landed_mib": 145.7,
      "engine_minutes_at_github_rate": 67.0,
      "engine_rows": [
       {
-       "asset": "llama-b11799-bin-ubuntu-x64.tar.gz",
+       "asset": "llama-b11804-bin-ubuntu-x64.tar.gz",
        "capability": "对话",
        "download_mib": 21.3,
        "engine": "llama",
-       "landed_mib": 53.8,
+       "landed_mib": 53.9,
        "status": "ok"
       },
       {
@@ -850,15 +850,15 @@
      "download_bytes": 12446376591,
      "download_gib": 11.59,
      "engine_download_mib": 50.2,
-     "engine_landed_mib": 132.9,
+     "engine_landed_mib": 133.0,
      "engine_minutes_at_github_rate": 59.8,
      "engine_rows": [
       {
-       "asset": "llama-b11799-bin-macos-arm64.tar.gz",
+       "asset": "llama-b11804-bin-macos-arm64.tar.gz",
        "capability": "对话",
        "download_mib": 15.4,
        "engine": "llama",
-       "landed_mib": 39.0,
+       "landed_mib": 39.1,
        "status": "ok"
       },
       {
@@ -895,18 +895,18 @@
     },
     "win-x64": {
      "deferred_image_bytes": 4265059488,
-     "download_bytes": 12444384297,
+     "download_bytes": 12444489154,
      "download_gib": 11.59,
-     "engine_download_mib": 48.3,
-     "engine_landed_mib": 126.9,
-     "engine_minutes_at_github_rate": 57.5,
+     "engine_download_mib": 48.4,
+     "engine_landed_mib": 127.0,
+     "engine_minutes_at_github_rate": 57.6,
      "engine_rows": [
       {
-       "asset": "llama-b11799-bin-win-cpu-x64.zip",
+       "asset": "llama-b11804-bin-win-cpu-x64.zip",
        "capability": "对话",
-       "download_mib": 22.9,
+       "download_mib": 23.0,
        "engine": "llama",
-       "landed_mib": 59.2,
+       "landed_mib": 59.3,
        "status": "ok"
       },
       {
@@ -926,18 +926,18 @@
        "status": "ok"
       }
      ],
-     "first_run_bytes": 8179324809,
+     "first_run_bytes": 8179429666,
      "first_run_gib": 7.62,
      "first_run_ideal_all_modelscope_minutes": 31.0,
-     "first_run_minutes_at_measured_rate": 273.3,
-     "first_run_seconds_at_fastest_sources": 16398.111799,
-     "first_run_worst_case_hours_at_slowest_measured": 9.68,
+     "first_run_minutes_at_measured_rate": 273.4,
+     "first_run_seconds_at_fastest_sources": 16405.254615,
+     "first_run_worst_case_hours_at_slowest_measured": 9.69,
      "ideal_all_modelscope_minutes": 47.1,
-     "minutes_at_measured_rate": 289.4,
+     "minutes_at_measured_rate": 289.6,
      "missing_capabilities": [],
-     "total_seconds_at_fastest_sources": 17366.558868,
+     "total_seconds_at_fastest_sources": 17373.701684,
      "unknown_landed_sizes": [],
-     "worst_case_hours_at_slowest_measured": 14.2
+     "worst_case_hours_at_slowest_measured": 14.21
     }
    },
    "companion_bytes": 0,

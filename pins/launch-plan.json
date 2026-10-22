@@ -331,7 +331,7 @@
     "note": "上游明写这是 public endpoint（不查 api-key），所以带钥匙也能探活",
     "path": "/health"
    },
-   "repo": "ggml-org/llama.cpp@b11799",
+   "repo": "ggml-org/llama.cpp@b11804",
    "request": {
     "cite": "llama-chat-completions-route",
     "method": "POST",

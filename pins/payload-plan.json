@@ -10,9 +10,9 @@
   "linux-x64": [
    {
     "archive_mib": 21.3,
-    "asset": "llama-b11799-bin-ubuntu-x64.tar.gz",
+    "asset": "llama-b11804-bin-ubuntu-x64.tar.gz",
     "capability": "对话",
-    "digest": "sha256:4920c65448350c28f8ce7b35eec91566807e0f111c25a0df2d5fc12a1ed1716a",
+    "digest": "sha256:bb800fbd5e905fb8b9887c9a6cb0ab4f14c7267c5f99302874521e7558b0613f",
     "engine": "llama",
     "entries": 62,
     "excluded": [],
@@ -22,15 +22,15 @@
     "packed_sum_mib": null,
     "pairing": [],
     "reader": "tar-stream",
-    "release": "b11799",
+    "release": "b11804",
     "shipped": 62,
     "status": "ok",
-    "uncompressed_mib": 53.8,
-    "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11799/llama-b11799-bin-ubuntu-x64.tar.gz",
+    "uncompressed_mib": 53.9,
+    "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11804/llama-b11804-bin-ubuntu-x64.tar.gz",
     "verified_bytes": {
-     "bytes": 22300522,
+     "bytes": 22331121,
      "digest_matches": true,
-     "sha256": "4920c65448350c28f8ce7b35eec91566807e0f111c25a0df2d5fc12a1ed1716a"
+     "sha256": "bb800fbd5e905fb8b9887c9a6cb0ab4f14c7267c5f99302874521e7558b0613f"
     }
    },
    {
@@ -94,9 +94,9 @@
   "macos-arm64": [
    {
     "archive_mib": 15.4,
-    "asset": "llama-b11799-bin-macos-arm64.tar.gz",
+    "asset": "llama-b11804-bin-macos-arm64.tar.gz",
     "capability": "对话",
-    "digest": "sha256:51c3471c9212b41e51a6696c0b966628fa45d625385fdb024c4483e8d3154dca",
+    "digest": "sha256:f54ecd2d9a552a1b4b55ba6ecad51694ce8e737e61061bbbe28fc71507777985",
     "engine": "llama",
     "entries": 62,
     "excluded": [],
@@ -106,15 +106,15 @@
     "packed_sum_mib": null,
     "pairing": [],
     "reader": "tar-stream",
-    "release": "b11799",
+    "release": "b11804",
     "shipped": 62,
     "status": "ok",
-    "uncompressed_mib": 39.0,
-    "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11799/llama-b11799-bin-macos-arm64.tar.gz",
+    "uncompressed_mib": 39.1,
+    "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11804/llama-b11804-bin-macos-arm64.tar.gz",
     "verified_bytes": {
-     "bytes": 16136376,
+     "bytes": 16145423,
      "digest_matches": true,
-     "sha256": "51c3471c9212b41e51a6696c0b966628fa45d625385fdb024c4483e8d3154dca"
+     "sha256": "f54ecd2d9a552a1b4b55ba6ecad51694ce8e737e61061bbbe28fc71507777985"
     }
    },
    {
@@ -206,10 +206,10 @@
   ],
   "win-x64": [
    {
-    "archive_mib": 22.9,
-    "asset": "llama-b11799-bin-win-cpu-x64.zip",
+    "archive_mib": 23.0,
+    "asset": "llama-b11804-bin-win-cpu-x64.zip",
     "capability": "对话",
-    "digest": "sha256:e77aee2c06504a5821d2127b98e71c9228507292ee1cb72b120280bdcb616291",
+    "digest": "sha256:3a3e417a0816329829081bdd443e3045ff3b2dbe866fcef89a1d919e941ce23f",
     "engine": "llama",
     "entries": 52,
     "excluded": [],
@@ -219,11 +219,11 @@
     "packed_sum_mib": 22.9,
     "pairing": [],
     "reader": "zip-central-directory",
-    "release": "b11799",
+    "release": "b11804",
     "shipped": 52,
     "status": "ok",
-    "uncompressed_mib": 59.2,
-    "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11799/llama-b11799-bin-win-cpu-x64.zip",
+    "uncompressed_mib": 59.3,
+    "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11804/llama-b11804-bin-win-cpu-x64.zip",
     "verified_bytes": null
    },
    {
@@ -284,9 +284,9 @@
  "rows": [
   {
    "archive_mib": 21.3,
-   "asset": "llama-b11799-bin-ubuntu-x64.tar.gz",
+   "asset": "llama-b11804-bin-ubuntu-x64.tar.gz",
    "capability": "对话",
-   "digest": "sha256:4920c65448350c28f8ce7b35eec91566807e0f111c25a0df2d5fc12a1ed1716a",
+   "digest": "sha256:bb800fbd5e905fb8b9887c9a6cb0ab4f14c7267c5f99302874521e7558b0613f",
    "engine": "llama",
    "entries": 62,
    "excluded": [],
@@ -296,15 +296,15 @@
    "packed_sum_mib": null,
    "pairing": [],
    "reader": "tar-stream",
-   "release": "b11799",
+   "release": "b11804",
    "shipped": 62,
    "status": "ok",
-   "uncompressed_mib": 53.8,
-   "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11799/llama-b11799-bin-ubuntu-x64.tar.gz",
+   "uncompressed_mib": 53.9,
+   "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11804/llama-b11804-bin-ubuntu-x64.tar.gz",
    "verified_bytes": {
-    "bytes": 22300522,
+    "bytes": 22331121,
     "digest_matches": true,
-    "sha256": "4920c65448350c28f8ce7b35eec91566807e0f111c25a0df2d5fc12a1ed1716a"
+    "sha256": "bb800fbd5e905fb8b9887c9a6cb0ab4f14c7267c5f99302874521e7558b0613f"
    }
   },
   {
@@ -366,9 +366,9 @@
   },
   {
    "archive_mib": 15.4,
-   "asset": "llama-b11799-bin-macos-arm64.tar.gz",
+   "asset": "llama-b11804-bin-macos-arm64.tar.gz",
    "capability": "对话",
-   "digest": "sha256:51c3471c9212b41e51a6696c0b966628fa45d625385fdb024c4483e8d3154dca",
+   "digest": "sha256:f54ecd2d9a552a1b4b55ba6ecad51694ce8e737e61061bbbe28fc71507777985",
    "engine": "llama",
    "entries": 62,
    "excluded": [],
@@ -378,15 +378,15 @@
    "packed_sum_mib": null,
    "pairing": [],
    "reader": "tar-stream",
-   "release": "b11799",
+   "release": "b11804",
    "shipped": 62,
    "status": "ok",
-   "uncompressed_mib": 39.0,
-   "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11799/llama-b11799-bin-macos-arm64.tar.gz",
+   "uncompressed_mib": 39.1,
+   "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11804/llama-b11804-bin-macos-arm64.tar.gz",
    "verified_bytes": {
-    "bytes": 16136376,
+    "bytes": 16145423,
     "digest_matches": true,
-    "sha256": "51c3471c9212b41e51a6696c0b966628fa45d625385fdb024c4483e8d3154dca"
+    "sha256": "f54ecd2d9a552a1b4b55ba6ecad51694ce8e737e61061bbbe28fc71507777985"
    }
   },
   {
@@ -476,10 +476,10 @@
    "verified_bytes": null
   },
   {
-   "archive_mib": 22.9,
-   "asset": "llama-b11799-bin-win-cpu-x64.zip",
+   "archive_mib": 23.0,
+   "asset": "llama-b11804-bin-win-cpu-x64.zip",
    "capability": "对话",
-   "digest": "sha256:e77aee2c06504a5821d2127b98e71c9228507292ee1cb72b120280bdcb616291",
+   "digest": "sha256:3a3e417a0816329829081bdd443e3045ff3b2dbe866fcef89a1d919e941ce23f",
    "engine": "llama",
    "entries": 52,
    "excluded": [],
@@ -489,11 +489,11 @@
    "packed_sum_mib": 22.9,
    "pairing": [],
    "reader": "zip-central-directory",
-   "release": "b11799",
+   "release": "b11804",
    "shipped": 52,
    "status": "ok",
-   "uncompressed_mib": 59.2,
-   "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11799/llama-b11799-bin-win-cpu-x64.zip",
+   "uncompressed_mib": 59.3,
+   "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11804/llama-b11804-bin-win-cpu-x64.zip",
    "verified_bytes": null
   },
   {
@@ -553,6 +553,6 @@
  "totals_mib": {
   "linux-x64": 56.3,
   "macos-arm64": 50.2,
-  "win-x64": 48.3
+  "win-x64": 48.4
  }
 }

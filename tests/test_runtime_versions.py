@@ -4,7 +4,7 @@
 捕获在 `tests/fixtures/release-window.json`，所以没有 runner 也能离线重算。
 
 这里钉住的三个数是量出来的、也是这张表存在的理由：
-`llama` 钉住的 b11799 就是窗口里最新一颗带产物的版本，窗口 25 个 release 的覆盖面没变；
+`llama` 钉住的 b11804 就是窗口里最新一颗带产物的版本，窗口 25 个 release 的覆盖面没变；
 `whisper` 的 `releases/latest` 是 v1.9.5（0 产物），真正能装的 b5454 正是我们钉的那颗；
 `whisper` 往回退的边界不是最老的标签，而是 v1.7.6 —— 再往前 13 个 release 上游没发 digest。
 `sd` 钉住的 master-975 落后 6 个带产物的版本（最新 master-987），升级仍是一次显式动作。
@@ -34,7 +34,7 @@ CAP = os.path.join(ROOT, "tests", "fixtures", "release-window.json")
 MATRIX = os.path.join(ROOT, "pins", "backend-matrix.json")
 PLAN = os.path.join(ROOT, "pins", "payload-plan.json")
 
-LPN = "b11799"
+LPN = "b11804"
 LLAMA = f"ggml-org/llama.cpp@{LPN}"
 WHISPER = "ggml-org/whisper.cpp@b5454"
 SD = "leejet/stable-diffusion.cpp@master-975-95b3090"
@@ -121,7 +121,7 @@ class TestArtifact(unittest.TestCase):
 
     def test_window_contains_the_pin_with_room_on_both_sides(self) -> None:
         """窗口必须翻到钉住那一颗，而且它下面还有更老的；否则"能退回哪"是空的。"""
-        want = {"llama": ("b11799", "b11770"), "sd": ("master-975-95b3090", "master-950-f2f168f"),
+        want = {"llama": ("b11804", "b11777"), "sd": ("master-975-95b3090", "master-950-f2f168f"),
                 "whisper": ("b5454", "v1.7.2")}
         for e, body in artifact()["engines"].items():
             tags = [r["tag"] for r in body["releases"]]

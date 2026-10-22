@@ -14,18 +14,1268 @@
   "llama": {
    "captured": 25,
    "latest_has_runtime": true,
-   "latest_runtime_tag": "b11799",
-   "latest_tag": "b11799",
+   "latest_runtime_tag": "b11804",
+   "latest_tag": "b11804",
    "newer_runtime_releases": 0,
-   "newest_older_release_with_digest": "b11769",
+   "newest_older_release_with_digest": "b11776",
    "older_releases_seen": 75,
    "older_without_digest_tags": [],
-   "oldest_captured_tag": "b11770",
-   "oldest_verifiable_tag": "b11770",
+   "oldest_captured_tag": "b11777",
+   "oldest_verifiable_tag": "b11777",
    "pages_fetched": 1,
    "per_page": 100,
-   "pinned": "b11799",
+   "pinned": "b11804",
    "releases": [
+    {
+     "assets_total": 36,
+     "attachments": [],
+     "digest_missing": [],
+     "has_runtime": true,
+     "name": "b11804",
+     "non_runtime_assets": 8,
+     "os_covered": [
+      "android-arm64",
+      "linux-arm64",
+      "linux-s390x",
+      "linux-x64",
+      "macos-arm64",
+      "macos-x64",
+      "win-arm64",
+      "win-x64"
+     ],
+     "published_at": "2026-10-22T01:26:20Z",
+     "repo": "ggml-org/llama.cpp",
+     "runtime": [
+      {
+       "asset": "llama-b11804-bin-android-arm64-snapdragon.tar.gz",
+       "backend": "qnn-snapdragon",
+       "os": "android-arm64",
+       "sha256": "10b092360c14f2a38774c74459db21c0d54531bfdb26ec4b49946cfd16c4478f",
+       "size": 61378491,
+       "version": null
+      },
+      {
+       "asset": "llama-b11804-bin-android-arm64.tar.gz",
+       "backend": "cpu",
+       "os": "android-arm64",
+       "sha256": "c148917d521468ce5ca30f40568fcbb4783615d55df754205601f6c2b521c68f",
+       "size": 76608307,
+       "version": null
+      },
+      {
+       "asset": "llama-b11804-bin-linux-arm64-snapdragon.tar.gz",
+       "backend": "qnn-snapdragon",
+       "os": "linux-arm64",
+       "sha256": "31b9357c4eea4570e76ecd955457bbdcdf2a6318aa6c74af1410315f0dfdde2e",
+       "size": 24374216,
+       "version": null
+      },
+      {
+       "asset": "llama-b11804-bin-macos-arm64.tar.gz",
+       "backend": "unknown_from_name",
+       "os": "macos-arm64",
+       "sha256": "f54ecd2d9a552a1b4b55ba6ecad51694ce8e737e61061bbbe28fc71507777985",
+       "size": 16145423,
+       "version": null
+      },
+      {
+       "asset": "llama-b11804-bin-macos-x64.tar.gz",
+       "backend": "unknown_from_name",
+       "os": "macos-x64",
+       "sha256": "e5baad4fd328f22fd19b291ba0841515923f97aa20228af5b49152ec27116703",
+       "size": 11882142,
+       "version": null
+      },
+      {
+       "asset": "llama-b11804-bin-ubuntu-arm64.tar.gz",
+       "backend": "cpu",
+       "os": "linux-arm64",
+       "sha256": "2c2c2daf42db57fceca356e3440213f350dd800f74101d78c1dde04a14dca124",
+       "size": 18036917,
+       "version": null
+      },
+      {
+       "asset": "llama-b11804-bin-ubuntu-cuda-12.8-x64.tar.gz",
+       "backend": "cuda",
+       "os": "linux-x64",
+       "sha256": "0ed79c7a8ce3a5bead13b7c84c2524bb04d3027bcf36047a2ba4c2be5c8ce55c",
+       "size": 177931030,
+       "version": "12.8"
+      },
+      {
+       "asset": "llama-b11804-bin-ubuntu-cuda-13.4-arm64.tar.gz",
+       "backend": "cuda",
+       "os": "linux-arm64",
+       "sha256": "0e45764856fd7d28cbc4668356c8df5e0eae1e93004b0980b0724a4273b90428",
+       "size": 153916711,
+       "version": "13.4"
+      },
+      {
+       "asset": "llama-b11804-bin-ubuntu-cuda-13.4-x64.tar.gz",
+       "backend": "cuda",
+       "os": "linux-x64",
+       "sha256": "6dd4e3f52ce766809bd5649c9dac57414e8ae114d25c04522b7150474f358b0f",
+       "size": 158781223,
+       "version": "13.4"
+      },
+      {
+       "asset": "llama-b11804-bin-ubuntu-openvino-2026.4.1-x64.tar.gz",
+       "backend": "openvino",
+       "os": "linux-x64",
+       "sha256": "4df140df7a2259532a293391a6c503ad9a7f1e1611f479f4f5769374c7796f15",
+       "size": 121851239,
+       "version": "2026.4.1"
+      },
+      {
+       "asset": "llama-b11804-bin-ubuntu-rocm-10.0-x64.tar.gz",
+       "backend": "rocm",
+       "os": "linux-x64",
+       "sha256": "552b8bc59d823d9b9468b36db3df8a4e4930d5cd0a5b20f570d92ee107c8f6d8",
+       "size": 249908117,
+       "version": "10.0"
+      },
+      {
+       "asset": "llama-b11804-bin-ubuntu-s390x.tar.gz",
+       "backend": "cpu",
+       "os": "linux-s390x",
+       "sha256": "358238569f07fac2f4ad12fdddbabe832ff48d6d50198f47fbe8778dd0262bd7",
+       "size": 16540346,
+       "version": null
+      },
+      {
+       "asset": "llama-b11804-bin-ubuntu-sycl-fp16-x64.tar.gz",
+       "backend": "sycl",
+       "os": "linux-x64",
+       "sha256": "fe875e28c373f99aab652d1f1f225bf8be1767d8bdcd4bb7d989720169f92bb3",
+       "size": 62795846,
+       "version": "16"
+      },
+      {
+       "asset": "llama-b11804-bin-ubuntu-sycl-fp32-x64.tar.gz",
+       "backend": "sycl",
+       "os": "linux-x64",
+       "sha256": "180701321a9994ac473076040ce940bea42da11c0361dd4683b744b312822880",
+       "size": 62690579,
+       "version": "32"
+      },
+      {
+       "asset": "llama-b11804-bin-ubuntu-vulkan-arm64.tar.gz",
+       "backend": "vulkan",
+       "os": "linux-arm64",
+       "sha256": "95fa26f0a6b622e065d2aded34c16c5eade295e0182b5bd443aa2411ba8aa802",
+       "size": 28324100,
+       "version": null
+      },
+      {
+       "asset": "llama-b11804-bin-ubuntu-vulkan-x64.tar.gz",
+       "backend": "vulkan",
+       "os": "linux-x64",
+       "sha256": "d7805abfa078792f8f48b191047a7e392412cfa3279e1668f04d8cb14ec1d764",
+       "size": 34975120,
+       "version": null
+      },
+      {
+       "asset": "llama-b11804-bin-ubuntu-x64.tar.gz",
+       "backend": "cpu",
+       "os": "linux-x64",
+       "sha256": "bb800fbd5e905fb8b9887c9a6cb0ab4f14c7267c5f99302874521e7558b0613f",
+       "size": 22331121,
+       "version": null
+      },
+      {
+       "asset": "llama-b11804-bin-win-cpu-arm64.zip",
+       "backend": "cpu",
+       "os": "win-arm64",
+       "sha256": "751ca227839f073d15d5a060869e377bd051906204c75fbd0bb0a046cf3dcab4",
+       "size": 12692599,
+       "version": null
+      },
+      {
+       "asset": "llama-b11804-bin-win-cpu-x64.zip",
+       "backend": "cpu",
+       "os": "win-x64",
+       "sha256": "3a3e417a0816329829081bdd443e3045ff3b2dbe866fcef89a1d919e941ce23f",
+       "size": 24067910,
+       "version": null
+      },
+      {
+       "asset": "llama-b11804-bin-win-cuda-12.4-x64.zip",
+       "backend": "cuda",
+       "os": "win-x64",
+       "sha256": "09fe6c2e5b5ad2fc0073f9bd8eb03b42f205b1c5360855393514ec76dd5fdce4",
+       "size": 272315030,
+       "version": "12.4"
+      },
+      {
+       "asset": "llama-b11804-bin-win-cuda-13.4-arm64.zip",
+       "backend": "cuda",
+       "os": "win-arm64",
+       "sha256": "19c439de936d908e5a6d78ad47aee686eb6fe2271a351fa37f9f38f19d1639a0",
+       "size": 147633606,
+       "version": "13.4"
+      },
+      {
+       "asset": "llama-b11804-bin-win-cuda-13.4-x64.zip",
+       "backend": "cuda",
+       "os": "win-x64",
+       "sha256": "99505c040fb83da89c19c3e11a312060e20e418be4034ff39a5f2b719d33324d",
+       "size": 159839208,
+       "version": "13.4"
+      },
+      {
+       "asset": "llama-b11804-bin-win-opencl-adreno-arm64.zip",
+       "backend": "opencl-adreno",
+       "os": "win-arm64",
+       "sha256": "f47e331a9450368d4a51b1510c25e6aacd20ccee2a5df542b09622b03c72e7af",
+       "size": 13555145,
+       "version": null
+      },
+      {
+       "asset": "llama-b11804-bin-win-openvino-2026.4.1-x64.zip",
+       "backend": "openvino",
+       "os": "win-x64",
+       "sha256": "f8b82134c16ccd3fc4b44642f48eee87bdaff11cc60c21a1b7f1b9b4953f5097",
+       "size": 104036828,
+       "version": "2026.4.1"
+      },
+      {
+       "asset": "llama-b11804-bin-win-rocm-10.0-x64.zip",
+       "backend": "rocm",
+       "os": "win-x64",
+       "sha256": "37e16d56c8debf9dab048fa80a40b2bcbabf340b70f7d3c615ef008c0abcf740",
+       "size": 263465134,
+       "version": "10.0"
+      },
+      {
+       "asset": "llama-b11804-bin-win-sycl-x64.zip",
+       "backend": "sycl",
+       "os": "win-x64",
+       "sha256": "00361341e1a41151ac6c13fdc628dcb4b26e4a682d91340d3382c74f56ad1d53",
+       "size": 154130104,
+       "version": null
+      },
+      {
+       "asset": "llama-b11804-bin-win-vulkan-arm64.zip",
+       "backend": "vulkan",
+       "os": "win-arm64",
+       "sha256": "efddc5d050b2a2ee9e26c024b27eef4073d96e3908fbe2ffcaefa6475d060561",
+       "size": 25079084,
+       "version": null
+      },
+      {
+       "asset": "llama-b11804-bin-win-vulkan-x64.zip",
+       "backend": "vulkan",
+       "os": "win-x64",
+       "sha256": "db9ab31997e93bf713d3dfec6eb1cf1b5a6a5f2940a3d4d111ad0ffab54c87d5",
+       "size": 36865203,
+       "version": null
+      }
+     ],
+     "runtime_assets": 28,
+     "tag": "b11804",
+     "unknown_tokens": [],
+     "verifiable": true
+    },
+    {
+     "assets_total": 36,
+     "attachments": [],
+     "digest_missing": [],
+     "has_runtime": true,
+     "name": "b11803",
+     "non_runtime_assets": 8,
+     "os_covered": [
+      "android-arm64",
+      "linux-arm64",
+      "linux-s390x",
+      "linux-x64",
+      "macos-arm64",
+      "macos-x64",
+      "win-arm64",
+      "win-x64"
+     ],
+     "published_at": "2026-10-21T22:30:59Z",
+     "repo": "ggml-org/llama.cpp",
+     "runtime": [
+      {
+       "asset": "llama-b11803-bin-android-arm64-snapdragon.tar.gz",
+       "backend": "qnn-snapdragon",
+       "os": "android-arm64",
+       "sha256": "576e8a56d4e4cda2a22445a03e66e40a5c3ce69799808e5411e9beef0e0d0fda",
+       "size": 61374570,
+       "version": null
+      },
+      {
+       "asset": "llama-b11803-bin-android-arm64.tar.gz",
+       "backend": "cpu",
+       "os": "android-arm64",
+       "sha256": "19dc889972536a8ec74e3535676c0ffe9334ad750431d5c5a15b39865f0848f0",
+       "size": 76610058,
+       "version": null
+      },
+      {
+       "asset": "llama-b11803-bin-linux-arm64-snapdragon.tar.gz",
+       "backend": "qnn-snapdragon",
+       "os": "linux-arm64",
+       "sha256": "bce137c874c0098a5fefc119a7e8bf05fd1564f0d34b8f07ea93f8706e932283",
+       "size": 24371056,
+       "version": null
+      },
+      {
+       "asset": "llama-b11803-bin-macos-arm64.tar.gz",
+       "backend": "unknown_from_name",
+       "os": "macos-arm64",
+       "sha256": "742ad51ee1bcf2606b5875d3a45824f8e6fd9000dc4d7488107448e0d40ddd12",
+       "size": 16145482,
+       "version": null
+      },
+      {
+       "asset": "llama-b11803-bin-macos-x64.tar.gz",
+       "backend": "unknown_from_name",
+       "os": "macos-x64",
+       "sha256": "9c85965695aa70cef61f89b7f584419fd788e07d184247c6cb32a9b9b8744e24",
+       "size": 11882158,
+       "version": null
+      },
+      {
+       "asset": "llama-b11803-bin-ubuntu-arm64.tar.gz",
+       "backend": "cpu",
+       "os": "linux-arm64",
+       "sha256": "d15bfa2ececaa7c9d825af7d3fe8f87aaaf8fd246206ba0d9c850c62f900a1a7",
+       "size": 18036531,
+       "version": null
+      },
+      {
+       "asset": "llama-b11803-bin-ubuntu-cuda-12.8-x64.tar.gz",
+       "backend": "cuda",
+       "os": "linux-x64",
+       "sha256": "4594be0afdddcfdf15e82f4fbd6805c60c399eaa62b181432ccaf3de87ef36d0",
+       "size": 177922746,
+       "version": "12.8"
+      },
+      {
+       "asset": "llama-b11803-bin-ubuntu-cuda-13.4-arm64.tar.gz",
+       "backend": "cuda",
+       "os": "linux-arm64",
+       "sha256": "3f83ff67b576ab4ddf6f4833e585ff983bdb3ff1bb8257391fff24ec3e4b4849",
+       "size": 153916729,
+       "version": "13.4"
+      },
+      {
+       "asset": "llama-b11803-bin-ubuntu-cuda-13.4-x64.tar.gz",
+       "backend": "cuda",
+       "os": "linux-x64",
+       "sha256": "ef7f81e8747e485e1856294c89a25a558e8e34dd95d295a3ef3f503b05fe2bae",
+       "size": 158781355,
+       "version": "13.4"
+      },
+      {
+       "asset": "llama-b11803-bin-ubuntu-openvino-2026.4.1-x64.tar.gz",
+       "backend": "openvino",
+       "os": "linux-x64",
+       "sha256": "2858b4b6fd7cda1a21d69b84be794e73d0256e61e00c43bffcdaf9ac8a23e2db",
+       "size": 121851394,
+       "version": "2026.4.1"
+      },
+      {
+       "asset": "llama-b11803-bin-ubuntu-rocm-10.0-x64.tar.gz",
+       "backend": "rocm",
+       "os": "linux-x64",
+       "sha256": "e23c03203f8c15f9df5eae5fe2914352dd6f163ded0542bdf3171d7d7b647e8d",
+       "size": 249908925,
+       "version": "10.0"
+      },
+      {
+       "asset": "llama-b11803-bin-ubuntu-s390x.tar.gz",
+       "backend": "cpu",
+       "os": "linux-s390x",
+       "sha256": "ba29ec62bbecf6b9ac4cdf35f6ff8ae9c2d7e116174a64c2c9a12de5eb14d133",
+       "size": 16535050,
+       "version": null
+      },
+      {
+       "asset": "llama-b11803-bin-ubuntu-sycl-fp16-x64.tar.gz",
+       "backend": "sycl",
+       "os": "linux-x64",
+       "sha256": "ec76061dba9304b9787cdc1b5cc778c1c44d540eaf676e54e7a22a24b36ccb1b",
+       "size": 62788862,
+       "version": "16"
+      },
+      {
+       "asset": "llama-b11803-bin-ubuntu-sycl-fp32-x64.tar.gz",
+       "backend": "sycl",
+       "os": "linux-x64",
+       "sha256": "68ae3f4c050a9167123e5bfba07b3eedd436c4f3a6fbccf25375f58c087c2db7",
+       "size": 62695546,
+       "version": "32"
+      },
+      {
+       "asset": "llama-b11803-bin-ubuntu-vulkan-arm64.tar.gz",
+       "backend": "vulkan",
+       "os": "linux-arm64",
+       "sha256": "d7995c61c81c566a829adef73f48005ef3be5436df5421df5350fd41f48c891b",
+       "size": 28324584,
+       "version": null
+      },
+      {
+       "asset": "llama-b11803-bin-ubuntu-vulkan-x64.tar.gz",
+       "backend": "vulkan",
+       "os": "linux-x64",
+       "sha256": "dac1fc5070dd9f737f97fce15965070a3f9b7d586c66186b509604a3a7ac731c",
+       "size": 34976185,
+       "version": null
+      },
+      {
+       "asset": "llama-b11803-bin-ubuntu-x64.tar.gz",
+       "backend": "cpu",
+       "os": "linux-x64",
+       "sha256": "2c718373086c9eda54d1e994cd5197aa079a4247e3dc4ec9edee8254cee08746",
+       "size": 22331049,
+       "version": null
+      },
+      {
+       "asset": "llama-b11803-bin-win-cpu-arm64.zip",
+       "backend": "cpu",
+       "os": "win-arm64",
+       "sha256": "315288ba2131fb18bb6776f9a1234de1d37d83c43ada9db7b54b761f783dd6ec",
+       "size": 12692561,
+       "version": null
+      },
+      {
+       "asset": "llama-b11803-bin-win-cpu-x64.zip",
+       "backend": "cpu",
+       "os": "win-x64",
+       "sha256": "68a11f1f0ab78587bfc42071d2dbd4aa1b621357ddc375c1ee25a24e76d27954",
+       "size": 24069022,
+       "version": null
+      },
+      {
+       "asset": "llama-b11803-bin-win-cuda-12.4-x64.zip",
+       "backend": "cuda",
+       "os": "win-x64",
+       "sha256": "3a9724665d7b1036d2e7f9e1cd2ef869f534bd3a1f7c11972e1eaeb223d9ec07",
+       "size": 272315003,
+       "version": "12.4"
+      },
+      {
+       "asset": "llama-b11803-bin-win-cuda-13.4-arm64.zip",
+       "backend": "cuda",
+       "os": "win-arm64",
+       "sha256": "a2b33544fd9dc16d83b58e15ae938c8a3891bc60ebea80e34195593ed441e049",
+       "size": 147633637,
+       "version": "13.4"
+      },
+      {
+       "asset": "llama-b11803-bin-win-cuda-13.4-x64.zip",
+       "backend": "cuda",
+       "os": "win-x64",
+       "sha256": "04b36b76c3708a6ce6120a45011f880054a179b6d9906ad54b1a8eb79cbb3d8b",
+       "size": 159839381,
+       "version": "13.4"
+      },
+      {
+       "asset": "llama-b11803-bin-win-opencl-adreno-arm64.zip",
+       "backend": "opencl-adreno",
+       "os": "win-arm64",
+       "sha256": "5d87b00925b1612de14309acd3bac6e7428e919fff560be79cc743dbabd9f44b",
+       "size": 13554182,
+       "version": null
+      },
+      {
+       "asset": "llama-b11803-bin-win-openvino-2026.4.1-x64.zip",
+       "backend": "openvino",
+       "os": "win-x64",
+       "sha256": "c866b5bcb3151e97e5acdd2a46b04c0fb3c8a7b594fa57618ba38de65c3765ed",
+       "size": 104036999,
+       "version": "2026.4.1"
+      },
+      {
+       "asset": "llama-b11803-bin-win-rocm-10.0-x64.zip",
+       "backend": "rocm",
+       "os": "win-x64",
+       "sha256": "87c36a5ab13ff84468ef64792aef88ff2632770a74eaf72e0082f2c11bcd54de",
+       "size": 263465307,
+       "version": "10.0"
+      },
+      {
+       "asset": "llama-b11803-bin-win-sycl-x64.zip",
+       "backend": "sycl",
+       "os": "win-x64",
+       "sha256": "c66847bdf4baacf009bf9e64fe802ddfe0285dc6ec652be6d90480396ee4e7f6",
+       "size": 154130278,
+       "version": null
+      },
+      {
+       "asset": "llama-b11803-bin-win-vulkan-arm64.zip",
+       "backend": "vulkan",
+       "os": "win-arm64",
+       "sha256": "b2108ec07b6d7424af9a04c6ef3840ce72c5ec5fb94533b31501d5f6b4157040",
+       "size": 25079115,
+       "version": null
+      },
+      {
+       "asset": "llama-b11803-bin-win-vulkan-x64.zip",
+       "backend": "vulkan",
+       "os": "win-x64",
+       "sha256": "01d38d95c7cb22eb615c2ea3269c9e1623d64b663b9df72c71de3ab1fec72716",
+       "size": 36865376,
+       "version": null
+      }
+     ],
+     "runtime_assets": 28,
+     "tag": "b11803",
+     "unknown_tokens": [],
+     "verifiable": true
+    },
+    {
+     "assets_total": 36,
+     "attachments": [],
+     "digest_missing": [],
+     "has_runtime": true,
+     "name": "b11802",
+     "non_runtime_assets": 8,
+     "os_covered": [
+      "android-arm64",
+      "linux-arm64",
+      "linux-s390x",
+      "linux-x64",
+      "macos-arm64",
+      "macos-x64",
+      "win-arm64",
+      "win-x64"
+     ],
+     "published_at": "2026-10-21T22:14:29Z",
+     "repo": "ggml-org/llama.cpp",
+     "runtime": [
+      {
+       "asset": "llama-b11802-bin-android-arm64-snapdragon.tar.gz",
+       "backend": "qnn-snapdragon",
+       "os": "android-arm64",
+       "sha256": "d8d858dba9b368bbd243766b299d39793475d2f2c99212668982d059a74dc21e",
+       "size": 61352346,
+       "version": null
+      },
+      {
+       "asset": "llama-b11802-bin-android-arm64.tar.gz",
+       "backend": "cpu",
+       "os": "android-arm64",
+       "sha256": "02e44c108c7629bf502bd2dc37228011050a478b005bca729b8637e6722fc89a",
+       "size": 76605619,
+       "version": null
+      },
+      {
+       "asset": "llama-b11802-bin-linux-arm64-snapdragon.tar.gz",
+       "backend": "qnn-snapdragon",
+       "os": "linux-arm64",
+       "sha256": "e0bb65187b7c7d527242e680be451fdb352879ed47f4976288e2cbd5a584b963",
+       "size": 24369025,
+       "version": null
+      },
+      {
+       "asset": "llama-b11802-bin-macos-arm64.tar.gz",
+       "backend": "unknown_from_name",
+       "os": "macos-arm64",
+       "sha256": "2061a8f599e05e77cf1fa2270d36446535c72e228318805b04d673377ec355cc",
+       "size": 16141609,
+       "version": null
+      },
+      {
+       "asset": "llama-b11802-bin-macos-x64.tar.gz",
+       "backend": "unknown_from_name",
+       "os": "macos-x64",
+       "sha256": "38b04d33081c4ce7fc4dec297f7520dc0d199e2f841f9c615bca86506a9a1691",
+       "size": 11878751,
+       "version": null
+      },
+      {
+       "asset": "llama-b11802-bin-ubuntu-arm64.tar.gz",
+       "backend": "cpu",
+       "os": "linux-arm64",
+       "sha256": "02791ed74f91ebdcb32359850afb99dc29a09fc435c04bcc9ed4b9f0ab3dc362",
+       "size": 18032641,
+       "version": null
+      },
+      {
+       "asset": "llama-b11802-bin-ubuntu-cuda-12.8-x64.tar.gz",
+       "backend": "cuda",
+       "os": "linux-x64",
+       "sha256": "c13c36d7c09d63af1c478b8c394ce844f9b6751c08b2b137dc77f491e865094e",
+       "size": 177926733,
+       "version": "12.8"
+      },
+      {
+       "asset": "llama-b11802-bin-ubuntu-cuda-13.4-arm64.tar.gz",
+       "backend": "cuda",
+       "os": "linux-arm64",
+       "sha256": "5bda9834d5dba1b99d1f0ad2ea6db4be947bf19af40c06381144ccb9d59e04a5",
+       "size": 153910591,
+       "version": "13.4"
+      },
+      {
+       "asset": "llama-b11802-bin-ubuntu-cuda-13.4-x64.tar.gz",
+       "backend": "cuda",
+       "os": "linux-x64",
+       "sha256": "1ee668e5d1c96d52cb58abd81a8fecd9c8afa89d4373812226ae694ea327e9ec",
+       "size": 158778858,
+       "version": "13.4"
+      },
+      {
+       "asset": "llama-b11802-bin-ubuntu-openvino-2026.4.1-x64.tar.gz",
+       "backend": "openvino",
+       "os": "linux-x64",
+       "sha256": "60942a8eb3eb6472b09a0ab3a1c6756fffce8244a327990d7b858fc4c0b75d7e",
+       "size": 121851927,
+       "version": "2026.4.1"
+      },
+      {
+       "asset": "llama-b11802-bin-ubuntu-rocm-10.0-x64.tar.gz",
+       "backend": "rocm",
+       "os": "linux-x64",
+       "sha256": "7da69730bf0c6593d21f57733d4a86df6e97204188d2c75abf2330e138165256",
+       "size": 249901446,
+       "version": "10.0"
+      },
+      {
+       "asset": "llama-b11802-bin-ubuntu-s390x.tar.gz",
+       "backend": "cpu",
+       "os": "linux-s390x",
+       "sha256": "e6109137170aff6e42023558dd7243f13ae087e684c46574f01f5d91d78a5d4c",
+       "size": 16549707,
+       "version": null
+      },
+      {
+       "asset": "llama-b11802-bin-ubuntu-sycl-fp16-x64.tar.gz",
+       "backend": "sycl",
+       "os": "linux-x64",
+       "sha256": "5f93795722565c5c7505f16d43c7fc08a9b186bc04da4f5a82848e85ac24efc9",
+       "size": 62791873,
+       "version": "16"
+      },
+      {
+       "asset": "llama-b11802-bin-ubuntu-sycl-fp32-x64.tar.gz",
+       "backend": "sycl",
+       "os": "linux-x64",
+       "sha256": "022035c12ca6f13d59664642b7a9e74293fbae1d77053855895aa4a27a7628d6",
+       "size": 62689063,
+       "version": "32"
+      },
+      {
+       "asset": "llama-b11802-bin-ubuntu-vulkan-arm64.tar.gz",
+       "backend": "vulkan",
+       "os": "linux-arm64",
+       "sha256": "58ca1b2318d20f5deb49f3732a80b341fa45934fdd0cac26c9d2f04115c8c369",
+       "size": 28318469,
+       "version": null
+      },
+      {
+       "asset": "llama-b11802-bin-ubuntu-vulkan-x64.tar.gz",
+       "backend": "vulkan",
+       "os": "linux-x64",
+       "sha256": "b076551d118bac893d3be589ef55ccd5322d41c65d8d46a6dc701ea23dc6976c",
+       "size": 34973794,
+       "version": null
+      },
+      {
+       "asset": "llama-b11802-bin-ubuntu-x64.tar.gz",
+       "backend": "cpu",
+       "os": "linux-x64",
+       "sha256": "a450d31991db9048b3963fec1a2797c1e0d3d8dfc2949f34133c40d02e86f7e8",
+       "size": 22329594,
+       "version": null
+      },
+      {
+       "asset": "llama-b11802-bin-win-cpu-arm64.zip",
+       "backend": "cpu",
+       "os": "win-arm64",
+       "sha256": "522d5950c22862ea378555418a9a5743e3b2a04c3e1aed06fd8c7c6b8ce84e13",
+       "size": 12688990,
+       "version": null
+      },
+      {
+       "asset": "llama-b11802-bin-win-cpu-x64.zip",
+       "backend": "cpu",
+       "os": "win-x64",
+       "sha256": "601cdf37bbff6a853900cf3fec72103419e10d7b9dd5c038d53c03de09b9e986",
+       "size": 24065109,
+       "version": null
+      },
+      {
+       "asset": "llama-b11802-bin-win-cuda-12.4-x64.zip",
+       "backend": "cuda",
+       "os": "win-x64",
+       "sha256": "79d7f9fbe2e25b7412168cba523cfe87e737b0e464ad584973f0cad36863c7ec",
+       "size": 272312484,
+       "version": "12.4"
+      },
+      {
+       "asset": "llama-b11802-bin-win-cuda-13.4-arm64.zip",
+       "backend": "cuda",
+       "os": "win-arm64",
+       "sha256": "0c6f02524d7044efa8daca7af9a6ef334eb64b6577f14117605113ab1187bedc",
+       "size": 147630618,
+       "version": "13.4"
+      },
+      {
+       "asset": "llama-b11802-bin-win-cuda-13.4-x64.zip",
+       "backend": "cuda",
+       "os": "win-x64",
+       "sha256": "a5d4ad4b747e243d6fd98679aae5c40a3c21e91b39f216a01feca0782b2cb7ed",
+       "size": 159836862,
+       "version": "13.4"
+      },
+      {
+       "asset": "llama-b11802-bin-win-opencl-adreno-arm64.zip",
+       "backend": "opencl-adreno",
+       "os": "win-arm64",
+       "sha256": "65ab2c9ba05c36d0c34f664a1ec084aa617d8968e8e72df2054a38d8206f525f",
+       "size": 13551163,
+       "version": null
+      },
+      {
+       "asset": "llama-b11802-bin-win-openvino-2026.4.1-x64.zip",
+       "backend": "openvino",
+       "os": "win-x64",
+       "sha256": "b5e7f0b29c58be45d3a5350509d34a6114ec4c73e62fa8b725629dff905a2c73",
+       "size": 104034484,
+       "version": "2026.4.1"
+      },
+      {
+       "asset": "llama-b11802-bin-win-rocm-10.0-x64.zip",
+       "backend": "rocm",
+       "os": "win-x64",
+       "sha256": "f3101fcfeb141391543ee57ecd282f5e8dae6836967dcce84171692e94f6c406",
+       "size": 263462789,
+       "version": "10.0"
+      },
+      {
+       "asset": "llama-b11802-bin-win-sycl-x64.zip",
+       "backend": "sycl",
+       "os": "win-x64",
+       "sha256": "a6cd4785f93ee283a7f3e51c89cc4b466d4a5800abf8696f49bf19287ff31575",
+       "size": 154127760,
+       "version": null
+      },
+      {
+       "asset": "llama-b11802-bin-win-vulkan-arm64.zip",
+       "backend": "vulkan",
+       "os": "win-arm64",
+       "sha256": "05dcc91478973af20f073349e9bc38e9af476d4d59e8cb11013a7a33a1bdf618",
+       "size": 25076096,
+       "version": null
+      },
+      {
+       "asset": "llama-b11802-bin-win-vulkan-x64.zip",
+       "backend": "vulkan",
+       "os": "win-x64",
+       "sha256": "3040d3ca49e0d6c711df9119d380276481af2a85f5b5c03a223181a18ce5ece0",
+       "size": 36862858,
+       "version": null
+      }
+     ],
+     "runtime_assets": 28,
+     "tag": "b11802",
+     "unknown_tokens": [],
+     "verifiable": true
+    },
+    {
+     "assets_total": 36,
+     "attachments": [],
+     "digest_missing": [],
+     "has_runtime": true,
+     "name": "b11801",
+     "non_runtime_assets": 8,
+     "os_covered": [
+      "android-arm64",
+      "linux-arm64",
+      "linux-s390x",
+      "linux-x64",
+      "macos-arm64",
+      "macos-x64",
+      "win-arm64",
+      "win-x64"
+     ],
+     "published_at": "2026-10-21T21:56:03Z",
+     "repo": "ggml-org/llama.cpp",
+     "runtime": [
+      {
+       "asset": "llama-b11801-bin-android-arm64-snapdragon.tar.gz",
+       "backend": "qnn-snapdragon",
+       "os": "android-arm64",
+       "sha256": "320ca74055436a8385c2f18b5854c41956ee3f77f9e0c6b1573cfc234e8e8bdd",
+       "size": 61347616,
+       "version": null
+      },
+      {
+       "asset": "llama-b11801-bin-android-arm64.tar.gz",
+       "backend": "cpu",
+       "os": "android-arm64",
+       "sha256": "9f0e015d15fa4db107819b1b9e4cddc969bd88d557eb839b8acc8432d1b1daea",
+       "size": 76602470,
+       "version": null
+      },
+      {
+       "asset": "llama-b11801-bin-linux-arm64-snapdragon.tar.gz",
+       "backend": "qnn-snapdragon",
+       "os": "linux-arm64",
+       "sha256": "6d28fde27db39dbd123e4be8f08561c0dd41833af26691bdad7fd8895b22c550",
+       "size": 24367997,
+       "version": null
+      },
+      {
+       "asset": "llama-b11801-bin-macos-arm64.tar.gz",
+       "backend": "unknown_from_name",
+       "os": "macos-arm64",
+       "sha256": "2b6f5e526ff462d0817eb670e0774715cc61f8016a3cb98ade7d2b283a279af1",
+       "size": 16140974,
+       "version": null
+      },
+      {
+       "asset": "llama-b11801-bin-macos-x64.tar.gz",
+       "backend": "unknown_from_name",
+       "os": "macos-x64",
+       "sha256": "308e0fce30c338e604109b5195c7306d2186f8eca88182d660738b366a3d9f98",
+       "size": 11878664,
+       "version": null
+      },
+      {
+       "asset": "llama-b11801-bin-ubuntu-arm64.tar.gz",
+       "backend": "cpu",
+       "os": "linux-arm64",
+       "sha256": "fe7e1681e42e3b950cac3077d4cead5ebbfcc36c66e5ae2ab3ccddfba32474b9",
+       "size": 18029100,
+       "version": null
+      },
+      {
+       "asset": "llama-b11801-bin-ubuntu-cuda-12.8-x64.tar.gz",
+       "backend": "cuda",
+       "os": "linux-x64",
+       "sha256": "cd42e3bb2af0efdb274f35a9c0b6fc32491934576c3e9ea3b91ad99cdf46883c",
+       "size": 177918001,
+       "version": "12.8"
+      },
+      {
+       "asset": "llama-b11801-bin-ubuntu-cuda-13.4-arm64.tar.gz",
+       "backend": "cuda",
+       "os": "linux-arm64",
+       "sha256": "4bf12170d319b72b102367c10a76a1cd98e3b3946e2987e408e2f87614c8375c",
+       "size": 153907753,
+       "version": "13.4"
+      },
+      {
+       "asset": "llama-b11801-bin-ubuntu-cuda-13.4-x64.tar.gz",
+       "backend": "cuda",
+       "os": "linux-x64",
+       "sha256": "086d8b5f0d60f558c631fbb48b21147c06ca02f88881172947efacefc55dbfdb",
+       "size": 158779392,
+       "version": "13.4"
+      },
+      {
+       "asset": "llama-b11801-bin-ubuntu-openvino-2026.4.1-x64.tar.gz",
+       "backend": "openvino",
+       "os": "linux-x64",
+       "sha256": "97d14949c197588ba6e0da40621bf6302a8a227ff2dced7f79b46a38981f2ff1",
+       "size": 121850908,
+       "version": "2026.4.1"
+      },
+      {
+       "asset": "llama-b11801-bin-ubuntu-rocm-10.0-x64.tar.gz",
+       "backend": "rocm",
+       "os": "linux-x64",
+       "sha256": "442f56f471fb09e3a35f581be5eee3d99a0c22038b5454b7340c4e963514cd89",
+       "size": 249901518,
+       "version": "10.0"
+      },
+      {
+       "asset": "llama-b11801-bin-ubuntu-s390x.tar.gz",
+       "backend": "cpu",
+       "os": "linux-s390x",
+       "sha256": "c79de3d9e7badd30814737ee9a10e0cb201a9655cc21abd0e44c98ce29cbf6cc",
+       "size": 16507858,
+       "version": null
+      },
+      {
+       "asset": "llama-b11801-bin-ubuntu-sycl-fp16-x64.tar.gz",
+       "backend": "sycl",
+       "os": "linux-x64",
+       "sha256": "fe4584b5be0708792f3d2406d0c0fee53ffaabe1f794bdf10f4e97de32fbf3f2",
+       "size": 62791474,
+       "version": "16"
+      },
+      {
+       "asset": "llama-b11801-bin-ubuntu-sycl-fp32-x64.tar.gz",
+       "backend": "sycl",
+       "os": "linux-x64",
+       "sha256": "640d8a63c6b30d31accd599b84144977647a5b299d63d27c76db0ac8a4c1ad36",
+       "size": 62685551,
+       "version": "32"
+      },
+      {
+       "asset": "llama-b11801-bin-ubuntu-vulkan-arm64.tar.gz",
+       "backend": "vulkan",
+       "os": "linux-arm64",
+       "sha256": "86c5c31ac79ec9ad45b237d936ca64e40825cdab48c9f3301343e73abf819e87",
+       "size": 28321695,
+       "version": null
+      },
+      {
+       "asset": "llama-b11801-bin-ubuntu-vulkan-x64.tar.gz",
+       "backend": "vulkan",
+       "os": "linux-x64",
+       "sha256": "9c5a03750f4791595d26f5621ab6e29f0682d35b9d04e5d301f73f3c60b6dbef",
+       "size": 34973470,
+       "version": null
+      },
+      {
+       "asset": "llama-b11801-bin-ubuntu-x64.tar.gz",
+       "backend": "cpu",
+       "os": "linux-x64",
+       "sha256": "a798bf34fdc33a1bab0e1fea39d020c0cc66ed8ee2e4d7d8d020711d1b2c35c7",
+       "size": 22328644,
+       "version": null
+      },
+      {
+       "asset": "llama-b11801-bin-win-cpu-arm64.zip",
+       "backend": "cpu",
+       "os": "win-arm64",
+       "sha256": "45e4a50ba363a2ba3dc7c1ecf639c075491f230c882cd27f2db15baed2a0996e",
+       "size": 12688492,
+       "version": null
+      },
+      {
+       "asset": "llama-b11801-bin-win-cpu-x64.zip",
+       "backend": "cpu",
+       "os": "win-x64",
+       "sha256": "ac7c3642e7b00c4fda2a0b422277ada6a3c179a13058d20ab21a0578852ccb60",
+       "size": 24065484,
+       "version": null
+      },
+      {
+       "asset": "llama-b11801-bin-win-cuda-12.4-x64.zip",
+       "backend": "cuda",
+       "os": "win-x64",
+       "sha256": "cd343b39f1e2bfbd40dadee8a0f7423de132bd48e238d538da039b20548a252e",
+       "size": 272313599,
+       "version": "12.4"
+      },
+      {
+       "asset": "llama-b11801-bin-win-cuda-13.4-arm64.zip",
+       "backend": "cuda",
+       "os": "win-arm64",
+       "sha256": "3220e2d2d4c623375433a056337c64abcecb0adaea754b26a980819a36406918",
+       "size": 147630098,
+       "version": "13.4"
+      },
+      {
+       "asset": "llama-b11801-bin-win-cuda-13.4-x64.zip",
+       "backend": "cuda",
+       "os": "win-x64",
+       "sha256": "6aa440126ea1da2cdc89d514eb88dcfd50665436b9dfe1de875294d6048a9c4e",
+       "size": 159837777,
+       "version": "13.4"
+      },
+      {
+       "asset": "llama-b11801-bin-win-opencl-adreno-arm64.zip",
+       "backend": "opencl-adreno",
+       "os": "win-arm64",
+       "sha256": "28766ff1879f7a157448bb98816a32bd476f7806d2610a20dd9e0af3d3eae818",
+       "size": 13550642,
+       "version": null
+      },
+      {
+       "asset": "llama-b11801-bin-win-openvino-2026.4.1-x64.zip",
+       "backend": "openvino",
+       "os": "win-x64",
+       "sha256": "5eb086b1b46291f1d48fe0779ffdfcef75440c96d985372cb9407c9b54b52736",
+       "size": 104035395,
+       "version": "2026.4.1"
+      },
+      {
+       "asset": "llama-b11801-bin-win-rocm-10.0-x64.zip",
+       "backend": "rocm",
+       "os": "win-x64",
+       "sha256": "0e186e44b8b3ac8bb16dda11afb6066e7ac1ca6eba1e33990b7aeabc454ecbdf",
+       "size": 263463702,
+       "version": "10.0"
+      },
+      {
+       "asset": "llama-b11801-bin-win-sycl-x64.zip",
+       "backend": "sycl",
+       "os": "win-x64",
+       "sha256": "e8b4d8c3860fcdc203e4ff95d1f3fcb4c20a09299bc3cde6efa01b777c53c1e3",
+       "size": 154128674,
+       "version": null
+      },
+      {
+       "asset": "llama-b11801-bin-win-vulkan-arm64.zip",
+       "backend": "vulkan",
+       "os": "win-arm64",
+       "sha256": "92d448c8ca13fe32671cd9e3d15e19e738fde409acaeb9e50e7fb3e9d766e4ff",
+       "size": 25075576,
+       "version": null
+      },
+      {
+       "asset": "llama-b11801-bin-win-vulkan-x64.zip",
+       "backend": "vulkan",
+       "os": "win-x64",
+       "sha256": "8283c9cbb3094577f54fcf1a5a5377d4bf84ac91669a2a7403f5b136609461eb",
+       "size": 36863771,
+       "version": null
+      }
+     ],
+     "runtime_assets": 28,
+     "tag": "b11801",
+     "unknown_tokens": [],
+     "verifiable": true
+    },
+    {
+     "assets_total": 36,
+     "attachments": [],
+     "digest_missing": [],
+     "has_runtime": true,
+     "name": "b11800",
+     "non_runtime_assets": 8,
+     "os_covered": [
+      "android-arm64",
+      "linux-arm64",
+      "linux-s390x",
+      "linux-x64",
+      "macos-arm64",
+      "macos-x64",
+      "win-arm64",
+      "win-x64"
+     ],
+     "published_at": "2026-10-21T21:15:21Z",
+     "repo": "ggml-org/llama.cpp",
+     "runtime": [
+      {
+       "asset": "llama-b11800-bin-android-arm64-snapdragon.tar.gz",
+       "backend": "qnn-snapdragon",
+       "os": "android-arm64",
+       "sha256": "7a60d626f84b928a9e2e12703ba6e49f3d7381e188d182e7e3d730dfaba06a9c",
+       "size": 61313081,
+       "version": null
+      },
+      {
+       "asset": "llama-b11800-bin-android-arm64.tar.gz",
+       "backend": "cpu",
+       "os": "android-arm64",
+       "sha256": "bd225a34dcd0983651579873252cd73bfdab35f553971830065338732dbdb947",
+       "size": 76545518,
+       "version": null
+      },
+      {
+       "asset": "llama-b11800-bin-linux-arm64-snapdragon.tar.gz",
+       "backend": "qnn-snapdragon",
+       "os": "linux-arm64",
+       "sha256": "8b78934b4df5870da18024ca1c51a6c858fb07650e16275583aa289f2f9590f7",
+       "size": 24360968,
+       "version": null
+      },
+      {
+       "asset": "llama-b11800-bin-macos-arm64.tar.gz",
+       "backend": "unknown_from_name",
+       "os": "macos-arm64",
+       "sha256": "6dd79d687754c2e6dd93fe3b921d26b05cff23e23283b7bcd6cbb79ba52e0d79",
+       "size": 16137768,
+       "version": null
+      },
+      {
+       "asset": "llama-b11800-bin-macos-x64.tar.gz",
+       "backend": "unknown_from_name",
+       "os": "macos-x64",
+       "sha256": "2e7017c5ade164607e680aa98bd50afb9a4ccb231a2729ba3b7ccbc400fea14e",
+       "size": 11871747,
+       "version": null
+      },
+      {
+       "asset": "llama-b11800-bin-ubuntu-arm64.tar.gz",
+       "backend": "cpu",
+       "os": "linux-arm64",
+       "sha256": "588c33e064561cddb7f0c74c2332977cbc6b597c7b6bf872d64e59bff0de06d9",
+       "size": 18023627,
+       "version": null
+      },
+      {
+       "asset": "llama-b11800-bin-ubuntu-cuda-12.8-x64.tar.gz",
+       "backend": "cuda",
+       "os": "linux-x64",
+       "sha256": "e5d489b995c2a0965ee746a246c934be9f4ffa00c78183b2d4f644f43ae5d7a7",
+       "size": 177920437,
+       "version": "12.8"
+      },
+      {
+       "asset": "llama-b11800-bin-ubuntu-cuda-13.4-arm64.tar.gz",
+       "backend": "cuda",
+       "os": "linux-arm64",
+       "sha256": "3c3d8fe2a212bafe564471adb17ce4223c053c3d7a13edf074bb5f6405976ce2",
+       "size": 153901187,
+       "version": "13.4"
+      },
+      {
+       "asset": "llama-b11800-bin-ubuntu-cuda-13.4-x64.tar.gz",
+       "backend": "cuda",
+       "os": "linux-x64",
+       "sha256": "db40512eac60431b2e3fe485437d19eba9b4664705372f01e397d65ffebb5f06",
+       "size": 158778147,
+       "version": "13.4"
+      },
+      {
+       "asset": "llama-b11800-bin-ubuntu-openvino-2026.4.1-x64.tar.gz",
+       "backend": "openvino",
+       "os": "linux-x64",
+       "sha256": "102b9dc9efd7edb57ce8416617bdca746b7f15ffa31d3e4a0d3f8af688e105f8",
+       "size": 121836864,
+       "version": "2026.4.1"
+      },
+      {
+       "asset": "llama-b11800-bin-ubuntu-rocm-10.0-x64.tar.gz",
+       "backend": "rocm",
+       "os": "linux-x64",
+       "sha256": "5af192ad2e8a8a0f82372ad0c32793d104f3c745081edeb60acd5feff57f9111",
+       "size": 249906538,
+       "version": "10.0"
+      },
+      {
+       "asset": "llama-b11800-bin-ubuntu-s390x.tar.gz",
+       "backend": "cpu",
+       "os": "linux-s390x",
+       "sha256": "dc297f89a11378069d4473046ccd6429201cf118f570e444b0c2f74fc1aa2bdb",
+       "size": 16524693,
+       "version": null
+      },
+      {
+       "asset": "llama-b11800-bin-ubuntu-sycl-fp16-x64.tar.gz",
+       "backend": "sycl",
+       "os": "linux-x64",
+       "sha256": "fe7c6c2a27dcee990de1ba65355ee8701ad0a252cf146369d83b3457d0e47064",
+       "size": 62780181,
+       "version": "16"
+      },
+      {
+       "asset": "llama-b11800-bin-ubuntu-sycl-fp32-x64.tar.gz",
+       "backend": "sycl",
+       "os": "linux-x64",
+       "sha256": "87884b5b58deb32d02a9afbd90c6a203c662b6a3ebc63f489b22744346f2e931",
+       "size": 62687516,
+       "version": "32"
+      },
+      {
+       "asset": "llama-b11800-bin-ubuntu-vulkan-arm64.tar.gz",
+       "backend": "vulkan",
+       "os": "linux-arm64",
+       "sha256": "a5fa04e57567395464f9a78572800ab13f299fc22a7288b92bf1a7ba30e150b3",
+       "size": 28311042,
+       "version": null
+      },
+      {
+       "asset": "llama-b11800-bin-ubuntu-vulkan-x64.tar.gz",
+       "backend": "vulkan",
+       "os": "linux-x64",
+       "sha256": "ba5ffa8b23ad2c130ee60d6f384170f191b059aa67ec12f1482a07b01f146902",
+       "size": 34967090,
+       "version": null
+      },
+      {
+       "asset": "llama-b11800-bin-ubuntu-x64.tar.gz",
+       "backend": "cpu",
+       "os": "linux-x64",
+       "sha256": "81b133a0cd266851ebbe3eea21edf87e045d381699026a620cf1387f0cf55fe3",
+       "size": 22322141,
+       "version": null
+      },
+      {
+       "asset": "llama-b11800-bin-win-cpu-arm64.zip",
+       "backend": "cpu",
+       "os": "win-arm64",
+       "sha256": "88c358fcbc89f226c8c7380cb30ba9f811da0731401887656a5d72b5b043404d",
+       "size": 12683843,
+       "version": null
+      },
+      {
+       "asset": "llama-b11800-bin-win-cpu-x64.zip",
+       "backend": "cpu",
+       "os": "win-x64",
+       "sha256": "99154bbdcec5a62b8d45884b016830699e29cf1464536edcc542a69b42349e7d",
+       "size": 24062663,
+       "version": null
+      },
+      {
+       "asset": "llama-b11800-bin-win-cuda-12.4-x64.zip",
+       "backend": "cuda",
+       "os": "win-x64",
+       "sha256": "80e7cb24b95332415ad3765ddc9b6555afbce96e4f47514cb29d86158b8f53fc",
+       "size": 272309025,
+       "version": "12.4"
+      },
+      {
+       "asset": "llama-b11800-bin-win-cuda-13.4-arm64.zip",
+       "backend": "cuda",
+       "os": "win-arm64",
+       "sha256": "659bd283f49e5cd4b519cc690b9d11287bb603e5daccd3c58fc0bc4901bfe7c0",
+       "size": 147624595,
+       "version": "13.4"
+      },
+      {
+       "asset": "llama-b11800-bin-win-cuda-13.4-x64.zip",
+       "backend": "cuda",
+       "os": "win-x64",
+       "sha256": "8d9835d05f6b8b5c56e7690b9863631ab0925c8d22153dcba42d6039905a7010",
+       "size": 159833403,
+       "version": "13.4"
+      },
+      {
+       "asset": "llama-b11800-bin-win-opencl-adreno-arm64.zip",
+       "backend": "opencl-adreno",
+       "os": "win-arm64",
+       "sha256": "60e60d00d521e79b3393dc39951d4792b0d363137f2ebe1ad1925038edc00d9c",
+       "size": 13545140,
+       "version": null
+      },
+      {
+       "asset": "llama-b11800-bin-win-openvino-2026.4.1-x64.zip",
+       "backend": "openvino",
+       "os": "win-x64",
+       "sha256": "b75c42c5e04aaf601c7b9c1d0a2a28d505f00278646c928287c80ebb5c153588",
+       "size": 104031023,
+       "version": "2026.4.1"
+      },
+      {
+       "asset": "llama-b11800-bin-win-rocm-10.0-x64.zip",
+       "backend": "rocm",
+       "os": "win-x64",
+       "sha256": "52bd94ec2fb4685acb4c3c063083ee0efecda794520c740a7036c675b7ec4f74",
+       "size": 263459329,
+       "version": "10.0"
+      },
+      {
+       "asset": "llama-b11800-bin-win-sycl-x64.zip",
+       "backend": "sycl",
+       "os": "win-x64",
+       "sha256": "f3bed5d0f7d8a6f8ebffcfe5a821bd4044a2b3df483f0c3736156891e40ebc85",
+       "size": 154124299,
+       "version": null
+      },
+      {
+       "asset": "llama-b11800-bin-win-vulkan-arm64.zip",
+       "backend": "vulkan",
+       "os": "win-arm64",
+       "sha256": "de4f23b1cef771af67a1541370af2951ded2268de84f91d0c163b5455c690d6f",
+       "size": 25070073,
+       "version": null
+      },
+      {
+       "asset": "llama-b11800-bin-win-vulkan-x64.zip",
+       "backend": "vulkan",
+       "os": "win-x64",
+       "sha256": "71b56d08a428ad7fbf1643a7a505e643d90bca7dc77138ebfae22adf0e845a01",
+       "size": 36859398,
+       "version": null
+      }
+     ],
+     "runtime_assets": 28,
+     "tag": "b11800",
+     "unknown_tokens": [],
+     "verifiable": true
+    },
     {
      "assets_total": 36,
      "attachments": [],
@@ -5025,1256 +6275,6 @@
      "tag": "b11777",
      "unknown_tokens": [],
      "verifiable": true
-    },
-    {
-     "assets_total": 36,
-     "attachments": [],
-     "digest_missing": [],
-     "has_runtime": true,
-     "name": "b11776",
-     "non_runtime_assets": 8,
-     "os_covered": [
-      "android-arm64",
-      "linux-arm64",
-      "linux-s390x",
-      "linux-x64",
-      "macos-arm64",
-      "macos-x64",
-      "win-arm64",
-      "win-x64"
-     ],
-     "published_at": "2026-10-21T03:04:08Z",
-     "repo": "ggml-org/llama.cpp",
-     "runtime": [
-      {
-       "asset": "llama-b11776-bin-android-arm64-snapdragon.tar.gz",
-       "backend": "qnn-snapdragon",
-       "os": "android-arm64",
-       "sha256": "56a3aaa1aedf9538d4abe77e34237c4fa7d744bc16dda470a5665e51eb30a106",
-       "size": 60947368,
-       "version": null
-      },
-      {
-       "asset": "llama-b11776-bin-android-arm64.tar.gz",
-       "backend": "cpu",
-       "os": "android-arm64",
-       "sha256": "00964852b9f37ab6e1eb9e2cb8a91279041b84fcbd8c01373054c5ee8c60120e",
-       "size": 76232702,
-       "version": null
-      },
-      {
-       "asset": "llama-b11776-bin-linux-arm64-snapdragon.tar.gz",
-       "backend": "qnn-snapdragon",
-       "os": "linux-arm64",
-       "sha256": "7c8f32bce6c4f7e4b2c9b9d2baaae8020b2fcaa3fb6eabfb4364c23e4df3c95a",
-       "size": 24227042,
-       "version": null
-      },
-      {
-       "asset": "llama-b11776-bin-macos-arm64.tar.gz",
-       "backend": "unknown_from_name",
-       "os": "macos-arm64",
-       "sha256": "0aecb31b5c3bf4ff4c78c2cdb1c5bd1b37601b7705ac1aa06d524277b656bce7",
-       "size": 16101870,
-       "version": null
-      },
-      {
-       "asset": "llama-b11776-bin-macos-x64.tar.gz",
-       "backend": "unknown_from_name",
-       "os": "macos-x64",
-       "sha256": "e01e1918da0508b38c78097b3da009005371175a72d8bbcf7142149397e16b83",
-       "size": 11826073,
-       "version": null
-      },
-      {
-       "asset": "llama-b11776-bin-ubuntu-arm64.tar.gz",
-       "backend": "cpu",
-       "os": "linux-arm64",
-       "sha256": "679cf6f4f123f093536aa88e864fae52c3389d856ecfefe433e7a96317cc3f3e",
-       "size": 17976582,
-       "version": null
-      },
-      {
-       "asset": "llama-b11776-bin-ubuntu-cuda-12.8-x64.tar.gz",
-       "backend": "cuda",
-       "os": "linux-x64",
-       "sha256": "ab687cb3981bee1961de96d00422999b79e38ebc3647e42bfb938fed078e472d",
-       "size": 177730598,
-       "version": "12.8"
-      },
-      {
-       "asset": "llama-b11776-bin-ubuntu-cuda-13.4-arm64.tar.gz",
-       "backend": "cuda",
-       "os": "linux-arm64",
-       "sha256": "79d499fafd75c016198fff0bfd518830edfec4fe688c198a1e9f9faeeebdf48b",
-       "size": 153745830,
-       "version": "13.4"
-      },
-      {
-       "asset": "llama-b11776-bin-ubuntu-cuda-13.4-x64.tar.gz",
-       "backend": "cuda",
-       "os": "linux-x64",
-       "sha256": "28553d484613d0d0fd61b2ef6af6d480e678b24da7c15f878a46f93135322028",
-       "size": 158603401,
-       "version": "13.4"
-      },
-      {
-       "asset": "llama-b11776-bin-ubuntu-openvino-2026.4.1-x64.tar.gz",
-       "backend": "openvino",
-       "os": "linux-x64",
-       "sha256": "548fd8877ebf9575c458ff5e563050c56b27c65b322389c0ad17944fdefce7c6",
-       "size": 121782326,
-       "version": "2026.4.1"
-      },
-      {
-       "asset": "llama-b11776-bin-ubuntu-rocm-10.0-x64.tar.gz",
-       "backend": "rocm",
-       "os": "linux-x64",
-       "sha256": "b6e1b7f477685622bccfa3bd0f7e98fa9aca7ee0c7c5057d3f4be3bb819f4b6e",
-       "size": 249796551,
-       "version": "10.0"
-      },
-      {
-       "asset": "llama-b11776-bin-ubuntu-s390x.tar.gz",
-       "backend": "cpu",
-       "os": "linux-s390x",
-       "sha256": "9c01669db4fdf4626337e31ff4a97f14073cb489514663a4cefc619662c13877",
-       "size": 16562297,
-       "version": null
-      },
-      {
-       "asset": "llama-b11776-bin-ubuntu-sycl-fp16-x64.tar.gz",
-       "backend": "sycl",
-       "os": "linux-x64",
-       "sha256": "9e06dcd2eb262835644e7da69d2dee8261dd80ddc9222dd3670b015d963eeb19",
-       "size": 62549793,
-       "version": "16"
-      },
-      {
-       "asset": "llama-b11776-bin-ubuntu-sycl-fp32-x64.tar.gz",
-       "backend": "sycl",
-       "os": "linux-x64",
-       "sha256": "21ef33d104f6c5474220623bc544570708a6151b81df4fc70c302fbb8f70e927",
-       "size": 62459675,
-       "version": "32"
-      },
-      {
-       "asset": "llama-b11776-bin-ubuntu-vulkan-arm64.tar.gz",
-       "backend": "vulkan",
-       "os": "linux-arm64",
-       "sha256": "9f8bd6cdde4ddb46be4c07336e1426434c52759e23023d6189c661b0277cf14e",
-       "size": 28263541,
-       "version": null
-      },
-      {
-       "asset": "llama-b11776-bin-ubuntu-vulkan-x64.tar.gz",
-       "backend": "vulkan",
-       "os": "linux-x64",
-       "sha256": "94568caf4001ee47d60d2f1f97e7fc8b8e00d0e7aa501ce4461a6fe623f50e5a",
-       "size": 34895068,
-       "version": null
-      },
-      {
-       "asset": "llama-b11776-bin-ubuntu-x64.tar.gz",
-       "backend": "cpu",
-       "os": "linux-x64",
-       "sha256": "ccb31cac521113f6242951933e4c2228cfa784e1d2a8e421327bcc036bee3c9c",
-       "size": 22253446,
-       "version": null
-      },
-      {
-       "asset": "llama-b11776-bin-win-cpu-arm64.zip",
-       "backend": "cpu",
-       "os": "win-arm64",
-       "sha256": "3705fa88ea9165e199a7c52a9668f1df4f5db2ef572ea814b7114406bcd7241c",
-       "size": 12617667,
-       "version": null
-      },
-      {
-       "asset": "llama-b11776-bin-win-cpu-x64.zip",
-       "backend": "cpu",
-       "os": "win-x64",
-       "sha256": "35434a1254cf2b97ed72791fed4dfff41ab3a102a1953e4e89bfd6b9ab9aedff",
-       "size": 23975867,
-       "version": null
-      },
-      {
-       "asset": "llama-b11776-bin-win-cuda-12.4-x64.zip",
-       "backend": "cuda",
-       "os": "win-x64",
-       "sha256": "92f280ad8f4569880501fdee5dd205f83063a0a20ed147fb228182fe69a33bfb",
-       "size": 272053204,
-       "version": "12.4"
-      },
-      {
-       "asset": "llama-b11776-bin-win-cuda-13.4-arm64.zip",
-       "backend": "cuda",
-       "os": "win-arm64",
-       "sha256": "c8af5f813cd5006d2ef5e23302eede458e496bcd35ce2c097b4c717926fa1d51",
-       "size": 147444946,
-       "version": "13.4"
-      },
-      {
-       "asset": "llama-b11776-bin-win-cuda-13.4-x64.zip",
-       "backend": "cuda",
-       "os": "win-x64",
-       "sha256": "07973636ff7654aca59c60feb430c0b7064d1d64501cd78a7b076eb67f21458d",
-       "size": 159624280,
-       "version": "13.4"
-      },
-      {
-       "asset": "llama-b11776-bin-win-opencl-adreno-arm64.zip",
-       "backend": "opencl-adreno",
-       "os": "win-arm64",
-       "sha256": "6ee44bb133349180ea22d6574fbee22df655269f55a99071bfa6b9094c5ccee3",
-       "size": 13474604,
-       "version": null
-      },
-      {
-       "asset": "llama-b11776-bin-win-openvino-2026.4.1-x64.zip",
-       "backend": "openvino",
-       "os": "win-x64",
-       "sha256": "4fc58fac1d2e750dc8395afb22871882a14200c61afd56e6a0fb06e320a1b041",
-       "size": 103938974,
-       "version": "2026.4.1"
-      },
-      {
-       "asset": "llama-b11776-bin-win-rocm-10.0-x64.zip",
-       "backend": "rocm",
-       "os": "win-x64",
-       "sha256": "cf2bd3f04280ac6b0ee451a47eaef5700a7d60ec1cbbf37a35232b5172700448",
-       "size": 263340858,
-       "version": "10.0"
-      },
-      {
-       "asset": "llama-b11776-bin-win-sycl-x64.zip",
-       "backend": "sycl",
-       "os": "win-x64",
-       "sha256": "f7d6a12067d1745c7430b148ab290036b2c5be9dbf218c5989aaf66a5cfa1fb8",
-       "size": 154033379,
-       "version": null
-      },
-      {
-       "asset": "llama-b11776-bin-win-vulkan-arm64.zip",
-       "backend": "vulkan",
-       "os": "win-arm64",
-       "sha256": "7fd1b0e46028468dd57d14e58390859da73043710957c058145053a16b2006c0",
-       "size": 25004122,
-       "version": null
-      },
-      {
-       "asset": "llama-b11776-bin-win-vulkan-x64.zip",
-       "backend": "vulkan",
-       "os": "win-x64",
-       "sha256": "dd52f75ee3cfe2fd4d0cf1c63fa6832fb980f2476b9ff5a0a256132f3a9439d6",
-       "size": 36767562,
-       "version": null
-      }
-     ],
-     "runtime_assets": 28,
-     "tag": "b11776",
-     "unknown_tokens": [],
-     "verifiable": true
-    },
-    {
-     "assets_total": 36,
-     "attachments": [],
-     "digest_missing": [],
-     "has_runtime": true,
-     "name": "b11774",
-     "non_runtime_assets": 8,
-     "os_covered": [
-      "android-arm64",
-      "linux-arm64",
-      "linux-s390x",
-      "linux-x64",
-      "macos-arm64",
-      "macos-x64",
-      "win-arm64",
-      "win-x64"
-     ],
-     "published_at": "2026-10-21T02:32:09Z",
-     "repo": "ggml-org/llama.cpp",
-     "runtime": [
-      {
-       "asset": "llama-b11774-bin-android-arm64-snapdragon.tar.gz",
-       "backend": "qnn-snapdragon",
-       "os": "android-arm64",
-       "sha256": "9549939a7e4bfcf01f005582f4cabf6e38e958c82911e33ca7307562ba46a8a6",
-       "size": 60947836,
-       "version": null
-      },
-      {
-       "asset": "llama-b11774-bin-android-arm64.tar.gz",
-       "backend": "cpu",
-       "os": "android-arm64",
-       "sha256": "6b092bee16199da35c8cc344ab347c9d635e27212acc7f08083fa7ae6a67e857",
-       "size": 76234003,
-       "version": null
-      },
-      {
-       "asset": "llama-b11774-bin-linux-arm64-snapdragon.tar.gz",
-       "backend": "qnn-snapdragon",
-       "os": "linux-arm64",
-       "sha256": "3cc10a52ccfddf94561d2a18a8173546028d7937dcc362aa3d54a60dbdd77feb",
-       "size": 24225786,
-       "version": null
-      },
-      {
-       "asset": "llama-b11774-bin-macos-arm64.tar.gz",
-       "backend": "unknown_from_name",
-       "os": "macos-arm64",
-       "sha256": "35853bc3af72c3f2c988633fc41882a1c544a93d258d1f34318598db1c7b4f5d",
-       "size": 16101745,
-       "version": null
-      },
-      {
-       "asset": "llama-b11774-bin-macos-x64.tar.gz",
-       "backend": "unknown_from_name",
-       "os": "macos-x64",
-       "sha256": "7662a3d81be77032557398a55fea8487728e728529f54a457a8f5b469af6bfa2",
-       "size": 11826079,
-       "version": null
-      },
-      {
-       "asset": "llama-b11774-bin-ubuntu-arm64.tar.gz",
-       "backend": "cpu",
-       "os": "linux-arm64",
-       "sha256": "109c7fa7dff158e2a0a7c0dd1d9880eea341437d7c433b11c349937057b80bc7",
-       "size": 17978064,
-       "version": null
-      },
-      {
-       "asset": "llama-b11774-bin-ubuntu-cuda-12.8-x64.tar.gz",
-       "backend": "cuda",
-       "os": "linux-x64",
-       "sha256": "7d03c8482b62c9533d47e777c0d3ca2edce6e57916b51f587a4576d332757fbb",
-       "size": 177732171,
-       "version": "12.8"
-      },
-      {
-       "asset": "llama-b11774-bin-ubuntu-cuda-13.4-arm64.tar.gz",
-       "backend": "cuda",
-       "os": "linux-arm64",
-       "sha256": "703f5d645a9d65c51211872937797953b8637c3322e5e077d5ef41808fe348a2",
-       "size": 153747282,
-       "version": "13.4"
-      },
-      {
-       "asset": "llama-b11774-bin-ubuntu-cuda-13.4-x64.tar.gz",
-       "backend": "cuda",
-       "os": "linux-x64",
-       "sha256": "2e439a4b03e39ed7273acb0b434caa175c7d17f222b9539ef5527a76a86503dd",
-       "size": 158603310,
-       "version": "13.4"
-      },
-      {
-       "asset": "llama-b11774-bin-ubuntu-openvino-2026.4.1-x64.tar.gz",
-       "backend": "openvino",
-       "os": "linux-x64",
-       "sha256": "b756c8686650350b8bd41665eee1c1b8a6842bdfac26815d641b7e028f476d14",
-       "size": 121773181,
-       "version": "2026.4.1"
-      },
-      {
-       "asset": "llama-b11774-bin-ubuntu-rocm-10.0-x64.tar.gz",
-       "backend": "rocm",
-       "os": "linux-x64",
-       "sha256": "3946d81057dfad0a4bdf6f8872521019797d02b2227906fb2fcf346e66ed6f2c",
-       "size": 249779510,
-       "version": "10.0"
-      },
-      {
-       "asset": "llama-b11774-bin-ubuntu-s390x.tar.gz",
-       "backend": "cpu",
-       "os": "linux-s390x",
-       "sha256": "d80dddd4b746769e6ad2f2b85d821fd6787bcf5fdfb1335cdb884e7289fd3418",
-       "size": 16569529,
-       "version": null
-      },
-      {
-       "asset": "llama-b11774-bin-ubuntu-sycl-fp16-x64.tar.gz",
-       "backend": "sycl",
-       "os": "linux-x64",
-       "sha256": "5f8f17b704958558d3aa4f9705fa2757e8caf6c80586f8d9e22c417c2d3c431c",
-       "size": 62549878,
-       "version": "16"
-      },
-      {
-       "asset": "llama-b11774-bin-ubuntu-sycl-fp32-x64.tar.gz",
-       "backend": "sycl",
-       "os": "linux-x64",
-       "sha256": "d08699c20914b47472a1619beb4c78aeb45c16985ff1aa7da9d2b5badc8725ff",
-       "size": 62460594,
-       "version": "32"
-      },
-      {
-       "asset": "llama-b11774-bin-ubuntu-vulkan-arm64.tar.gz",
-       "backend": "vulkan",
-       "os": "linux-arm64",
-       "sha256": "d362dbe14e871453d9b982160231a03c0bf1a9ff53c507e0c705bf0fa8d50490",
-       "size": 28264206,
-       "version": null
-      },
-      {
-       "asset": "llama-b11774-bin-ubuntu-vulkan-x64.tar.gz",
-       "backend": "vulkan",
-       "os": "linux-x64",
-       "sha256": "ab70533ccb404028d0eb1b1a8b8d2fd72b6a1ab952b5b9286b330ee5970f289a",
-       "size": 34897463,
-       "version": null
-      },
-      {
-       "asset": "llama-b11774-bin-ubuntu-x64.tar.gz",
-       "backend": "cpu",
-       "os": "linux-x64",
-       "sha256": "c8af7343d7a336b47f995b8ae14d99002fd5029a3d1ac17b5cd494ef972d8f96",
-       "size": 22251192,
-       "version": null
-      },
-      {
-       "asset": "llama-b11774-bin-win-cpu-arm64.zip",
-       "backend": "cpu",
-       "os": "win-arm64",
-       "sha256": "e93f9d869be6c6654d807cdb4f202c25e55ff6ec83a77d429e8d5f80b0800a7d",
-       "size": 12617789,
-       "version": null
-      },
-      {
-       "asset": "llama-b11774-bin-win-cpu-x64.zip",
-       "backend": "cpu",
-       "os": "win-x64",
-       "sha256": "f189f1f16c95b89faa7a6d81a3bf7962d6cee1f25666cd9d8b4c04fe81385e8b",
-       "size": 23975793,
-       "version": null
-      },
-      {
-       "asset": "llama-b11774-bin-win-cuda-12.4-x64.zip",
-       "backend": "cuda",
-       "os": "win-x64",
-       "sha256": "f04ecf019895879cc25063e6dd21790ae12a573b2567076c22689b697d22e5ac",
-       "size": 272054212,
-       "version": "12.4"
-      },
-      {
-       "asset": "llama-b11774-bin-win-cuda-13.4-arm64.zip",
-       "backend": "cuda",
-       "os": "win-arm64",
-       "sha256": "c610f98bfef2758245e8eb3393409ec891175a2d8891f3311eb3e0185d1aded0",
-       "size": 147444480,
-       "version": "13.4"
-      },
-      {
-       "asset": "llama-b11774-bin-win-cuda-13.4-x64.zip",
-       "backend": "cuda",
-       "os": "win-x64",
-       "sha256": "979c1b29f30f38cd52ecee1a3e92a0038939cad8c205cb1ff8fa352c104f253a",
-       "size": 159625297,
-       "version": "13.4"
-      },
-      {
-       "asset": "llama-b11774-bin-win-opencl-adreno-arm64.zip",
-       "backend": "opencl-adreno",
-       "os": "win-arm64",
-       "sha256": "dce1d5e5dead18818c0f91d704e4455d908504adc89e297ab3275cf4227ca623",
-       "size": 13474138,
-       "version": null
-      },
-      {
-       "asset": "llama-b11774-bin-win-openvino-2026.4.1-x64.zip",
-       "backend": "openvino",
-       "os": "win-x64",
-       "sha256": "808e832b63f0ad46341e26ad5c345923f3986f952939c2d5b74c25f728ab5203",
-       "size": 103939990,
-       "version": "2026.4.1"
-      },
-      {
-       "asset": "llama-b11774-bin-win-rocm-10.0-x64.zip",
-       "backend": "rocm",
-       "os": "win-x64",
-       "sha256": "dea2c5e67078d826ea423a99428131845367996a40538d7f7dae6b0a2a8b18ef",
-       "size": 263341875,
-       "version": "10.0"
-      },
-      {
-       "asset": "llama-b11774-bin-win-sycl-x64.zip",
-       "backend": "sycl",
-       "os": "win-x64",
-       "sha256": "c5e7bb41b10e8a585d263449686363128c2ffdef983b9247489e73c8dba4591f",
-       "size": 154034395,
-       "version": null
-      },
-      {
-       "asset": "llama-b11774-bin-win-vulkan-arm64.zip",
-       "backend": "vulkan",
-       "os": "win-arm64",
-       "sha256": "99682bf9dbb94bea7b17da80263cfd30622b7b11b5f762f668e15467652064ec",
-       "size": 25003656,
-       "version": null
-      },
-      {
-       "asset": "llama-b11774-bin-win-vulkan-x64.zip",
-       "backend": "vulkan",
-       "os": "win-x64",
-       "sha256": "cf66280e06c3366be04e5b524b9bdfd9f9f7012b768739499ea1ce1d6789b1b4",
-       "size": 36768578,
-       "version": null
-      }
-     ],
-     "runtime_assets": 28,
-     "tag": "b11774",
-     "unknown_tokens": [],
-     "verifiable": true
-    },
-    {
-     "assets_total": 36,
-     "attachments": [],
-     "digest_missing": [],
-     "has_runtime": true,
-     "name": "b11773",
-     "non_runtime_assets": 8,
-     "os_covered": [
-      "android-arm64",
-      "linux-arm64",
-      "linux-s390x",
-      "linux-x64",
-      "macos-arm64",
-      "macos-x64",
-      "win-arm64",
-      "win-x64"
-     ],
-     "published_at": "2026-10-21T02:15:10Z",
-     "repo": "ggml-org/llama.cpp",
-     "runtime": [
-      {
-       "asset": "llama-b11773-bin-android-arm64-snapdragon.tar.gz",
-       "backend": "qnn-snapdragon",
-       "os": "android-arm64",
-       "sha256": "ef6aa860a130e7c1fa06db07e441fc25e21781f49a8df7c5c9f26d8ca5d4a861",
-       "size": 60943810,
-       "version": null
-      },
-      {
-       "asset": "llama-b11773-bin-android-arm64.tar.gz",
-       "backend": "cpu",
-       "os": "android-arm64",
-       "sha256": "e335779bfb310a1d2ec101e78a72d10fec59feb30c14b418c2fb2f1fc583ab51",
-       "size": 76231912,
-       "version": null
-      },
-      {
-       "asset": "llama-b11773-bin-linux-arm64-snapdragon.tar.gz",
-       "backend": "qnn-snapdragon",
-       "os": "linux-arm64",
-       "sha256": "bfd3b01b4f1e8a085d9ca40158d15787a2cef588641cef3f12849d29386d201d",
-       "size": 24226066,
-       "version": null
-      },
-      {
-       "asset": "llama-b11773-bin-macos-arm64.tar.gz",
-       "backend": "unknown_from_name",
-       "os": "macos-arm64",
-       "sha256": "ec085aac26d71d51b0f1d5a05bf3bd85b10a8e8f12c85e60c014e1857d88cd40",
-       "size": 16101615,
-       "version": null
-      },
-      {
-       "asset": "llama-b11773-bin-macos-x64.tar.gz",
-       "backend": "unknown_from_name",
-       "os": "macos-x64",
-       "sha256": "4e279a539888a8844d4e8894942cc1131ed217b3caaeca8de47466077af2c76a",
-       "size": 11825673,
-       "version": null
-      },
-      {
-       "asset": "llama-b11773-bin-ubuntu-arm64.tar.gz",
-       "backend": "cpu",
-       "os": "linux-arm64",
-       "sha256": "31ec42eb8eceeb15ffe5126e4216cb8098360a500e29b253bf62b12e688edcbb",
-       "size": 17976920,
-       "version": null
-      },
-      {
-       "asset": "llama-b11773-bin-ubuntu-cuda-12.8-x64.tar.gz",
-       "backend": "cuda",
-       "os": "linux-x64",
-       "sha256": "d3fdfd0edd23630a3b999afd1a203562ce8418ba6e3eb40158573b94ea96a2f1",
-       "size": 177732770,
-       "version": "12.8"
-      },
-      {
-       "asset": "llama-b11773-bin-ubuntu-cuda-13.4-arm64.tar.gz",
-       "backend": "cuda",
-       "os": "linux-arm64",
-       "sha256": "22969162f3d97412b6701fe10779415bcb310c48e1e1df9f5236ed3f1ff8fd16",
-       "size": 153747319,
-       "version": "13.4"
-      },
-      {
-       "asset": "llama-b11773-bin-ubuntu-cuda-13.4-x64.tar.gz",
-       "backend": "cuda",
-       "os": "linux-x64",
-       "sha256": "8c2e8b3cd81f975fe36ddcb564510fae07ffe228c4c303ed07afd953ff1a4972",
-       "size": 158604136,
-       "version": "13.4"
-      },
-      {
-       "asset": "llama-b11773-bin-ubuntu-openvino-2026.4.1-x64.tar.gz",
-       "backend": "openvino",
-       "os": "linux-x64",
-       "sha256": "0fb7c8139473e31a9d8c19265aeb5e531b4c4c0f1bed81215b75a48bba1faea1",
-       "size": 121781460,
-       "version": "2026.4.1"
-      },
-      {
-       "asset": "llama-b11773-bin-ubuntu-rocm-10.0-x64.tar.gz",
-       "backend": "rocm",
-       "os": "linux-x64",
-       "sha256": "c6c78377702913b6836ed1cc36261b3b57f1b2cb27a52a3ea3ec70a1b4f9128a",
-       "size": 249805575,
-       "version": "10.0"
-      },
-      {
-       "asset": "llama-b11773-bin-ubuntu-s390x.tar.gz",
-       "backend": "cpu",
-       "os": "linux-s390x",
-       "sha256": "41973052d29e81517eddcc24192b434ff7cc598788115777fa11c0aac034cd29",
-       "size": 16566913,
-       "version": null
-      },
-      {
-       "asset": "llama-b11773-bin-ubuntu-sycl-fp16-x64.tar.gz",
-       "backend": "sycl",
-       "os": "linux-x64",
-       "sha256": "ce80051a0b2245ada07ff08e58670bc93e104953e619a4f4891f5093e4f6e1c3",
-       "size": 62550506,
-       "version": "16"
-      },
-      {
-       "asset": "llama-b11773-bin-ubuntu-sycl-fp32-x64.tar.gz",
-       "backend": "sycl",
-       "os": "linux-x64",
-       "sha256": "55676ca959bf39dd569f71b6d81074723154baa806646d1b1a6cae7035d970fc",
-       "size": 62442727,
-       "version": "32"
-      },
-      {
-       "asset": "llama-b11773-bin-ubuntu-vulkan-arm64.tar.gz",
-       "backend": "vulkan",
-       "os": "linux-arm64",
-       "sha256": "833d995b5d4dd6a732261f99c12a460b7687ca3ed37cda1143886ed2808872f1",
-       "size": 28264439,
-       "version": null
-      },
-      {
-       "asset": "llama-b11773-bin-ubuntu-vulkan-x64.tar.gz",
-       "backend": "vulkan",
-       "os": "linux-x64",
-       "sha256": "9b27f3189a97d5fa662d691dbea5903723d812d011e860e635fc9dc127082b85",
-       "size": 34895046,
-       "version": null
-      },
-      {
-       "asset": "llama-b11773-bin-ubuntu-x64.tar.gz",
-       "backend": "cpu",
-       "os": "linux-x64",
-       "sha256": "07ed883b414f274851080cc58c246808c461d9f3f34f475f8f00e0f0f3659cf5",
-       "size": 22254711,
-       "version": null
-      },
-      {
-       "asset": "llama-b11773-bin-win-cpu-arm64.zip",
-       "backend": "cpu",
-       "os": "win-arm64",
-       "sha256": "16307926d24bafa6992d04f44313ddbed1be9f3be4ba199726209a5842345e13",
-       "size": 12618018,
-       "version": null
-      },
-      {
-       "asset": "llama-b11773-bin-win-cpu-x64.zip",
-       "backend": "cpu",
-       "os": "win-x64",
-       "sha256": "5edd44c862c27719fc409c9cde0ebc8aa47ded25d2e04a87956d64193acabf48",
-       "size": 23976044,
-       "version": null
-      },
-      {
-       "asset": "llama-b11773-bin-win-cuda-12.4-x64.zip",
-       "backend": "cuda",
-       "os": "win-x64",
-       "sha256": "1c09542a78b1b3fe59ebbc3c4a4087e8feb52846c1141409c6c2ff36eeac57ef",
-       "size": 272053832,
-       "version": "12.4"
-      },
-      {
-       "asset": "llama-b11773-bin-win-cuda-13.4-arm64.zip",
-       "backend": "cuda",
-       "os": "win-arm64",
-       "sha256": "8892d06a58da1b1538346f43bc87eb231487aa0e2dd3b10f5ec40738c99502c9",
-       "size": 147444679,
-       "version": "13.4"
-      },
-      {
-       "asset": "llama-b11773-bin-win-cuda-13.4-x64.zip",
-       "backend": "cuda",
-       "os": "win-x64",
-       "sha256": "149ffa1c1de67dfa141af013c2acd58a24922d89b2959979d4a6ee3c871875b0",
-       "size": 159624909,
-       "version": "13.4"
-      },
-      {
-       "asset": "llama-b11773-bin-win-opencl-adreno-arm64.zip",
-       "backend": "opencl-adreno",
-       "os": "win-arm64",
-       "sha256": "a1b8c90362cd5f01049a2c5e2d7c1b527e00e302052392784a888a02d831b609",
-       "size": 13474337,
-       "version": null
-      },
-      {
-       "asset": "llama-b11773-bin-win-openvino-2026.4.1-x64.zip",
-       "backend": "openvino",
-       "os": "win-x64",
-       "sha256": "f7a3b495e3b88e27e4b77de7a083daf362ba7ef49f65d31017ec90ca71424335",
-       "size": 103939602,
-       "version": "2026.4.1"
-      },
-      {
-       "asset": "llama-b11773-bin-win-rocm-10.0-x64.zip",
-       "backend": "rocm",
-       "os": "win-x64",
-       "sha256": "b4a6969a4b22ed195191eb9828e2422944314f3f0db5650bb3a600e72b628c08",
-       "size": 263341487,
-       "version": "10.0"
-      },
-      {
-       "asset": "llama-b11773-bin-win-sycl-x64.zip",
-       "backend": "sycl",
-       "os": "win-x64",
-       "sha256": "52c85ce08adf9dc658f9c9bf878b3d95befacc5ca4d70147d959a290207c754c",
-       "size": 154034005,
-       "version": null
-      },
-      {
-       "asset": "llama-b11773-bin-win-vulkan-arm64.zip",
-       "backend": "vulkan",
-       "os": "win-arm64",
-       "sha256": "4eb3fbbb572bfb1dcd1f97649edd06dfb09f7c40a9c3a7eaec7ab7b334a110b9",
-       "size": 25003856,
-       "version": null
-      },
-      {
-       "asset": "llama-b11773-bin-win-vulkan-x64.zip",
-       "backend": "vulkan",
-       "os": "win-x64",
-       "sha256": "b32fd89da9dbe02e05b38b85ccf7dc8debd9aafde3cbfe3e64cc917e76dcad45",
-       "size": 36768191,
-       "version": null
-      }
-     ],
-     "runtime_assets": 28,
-     "tag": "b11773",
-     "unknown_tokens": [],
-     "verifiable": true
-    },
-    {
-     "assets_total": 36,
-     "attachments": [],
-     "digest_missing": [],
-     "has_runtime": true,
-     "name": "b11772",
-     "non_runtime_assets": 8,
-     "os_covered": [
-      "android-arm64",
-      "linux-arm64",
-      "linux-s390x",
-      "linux-x64",
-      "macos-arm64",
-      "macos-x64",
-      "win-arm64",
-      "win-x64"
-     ],
-     "published_at": "2026-10-21T01:59:38Z",
-     "repo": "ggml-org/llama.cpp",
-     "runtime": [
-      {
-       "asset": "llama-b11772-bin-android-arm64-snapdragon.tar.gz",
-       "backend": "qnn-snapdragon",
-       "os": "android-arm64",
-       "sha256": "79cea0267529232b781ad9e67320349d1462d1eb4287e5a76924518a8bf4bf22",
-       "size": 60878547,
-       "version": null
-      },
-      {
-       "asset": "llama-b11772-bin-android-arm64.tar.gz",
-       "backend": "cpu",
-       "os": "android-arm64",
-       "sha256": "ae8fb14f080b47064ca47d0811fdc50868e5e71676a550ae95ff07cdcd12ff08",
-       "size": 76165340,
-       "version": null
-      },
-      {
-       "asset": "llama-b11772-bin-linux-arm64-snapdragon.tar.gz",
-       "backend": "qnn-snapdragon",
-       "os": "linux-arm64",
-       "sha256": "c42d6b7ba9fcca02dc9212bbbf48d7cd8ca3f79baa8ca2091400e17fbd790d2c",
-       "size": 24206383,
-       "version": null
-      },
-      {
-       "asset": "llama-b11772-bin-macos-arm64.tar.gz",
-       "backend": "unknown_from_name",
-       "os": "macos-arm64",
-       "sha256": "d456f43c731e9385e49679b5db29ea8d92dd76fb1ba569cb558cdfd95da89055",
-       "size": 16088236,
-       "version": null
-      },
-      {
-       "asset": "llama-b11772-bin-macos-x64.tar.gz",
-       "backend": "unknown_from_name",
-       "os": "macos-x64",
-       "sha256": "298558bd74cc8ab8a9a705e9b076cf31434c28ee896c5038f9292d674b5044fd",
-       "size": 11809628,
-       "version": null
-      },
-      {
-       "asset": "llama-b11772-bin-ubuntu-arm64.tar.gz",
-       "backend": "cpu",
-       "os": "linux-arm64",
-       "sha256": "4b7430aded1f334f9e6e3d770510457b73b8112c6c458e4f4547654b848defac",
-       "size": 17963320,
-       "version": null
-      },
-      {
-       "asset": "llama-b11772-bin-ubuntu-cuda-12.8-x64.tar.gz",
-       "backend": "cuda",
-       "os": "linux-x64",
-       "sha256": "686d7627d0c2c7b777c93009c5288ff56ab0212358e73278c2adef45e8d8212f",
-       "size": 177719330,
-       "version": "12.8"
-      },
-      {
-       "asset": "llama-b11772-bin-ubuntu-cuda-13.4-arm64.tar.gz",
-       "backend": "cuda",
-       "os": "linux-arm64",
-       "sha256": "2dba77cd05f34147cbd903e5666413932f06c2700ad1cc5c91043d565ab3fd3d",
-       "size": 153734415,
-       "version": "13.4"
-      },
-      {
-       "asset": "llama-b11772-bin-ubuntu-cuda-13.4-x64.tar.gz",
-       "backend": "cuda",
-       "os": "linux-x64",
-       "sha256": "69959b6844c7944ca8f40acd4ce846b1c1600a23cd1225517a805e45577b1a99",
-       "size": 158581384,
-       "version": "13.4"
-      },
-      {
-       "asset": "llama-b11772-bin-ubuntu-openvino-2026.4.1-x64.tar.gz",
-       "backend": "openvino",
-       "os": "linux-x64",
-       "sha256": "033cf5984ed202386e64519907bf92f5db588fc56ef0fd8e912f0e81ca4039b5",
-       "size": 121767102,
-       "version": "2026.4.1"
-      },
-      {
-       "asset": "llama-b11772-bin-ubuntu-rocm-10.0-x64.tar.gz",
-       "backend": "rocm",
-       "os": "linux-x64",
-       "sha256": "ad1c29890302faa47625455a09c2d00cbe4257a6e7e8df1a1ad4b460e1ec6748",
-       "size": 249755954,
-       "version": "10.0"
-      },
-      {
-       "asset": "llama-b11772-bin-ubuntu-s390x.tar.gz",
-       "backend": "cpu",
-       "os": "linux-s390x",
-       "sha256": "07b394850342066990cd208addaac4cfaf3201724c25747a95119c74e1d4dddc",
-       "size": 16553501,
-       "version": null
-      },
-      {
-       "asset": "llama-b11772-bin-ubuntu-sycl-fp16-x64.tar.gz",
-       "backend": "sycl",
-       "os": "linux-x64",
-       "sha256": "af12cf8d43137714d97fe4b6bdbad56f5bfc9c8ab55a50f8d8bfde35d1a4de50",
-       "size": 62504813,
-       "version": "16"
-      },
-      {
-       "asset": "llama-b11772-bin-ubuntu-sycl-fp32-x64.tar.gz",
-       "backend": "sycl",
-       "os": "linux-x64",
-       "sha256": "8a074d6f9e22ab6f3285310aa544b7d4a767e750a9cec5fb7070d7b7348749d3",
-       "size": 62398835,
-       "version": "32"
-      },
-      {
-       "asset": "llama-b11772-bin-ubuntu-vulkan-arm64.tar.gz",
-       "backend": "vulkan",
-       "os": "linux-arm64",
-       "sha256": "562e9aaf3d66f55bc75e6b5e0902bb91513bce0c9d4c61d2d4848a75140b1564",
-       "size": 28249552,
-       "version": null
-      },
-      {
-       "asset": "llama-b11772-bin-ubuntu-vulkan-x64.tar.gz",
-       "backend": "vulkan",
-       "os": "linux-x64",
-       "sha256": "f6637e41c0df454404f5c721cccea6d4eb5afc3ac8b29cf0b769dc986d096ed3",
-       "size": 34878929,
-       "version": null
-      },
-      {
-       "asset": "llama-b11772-bin-ubuntu-x64.tar.gz",
-       "backend": "cpu",
-       "os": "linux-x64",
-       "sha256": "bad74c9727f03cce3582af7aca43753e6ed53ee2b54ee6855559003384f1d5c1",
-       "size": 22239117,
-       "version": null
-      },
-      {
-       "asset": "llama-b11772-bin-win-cpu-arm64.zip",
-       "backend": "cpu",
-       "os": "win-arm64",
-       "sha256": "a6d0af9c4c5374aab2327de67fb5e255e703f174c8100020cdbe213ed143dd82",
-       "size": 12600228,
-       "version": null
-      },
-      {
-       "asset": "llama-b11772-bin-win-cpu-x64.zip",
-       "backend": "cpu",
-       "os": "win-x64",
-       "sha256": "8e40d733eb5e0e4354a3959bc5add77aea6c735fa8bd54bbd9c089fa73c3d91a",
-       "size": 23959661,
-       "version": null
-      },
-      {
-       "asset": "llama-b11772-bin-win-cuda-12.4-x64.zip",
-       "backend": "cuda",
-       "os": "win-x64",
-       "sha256": "fd904fde39a66106c6bcb56dce7be9111cfb59d2a245ed8d6e47f735664014c0",
-       "size": 272036832,
-       "version": "12.4"
-      },
-      {
-       "asset": "llama-b11772-bin-win-cuda-13.4-arm64.zip",
-       "backend": "cuda",
-       "os": "win-arm64",
-       "sha256": "ed6fd863d174562f470e7f368c978be749cc54e883a8166d91055112c3547884",
-       "size": 147426613,
-       "version": "13.4"
-      },
-      {
-       "asset": "llama-b11772-bin-win-cuda-13.4-x64.zip",
-       "backend": "cuda",
-       "os": "win-x64",
-       "sha256": "c2c03c060bf611601703a3385b846f62bffb3653db872a59264a593613b9f34a",
-       "size": 159607917,
-       "version": "13.4"
-      },
-      {
-       "asset": "llama-b11772-bin-win-opencl-adreno-arm64.zip",
-       "backend": "opencl-adreno",
-       "os": "win-arm64",
-       "sha256": "974ef270eb3f8d4ff0e040eb70636e5a63660a22bb20e7c11439ec4a1cb27107",
-       "size": 13456270,
-       "version": null
-      },
-      {
-       "asset": "llama-b11772-bin-win-openvino-2026.4.1-x64.zip",
-       "backend": "openvino",
-       "os": "win-x64",
-       "sha256": "724c6d9c368430ba2e29e91ffceb54a4c17b677da0f6cdfecbb6130791db480b",
-       "size": 103922611,
-       "version": "2026.4.1"
-      },
-      {
-       "asset": "llama-b11772-bin-win-rocm-10.0-x64.zip",
-       "backend": "rocm",
-       "os": "win-x64",
-       "sha256": "4cdf433f5ea720ca4c5bd8f7e7ae250cde6257bd5b7fa803ab2b6eaec35d37d0",
-       "size": 263324496,
-       "version": "10.0"
-      },
-      {
-       "asset": "llama-b11772-bin-win-sycl-x64.zip",
-       "backend": "sycl",
-       "os": "win-x64",
-       "sha256": "7c01da6dbcd0153cd985b6acfce41653b7df563753038cdc5d476982392f25c1",
-       "size": 154017015,
-       "version": null
-      },
-      {
-       "asset": "llama-b11772-bin-win-vulkan-arm64.zip",
-       "backend": "vulkan",
-       "os": "win-arm64",
-       "sha256": "2146238467125e8d775ef60a631e778029ff3eb9b50837edb22b1b7134102220",
-       "size": 24985790,
-       "version": null
-      },
-      {
-       "asset": "llama-b11772-bin-win-vulkan-x64.zip",
-       "backend": "vulkan",
-       "os": "win-x64",
-       "sha256": "3e18d73ba5b2f9cce4c4563437e098335966869391fb4fd1f558cc4cdb051fbb",
-       "size": 36751200,
-       "version": null
-      }
-     ],
-     "runtime_assets": 28,
-     "tag": "b11772",
-     "unknown_tokens": [],
-     "verifiable": true
-    },
-    {
-     "assets_total": 36,
-     "attachments": [],
-     "digest_missing": [],
-     "has_runtime": true,
-     "name": "b11770",
-     "non_runtime_assets": 8,
-     "os_covered": [
-      "android-arm64",
-      "linux-arm64",
-      "linux-s390x",
-      "linux-x64",
-      "macos-arm64",
-      "macos-x64",
-      "win-arm64",
-      "win-x64"
-     ],
-     "published_at": "2026-10-21T01:27:25Z",
-     "repo": "ggml-org/llama.cpp",
-     "runtime": [
-      {
-       "asset": "llama-b11770-bin-android-arm64-snapdragon.tar.gz",
-       "backend": "qnn-snapdragon",
-       "os": "android-arm64",
-       "sha256": "2ba515019f88bb5953160e824698fec335b0767dd129fd55a786457a4c9519d6",
-       "size": 60881945,
-       "version": null
-      },
-      {
-       "asset": "llama-b11770-bin-android-arm64.tar.gz",
-       "backend": "cpu",
-       "os": "android-arm64",
-       "sha256": "a5726527e0d231863840d1ef7e8282d725f335824f33e5ed04c022fb46fc38d9",
-       "size": 76165861,
-       "version": null
-      },
-      {
-       "asset": "llama-b11770-bin-linux-arm64-snapdragon.tar.gz",
-       "backend": "qnn-snapdragon",
-       "os": "linux-arm64",
-       "sha256": "c8fe0b3a1a7e648d5dd0118e3e3de7ecdb7efe456599a1ab5e4901b8fcccad58",
-       "size": 24211894,
-       "version": null
-      },
-      {
-       "asset": "llama-b11770-bin-macos-arm64.tar.gz",
-       "backend": "unknown_from_name",
-       "os": "macos-arm64",
-       "sha256": "83790ddc9e771111077fe224f65e973bce21d80c0e0ae87b5e2e5247c04843e7",
-       "size": 16088373,
-       "version": null
-      },
-      {
-       "asset": "llama-b11770-bin-macos-x64.tar.gz",
-       "backend": "unknown_from_name",
-       "os": "macos-x64",
-       "sha256": "9f6deefdb00a751e91778627a2bf442031712e98908a34a10773bedbb96fad6d",
-       "size": 11809479,
-       "version": null
-      },
-      {
-       "asset": "llama-b11770-bin-ubuntu-arm64.tar.gz",
-       "backend": "cpu",
-       "os": "linux-arm64",
-       "sha256": "fca8c4879c8f7f0ad1aecc61469c6657f5b1172b937121a36aaf682cc122e55c",
-       "size": 17963928,
-       "version": null
-      },
-      {
-       "asset": "llama-b11770-bin-ubuntu-cuda-12.8-x64.tar.gz",
-       "backend": "cuda",
-       "os": "linux-x64",
-       "sha256": "f10f9cd6a941f2c85f6d70a1be6e6399cd63e5f4e3f600d42ad162e2d09d7006",
-       "size": 177720093,
-       "version": "12.8"
-      },
-      {
-       "asset": "llama-b11770-bin-ubuntu-cuda-13.4-arm64.tar.gz",
-       "backend": "cuda",
-       "os": "linux-arm64",
-       "sha256": "844ef87f1a35ce316d8ef00669dbb963467060d61753b06a97a81180a7f01aeb",
-       "size": 153730688,
-       "version": "13.4"
-      },
-      {
-       "asset": "llama-b11770-bin-ubuntu-cuda-13.4-x64.tar.gz",
-       "backend": "cuda",
-       "os": "linux-x64",
-       "sha256": "8f3b25f64c41bb502b96f0ef4e3194fd82a9904ff1fdbf5ef346b1f1e3531940",
-       "size": 158580829,
-       "version": "13.4"
-      },
-      {
-       "asset": "llama-b11770-bin-ubuntu-openvino-2026.4.1-x64.tar.gz",
-       "backend": "openvino",
-       "os": "linux-x64",
-       "sha256": "e1a91c596b45fd60baea2ac278c42dfaee99c402762531e2b97306a3baf5fd41",
-       "size": 121758956,
-       "version": "2026.4.1"
-      },
-      {
-       "asset": "llama-b11770-bin-ubuntu-rocm-10.0-x64.tar.gz",
-       "backend": "rocm",
-       "os": "linux-x64",
-       "sha256": "e961117c9ad58d155bca22356ad07822ac100bfc2e17d839629b26b988a71af7",
-       "size": 249757083,
-       "version": "10.0"
-      },
-      {
-       "asset": "llama-b11770-bin-ubuntu-s390x.tar.gz",
-       "backend": "cpu",
-       "os": "linux-s390x",
-       "sha256": "0576e6d7c530fa5681c4e49e674ab32b08582df5850e8d11aa3b425bc7250582",
-       "size": 16557032,
-       "version": null
-      },
-      {
-       "asset": "llama-b11770-bin-ubuntu-sycl-fp16-x64.tar.gz",
-       "backend": "sycl",
-       "os": "linux-x64",
-       "sha256": "beff4ed432db6b281eade11855bc8c28889d4fd07ee5766f1742e216ced8da0c",
-       "size": 62512020,
-       "version": "16"
-      },
-      {
-       "asset": "llama-b11770-bin-ubuntu-sycl-fp32-x64.tar.gz",
-       "backend": "sycl",
-       "os": "linux-x64",
-       "sha256": "9514690b6422807dde23baf16af85244580a18fcc101171afec5d5a88c108b00",
-       "size": 62409008,
-       "version": "32"
-      },
-      {
-       "asset": "llama-b11770-bin-ubuntu-vulkan-arm64.tar.gz",
-       "backend": "vulkan",
-       "os": "linux-arm64",
-       "sha256": "2915cb93f4b9dd40697808bf6f80071a4991599db183e9a9a4c88620ebf19d28",
-       "size": 28250271,
-       "version": null
-      },
-      {
-       "asset": "llama-b11770-bin-ubuntu-vulkan-x64.tar.gz",
-       "backend": "vulkan",
-       "os": "linux-x64",
-       "sha256": "27f446a361c25944d6c9dd8e6050f8b1a722ae2c4e0e6137670657a914fbc12c",
-       "size": 34878959,
-       "version": null
-      },
-      {
-       "asset": "llama-b11770-bin-ubuntu-x64.tar.gz",
-       "backend": "cpu",
-       "os": "linux-x64",
-       "sha256": "1e29b111d381ea2d3e0c66864329203e646357148a57b5f16a04e8b09b7acc04",
-       "size": 22236580,
-       "version": null
-      },
-      {
-       "asset": "llama-b11770-bin-win-cpu-arm64.zip",
-       "backend": "cpu",
-       "os": "win-arm64",
-       "sha256": "c6c38694f557ccdf1c2706f28a55aca9ddcf77aa50ce1d1ed49dae1c784f6f11",
-       "size": 12599537,
-       "version": null
-      },
-      {
-       "asset": "llama-b11770-bin-win-cpu-x64.zip",
-       "backend": "cpu",
-       "os": "win-x64",
-       "sha256": "2b7f4c3a844683780e2b3abe77b7ca014bc4185cb19f5be75db507bdcc686281",
-       "size": 23959829,
-       "version": null
-      },
-      {
-       "asset": "llama-b11770-bin-win-cuda-12.4-x64.zip",
-       "backend": "cuda",
-       "os": "win-x64",
-       "sha256": "3f0fd24195719e4e09fe90cd71c91ed48196533cce4dc5e73dd8bbeada3a137b",
-       "size": 272037270,
-       "version": "12.4"
-      },
-      {
-       "asset": "llama-b11770-bin-win-cuda-13.4-arm64.zip",
-       "backend": "cuda",
-       "os": "win-arm64",
-       "sha256": "3ac200db31cfb1c635dfa27d2eb545d1c13e0ced0ff44d5f56696ce45c63a82c",
-       "size": 147425904,
-       "version": "13.4"
-      },
-      {
-       "asset": "llama-b11770-bin-win-cuda-13.4-x64.zip",
-       "backend": "cuda",
-       "os": "win-x64",
-       "sha256": "bcf1c02f6cfad0a625930130b7378dcd8e17d887e032840e0cce14c2c2437266",
-       "size": 159608346,
-       "version": "13.4"
-      },
-      {
-       "asset": "llama-b11770-bin-win-opencl-adreno-arm64.zip",
-       "backend": "opencl-adreno",
-       "os": "win-arm64",
-       "sha256": "2cbdbc8cf96404f1923e11d31963c726e5d7925e7ef9ca31a3dffad89736358e",
-       "size": 13455562,
-       "version": null
-      },
-      {
-       "asset": "llama-b11770-bin-win-openvino-2026.4.1-x64.zip",
-       "backend": "openvino",
-       "os": "win-x64",
-       "sha256": "8fba8ace047874df0fcfc2b2f6b1e9e2162e8459f69152f60033490ec63fd0b2",
-       "size": 103923039,
-       "version": "2026.4.1"
-      },
-      {
-       "asset": "llama-b11770-bin-win-rocm-10.0-x64.zip",
-       "backend": "rocm",
-       "os": "win-x64",
-       "sha256": "4fb458b9833b5b1bbed2522911db21620f66b4ddb3d46f66394215337afad04c",
-       "size": 263324925,
-       "version": "10.0"
-      },
-      {
-       "asset": "llama-b11770-bin-win-sycl-x64.zip",
-       "backend": "sycl",
-       "os": "win-x64",
-       "sha256": "c188fb944d57467d5def4c7e531187cbd1a758d757eb753b4fcae01da47ae6e7",
-       "size": 154017444,
-       "version": null
-      },
-      {
-       "asset": "llama-b11770-bin-win-vulkan-arm64.zip",
-       "backend": "vulkan",
-       "os": "win-arm64",
-       "sha256": "d668847aced74b6777b1216432a2b9e85df563760485ea246d4be5dcc4c9258d",
-       "size": 24985081,
-       "version": null
-      },
-      {
-       "asset": "llama-b11770-bin-win-vulkan-x64.zip",
-       "backend": "vulkan",
-       "os": "win-x64",
-       "sha256": "92c52c48c180be9adcc39f5a3168e8aee1b56e461f53ee256ee1642b8e34fb1e",
-       "size": 36751630,
-       "version": null
-      }
-     ],
-     "runtime_assets": 28,
-     "tag": "b11770",
-     "unknown_tokens": [],
-     "verifiable": true
     }
    ],
    "repo": "ggml-org/llama.cpp",
@@ -6286,6 +6286,11 @@
    "source_only_tags": [],
    "unverifiable_tags": [],
    "verifiable_tags": [
+    "b11804",
+    "b11803",
+    "b11802",
+    "b11801",
+    "b11800",
     "b11799",
     "b11798",
     "b11797",
@@ -6305,12 +6310,7 @@
     "b11781",
     "b11780",
     "b11778",
-    "b11777",
-    "b11776",
-    "b11774",
-    "b11773",
-    "b11772",
-    "b11770"
+    "b11777"
    ]
   },
   "sd": {

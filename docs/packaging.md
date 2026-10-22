@@ -97,9 +97,9 @@ upload-artifact 没被数过（"49 处"因此少算）。计数不靠这句话�
 
 | OS 默认档 | 引擎压缩包相加 | 引擎落地（全量 → 只收 server） | 最省的一条权重 |
 |---|---|---|---|
-| win-x64 | 48.3 MiB | 126.9 → **105.0 MiB**（三个包都是 zip，逐文件精确） | 对话 qwen2.5-0.5b-q2_k 415 MB |
-| linux-x64 | 56.3 MiB | 145.6 → **124.7 MiB**（llama 41.0 / whisper 20.1 / sd 63.6；tar 已由 CI 解流，符号链接按链接本身计） | 同上 |
-| macos-arm64 | 50.2 MiB | 132.9 → **119.1 MiB**（llama 28.7 / sd 90.4；whisper 本来就没有 macOS 产物） | 同上 |
+| win-x64 | 48.4 MiB | 127.0 → **105.0 MiB**（三个包都是 zip，逐文件精确） | 对话 qwen2.5-0.5b-q2_k 415 MB |
+| linux-x64 | 56.3 MiB | 145.7 → **124.7 MiB**（llama 41.0 / whisper 20.1 / sd 63.6；tar 已由 CI 解流，符号链接按链接本身计） | 同上 |
+| macos-arm64 | 50.2 MiB | 133.0 → **119.1 MiB**（llama 28.7 / sd 90.4；whisper 本来就没有 macOS 产物） | 同上 |
 
 （上一版这三格只有 sd 的数却标成整档落地 —— linux 65.0 / macOS 93.9 都漏掉了 llama 与 whisper。）
 

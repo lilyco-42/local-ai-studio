@@ -1,9 +1,9 @@
 {
- "sha256": "26b25259b4d42b781d6a8d1f3625f5ef8b576b9e0db62bfd81b38b3d8ecc1673",
- "bytes": 93924,
- "lines": 3167,
+ "sha256": "7c4a4bfd888ec63ca24512126213787cf91e4617421ef7d9664e36519537e5ec",
+ "bytes": 117621,
+ "lines": 3991,
  "crlf": 0,
- "assets": 57,
- "captured_at": "2026-10-21",
- "how": "zip 50 颗：zip_peek 用 HTTP Range 读中央目录（每颗约 1 MiB 尾部）；tar.gz 7 颗（真装的默认档）：payload_plan.read_tar_entries 取整包并复核字节与上游 digest。都不解包、不运行。历次重钉的捕获按 filename 累积（b11727 / b11798 / b11799），表只认当前钉值那几颗。"
+ "assets": 70,
+ "captured_at": "2026-10-22",
+ "how": "zip 61 颗：zip_peek 用 HTTP Range 读中央目录（每颗约 1 MiB 尾部）；tar.gz 9 颗（真装的默认档）：payload_plan.read_tar_entries 取整包并复核字节与上游 digest。都不解包、不运行。历次重钉的捕获按 filename 累积（b11727 / b11798 / b11799 / b11804），表只认当前钉值那几颗。"
 }

@@ -131,8 +131,8 @@ class TestArtifact(unittest.TestCase):
     def test_the_cells_the_shell_will_read(self) -> None:
         """分层要能用，前提是这些格子真在，而且体积差是真的（CPU 16.9 vs CUDA 327.7）。"""
         e = artifact()["engines"]
-        self.assertEqual(one(e, "llama", "win-x64", "cpu")["mib"], 22.9)
-        self.assertEqual(one(e, "llama", "win-x64", "vulkan")["mib"], 35.1)
+        self.assertEqual(one(e, "llama", "win-x64", "cpu")["mib"], 23.0)
+        self.assertEqual(one(e, "llama", "win-x64", "vulkan")["mib"], 35.2)
         self.assertEqual(one(e, "sd", "win-x64", "cpu")["mib"], 16.9)
         self.assertEqual(one(e, "sd", "win-x64", "cuda")["mib"], 327.7)
         self.assertEqual(one(e, "sd", "linux-x64", "vulkan")["mib"], 34.9)

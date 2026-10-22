@@ -381,9 +381,9 @@ python3 tools/recommend_models.py --live --check                          # 真�
 
 | 档位 | 首装默认（不含生图） | 装齐四样 | 首装等待（逐源实测） | 装齐等待（逐源实测） | 可用最慢源（首装 / 装齐） |
 |---|---|---|---|---|---|
-| 4GB | **3.80 GiB** | 5.79 GiB | 159.6 分钟 | 167.7 分钟 | 5.27 / 7.53 小时 |
-| 8GB | **7.61 GiB** | 11.59 GiB | 268.4 分钟 | 284.6 分钟 | 9.60 / 14.12 小时 |
-| 16GB | **11.31 GiB** | 20.70 GiB（含生图配套件 1.77） | 283.5 分钟 | 321.6 分钟 | 13.81 / 24.49 小时 |
+| 4GB | **3.81 GiB** | 5.79 GiB | 164.6 分钟 | 172.7 分钟 | 5.35 / 7.61 小时 |
+| 8GB | **7.62 GiB** | 11.59 GiB | 273.4 分钟 | 289.6 分钟 | 9.69 / 14.21 小时 |
+| 16GB | **11.32 GiB** | 20.71 GiB（含生图配套件 1.77） | 288.5 分钟 | 326.6 分钟 | 13.90 / 24.58 小时 |
 
 等待时间不是"总字节 ÷ 一个速率"：引擎只发 GitHub release（0.014 MiB/s）、whisper 只有 hf-mirror
 （0.25，ModelScope 地址是上游 404）、对话/生图/OCR 有 ModelScope（4.2），每颗文件按它自己
@@ -408,7 +408,7 @@ python3 tools/recommend_models.py --live --check                          # 真�
 把权重相加当内存需求是错的，内存那一轴由三张表各自的判据负责）；
 `missing_capabilities`（**没有产物**：macOS 的字幕 —— whisper 为 Apple 平台只发 xcframework 库，成员表里数不出 `whisper-cli`）与
 `unknown_landed_sizes`（**落地大小未知**：某行格式读不出成员表时才标；llama/whisper 的 tar.gz
-以前全靠它，现在读了 tar 成员表，落地 win **126.9** / linux **145.6** / macOS **132.9** MiB ——
+以前全靠它，现在读了 tar 成员表，落地 win **127.0** / linux **145.7** / macOS **133.0** MiB ——
 这是**整包全量**口径；出包只收 server 后 win 是 **105.0**，见 [packaging.md](packaging.md) ④）
 是两个字段 —— 把后者当缺失能力报出去，等于谎称那项功能在 Apple silicon 上没得用。
 
