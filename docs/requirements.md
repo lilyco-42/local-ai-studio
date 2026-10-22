@@ -98,7 +98,7 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
 
 ## 验收标准（在当前唯一可用验证手段 = GitHub Actions 下）
 
-1. `ci.yml`：993 个单测绿（重数：`python -W error::ResourceWarning -m unittest discover -s tests
+1. `ci.yml`：1025 个单测绿（重数：`python -W error::ResourceWarning -m unittest discover -s tests
    -p "test_*.py"`；按文件数就 `python -m unittest tests.<模块名>`。2026-10-20 实测逐文件：
    `test_yaml_gate.py` 闸门自己（含 workflow 文件清单与磁盘覆盖对照）17、`test_lane_argv.py` 车道 ↔ 启动表一致（含 15 个 workflow 文本变异）10、
    `test_sideload.py` sideload 按内容认领（6 条源码变异体 + 三个真上游文件）22、
@@ -125,6 +125,8 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
    清单 serde 形状 1 条正控 + 7 个变异）20、
    `test_stage_payload.py` 出包产物→外壳 runtime 摆位（含真实合同落点、soname 链接解真身与 11 条负向）12、
    `test_payload_intake.py` 首启交付清单（真实合同落点 / 两个数据根同一份字节 / 6 条源码变异体 / 消费端重放）21、
+   `test_bundle_payload.py` 随包载荷（清单自身校验 / 对象键布局 / 根表最后写 / 复制前后逐字节复核 /
+   源件缺件或篡改、键不符、落点越界、输出非空与复制中途失败都会红）27、
    `test_make_icons.py` 图标从 ICO 派生（PNG 尺寸 / ICNS chunk 覆盖 / 预乘缩放无黑边 /
    已提交图标可复算 + 篡改与缺件必须红 + 重压缩同一张图必须认、改一个像素必须拒）10、
    `test_establish_verify.py` 字节复核 16、`test_shell_vars.py` shell 变量判据 14、
@@ -134,7 +136,8 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
    `test_wd_ipc_probe.py` WebDriver 真驱动窗口（会话请求 / status 与 data_root 判据 / UI 渲染证据 /
    车道文本与已知坏对照 / `installed=false` 与"运行组件未安装"状态条 / 硬件条与入门档卡片的
    真渲染字段 / 中心服务器默认关闭与命令预览 /
-   合成本地对象桶 + 真实 intake 清单的装后逐字节核对与第二次安装 0 写入）54、
+   合成本地对象桶 + 真实 intake 清单的装后逐字节核对与第二次安装 0 写入 /
+   包内对象键布局的离线首装与来源描述形状）59、
    `test_recommend_image.py` 生图档位表 31、`test_machine_budget.py` 装机预算 21、
    `test_lane_replay_report.py` 给分段、预跑与 job 数计数，并把上面这份逐文件账按模块 import 复算
    （1 条正控 + 4 个计数变异 + 合写加法自洽），另按锚点复算 README 与两份文档里 7 处

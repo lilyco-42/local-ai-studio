@@ -357,6 +357,66 @@ class TestInstallFixture(unittest.TestCase):
                 wd.check_reinstall_report(value, 2)
 
 
+class TestBundledFixture(unittest.TestCase):
+    def setUp(self) -> None:
+        self.tmp = tempfile.TemporaryDirectory()
+        self.work = self.tmp.name
+
+    def tearDown(self) -> None:
+        self.tmp.cleanup()
+
+    def test_layout_is_object_keys_plus_a_root_table(self) -> None:
+        fixture = wd.build_bundled_fixture(self.work, CONTRACT, capability="对话")
+        root = fixture["bundled_root"]
+        delivery = fixture["delivery"]
+        self.assertTrue(os.path.isfile(os.path.join(root, "delivery-manifest.json")))
+        self.assertFalse(os.path.isfile(os.path.join(root, "payload-manifest.json")))
+        for row in delivery["files"]:
+            self.assertTrue(os.path.isfile(os.path.join(root, *row["key"].split("/"))),
+                            row["key"])
+        self.assertTrue(os.path.isfile(
+            os.path.join(root, *delivery["manifest"]["key"].split("/"))))
+        self.assertEqual(fixture["bundle_check"]["files"], len(delivery["files"]))
+        self.assertEqual(fixture["bundle_report"]["bytes"],
+                         sum(row["bytes"] for row in delivery["files"]))
+        self.assertFalse(os.path.exists(os.path.join(self.work, "payload-source.json")))
+        self.assertFalse(os.path.exists(os.path.join(self.work, "payload-manifest.json")))
+
+    def test_fixture_refuses_non_server_and_unknown_capabilities(self) -> None:
+        with self.assertRaisesRegex(ValueError, "不是 server"):
+            wd.build_bundled_fixture(self.work, CONTRACT, capability="文字识别")
+        with self.assertRaises(ValueError):
+            wd.build_bundled_fixture(self.work, CONTRACT, capability="不存在")
+
+
+class TestPayloadSourceView(unittest.TestCase):
+    def test_bundled_must_not_carry_remote_addresses(self) -> None:
+        wd.check_payload_source(
+            {"mode": "bundled", "manifest_url": "", "bases": []}, "bundled")
+        for bad in (
+            {"mode": "bundled", "manifest_url": "https://x", "bases": []},
+            {"mode": "bundled", "manifest_url": "", "bases": ["https://x"]},
+            {"mode": "remote", "manifest_url": "", "bases": []},
+            {"mode": "remote", "manifest_url": "https://x", "bases": ["https://x"]},
+        ):
+            with self.subTest(bad=bad), self.assertRaises(wd.ProbeError):
+                wd.check_payload_source(bad, "bundled")
+
+    def test_remote_needs_a_manifest_url_and_at_least_one_base(self) -> None:
+        wd.check_payload_source(
+            {"mode": "remote", "manifest_url": "https://x/m.json", "bases": ["https://x"]},
+            "remote")
+        for bad in (
+            None,
+            {"mode": "remote", "manifest_url": "", "bases": ["https://x"]},
+            {"mode": "remote", "manifest_url": "https://x/m.json", "bases": []},
+            {"mode": "bundled", "manifest_url": "https://x/m.json", "bases": ["https://x"]},
+            {"mode": "remote", "manifest_url": "https://x/m.json", "bases": [""]},
+        ):
+            with self.subTest(bad=bad), self.assertRaises(wd.ProbeError):
+                wd.check_payload_source(bad, "remote")
+
+
 class TestFixtureServer(unittest.TestCase):
     def test_serves_the_delivery_manifest_and_every_object_key(self) -> None:
         opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
@@ -552,6 +612,25 @@ class TestWorkflow(unittest.TestCase):
     def test_ipc_step_does_not_start_engines_or_touch_the_network(self) -> None:
         run = self.step("WebDriver")["run"]
         for forbidden in ("start_engine", "curl ", "wget "):
+            with self.subTest(forbidden=forbidden):
+                self.assertNotIn(forbidden, run)
+
+    def test_bundled_step_uses_a_fresh_data_root_and_no_network(self) -> None:
+        step = self.step("内置载荷")
+        self.assertEqual(step["if"], "matrix.os == 'ubuntu-latest'")
+        self.assertLessEqual(step["timeout-minutes"], 15)
+        run = step["run"]
+        for needle in (
+            'XDG_DATA_HOME="$RUNNER_TEMP/data-bundled"',
+            'HOME="$RUNNER_TEMP/home-bundled"',
+            "--expect-not-installed",
+            "--install-bundled 对话",
+            "--negative-control",
+            "$GITHUB_WORKSPACE/tools/wd_ipc_probe.py",
+        ):
+            with self.subTest(needle=needle):
+                self.assertIn(needle, run)
+        for forbidden in ("start_engine", "curl ", "wget ", "--install-payload"):
             with self.subTest(forbidden=forbidden):
                 self.assertNotIn(forbidden, run)
 
