@@ -409,7 +409,7 @@ python3 tools/recommend_models.py --live --check                          # 真�
 `missing_capabilities`（**没有产物**：macOS 的字幕 —— whisper 为 Apple 平台只发 xcframework 库，成员表里数不出 `whisper-cli`）与
 `unknown_landed_sizes`（**落地大小未知**：某行格式读不出成员表时才标；llama/whisper 的 tar.gz
 以前全靠它，现在读了 tar 成员表，落地 win **127.0** / linux **145.7** / macOS **133.0** MiB ——
-这是**整包全量**口径；出包只收 server 后 win 是 **105.0**，见 [packaging.md](packaging.md) ④）
+这是**整包全量**口径；出包只收 server 后 win 是 **105.1**，见 [packaging.md](packaging.md) ④）
 是两个字段 —— 把后者当缺失能力报出去，等于谎称那项功能在 Apple silicon 上没得用。
 
 **这张表算出来之后，反过来把生图那条链改了三处**（方向全是"少算"，这正是单独加总一遍的价值）：

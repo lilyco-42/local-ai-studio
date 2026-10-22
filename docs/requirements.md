@@ -363,8 +363,8 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     可执行文件、孤儿 `-impl.dll` 不许出现、符号链接必须能解到随包的真身、负载目录里不许留压缩包
     （留着就等于把二次解包推给用户首启）。同名不同目录的成员**不许静默覆盖**，
     要点名进排除表 —— 覆盖会让"装进去的文件"与"清单里的文件"不是同一份。
-    收窄后 win 默认档 113 → 57 个文件、127.0 → **105.0 MiB**（`zip` 中央目录的 uncompressed
-    size 求和，未下载整包；llama 52→24 / 43.1、whisper 41→16 / 16.9、sd 20→17 / 45.0；
+    收窄后 win 默认档 113 → 57 个文件、127.0 → **105.1 MiB**（`zip` 中央目录的 uncompressed
+    size 求和，未下载整包；llama 52→24 / 43.2、whisper 41→16 / 16.9、sd 20→17 / 45.0；
     Linux/macOS 由 package 车道首次解流后的 manifest 给出：linux 145.7 → **124.7**
     （llama 41.0 / whisper 20.1 / sd 63.6），macOS 133.0 → **119.1**（llama 28.7 / sd 90.4；
     符号链接按链接本身计，不按目标大小重复算）。
@@ -385,7 +385,7 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     `libwebkit2gtk-4.1-dev` 一族，所以安装包车道第一步是 apt 装 + 打印 `pkg-config --modversion`；
     官方 `tauri-apps/tauri-action`（MIT、1,619★、2026-10-16 仍在 push）是 `uses:` 型且
     release **没有产物**，所以它只能按 commit SHA 钉，工具带那套 digest sha256 对它不适用。
-    最后是算术：**引擎落地就有 105.0 MiB（win-x64，只收 server 后；全量 127.0）**，再加 415 MB/1,566 MB 权重就不是安装包 ——
+    最后是算术：**引擎落地就有 105.1 MiB（win-x64，只收 server 后；全量 127.0）**，再加 415 MB/1,566 MB 权重就不是安装包 ——
     所以"壳装好、引擎与权重首启按下载层契约拉"是决定，不是妥协（LM Studio 同形态）。
 17. **给用户看的对话档 ≠ 车道最小样本，而这张表也是重算出来的，不是手挑的**：
     `catalog/defaults.json` 那颗 `qwen2.5-0.5b-instruct-q2_k`（415 MB）只为在 2 核无 GPU 的
@@ -772,7 +772,7 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     这张表**故意不说**的写在 `rule.driver`：这台机器的驱动能不能吃到某一档 CUDA，要运行时问
     `nvidia-smi`，属外壳 #25 —— 与"有哪些档可换"仍是两句话。
     **落地体积这一列是第四个会骗人的数**：下载量小不等于占盘小。逐颗从 `runtime-parity` 取
-    （那颗包成员解压后大小相加；整包全量口径 —— 出包只收 server 后默认档 43.1，
+    （那颗包成员解压后大小相加；整包全量口径 —— 出包只收 server 后默认档 43.2，
     可选档的收窄差值未逐档重算），默认那颗作减法基准，实测 llama 在 win-x64：
     CPU 落 **59.2** MiB → Vulkan **98.8**（+39.6）→ CUDA 13.4 **202.0**（+142.8）→
     CUDA 12.4 **609.8**（+550.6）→ ROCm **1160.5**（+1101.3 MiB）—— 换 ROCm 是多占 1.1 GiB，
@@ -960,11 +960,11 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     进度按文件数发 `payload-progress`。离线单测只能证这条消费链；真窗口里的“点按钮首装”已有 CI 证据（见下），
     **真 HTTPS 基址与真实用户电脑上的首装仍未跑过**。
     **证据边界**：2026-10-21 `package.yml`（run 39632180385）在三档 OS 上真跑了第 8 步（摆位 + `--check`）
-    与第 9 步（交付清单），三档 `engine-payload-<os>` 都上传成功；同日 run 39654853807 在**三档原生 runner**
-    上做了消费者重放：删掉摆好的数据根，只凭清单装进空目录（linux-x64 94 个文件 / 156.3 MiB、
-    win-x64 58 / 105.0、macos-arm64 33 / 158.4，均 0 跳过），再从装好的树起 `llama-server --help`
+    与第 9 步（交付清单），三档 `engine-payload-<os>` 都上传成功；2026-10-22 的 run 39730079234 在**三档原生 runner**
+    上做了消费者重放：删掉摆好的数据根，只凭清单装进空目录（linux-x64 94 个文件 / 156.4 MiB、
+    win-x64 58 / 105.1、macos-arm64 33 / 158.5，均 0 跳过），再从装好的树起 `llama-server --help`
     （三次 rc=0，输出含 `--port`）。所以"真实上游包能按合同落位"与"清单足以还原能起引擎的树"都有 CI 证据；
-    出包车道现在还会把对象目录当 HTTP 远端再取一遍（`--base-url`；run 39656642754 三档均 0 跳过、
+    出包车道现在还会把对象目录当 HTTP 远端再取一遍（`--base-url`；同一 run 三档均 0 跳过、
     同数落盘、`--help` 三次 rc=0，但这段是回环明文，真 HTTPS 基址仍未在重放里跑过）。
     同日 UI 车道（run 39688402251）把点击首装也接进了 shell.yml：`wd_ipc_probe.py --install-payload 对话`
     用真实 `stage_payload`/`payload_intake` 造 2 个对象 + 根清单（合成字节 43/35 B，不是上游包），
@@ -993,7 +993,7 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     **证据边界**：2026-10-21 三格都真出包了（run 39633525944）：Linux `deb` 3,237,370 B、
     Windows `nsis` 2,076,484 B、macOS `dmg` 3,152,248 B；包未签名、未公证；CLI 版本与 deb maintainer
     （tauri-bundler 取 identifier 第二段 `lilyco42`）仍只是静态核对。安装包只装外壳：引擎落地
-    win-x64 就是 105.0 MiB（只收 server；全量 127.0），权重 415 MB / 1.5 GB，都不进安装器。
+    win-x64 就是 105.1 MiB（只收 server；全量 127.0），权重 415 MB / 1.5 GB，都不进安装器。
 35. **国内下载层：慢在网络，别慢在设计与重试**（`shell/core/src/download.rs` + `tools/download_plan.py` +
     `pins/download-plan.json`）：传输不引 TLS 依赖，也不把 URL 拼进 shell 字符串 —— `CurlFetcher`
     调系统 `curl`，每个参数一个 argv，URL 只出现在 `--url` 后面；`--speed-limit 65536 --speed-time 30`

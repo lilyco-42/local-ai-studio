@@ -274,7 +274,7 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   拼法不同也必须配上同一颗。**这张表不说"这台机器的驱动能吃到哪一档"** —— 那要运行时问 `nvidia-smi`，
   属外壳（#25）。10 条源码变异体 × 13 条探针，外加一条链式核对（release 夹具 → 矩阵 → 换档表）；
   **下载量小不等于占盘小**：llama 在 win-x64 的默认档落 59.2 MiB（整包全量；出包只收
-  server 后默认档 43.1，可选档的收窄差值未逐档重算），换 Vulkan 98.8（+39.6）、
+  server 后默认档 43.2，可选档的收窄差值未逐档重算），换 Vulkan 98.8（+39.6）、
   换 CUDA 12.4 609.8（+550.6）、换 ROCm 1160.5（+1101.3 MiB）—— 45 个可选档里 29 个有数、
   16 个（没读整包的 tar）写 `null` + 说明，**不许写成 0**。
   12 条源码变异体 × 16 条探针（新增"落地体积未知被写成 0"与"默认档缺落地体积不报"）；
@@ -411,7 +411,7 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   按"没 CUDA 的 x64 / Apple silicon"选默认产物，zip 用 Range 读中央目录、tar.gz 读成员表
   （都只读名字与大小，不解包、不执行）拿逐文件大小：引擎净负载 win 48.4 / linux 56.3 /
   macOS 50.2 MiB，**全量落地** win 127.0 / linux 145.7 / macOS 133.0 MiB（都不含权重；
-  出包只收 server 后 win 实为 105.0 MiB，见下条）；
+  出包只收 server 后 win 实为 105.1 MiB，见下条）；
   `whisper-bin-x64.zip` 41 条里收 31、排除 10 个 `test-*.exe`，Linux 那个 tar 包同样数出 10 个测试程序。
   tar.gz 那三行是**取到临时文件后整包算过 sha256 并等于上游 release digest** 才算读到的
   （体积也要等于 release 声明，否则当截断）；zip 那几行只读了尾部中央目录，本来就没有整包字节，
@@ -431,8 +431,8 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   `LICENSE`、`.metal` 这类非可执行数据原样保留。macOS 的 `libx.0.dylib` 是指向
   `libx.0.7.0.dylib` 的符号链接，链接本身也要落盘（否则 `@rpath` 那一环断了）。
   同名不同目录的成员不许静默覆盖；主二进制缺席、清单里残留被排除的东西、目录里留着压缩包都会红。
-  收窄后 win 默认档 113 → 57 个文件、127.0 → **105.0 MiB**（中央目录 uncompressed size 求和，
-  未下载整包；llama 52→24 / 43.1，whisper 41→16 / 16.9，sd 20→17 / 45.0）；
+  收窄后 win 默认档 113 → 57 个文件、127.0 → **105.1 MiB**（中央目录 uncompressed size 求和，
+  未下载整包；llama 52→24 / 43.2，whisper 41→16 / 16.9，sd 20→17 / 45.0）；
   Linux/macOS 由同一次出包的 manifest 给出：145.7 → 124.7、133.0 → 119.1 MiB
   （符号链接按链接本身计）。
   `--selfcheck` 18 条、`tests/test_pack_engine.py` 20 条（合成 zip/tar.gz，含 digest 不符、
@@ -463,12 +463,12 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   https，`http://127.0.0.1` 只给重放用（公网 http 会被拒）。首启入口也在这两层之上：
   `payload_source` 报告数据根里有没有 `payload-source.json`，`install_payload` 取交付清单、
   校验平台后逐对象装进数据根，进度按文件数发 `payload-progress`；配置缺失时 UI 不显示安装按钮。CI 的消费者重放先走目录路径
-  （run 39654853807：linux-x64 94 个文件 / 156.3 MiB、win-x64 58 / 105.0、macos-arm64 33 / 158.4），
-  再用 `python -m http.server` 把对象目录当远端、走一遍 HTTP 取数路径（run 39656642754 三档同数、
+  （run 39730079234：linux-x64 94 个文件 / 156.4 MiB、win-x64 58 / 105.1、macos-arm64 33 / 158.5），
+  再用 `python -m http.server` 把对象目录当远端、走一遍 HTTP 取数路径（同一 run 三档同数、
   均 0 跳过，`--help` 三次 rc=0 且输出含 `--port`）。IPC/UI 入口已接（读数据根的
   `payload-source.json`），发布落点（R2 写）与生产基址仍未定。
 - `.github/workflows/installer.yml` + `tools/make_icons.py`：**安装包本身**，三平台各一个未签名包，
-  只装壳、不带引擎与权重（引擎 server-only 后 105.0 MiB + 权重 415 MB 起，装不进安装器）。矩阵 Windows `nsis` /
+  只装壳、不带引擎与权重（引擎 server-only 后 105.1 MiB + 权重 415 MB 起，装不进安装器）。矩阵 Windows `nsis` /
   macOS `dmg` / Linux `deb`，用钉住的 `tauri-apps/tauri-action`；CLI 显式传
   `npx --yes @tauri-apps/cli@2.12.3` —— 不传时 action 会自己 `npm install -g @tauri-apps/cli@v2`，
   浮在一个大版本上。`tauri.conf.json` 的 `bundle.active` 打开、targets 三档、图标五件；
