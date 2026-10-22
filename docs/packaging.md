@@ -58,7 +58,8 @@ application as a Tauri binary for macOS, Linux and Windows"，最新 release 是
 按"有先例就克隆研究具体实现"处理：安装包车道以它为骨架，但**不用它的 CLI 自动回退** ——
 它在找不到 `@tauri-apps/cli` 时会 `npm install -g @tauri-apps/cli@v2`（一个浮动大版本），
 所以车道显式传 `tauriScript: npx --yes @tauri-apps/cli@2.12.3` 把这个坐标钉死。
-引擎与 `payload-manifest.json` 也**不进安装包**（见 ④/⑤），车道只多一步"产物必须非空"。
+引擎的 server-only 运行组件现在**随包发**（`bundled/`，见 ④/⑥），权重仍不进包；
+车道最后一步会把安装包解开，按同一份清单逐文件复核包里的这棵树。
 
 顺手把这张表存在的理由说完：**在这一轮之前，三个 workflow 里 4 个 `uses:` 全是浮动大版本 tag**
 （`actions/checkout@v4`、`actions/setup-python@v5`、`actions/upload-artifact@v4`、
@@ -93,24 +94,26 @@ upload-artifact 没被数过（"49 处"因此少算）。计数不靠这句话�
 **`win25/20261013.288`**（windows 镜像的 tag）。这是本轮第二次证明
 "latest 不是我们要的那个"（第一次是 whisper.cpp 的 latest 有 0 个产物）。
 
-## ④ 包里到底该装什么？—— 只装外壳，引擎与权重一律首启下载
+## ④ 包里到底该装什么？—— 引擎随包，权重首启下载
 
-`pins/payload-plan.json` 实测的引擎**落地**负载。出包现在只收 server 与共享运行库
-（`pack_engine.py` 的 server-only 策略），所以"全量"与"只收 server"两列都给：
-只有 zip 的逐文件大小可离线精确求和，tar 的收窄后体积要等 CI 首次解流。
+`pack_engine.py` 只收 server 与共享运行库，`stage_payload.py` 按合同摆进数据根，
+`bundle_payload.py` 再打成对象键布局。2026-10-22 安装包车道（run 39779235920）实测：
 
-| OS 默认档 | 引擎压缩包相加 | 引擎落地（全量 → 只收 server） | 最省的一条权重 |
+| OS 默认档 | 内置载荷（server-only，解压后） | 安装包（实测） | 仍不进的权重 |
 |---|---|---|---|
-| win-x64 | 48.4 MiB | 127.0 → **105.1 MiB**（三个包都是 zip，逐文件精确） | 对话 qwen2.5-0.5b-q2_k 415 MB |
-| linux-x64 | 56.3 MiB | 145.7 → **124.7 MiB**（llama 41.0 / whisper 20.1 / sd 63.6；tar 已由 CI 解流，符号链接按链接本身计） | 同上 |
-| macos-arm64 | 50.2 MiB | 133.0 → **119.1 MiB**（llama 28.7 / sd 90.4；whisper 本来就没有 macOS 产物） | 同上 |
+| win-x64 | **105.1 MiB** / 57 文件（llama 43.2 + whisper 16.9 + sd 45.0） | `nsis` **25.0 MiB** | 对话 527 MB / 生图 1,566 MB 起 |
+| linux-x64 | **156.4 MiB** / 93 文件（llama 69.3 + whisper 23.5 + sd 63.6） | `deb` **63.3 MiB** | 同上 |
+| macos-arm64 | **158.5 MiB** / 32 文件（llama 68.1 + sd 90.4；whisper 上游没有 macOS 产物） | `dmg` **59.6 MiB** | 同上 |
 
-（上一版这三格只有 sd 的数却标成整档落地 —— linux 65.0 / macOS 93.9 都漏掉了 llama 与 whisper。）
+结论按实际压缩后的包算，而不是按解压后的负载算：**引擎能进安装包**（105–159 MiB 的树压成
+25–63 MiB 的包），**权重仍不能进** —— 入门权重 527 MB、生图 1.5 GB，且本来就该按内容寻址
+校验后现下（下载层契约见 [model-catalog.md](model-catalog.md) 与 `tools/file_index.py`）。
+LM Studio 也是这个形态（壳与 runtime 先装好、模型首启下载），所以"引擎随包、权重首启下载"
+是同类产品的共同选择，不是把难点推给用户。
 
-结论不是审美问题而是算术：**引擎装进安装包就已经 >100 MiB（只收 server 也还有 105.1 MiB），再叠 415 MB（对话）或
-1,566 MB（生图）就不是安装包了** —— 而且权重本来就该按内容寻址校验后现下
-（下载层契约见 [model-catalog.md](model-catalog.md) 与 `tools/file_index.py`）。
-LM Studio 也是这个形态（壳先装好、模型首启下载），所以"安装包小、首启下载"不是妥协，是同类产品的共同选择。
+上一版这段按 `payload-plan.json` 的估算写成"引擎 105.1 MiB 也装不进安装器"，并只算了主程序，
+漏了共享库与升级后的 llama（b11804）；实测三档是 105.1 / 156.4 / 158.5 MiB，而压缩后的安装包
+只有 25.0 / 63.3 / 59.6 MiB。数错了不要紧，要紧的是这次把它换成车道自己解开安装包复核过的数。
 
 ## ⑤ 出包产物怎么变成外壳认的目录？—— 一步摆位，根清单最后写
 
@@ -188,10 +191,14 @@ CI 里的消费者重放（`examples/install_from_dir.rs`）分两遍：第一�
 Ubuntu 的窗口与 IPC 驱动步仍绿；回环合成件上的真实下载与点按钮首装已在 run 39688402251 里跑过一次，
 真 HTTPS 基址与真实用户电脑上的首装仍未跑过。
 
-**还没接上的一段**：谁把 `delivery-manifest.json` 与对象传进桶里、生产 HTTPS 基址填什么，都还没定
-（写 R2 需他批准；三档 105.1–158.5 MiB ≈ 117–176 s @ 0.90 MiB/s），或选择随安装包分发
-（按同一份清单计，win 105.1 / linux 156.4 / mac 158.5 MiB，由安装器把同一份配置写进数据根）。
-真实用户电脑上的首装也还没跑过（本机禁跑）。
+**还没接上的一段**：远程源的发布落点（R2 写）与生产 HTTPS 基址仍未定（#57）；但
+"随安装包分发"这条路已经接通 —— 2026-10-22 run 39779235920 的三档安装包都带上了
+server-only 运行组件（win 57 / linux 93 / mac 32 个文件），车道解开包后用
+`bundle_payload.py --check` 逐文件核过。真窗口里点一次内置载荷安装的判据也进了 `shell.yml`
+（离线、不起服务，见第 34 条）。同时抓到一个只在真集成里才露头的错：外壳原先把包根的表名
+当成装好后的根清单名（`payload-manifest.json`），而工具写的是 `delivery-manifest.json` ——
+安装包带对了、外壳却会发现不了；现在两边共用 `delivery::TABLE_NAME`，并有离线对照钉住。
+真实用户电脑上的首装仍未跑过（本机禁跑）。
 
 ## ⑥ 安装包本身怎么出？—— 三平台各一个未签名包，图标由 ICO 派生
 
@@ -199,7 +206,15 @@ Ubuntu 的窗口与 IPC 驱动步仍绿；回环合成件上的真实下载与�
 矩阵三格 Windows `nsis`、macOS `dmg`、Linux `deb`；`projectPath: shell`，
 `tauriScript: npx --yes @tauri-apps/cli@2.12.3`（钉死，绕开 tauri-action 在找不到 CLI 时
 `npm install -g @tauri-apps/cli@v2` 的浮动回退），`tauri-action` 钉 `1deb371b…`，
-产物用 `uploadWorkflowArtifacts` 上传。包里只有外壳，引擎与权重不在其中。
+产物用 `uploadWorkflowArtifacts` 上传。车道分两段：先在 ubuntu 上按钉值生成三档内置载荷
+（对象键 + 包根 `delivery-manifest.json`，根清单最后写），再由三格原生 runner 下载到
+`shell/src-tauri/bundled` 编包 —— 引擎随包，权重不在其中。
+
+`bundle.active` 已打开，`tauri.conf.json` 的 `resources` 写 `bundled/**/*`（glob 必须匹配到
+文件；`bundled/**` 只匹配到目录，CI 因此红过一次）。仓库里留一个 `bundled/placeholder.txt`
+让没有载荷的普通 `cargo build`（`ci` / `shell` 车道）也能过 Tauri 的编译期资源校验；安装包
+车道在编包前删掉它。Windows runner 的 Python 默认 cp1252，工具打印中文会 `UnicodeEncodeError`，
+车道用 `PYTHONUTF8=1` 统一。
 
 图标：打包器按平台读 `.ico` / `.icns` / PNG，仓库原来只有一张 32×32 的 `icon.ico`。
 `tools/make_icons.py` 用纯 stdlib 解 ICO 的 32bpp BGRA（`biHeight` 是高度的两倍，下半是
@@ -209,18 +224,20 @@ AND 掩码），按**预乘 alpha** 做双线性放大，写出 `32x32.png`、`1
 同一份像素压缩出 6,389 vs 6,393 B —— 所以字节不同时解压后逐像素比，CI 才不会假红。
 10 条单测覆盖形状、块类型、预乘、坏 ICO、篡改与缺文件、以及"重压缩的同一张图必须认、
 改一个像素必须拒"这对正负对照。
-`bundle.active` 已打开，目标写在 `tauri.conf.json`，车道再用 `--bundles` 逐平台收窄。
 
-证据边界：2026-10-21 三格都真出包了（run 39633525944）：Linux `deb` 3,237,370 B、Windows
-`nsis` 2,076,484 B、macOS `dmg` 3,152,248 B；CLI 版本、图标与"产物必须非空"都由车道本身核过。
+证据边界：2026-10-22 run 39779235920 三格全绿，安装包分别为 Linux `deb` 66,422,834 B、
+Windows `nsis` 26,205,326 B、macOS `dmg` 62,451,834 B；包内 `bundled/` 分别为 93 / 57 / 32 个
+文件（157 / 106 / 159 MiB）。车道最后一步不是"产物非空"，而是**解开安装包**（`dpkg-deb -x` /
+`7z x` / `hdiutil attach`），找到唯一的 `bundled/delivery-manifest.json`，与编包前那份逐字节
+`cmp`，再用 `bundle_payload.py --check` 复核包内每个对象的 bytes + sha256。三档都过了。
 签名仍没做（macOS 无公证、Windows 无代码签名，首启有系统警告），证书仍需他决定。
 
 ## 还欠什么（都在等一个决定，不是技术问题）
 
 - **CI 已经跑过了**：2026-10-21 仓库转 public 后，`ci`、`shell`、`engine-live`（22 job）、
-  `package`（3 OS）全绿；`installer` 的 Linux `deb` 与 Windows `nsis` 已出包，macOS `dmg` 仍在
-  队列/编译中。转 public 之前（2026-10-20 在 `4202ef0` 上）的形状是 run 建了、job 全登记但
-  `runner_name` 空、`steps: 0`、2-3 秒 failure；原因只在 check-run annotation 里，写的是
+  `package`（3 OS）全绿；`installer` 三平台都已出包，且 2026-10-22 起包里带 server-only
+  运行组件（run 39779235920）。转 public 之前（2026-10-20 在 `4202ef0` 上）的形状是 run 建了、
+  job 全登记但 `runner_name` 空、`steps: 0`、2-3 秒 failure；原因只在 check-run annotation 里，写的是
   **账单/支出上限**（"recent account payments have failed or your spending limit needs to be
   increased"），不是"private 没有免费额度"一句话。逐条复现命令与完整观察记在 README 末段
   "这套 CI 能证明什么"。①②④⑤⑥ 现在都有 CI 证据；仍未证的是安装后的外壳真的能打开（GUI 设备验证）。

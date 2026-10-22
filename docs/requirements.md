@@ -396,8 +396,9 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     `libwebkit2gtk-4.1-dev` 一族，所以安装包车道第一步是 apt 装 + 打印 `pkg-config --modversion`；
     官方 `tauri-apps/tauri-action`（MIT、1,619★、2026-10-16 仍在 push）是 `uses:` 型且
     release **没有产物**，所以它只能按 commit SHA 钉，工具带那套 digest sha256 对它不适用。
-    最后是算术：**引擎落地就有 105.1 MiB（win-x64，只收 server 后；全量 127.0）**，再加 415 MB/1,566 MB 权重就不是安装包 ——
-    所以"壳装好、引擎与权重首启按下载层契约拉"是决定，不是妥协（LM Studio 同形态）。
+    最后是算术：**引擎 server-only 落地三档 105.1 / 156.4 / 158.5 MiB，压缩后的安装包只有
+    25.0 / 63.3 / 59.6 MiB** —— 所以引擎随包装、权重（415 MB / 1,566 MB）首启按下载层契约拉
+    是决定，不是妥协（LM Studio 同形态；实测见第 34 条）。
 17. **给用户看的对话档 ≠ 车道最小样本，而这张表也是重算出来的，不是手挑的**：
     `catalog/defaults.json` 那颗 `qwen2.5-0.5b-instruct-q2_k`（415 MB）只为在 2 核无 GPU 的
     runner 上把引擎拉起来跑通一次；用户第一句问的是"我这台机器该装哪个"，那件事由
@@ -994,7 +995,7 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     幂等"整条链在 CI 里真跑通过一次，只是版本与基址都是回环合成件。
     仍没有的是**发布落点（R2 写）、生产 HTTPS 基址**（#57），以及用户个人电脑上的"装完真能跑"。
     OCR 仍不在出包清单里，`not_in_manifest` 会点名 `文字识别/oar-ocr` —— 已知缺口，不是这一步的失败。
-34. **安装包本身：三平台各一个未签名包，只装壳**（`.github/workflows/installer.yml` + `tools/make_icons.py`）：
+34. **安装包本身：三平台各一个未签名包，带 server-only 运行组件**（`.github/workflows/installer.yml` + `tools/make_icons.py`）：
     矩阵 Windows `nsis` / macOS `dmg` / Linux `deb`；触发是 push main 上 `shell/**` 或自身 +
     `workflow_dispatch`；`permissions: contents: read`、并发组、checkout 与 tauri-action 全按 SHA。
     CLI 坐标写死 `tauriScript: npx --yes @tauri-apps/cli@2.12.3` —— 读过 action 的 `dist/index.js`：
@@ -1007,12 +1008,24 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     对同一份像素给出 6,389 vs 6,393 B），所以字节不同时解压后逐像素比；CI 上假红的正是这条。
     `tests/test_make_icons.py` 10 条（PNG 尺寸、ICNS chunk 覆盖、确定性、透明边缘无黑边、坏 ICO 拒绝、
     已提交图标可复算、篡改与缺件必须红、重压缩的 PNG/ICNS 必须认作同一张图、改一个像素必须拒）。
-    车道最后一步断言矩阵 glob 真找到安装包且非空 ——
-    `uploadWorkflowArtifacts: true` 成功不代表编出了东西。
-    **证据边界**：2026-10-21 三格都真出包了（run 39633525944）：Linux `deb` 3,237,370 B、
-    Windows `nsis` 2,076,484 B、macOS `dmg` 3,152,248 B；包未签名、未公证；CLI 版本与 deb maintainer
-    （tauri-bundler 取 identifier 第二段 `lilyco42`）仍只是静态核对。安装包只装外壳：引擎落地
-    win-x64 就是 105.1 MiB（只收 server；全量 127.0），权重 415 MB / 1.5 GB，都不进安装器。
+    车道先跑 `payload` 矩阵（ubuntu 上按钉值生成三档内置载荷：对象键布局 + 包根
+    `delivery-manifest.json`，根清单最后写），再由三格原生 runner 下载到 `shell/src-tauri/bundled`
+    编包。`resources` 写 `bundled/**/*`：glob 必须匹配到文件，`bundled/**` 只匹配到目录，
+    macOS 的 `cargo build` 因此在 2026-10-22 红过一次；仓库留一个 `bundled/placeholder.txt`
+    让没有载荷的普通编译过 Tauri 的编译期资源校验，安装包车道编包前删掉它。Windows runner 的
+    Python 默认 cp1252，工具打印中文会 `UnicodeEncodeError`，车道用 `PYTHONUTF8=1`。
+    车道最后一步不是"产物非空"：解开安装包（`dpkg-deb -x` / `7z x` / `hdiutil attach`），
+    找到唯一的 `bundled/delivery-manifest.json`，与编包前那份逐字节 `cmp`，再用
+    `bundle_payload.py --check` 复核包内每个对象的 bytes + sha256。
+    **证据边界**：2026-10-22 run 39779235920 三格全绿：Linux `deb` 66,422,834 B（包内 93 文件 /
+    157 MiB）、Windows `nsis` 26,205,326 B（57 / 106 MiB）、macOS `dmg` 62,451,834 B（32 / 159 MiB）；
+    三档 `payload` job 也各自复核过清单（win 110,167,837 B、linux 164,022,516 B、mac 166,224,542 B）。
+    包未签名、未公证；CLI 版本与 deb maintainer（tauri-bundler 取 identifier 第二段 `lilyco42`）
+    仍只是静态核对。权重 415 MB / 1.5 GB 仍不进安装器，由首启的入门模型下载负责。
+    这条车道还抓到过一个只在真集成里露头的错：外壳原先把包根的表名当成装好后的根清单名
+    （`payload-manifest.json`），而工具写的是 `delivery-manifest.json` —— 安装包带对了、外壳却
+    发现不了。现在两边共用 `delivery::TABLE_NAME`，`tests/test_wd_ipc_probe.py` 的
+    `test_layout_is_object_keys_plus_a_root_table` 直接比对两边的字面量。
 35. **国内下载层：慢在网络，别慢在设计与重试**（`shell/core/src/download.rs` + `tools/download_plan.py` +
     `pins/download-plan.json`）：传输不引 TLS 依赖，也不把 URL 拼进 shell 字符串 —— `CurlFetcher`
     调系统 `curl`，每个参数一个 argv，URL 只出现在 `--url` 后面；`--speed-limit 65536 --speed-time 30`

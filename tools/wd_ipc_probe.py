@@ -386,7 +386,7 @@ def build_bundled_fixture(work: str, contract_path: str, capability: str = "对�
 def check_payload_source(view, mode: str) -> None:
     """UI 用来决定显不显示安装入口的那份来源描述。"""
     if not isinstance(view, dict):
-        raise ProbeError(f"payload_source 应回对象或 null，实际是 {type(view).__name__}")
+        raise ProbeError(f"payload_source 应回对象（mode={mode}），实际是 {type(view).__name__}")
     if view.get("mode") != mode:
         raise ProbeError(f"payload_source.mode 是 {view.get('mode')!r}，期望 {mode!r}")
     url = view.get("manifest_url")

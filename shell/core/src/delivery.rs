@@ -22,6 +22,8 @@ use crate::hex_encode;
 use crate::manifest::sha256_file;
 
 pub const MANIFEST_NAME: &str = "payload-manifest.json";
+/// 交付表在包根的文件名，与 `tools/payload_intake.py` / `tools/bundle_payload.py` 同一份。
+pub const TABLE_NAME: &str = "delivery-manifest.json";
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct Delivery {

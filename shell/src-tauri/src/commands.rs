@@ -359,7 +359,7 @@ pub async fn install_payload(
             format!(
                 "没有载荷来源：数据根里没有 {}，安装包里也没有 bundled/{}",
                 source_path.display(),
-                local_ai_studio_core::delivery::MANIFEST_NAME
+                local_ai_studio_core::delivery::TABLE_NAME
             )
         })?;
         let report = bundled::install_from(&root, platform, &data_root)

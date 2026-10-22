@@ -507,9 +507,11 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   （run 39730079234：linux-x64 94 个文件 / 156.4 MiB、win-x64 58 / 105.1、macos-arm64 33 / 158.5），
   再用 `python -m http.server` 把对象目录当远端、走一遍 HTTP 取数路径（同一 run 三档同数、
   均 0 跳过，`--help` 三次 rc=0 且输出含 `--port`）。IPC/UI 入口已接（读数据根的
-  `payload-source.json`），发布落点（R2 写）与生产基址仍未定。
+  `payload-source.json`），发布落点（R2 写）与生产基址仍未定；安装包自带的路径已接通：
+  `bundled/` 在安装包里，首启不联网也能装运行组件（run 39779235920，见下条）。
 - `.github/workflows/installer.yml` + `tools/make_icons.py`：**安装包本身**，三平台各一个未签名包，
-  只装壳、不带引擎与权重（引擎 server-only 后 105.1 MiB + 权重 415 MB 起，装不进安装器）。矩阵 Windows `nsis` /
+  带 server-only 运行组件（三档内置载荷 105.1 / 156.4 / 158.5 MiB，压缩后安装包
+  25.0 / 63.3 / 59.6 MiB），权重仍不进包（415 MB 起，首启下载）。矩阵 Windows `nsis` /
   macOS `dmg` / Linux `deb`，用钉住的 `tauri-apps/tauri-action`；CLI 显式传
   `npx --yes @tauri-apps/cli@2.12.3` —— 不传时 action 会自己 `npm install -g @tauri-apps/cli@v2`，
   浮在一个大版本上。`tauri.conf.json` 的 `bundle.active` 打开、targets 三档、图标五件；
@@ -517,10 +519,12 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   与 ICNS（预乘 alpha 双线性缩放，避免透明边缘发黑）。`--check` 先比字节，不同就**解压后逐像素比**
   —— 压缩流随 zlib 实现而变（本机 python3 的 zlib-ng 1.3.1 与 Anaconda python 的 zlib 1.3.2
   对同一份像素给出 6,389 vs 6,393 B），逐字节比会在 CI 的另一种 zlib 上假红；
-  `tests/test_make_icons.py` 10 条（含"重新压缩但图没变"的阳性对照与改一个像素的阴性对照）。车道最后一步断言 glob 真找到包且非空
-  （`uploadWorkflowArtifacts` 成功不代表编出了东西）。**2026-10-21 三格全出了**（run 39633525944）：
-  Linux `deb` 3,237,370 B、Windows `nsis` 2,076,484 B、macOS `dmg` 3,152,248 B（`darwin-aarch64-dmg`，
-  16:28Z 才排到 runner、约 3 分钟编完）。包未签名，`tauriScript` 与 deb maintainer 仍只是静态核对。
+  `tests/test_make_icons.py` 10 条（含"重新压缩但图没变"的阳性对照与改一个像素的阴性对照）。车道最后一步
+  不是"产物非空"：把安装包解开（`dpkg-deb -x` / `7z x` / `hdiutil attach`），找到唯一的
+  `bundled/delivery-manifest.json`，与编包前那份逐字节 `cmp`，再用 `bundle_payload.py --check`
+  复核包内每个对象。**2026-10-22 三格全绿**（run 39779235920）：Linux `deb` 66,422,834 B、
+  Windows `nsis` 26,205,326 B、macOS `dmg` 62,451,834 B；包内运行组件 93 / 57 / 32 个文件
+  （157 / 106 / 159 MiB），权重不在其中。包未签名，`tauriScript` 与 deb maintainer 仍只是静态核对。
 - `.github/workflows/ci.yml`：静态门禁（含 yaml_gate）+ 单测（夹具是真实 API 捕获）+ 离线跑发现器
   与离线回放工具带钉表。
 - `.github/workflows/engine-live.yml`：打真实 API 发现产物 → 下载 linux 引擎（不编译）→ 下载 pin 住的

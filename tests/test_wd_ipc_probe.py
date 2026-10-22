@@ -18,6 +18,7 @@ import urllib.request
 import yaml
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "tools"))
+import bundle_payload as bp  # noqa: E402
 import wd_ipc_probe as wd  # noqa: E402
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
@@ -371,6 +372,16 @@ class TestBundledFixture(unittest.TestCase):
         delivery = fixture["delivery"]
         self.assertTrue(os.path.isfile(os.path.join(root, "delivery-manifest.json")))
         self.assertFalse(os.path.isfile(os.path.join(root, "payload-manifest.json")))
+        # 外壳必须按包根这张表的名字找（不是装好后的根清单名）：两边各写一份字面量
+        # 就会像 2026-10-22 那次一样，安装包带对了、外壳却发现不了。
+        with open(os.path.join(ROOT, "shell", "core", "src", "delivery.rs"),
+                  encoding="utf-8") as fh:
+            self.assertIn(f'pub const TABLE_NAME: &str = "{bp.TABLE_NAME}"', fh.read())
+        with open(os.path.join(ROOT, "shell", "core", "src", "bundled.rs"),
+                  encoding="utf-8") as fh:
+            loader = fh.read()
+        self.assertIn("root.join(TABLE_NAME)", loader)
+        self.assertNotIn("root.join(MANIFEST_NAME)", loader)
         for row in delivery["files"]:
             self.assertTrue(os.path.isfile(os.path.join(root, *row["key"].split("/"))),
                             row["key"])

@@ -1,31 +1,32 @@
 //! 随安装包分发的运行组件：与远程源消费同一份 `delivery-manifest.json`。
 //!
-//! 安装包里放的是对象键布局（`<root>/<key>`）加一张根清单；这一层只负责发现它、
-//! 把清单再验一遍、按落点逐文件复制。校验与落盘顺序仍走 `delivery::install`，
+//! 安装包里放的是对象键布局（`<root>/<key>`）加一张**包根**的交付表
+//! `delivery-manifest.json`（`bundle_payload.py` 最后写它）；这一层只负责发现它、
+//! 把表再验一遍、按落点逐文件复制。校验与落盘顺序仍走 `delivery::install`，
 //! 所以内置路径不会绕开哈希，也不会让根清单先于文件出现。
 
 use std::fs;
 use std::path::{Path, PathBuf};
 
-use crate::delivery::{install, Delivery, Installed, MANIFEST_NAME};
+use crate::delivery::{install, Delivery, Installed, TABLE_NAME};
 use crate::error::CoreError;
 
 pub const ENV_DIR: &str = "LOCAL_AI_BUNDLED_PAYLOAD";
 pub const DIR_NAME: &str = "bundled";
 
-fn has_manifest(dir: &Path) -> bool {
-    dir.join(MANIFEST_NAME).is_file()
+fn has_table(dir: &Path) -> bool {
+    dir.join(TABLE_NAME).is_file()
 }
 
 /// 测试与离线重放可以用环境变量指一棵树；正式安装走 Tauri 的资源目录。
 pub fn from_env() -> Option<PathBuf> {
     let dir = PathBuf::from(std::env::var_os(ENV_DIR)?);
-    has_manifest(&dir).then_some(dir)
+    has_table(&dir).then_some(dir)
 }
 
 pub fn in_resource_dir(resource_dir: Option<&Path>) -> Option<PathBuf> {
     let dir = resource_dir?.join(DIR_NAME);
-    has_manifest(&dir).then_some(dir)
+    has_table(&dir).then_some(dir)
 }
 
 pub fn candidate(resource_dir: Option<&Path>) -> Option<PathBuf> {
@@ -33,7 +34,7 @@ pub fn candidate(resource_dir: Option<&Path>) -> Option<PathBuf> {
 }
 
 pub fn load(root: &Path) -> Result<Delivery, CoreError> {
-    Delivery::from_file(&root.join(MANIFEST_NAME))
+    Delivery::from_file(&root.join(TABLE_NAME))
 }
 
 pub fn install_from(root: &Path, platform: &str, data_root: &Path) -> Result<Installed, CoreError> {
@@ -49,6 +50,7 @@ pub fn install_from(root: &Path, platform: &str, data_root: &Path) -> Result<Ins
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::delivery::MANIFEST_NAME;
     use crate::hex_encode;
     use serde_json::json;
     use sha2::{Digest, Sha256};
@@ -130,7 +132,7 @@ mod tests {
             "totals": {"files": file_rows.len(), "bytes": total},
         });
         fs::write(
-            root.join(MANIFEST_NAME),
+            root.join(TABLE_NAME),
             serde_json::to_string_pretty(&delivery).unwrap(),
         )
         .unwrap();
