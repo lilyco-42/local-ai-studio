@@ -29,6 +29,8 @@ permissions:
 
 env:
   GITHUB_TOKEN: ${{ github.token }}
+  # windows runner 的 Python 默认 cp1252，工具会打印中文；改成 UTF-8 输出。
+  PYTHONUTF8: "1"
 
 concurrency:
   group: installer-${{ github.ref }}
@@ -121,6 +123,9 @@ jobs:
       - name: 编包前复核：清单与每个对象都能对上
         run: |
           set -euo pipefail
+          # 仓库里的占位文件只为"没有载荷时的普通编译"满足资源 glob；
+          # 安装包里不能带上它，否则内置载荷的 check 会把它当成清单外文件。
+          rm -f shell/src-tauri/bundled/placeholder.txt
           test -f shell/src-tauri/bundled/delivery-manifest.json
           ${{ matrix.python }} tools/bundle_payload.py --check \
             --manifest shell/src-tauri/bundled/delivery-manifest.json \
