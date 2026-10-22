@@ -8,10 +8,13 @@ use tauri::{AppHandle, Emitter, State};
 use local_ai_studio_core::base64;
 use local_ai_studio_core::delivery::{install, Delivery};
 use local_ai_studio_core::download::{CurlFetcher, Policy};
+use local_ai_studio_core::hardware::Hardware;
 use local_ai_studio_core::http::MAX_BODY_BYTES;
+use local_ai_studio_core::hub::{self, HubView};
 use local_ai_studio_core::payload_fetch::{
     fetch_manifest, fetch_object, load_source, SOURCE_NAME,
 };
+use local_ai_studio_core::starter::{self, StarterPin};
 use local_ai_studio_core::{OcrRequest, Status};
 
 use crate::state::AppState;
@@ -332,6 +335,93 @@ pub async fn install_payload(
     })
     .await
     .map_err(|e| format!("安装任务失败: {e}"))?
+}
+
+#[derive(Serialize)]
+pub struct StarterOut {
+    pub installed: bool,
+    pub id: String,
+    pub file: String,
+    pub bytes: u64,
+    pub size_mib: u64,
+    pub license: String,
+    pub ram_mib_min: u64,
+    pub path: Option<String>,
+}
+
+fn starter_view(pin: &StarterPin, data_root: &std::path::Path) -> StarterOut {
+    let path = starter::installed_path(pin, data_root);
+    StarterOut {
+        installed: path.is_some(),
+        id: pin.model.id.clone(),
+        file: pin.model.file.clone(),
+        bytes: pin.model.bytes,
+        size_mib: pin.size_mib(),
+        license: pin.model.license.clone(),
+        ram_mib_min: pin.fit.ram_mib_min,
+        path: path.map(|p| p.display().to_string()),
+    }
+}
+
+#[tauri::command]
+pub fn hardware_profile(state: State<'_, AppState>) -> Hardware {
+    state.hardware.clone()
+}
+
+#[tauri::command]
+pub fn starter_status(state: State<'_, AppState>) -> StarterOut {
+    starter_view(&state.starter, &state.data_root)
+}
+
+/// 只下这只权重，不碰引擎载荷；装好之后把"对话"停一次，下一次启动就换用它。
+#[tauri::command]
+pub async fn starter_install(state: State<'_, AppState>) -> Result<StarterOut, String> {
+    let data_root = state.data_root.clone();
+    let supervisor = state.supervisor.clone();
+    let pin = state.starter.clone();
+    let task_pin = pin.clone();
+    let path = tauri::async_runtime::spawn_blocking(move || {
+        let mut fetcher = CurlFetcher::new();
+        let (path, _) = starter::install(&task_pin, &data_root, &mut fetcher, Policy::default())
+            .map_err(|e| e.to_string())?;
+        // 527 MB 的整文件复核也放在阻塞线程里，别堵住 async worker。
+        starter::verify(&path, task_pin.model.bytes, &task_pin.model.sha256)
+            .map_err(|e| e.to_string())?;
+        Ok::<_, String>(path)
+    })
+    .await
+    .map_err(|e| format!("入门模型下载任务失败: {e}"))??;
+    {
+        let mut guard = supervisor.lock().map_err(|_| lock_broken())?;
+        guard.stop("对话");
+        guard.set_starter_model(Some(path));
+    }
+    Ok(starter_view(&pin, &state.data_root))
+}
+
+#[tauri::command]
+pub fn hub_config(state: State<'_, AppState>) -> Result<HubView, String> {
+    hub::load(&state.data_root)
+        .map(|config| config.view())
+        .map_err(|e| e.to_string())
+}
+
+/// 只写开关与展示用的命令；不连接、不登录、不碰积分。
+#[tauri::command]
+pub fn hub_save(
+    state: State<'_, AppState>,
+    enabled: bool,
+    ssh_user: String,
+    ssh_key: String,
+) -> Result<HubView, String> {
+    // 配置文件坏了也要能靠一次显式保存恢复，而不是把用户锁在报错页。
+    let mut config = hub::load(&state.data_root).unwrap_or_default();
+    config.enabled = enabled;
+    config.ssh_user = ssh_user.trim().to_string();
+    config.ssh_key = ssh_key.trim().to_string();
+    hub::save(&state.data_root, config)
+        .map(|saved| saved.view())
+        .map_err(|e| e.to_string())
 }
 
 #[cfg(test)]

@@ -9,9 +9,12 @@ pub mod contract;
 pub mod delivery;
 pub mod download;
 pub mod error;
+pub mod hardware;
 pub mod http;
+pub mod hub;
 pub mod manifest;
 pub mod payload_fetch;
+pub mod starter;
 pub mod supervisor;
 
 pub use contract::{Contract, CONTRACT_JSON};

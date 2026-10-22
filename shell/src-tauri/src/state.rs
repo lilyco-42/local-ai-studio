@@ -2,12 +2,17 @@ use std::fs;
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
 
+use local_ai_studio_core::hardware::{detect, Hardware};
+use local_ai_studio_core::starter::{installed_path, StarterPin};
 use local_ai_studio_core::{Contract, Supervisor};
 use tauri::Manager;
 
 pub struct AppState {
     pub supervisor: Arc<Mutex<Supervisor>>,
     pub data_root: PathBuf,
+    /// 启动时读一次；`nvidia-smi` 之类只读探测不会每 3 秒重跑。
+    pub hardware: Hardware,
+    pub starter: StarterPin,
 }
 
 impl AppState {
@@ -23,11 +28,16 @@ impl AppState {
             .ok_or_else(|| format!("合同里没有 {} 这一格", std::env::consts::OS))?;
         let tier = std::env::var("LOCAL_AI_TIER").unwrap_or_else(|_| "8GB".to_string());
         let device = std::env::var("LOCAL_AI_OCR_DEVICE").unwrap_or_else(|_| "auto".to_string());
+        let starter = StarterPin::embedded().map_err(|e| e.to_string())?;
+        let starter_model = installed_path(&starter, &data_root);
         let supervisor = Supervisor::new(contract, platform, &tier, data_root.clone(), &device)
-            .map_err(|e| e.to_string())?;
+            .map_err(|e| e.to_string())?
+            .with_starter_model(starter_model);
         Ok(Self {
             supervisor: Arc::new(Mutex::new(supervisor)),
             data_root,
+            hardware: detect(),
+            starter,
         })
     }
 }
