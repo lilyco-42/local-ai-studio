@@ -12,8 +12,10 @@ const I18N = {
     idle: '未启动',
     running: '运行中',
     notInstalled: '运行组件未安装',
-    notInstalledHint: '引擎负载还没装进数据目录；点“安装运行组件”按清单下载并逐文件校验。',
-    payloadUnconfigured: '数据目录里还没有 payload-source.json：写入交付清单地址与下载基址后重开窗口，这里才会出现安装入口。',
+    notInstalledHint: '引擎负载还没装进数据目录；点“安装运行组件”按清单落盘并逐文件校验。',
+    bundledHint: '这个安装包自带运行组件：点“安装运行组件”直接落进数据目录，不联网，逐文件校验。',
+    remoteHint: '数据目录里配置了远程源：点“安装运行组件”按清单下载并逐文件校验。',
+    payloadUnconfigured: '数据目录里没有 payload-source.json，这个安装包也没带内置运行组件：没有可用的首装来源。',
     installPayload: '安装运行组件',
     installBusy: '安装运行组件… {seen}/{total}',
     unavailable: '本平台暂不提供',
@@ -37,7 +39,7 @@ const I18N = {
     size: '尺寸',
     generate: '出图',
     dataDir: '数据目录',
-    payloadHint: '安装包只装外壳；引擎负载由“安装运行组件”从配置的源取回并逐文件校验。',
+    payloadHint: '首装来源：安装包自带运行组件时直接落盘；数据根里的 payload-source.json 可覆盖为远程源，两者都逐文件校验。',
     needFile: '还没有选文件。',
     engineError: '引擎错误',
     emptyReply: '模型没有返回内容。',
@@ -72,8 +74,10 @@ const I18N = {
     idle: 'stopped',
     running: 'running',
     notInstalled: 'runtime not installed',
-    notInstalledHint: 'The engine payload is not in the data folder yet; Install runtime fetches it from the configured source and verifies every file.',
-    payloadUnconfigured: 'No payload-source.json in the data folder yet: add the manifest URL and download bases, then reopen the window to get the install button.',
+    notInstalledHint: 'The engine payload is not in the data folder yet; Install runtime writes it and verifies every file.',
+    bundledHint: 'This installer carries the runtime: Install runtime copies it into the data folder, offline, verifying every file.',
+    remoteHint: 'A remote source is configured in the data folder: Install runtime downloads it and verifies every file.',
+    payloadUnconfigured: 'No payload-source.json in the data folder, and this installer carries no bundled runtime: there is no first-install source.',
     installPayload: 'Install runtime',
     installBusy: 'Installing runtime… {seen}/{total}',
     unavailable: 'not available on this platform',
@@ -97,7 +101,7 @@ const I18N = {
     size: 'Size',
     generate: 'Generate',
     dataDir: 'Data dir',
-    payloadHint: 'The installer ships only the shell; Install runtime fetches engines from the configured source and verifies each file.',
+    payloadHint: 'First-install source: an installer-bundled runtime copies straight in; payload-source.json in the data folder overrides it with a remote source. Both verify every file.',
     needFile: 'No file selected yet.',
     engineError: 'Engine error',
     emptyReply: 'The model returned no content.',
@@ -373,8 +377,10 @@ function renderStatus() {
   }
   if (row && row.installed === false) {
     el('engine-chip').textContent = cap + ' · ' + t('notInstalled');
-    el('engine-state').textContent = cap + ' · '
-      + (payloadSource ? t('notInstalledHint') : (payloadSourceError || t('payloadUnconfigured')));
+    const hint = payloadSource
+      ? t(payloadSource.mode === 'bundled' ? 'bundledHint' : 'remoteHint')
+      : (payloadSourceError || t('payloadUnconfigured'));
+    el('engine-state').textContent = cap + ' · ' + hint;
     installButton.hidden = !payloadSource;
     if (!busy) {
       installButton.disabled = !payloadSource;

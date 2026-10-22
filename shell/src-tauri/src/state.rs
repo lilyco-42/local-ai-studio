@@ -4,7 +4,7 @@ use std::sync::{Arc, Mutex};
 
 use local_ai_studio_core::hardware::{detect, Hardware};
 use local_ai_studio_core::starter::{installed_path, StarterPin};
-use local_ai_studio_core::{Contract, Supervisor};
+use local_ai_studio_core::{bundled, Contract, Supervisor};
 use tauri::Manager;
 
 pub struct AppState {
@@ -13,6 +13,8 @@ pub struct AppState {
     /// 启动时读一次；`nvidia-smi` 之类只读探测不会每 3 秒重跑。
     pub hardware: Hardware,
     pub starter: StarterPin,
+    /// 安装包自带的运行组件目录；没有就是 `None`，远程源仍然可用。
+    pub bundled: Option<PathBuf>,
 }
 
 impl AppState {
@@ -33,11 +35,13 @@ impl AppState {
         let supervisor = Supervisor::new(contract, platform, &tier, data_root.clone(), &device)
             .map_err(|e| e.to_string())?
             .with_starter_model(starter_model);
+        let resource_dir = app.path().resource_dir().ok();
         Ok(Self {
             supervisor: Arc::new(Mutex::new(supervisor)),
             data_root,
             hardware: detect(),
             starter,
+            bundled: bundled::candidate(resource_dir.as_deref()),
         })
     }
 }
