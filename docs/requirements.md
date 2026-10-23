@@ -397,7 +397,7 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     官方 `tauri-apps/tauri-action`（MIT、1,619★、2026-10-16 仍在 push）是 `uses:` 型且
     release **没有产物**，所以它只能按 commit SHA 钉，工具带那套 digest sha256 对它不适用。
     最后是算术：**引擎 server-only 落地三档 105.1 / 156.4 / 158.5 MiB，压缩后的安装包只有
-    25.0 / 63.3 / 59.6 MiB** —— 所以引擎随包装、权重（415 MB / 1,566 MB）首启按下载层契约拉
+    25.0 / 63.3 / 59.6 MiB** —— 所以引擎随包装、权重（527 MB / 1,566 MB）首启按下载层契约拉
     是决定，不是妥协（LM Studio 同形态；实测见第 34 条）。
 17. **给用户看的对话档 ≠ 车道最小样本，而这张表也是重算出来的，不是手挑的**：
     `catalog/defaults.json` 那颗 `qwen2.5-0.5b-instruct-q2_k`（415 MB）只为在 2 核无 GPU 的
@@ -993,6 +993,11 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     `ui(…): chip='对话 · 未启动'`、盘上 3 颗文件逐字节相符、`.objects` 已清 → 二次安装
     `written=0 skipped=3`；负向对照同时证明判据会红（掺假能力名被拒）。即"UI → IPC → 取数 → 落盘 →
     幂等"整条链在 CI 里真跑通过一次，只是版本与基址都是回环合成件。
+    内置路径也有同一套真窗口判据：`--install-bundled` 用 `bundle_payload.py` 把同一份合成清单
+    打成对象键树、不起 HTTP，窗口起来后点同一个按钮。2026-10-22 run 39781418732 的 Ubuntu app
+    job 里，来源提示是"安装包自带"，点后 `对话(installed=True)`、盘上 3 颗文件逐字节相符、
+    没有 `.objects`，二次安装 `written=0 skipped=3 mode=bundled`；这一步同时把外壳包根表名
+    与工具不一致的集成缺口抓了出来（见第 34 条）。
     仍没有的是**发布落点（R2 写）、生产 HTTPS 基址**（#57），以及用户个人电脑上的"装完真能跑"。
     OCR 仍不在出包清单里，`not_in_manifest` 会点名 `文字识别/oar-ocr` —— 已知缺口，不是这一步的失败。
 34. **安装包本身：三平台各一个未签名包，带 server-only 运行组件**（`.github/workflows/installer.yml` + `tools/make_icons.py`）：
@@ -1021,7 +1026,7 @@ Apple Silicon Mac、x64/ARM64 Windows、x64 Linux；引擎以 llama.cpp（GGUF�
     157 MiB）、Windows `nsis` 26,205,326 B（57 / 106 MiB）、macOS `dmg` 62,451,834 B（32 / 159 MiB）；
     三档 `payload` job 也各自复核过清单（win 110,167,837 B、linux 164,022,516 B、mac 166,224,542 B）。
     包未签名、未公证；CLI 版本与 deb maintainer（tauri-bundler 取 identifier 第二段 `lilyco42`）
-    仍只是静态核对。权重 415 MB / 1.5 GB 仍不进安装器，由首启的入门模型下载负责。
+    仍只是静态核对。权重 527 MB / 1.5 GB 仍不进安装器，由首启的入门模型下载负责。
     这条车道还抓到过一个只在真集成里露头的错：外壳原先把包根的表名当成装好后的根清单名
     （`payload-manifest.json`），而工具写的是 `delivery-manifest.json` —— 安装包带对了、外壳却
     发现不了。现在两边共用 `delivery::TABLE_NAME`，`tests/test_wd_ipc_probe.py` 的

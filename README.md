@@ -511,7 +511,7 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   `bundled/` 在安装包里，首启不联网也能装运行组件（run 39779235920，见下条）。
 - `.github/workflows/installer.yml` + `tools/make_icons.py`：**安装包本身**，三平台各一个未签名包，
   带 server-only 运行组件（三档内置载荷 105.1 / 156.4 / 158.5 MiB，压缩后安装包
-  25.0 / 63.3 / 59.6 MiB），权重仍不进包（415 MB 起，首启下载）。矩阵 Windows `nsis` /
+  25.0 / 63.3 / 59.6 MiB），权重仍不进包（527 MB 起，首启下载）。矩阵 Windows `nsis` /
   macOS `dmg` / Linux `deb`，用钉住的 `tauri-apps/tauri-action`；CLI 显式传
   `npx --yes @tauri-apps/cli@2.12.3` —— 不传时 action 会自己 `npm install -g @tauri-apps/cli@v2`，
   浮在一个大版本上。`tauri.conf.json` 的 `bundle.active` 打开、targets 三档、图标五件；
