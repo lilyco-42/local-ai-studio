@@ -123,8 +123,11 @@ jobs:
           LIBGL_ALWAYS_SOFTWARE: "1"
           NO_AT_BRIDGE: "1"
         run: |
-          sudo apt-get install -y xvfb webkit2gtk-driver
-          apt-cache policy webkit2gtk-driver | head -5
+          sudo apt-get install -y xvfb
+          # ubuntu-latest 已迁到 26.04：驱动包从 webkit2gtk-driver 改名 webkitgtk-webdriver
+          if ! sudo apt-get install -y webkit2gtk-driver; then
+            sudo apt-get install -y webkitgtk-webdriver
+          fi
           command -v WebKitWebDriver
           WebKitWebDriver --version || true
           if ! command -v tauri-driver >/dev/null 2>&1; then

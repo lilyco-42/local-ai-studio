@@ -686,7 +686,9 @@ def run(args) -> int:
             raise ValueError(f"{option} 只驱动对话页：安装按钮与状态条跟着当前页签走")
     native = args.native_driver or shutil.which("WebKitWebDriver")
     if not native:
-        raise ProbeError("找不到 WebKitWebDriver（Ubuntu 上是 webkit2gtk-driver 包）")
+        raise ProbeError(
+            "找不到 WebKitWebDriver（Ubuntu 24.04 是 webkit2gtk-driver 包，26.04 起是 webkitgtk-webdriver）"
+        )
     base = f"http://127.0.0.1:{args.port}"
     driver = Driver(driver_argv(args.driver, args.port, args.native_port, native), base, args.log)
     sid = None

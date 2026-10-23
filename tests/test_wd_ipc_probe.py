@@ -607,6 +607,7 @@ class TestWorkflow(unittest.TestCase):
         run = self.step("WebDriver")["run"]
         for needle in (
             "webkit2gtk-driver",
+            "webkitgtk-webdriver",
             'command -v WebKitWebDriver',
             "cargo install tauri-driver --locked --version 2.1.0",
             'xvfb-run -a',
