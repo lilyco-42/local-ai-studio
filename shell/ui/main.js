@@ -12,8 +12,10 @@ const I18N = {
     idle: '未启动',
     running: '运行中',
     notInstalled: '运行组件未安装',
-    notInstalledHint: '引擎负载还没装进数据目录；点“安装运行组件”按清单下载并逐文件校验。',
-    payloadUnconfigured: '数据目录里还没有 payload-source.json：写入交付清单地址与下载基址后重开窗口，这里才会出现安装入口。',
+    notInstalledHint: '引擎负载还没装进数据目录；点“安装运行组件”按清单落盘并逐文件校验。',
+    bundledHint: '这个安装包自带运行组件：点“安装运行组件”直接落进数据目录，不联网，逐文件校验。',
+    remoteHint: '数据目录里配置了远程源：点“安装运行组件”按清单下载并逐文件校验。',
+    payloadUnconfigured: '数据目录里没有 payload-source.json，这个安装包也没带内置运行组件：没有可用的首装来源。',
     installPayload: '安装运行组件',
     installBusy: '安装运行组件… {seen}/{total}',
     unavailable: '本平台暂不提供',
@@ -37,10 +39,29 @@ const I18N = {
     size: '尺寸',
     generate: '出图',
     dataDir: '数据目录',
-    payloadHint: '安装包只装外壳；引擎负载由“安装运行组件”从配置的源取回并逐文件校验。',
+    payloadHint: '首装来源：安装包自带运行组件时直接落盘；数据根里的 payload-source.json 可覆盖为远程源，两者都逐文件校验。',
     needFile: '还没有选文件。',
     engineError: '引擎错误',
-    emptyReply: '模型没有返回内容。'
+    emptyReply: '模型没有返回内容。',
+    hwAccel: '加速推理',
+    hwCpu: 'CPU 推理',
+    hwCores: '核',
+    hwUnsupported: '当前引擎没有后端',
+    hwNone: '未检测到 GPU/NPU',
+    starterTitle: '随身入门模型',
+    starterNeed: '还没下载（约 {mib} MiB）。下载后先按 sha256 校验，再交给对话引擎。',
+    starterReady: '已就绪（{mib} MiB）。启动对话引擎就会用它。',
+    starterBusy: '正在下载并校验…支持断点续传，约 {mib} MiB。',
+    starterInstall: '下载入门模型',
+    starterMeta: '{id} · {license} · 建议内存 ≥ {ram} MiB',
+    hubTitle: '可选：接入 lain42.top 算力中心',
+    hubHint: '只保存开关和一条命令；外壳不自动连接、不开入站端口。积分与结算都在服务端，客户端不碰支付。',
+    hubEnable: '启用（仅保存配置）',
+    hubUser: 'SSH 用户名（可留空）',
+    hubKey: '私钥路径',
+    hubSave: '保存',
+    hubSaved: '已保存；尚未连接。',
+    hubNode: '节点 ID'
   },
   en: {
     appName: 'Local AI Studio',
@@ -53,8 +74,10 @@ const I18N = {
     idle: 'stopped',
     running: 'running',
     notInstalled: 'runtime not installed',
-    notInstalledHint: 'The engine payload is not in the data folder yet; Install runtime fetches it from the configured source and verifies every file.',
-    payloadUnconfigured: 'No payload-source.json in the data folder yet: add the manifest URL and download bases, then reopen the window to get the install button.',
+    notInstalledHint: 'The engine payload is not in the data folder yet; Install runtime writes it and verifies every file.',
+    bundledHint: 'This installer carries the runtime: Install runtime copies it into the data folder, offline, verifying every file.',
+    remoteHint: 'A remote source is configured in the data folder: Install runtime downloads it and verifies every file.',
+    payloadUnconfigured: 'No payload-source.json in the data folder, and this installer carries no bundled runtime: there is no first-install source.',
     installPayload: 'Install runtime',
     installBusy: 'Installing runtime… {seen}/{total}',
     unavailable: 'not available on this platform',
@@ -78,10 +101,29 @@ const I18N = {
     size: 'Size',
     generate: 'Generate',
     dataDir: 'Data dir',
-    payloadHint: 'The installer ships only the shell; Install runtime fetches engines from the configured source and verifies each file.',
+    payloadHint: 'First-install source: an installer-bundled runtime copies straight in; payload-source.json in the data folder overrides it with a remote source. Both verify every file.',
     needFile: 'No file selected yet.',
     engineError: 'Engine error',
-    emptyReply: 'The model returned no content.'
+    emptyReply: 'The model returned no content.',
+    hwAccel: 'accelerated',
+    hwCpu: 'CPU',
+    hwCores: 'cores',
+    hwUnsupported: 'no backend in this engine',
+    hwNone: 'no GPU/NPU detected',
+    starterTitle: 'Pocket starter model',
+    starterNeed: 'Not downloaded yet (about {mib} MiB). It is checked against sha256 before the chat engine uses it.',
+    starterReady: 'Ready ({mib} MiB). Starting the chat engine will use it.',
+    starterBusy: 'Downloading and verifying… resumable, about {mib} MiB.',
+    starterInstall: 'Download starter model',
+    starterMeta: '{id} · {license} · needs ≥ {ram} MiB RAM',
+    hubTitle: 'Optional: join the lain42.top compute hub',
+    hubHint: 'Only a toggle and a command are saved. The shell never connects on its own and opens no inbound port. Credits and payouts live server-side; the client never touches payments.',
+    hubEnable: 'Enable (saves config only)',
+    hubUser: 'SSH user (optional)',
+    hubKey: 'Private key path',
+    hubSave: 'Save',
+    hubSaved: 'Saved; not connected.',
+    hubNode: 'Node ID'
   }
 };
 
@@ -100,6 +142,9 @@ let unavailable = new Set();
 let history = [];
 let payloadSource = null;
 let payloadSourceError = null;
+let hardware = null;
+let starter = null;
+let hubState = null;
 
 function loadLang() {
   try {
@@ -133,6 +178,9 @@ function applyLang() {
   });
   el('lang').textContent = lang === 'zh' ? 'EN' : '中';
   renderStatus();
+  renderHardware();
+  renderStarter();
+  renderHub();
 }
 
 function selectTab(tab) {
@@ -163,7 +211,7 @@ async function run(task) {
 }
 
 function setButtonsDisabled(value) {
-  document.querySelectorAll('main button, #engine-start, #engine-stop, #payload-install').forEach((node) => {
+  document.querySelectorAll('main button, #engine-start, #engine-stop, #payload-install, #starter-install, #hub-save').forEach((node) => {
     node.disabled = value || unavailable.has(node.dataset.capability);
   });
 }
@@ -219,6 +267,11 @@ async function refreshStatus() {
     payloadSource = null;
     payloadSourceError = String(err);
   }
+  try {
+    starter = await invoke('starter_status');
+  } catch (_err) {
+    starter = null;
+  }
   unavailable = new Set(statusRows
     .filter((row) => row.available === false)
     .map((row) => row.capability));
@@ -226,6 +279,84 @@ async function refreshStatus() {
     node.disabled = busy || unavailable.has(node.dataset.capability);
   });
   renderStatus();
+  renderStarter();
+}
+
+function renderHardware() {
+  const box = el('env');
+  if (!hardware) {
+    box.hidden = true;
+    return;
+  }
+  box.hidden = false;
+  const backend = hardware.backend || {};
+  const chip = el('env-backend');
+  chip.textContent = (backend.accelerated ? t('hwAccel') : t('hwCpu'))
+    + ' · ' + (backend.label || 'CPU');
+  chip.title = backend.reason || '';
+
+  const bits = [];
+  const cpu = hardware.cpu || {};
+  if (cpu.brand) bits.push(cpu.brand);
+  if (cpu.cores) bits.push(cpu.cores + ' ' + t('hwCores'));
+  if (hardware.ram_mib) bits.push((hardware.ram_mib / 1024).toFixed(1) + ' GiB');
+  bits.push(hardware.os + '/' + hardware.arch);
+  el('env-cpu').textContent = bits.join(' · ');
+
+  const accel = el('env-accel');
+  accel.textContent = '';
+  const rows = hardware.accelerators || [];
+  if (rows.length === 0) {
+    const none = document.createElement('span');
+    none.className = 'chip';
+    none.textContent = t('hwNone');
+    accel.appendChild(none);
+    return;
+  }
+  rows.slice(0, 4).forEach((row) => {
+    const node = document.createElement('span');
+    node.className = 'chip' + (row.usable ? ' ok' : '');
+    let text = (row.kind === 'npu' ? 'NPU' : 'GPU') + ' · ' + row.name;
+    if (row.backend) text += ' · ' + row.backend.toUpperCase();
+    if (!row.usable) text += ' · ' + t('hwUnsupported');
+    node.textContent = text;
+    node.title = row.note || '';
+    accel.appendChild(node);
+  });
+}
+
+function renderStarter() {
+  const box = el('starter');
+  box.hidden = !starter;
+  if (!starter) return;
+  const mib = starter.size_mib || Math.round((starter.bytes || 0) / 1048576);
+  const button = el('starter-install');
+  const state = el('starter-state');
+  el('starter-meta').textContent = t('starterMeta')
+    .replace('{id}', starter.id || '')
+    .replace('{license}', starter.license || '')
+    .replace('{ram}', starter.ram_mib_min || 0);
+  if (starter.installed) {
+    state.textContent = t('starterReady').replace('{mib}', mib);
+    button.hidden = true;
+  } else {
+    state.textContent = t('starterNeed').replace('{mib}', mib);
+    button.hidden = false;
+    button.disabled = busy;
+  }
+}
+
+function renderHub() {
+  if (!hubState) return;
+  el('hub-enabled').checked = hubState.enabled === true;
+  el('hub-user').value = hubState.ssh_user || '';
+  el('hub-key').value = hubState.ssh_key || '';
+  const command = el('hub-command');
+  command.hidden = !hubState.ssh_command;
+  command.textContent = hubState.ssh_command || '';
+  el('hub-node').textContent = hubState.node_id
+    ? t('hubNode') + ': ' + hubState.node_id
+    : '';
 }
 
 function renderStatus() {
@@ -246,8 +377,10 @@ function renderStatus() {
   }
   if (row && row.installed === false) {
     el('engine-chip').textContent = cap + ' · ' + t('notInstalled');
-    el('engine-state').textContent = cap + ' · '
-      + (payloadSource ? t('notInstalledHint') : (payloadSourceError || t('payloadUnconfigured')));
+    const hint = payloadSource
+      ? t(payloadSource.mode === 'bundled' ? 'bundledHint' : 'remoteHint')
+      : (payloadSourceError || t('payloadUnconfigured'));
+    el('engine-state').textContent = cap + ' · ' + hint;
     installButton.hidden = !payloadSource;
     if (!busy) {
       installButton.disabled = !payloadSource;
@@ -302,6 +435,29 @@ async function installPayload() {
   await run(async () => {
     await invoke('install_payload');
   });
+}
+
+async function installStarter() {
+  if (!starter) return;
+  await run(async () => {
+    const mib = starter.size_mib || Math.round((starter.bytes || 0) / 1048576);
+    el('starter-state').textContent = t('starterBusy').replace('{mib}', mib);
+    starter = await invoke('starter_install');
+  });
+}
+
+async function saveHub() {
+  const enabled = el('hub-enabled').checked;
+  const sshUser = el('hub-user').value.trim();
+  const sshKey = el('hub-key').value.trim();
+  el('hub-state').textContent = '';
+  try {
+    hubState = await invoke('hub_save', { enabled, sshUser, sshKey });
+    renderHub();
+    el('hub-state').textContent = t('hubSaved');
+  } catch (err) {
+    el('hub-state').textContent = String(err);
+  }
 }
 
 async function readBytes(input, required) {
@@ -401,6 +557,8 @@ function wire() {
     applyLang();
   });
   el('payload-install').addEventListener('click', installPayload);
+  el('starter-install').addEventListener('click', installStarter);
+  el('hub-save').addEventListener('click', saveHub);
   el('engine-start').addEventListener('click', startEngine);
   el('engine-stop').addEventListener('click', stopEngine);
   el('chat-send').addEventListener('click', sendChat);
@@ -425,6 +583,24 @@ function init() {
     })
     .catch((err) => {
       el('data-root').textContent = String(err);
+    });
+  invoke('hardware_profile')
+    .then((value) => {
+      hardware = value;
+      renderHardware();
+    })
+    .catch((err) => {
+      el('env').hidden = false;
+      el('env-backend').textContent = t('hwCpu');
+      el('env-cpu').textContent = String(err);
+    });
+  invoke('hub_config')
+    .then((value) => {
+      hubState = value;
+      renderHub();
+    })
+    .catch((err) => {
+      el('hub-state').textContent = String(err);
     });
   refreshStatus();
   window.setInterval(() => {

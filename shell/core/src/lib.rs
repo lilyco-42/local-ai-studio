@@ -5,13 +5,17 @@
 //! 源码里不写死引擎名、旗标或端口。
 
 pub mod base64;
+pub mod bundled;
 pub mod contract;
 pub mod delivery;
 pub mod download;
 pub mod error;
+pub mod hardware;
 pub mod http;
+pub mod hub;
 pub mod manifest;
 pub mod payload_fetch;
+pub mod starter;
 pub mod supervisor;
 
 pub use contract::{Contract, CONTRACT_JSON};

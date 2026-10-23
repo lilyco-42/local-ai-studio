@@ -22,8 +22,8 @@ sys.path.insert(0, HERE)
 ASSERT_RX = re.compile(r"\bcheck\(|SystemExit|\bassert |sys\.exit\(")
 BLOCK_RX = re.compile(r"<<'PY'[^\n]*\n(.*?)\nPY", re.S)
 # 期望值不是估的：2026-10-20 按这两条正则数出来的（重数：本文件的 -v 输出那一行）
-EXPECTED_TOTAL = 18
-EXPECTED_ASSERT = 13
+EXPECTED_TOTAL = 20
+EXPECTED_ASSERT = 15
 EXPECTED_REPLAYED = {
     ("headless-inference", "llama-server"),
     ("image-proof", "常驻 sd-server"),
@@ -37,8 +37,8 @@ EXPECTED_REPLAYED = {
 REPLAY_FILES = ("tests/test_lane_assertions.py", "tests/test_image_proof_block.py")
 # 每张 workflow 的 job 数（2026-10-20 实测；docs/toolbelt.md 那句"其余 21 条 job 一次都没跑过"
 # 就靠这个数与它绑在一起）：加一条 job 必须同时改文档里那句
-EXPECTED_JOBS = {"engine-live.yml": 22, "ci.yml": 1, "package.yml": 2, "shell.yml": 2,
-                 "installer.yml": 1, "upstream-follow.yml": 1}
+EXPECTED_JOBS = {"engine-live.yml": 23, "ci.yml": 1, "package.yml": 2, "shell.yml": 2,
+                 "installer.yml": 2, "upstream-follow.yml": 1}
 
 
 def blocks():

@@ -18,6 +18,7 @@ import urllib.request
 import yaml
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "tools"))
+import bundle_payload as bp  # noqa: E402
 import wd_ipc_probe as wd  # noqa: E402
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
@@ -44,6 +45,44 @@ def ui_state(**overrides):
     base = {
         "title": "Local AI Studio", "tauri": True, "boot_hidden": True,
         "chip": "对话 · 未启动", "data_root_text": "/home/runner/.local/share/local-ai-studio",
+        "env_hidden": False, "env_backend": "CPU 推理 · CPU",
+        "env_cpu": "x · 4 核 · 8.0 GiB · linux/x86_64", "env_accel_chips": 1,
+        "starter_hidden": False,
+        "starter_meta": "lainlives/Qwen3.5-0.8B-uncensored · apache-2.0 · 建议内存 ≥ 1024 MiB",
+        "hub_enabled": False,
+    }
+    base.update(overrides)
+    return base
+
+
+def hw_doc(**overrides):
+    base = {
+        "os": "linux", "arch": "x86_64",
+        "cpu": {"arch": "x86_64", "cores": 4, "brand": "x"},
+        "ram_mib": 8192, "accelerators": [],
+        "backend": {"id": "cpu", "label": "CPU", "accelerated": False, "reason": "没找到加速器"},
+    }
+    base.update(overrides)
+    return base
+
+
+def starter_view(**overrides):
+    with open(os.path.join(ROOT, "pins", "starter.json"), encoding="utf-8") as fh:
+        pin = json.load(fh)
+    model = pin["model"]
+    base = {
+        "installed": False, "id": model["id"], "file": model["file"],
+        "bytes": model["bytes"], "size_mib": (model["bytes"] + 1048575) // 1048576,
+        "license": model["license"], "ram_mib_min": pin["fit"]["ram_mib_min"], "path": None,
+    }
+    base.update(overrides)
+    return base
+
+
+def hub_view(**overrides):
+    base = {
+        "enabled": False, "host": "lain42.top", "ssh_user": "", "ssh_key": "~/.ssh/lain42_ed25519",
+        "node_id": "", "ssh_command": "ssh -i ~/.ssh/lain42_ed25519 -o IdentitiesOnly=yes lain42.top",
     }
     base.update(overrides)
     return base
@@ -319,6 +358,76 @@ class TestInstallFixture(unittest.TestCase):
                 wd.check_reinstall_report(value, 2)
 
 
+class TestBundledFixture(unittest.TestCase):
+    def setUp(self) -> None:
+        self.tmp = tempfile.TemporaryDirectory()
+        self.work = self.tmp.name
+
+    def tearDown(self) -> None:
+        self.tmp.cleanup()
+
+    def test_layout_is_object_keys_plus_a_root_table(self) -> None:
+        fixture = wd.build_bundled_fixture(self.work, CONTRACT, capability="对话")
+        root = fixture["bundled_root"]
+        delivery = fixture["delivery"]
+        self.assertTrue(os.path.isfile(os.path.join(root, "delivery-manifest.json")))
+        self.assertFalse(os.path.isfile(os.path.join(root, "payload-manifest.json")))
+        # 外壳必须按包根这张表的名字找（不是装好后的根清单名）：两边各写一份字面量
+        # 就会像 2026-10-22 那次一样，安装包带对了、外壳却发现不了。
+        with open(os.path.join(ROOT, "shell", "core", "src", "delivery.rs"),
+                  encoding="utf-8") as fh:
+            self.assertIn(f'pub const TABLE_NAME: &str = "{bp.TABLE_NAME}"', fh.read())
+        with open(os.path.join(ROOT, "shell", "core", "src", "bundled.rs"),
+                  encoding="utf-8") as fh:
+            loader = fh.read()
+        self.assertIn("root.join(TABLE_NAME)", loader)
+        self.assertNotIn("root.join(MANIFEST_NAME)", loader)
+        for row in delivery["files"]:
+            self.assertTrue(os.path.isfile(os.path.join(root, *row["key"].split("/"))),
+                            row["key"])
+        self.assertTrue(os.path.isfile(
+            os.path.join(root, *delivery["manifest"]["key"].split("/"))))
+        self.assertEqual(fixture["bundle_check"]["files"], len(delivery["files"]))
+        self.assertEqual(fixture["bundle_report"]["bytes"],
+                         sum(row["bytes"] for row in delivery["files"]))
+        self.assertFalse(os.path.exists(os.path.join(self.work, "payload-source.json")))
+        self.assertFalse(os.path.exists(os.path.join(self.work, "payload-manifest.json")))
+
+    def test_fixture_refuses_non_server_and_unknown_capabilities(self) -> None:
+        with self.assertRaisesRegex(ValueError, "不是 server"):
+            wd.build_bundled_fixture(self.work, CONTRACT, capability="文字识别")
+        with self.assertRaises(ValueError):
+            wd.build_bundled_fixture(self.work, CONTRACT, capability="不存在")
+
+
+class TestPayloadSourceView(unittest.TestCase):
+    def test_bundled_must_not_carry_remote_addresses(self) -> None:
+        wd.check_payload_source(
+            {"mode": "bundled", "manifest_url": "", "bases": []}, "bundled")
+        for bad in (
+            {"mode": "bundled", "manifest_url": "https://x", "bases": []},
+            {"mode": "bundled", "manifest_url": "", "bases": ["https://x"]},
+            {"mode": "remote", "manifest_url": "", "bases": []},
+            {"mode": "remote", "manifest_url": "https://x", "bases": ["https://x"]},
+        ):
+            with self.subTest(bad=bad), self.assertRaises(wd.ProbeError):
+                wd.check_payload_source(bad, "bundled")
+
+    def test_remote_needs_a_manifest_url_and_at_least_one_base(self) -> None:
+        wd.check_payload_source(
+            {"mode": "remote", "manifest_url": "https://x/m.json", "bases": ["https://x"]},
+            "remote")
+        for bad in (
+            None,
+            {"mode": "remote", "manifest_url": "", "bases": ["https://x"]},
+            {"mode": "remote", "manifest_url": "https://x/m.json", "bases": []},
+            {"mode": "bundled", "manifest_url": "https://x/m.json", "bases": ["https://x"]},
+            {"mode": "remote", "manifest_url": "https://x/m.json", "bases": [""]},
+        ):
+            with self.subTest(bad=bad), self.assertRaises(wd.ProbeError):
+                wd.check_payload_source(bad, "remote")
+
+
 class TestFixtureServer(unittest.TestCase):
     def test_serves_the_delivery_manifest_and_every_object_key(self) -> None:
         opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
@@ -398,6 +507,62 @@ class TestUiGate(unittest.TestCase):
             wd.check_ui(state, state["data_root_text"], chip_suffix="运行组件未安装")
 
 
+class TestFeatureStrips(unittest.TestCase):
+    def test_hardware_starter_and_default_hub_pass(self) -> None:
+        expect = wd.starter_expect()
+        wd.check_hardware(hw_doc())
+        wd.check_starter_view(starter_view(), expect)
+        wd.check_hub_default(hub_view())
+        wd.check_feature_strips(ui_state(), hw_doc(), expect, fresh=True)
+
+    def test_hardware_and_strip_mutations_are_rejected(self) -> None:
+        expect = wd.starter_expect()
+        hw_cases = {
+            "缺架构": hw_doc(arch=""),
+            "核数为 0": hw_doc(cpu={"cores": 0}),
+            "backend 缺 label": hw_doc(backend={"accelerated": False}),
+            "accelerated 不是布尔": hw_doc(backend={"label": "CPU", "accelerated": "no"}),
+            "accelerators 不是数组": hw_doc(accelerators={}),
+        }
+        for label, doc in hw_cases.items():
+            with self.subTest(label=label), self.assertRaises(wd.ProbeError):
+                wd.check_hardware(doc)
+        starter_cases = {
+            "许可与 pin 不符": starter_view(license="gpl-3.0"),
+            "内存门槛与 pin 不符": starter_view(ram_mib_min=1),
+            "bytes 是 0": starter_view(bytes=0),
+            "installed 不是布尔": starter_view(installed="false"),
+        }
+        for label, doc in starter_cases.items():
+            with self.subTest(label=label), self.assertRaises(wd.ProbeError):
+                wd.check_starter_view(doc, expect)
+        strip_cases = {
+            "硬件条被藏起来": ui_state(env_hidden=True),
+            "后端标签没画": ui_state(env_backend="GPU 加速"),
+            "系统架构没画": ui_state(env_cpu="x · 4 核 · 8.0 GiB"),
+            "加速器区是空的": ui_state(env_accel_chips=0),
+            "入门档卡片被藏起来": ui_state(starter_hidden=True),
+            "卡片没写许可": ui_state(starter_meta="lainlives/Qwen3.5-0.8B-uncensored"),
+            "中心服务器默认是开的": ui_state(hub_enabled=True),
+        }
+        for label, state in strip_cases.items():
+            with self.subTest(label=label), self.assertRaises(wd.ProbeError):
+                wd.check_feature_strips(state, hw_doc(), expect, fresh=True)
+
+    def test_default_hub_mutations_are_rejected(self) -> None:
+        cases = {
+            "默认开着": hub_view(enabled=True),
+            "主机不对": hub_view(host="evil.example"),
+            "命令不是 ssh": hub_view(ssh_command="bash -c whoami"),
+            "命令少了 IdentitiesOnly": hub_view(ssh_command="ssh -i ~/.ssh/key lain42.top"),
+            "命令没指向中心": hub_view(ssh_command="ssh -i ~/.ssh/key -o IdentitiesOnly=yes other.example"),
+            "还没保存就有 node_id": hub_view(node_id="a" * 32),
+        }
+        for label, view in cases.items():
+            with self.subTest(label=label), self.assertRaises(wd.ProbeError):
+                wd.check_hub_default(view)
+
+
 class TestPolling(unittest.TestCase):
     def test_transient_probe_errors_are_retried(self) -> None:
         """原生驱动比中间节点晚 listen：第一次连接被关掉时必须重试，而不是当场判死。"""
@@ -442,6 +607,7 @@ class TestWorkflow(unittest.TestCase):
         run = self.step("WebDriver")["run"]
         for needle in (
             "webkit2gtk-driver",
+            "webkitgtk-webdriver",
             'command -v WebKitWebDriver',
             "cargo install tauri-driver --locked --version 2.1.0",
             'xvfb-run -a',
@@ -458,6 +624,25 @@ class TestWorkflow(unittest.TestCase):
     def test_ipc_step_does_not_start_engines_or_touch_the_network(self) -> None:
         run = self.step("WebDriver")["run"]
         for forbidden in ("start_engine", "curl ", "wget "):
+            with self.subTest(forbidden=forbidden):
+                self.assertNotIn(forbidden, run)
+
+    def test_bundled_step_uses_a_fresh_data_root_and_no_network(self) -> None:
+        step = self.step("内置载荷")
+        self.assertEqual(step["if"], "matrix.os == 'ubuntu-latest'")
+        self.assertLessEqual(step["timeout-minutes"], 15)
+        run = step["run"]
+        for needle in (
+            'XDG_DATA_HOME="$RUNNER_TEMP/data-bundled"',
+            'HOME="$RUNNER_TEMP/home-bundled"',
+            "--expect-not-installed",
+            "--install-bundled 对话",
+            "--negative-control",
+            "$GITHUB_WORKSPACE/tools/wd_ipc_probe.py",
+        ):
+            with self.subTest(needle=needle):
+                self.assertIn(needle, run)
+        for forbidden in ("start_engine", "curl ", "wget ", "--install-payload"):
             with self.subTest(forbidden=forbidden):
                 self.assertNotIn(forbidden, run)
 

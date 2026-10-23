@@ -69,6 +69,13 @@ pub fn render(
     let cwd = contract::expand_dir(dir_template, ctx.data_root)?;
     let program = cwd.join(&cell.binary);
     let row = cell.argv_for(ctx.tier)?;
+    // 入门档只替换"唯一的权重占位符"：生图那种一颗命令行带四个伴生权重的，
+    // 不能被一只入门模型顶掉；字幕的 `.bin` 也不在替换范围内。
+    let model_override = if row.iter().filter(|t| t.ends_with(".gguf}")).count() == 1 {
+        ctx.extra.get("__model__").map(|v| v.as_str())
+    } else {
+        None
+    };
     let mut args = Vec::with_capacity(row.len());
     let mut inputs = Vec::new();
     for token in row {
@@ -87,7 +94,11 @@ pub fn render(
             })?,
             other if contract::is_placeholder(other) => {
                 let inner = &other[1..other.len() - 1];
-                if let Some(v) = ctx.extra.get(inner) {
+                if let Some(path) = model_override.filter(|_| other.ends_with(".gguf}")) {
+                    let path = PathBuf::from(path);
+                    inputs.push(path.clone());
+                    path.to_string_lossy().into_owned()
+                } else if let Some(v) = ctx.extra.get(inner) {
                     v.clone()
                 } else if cap.mode == "server" {
                     let path = models_dir(ctx.data_root).join(inner);
@@ -193,6 +204,8 @@ pub struct Supervisor {
     data_root: PathBuf,
     device: String,
     readiness_timeout: Duration,
+    /// 用户装好的入门权重；只替换命令行里唯一的 `.gguf` 占位符。
+    starter_model: Option<PathBuf>,
     running: BTreeMap<String, Running>,
 }
 
@@ -225,6 +238,7 @@ impl Supervisor {
             data_root,
             device: device.to_string(),
             readiness_timeout: READY_TIMEOUT,
+            starter_model: None,
             running: BTreeMap::new(),
         })
     }
@@ -232,6 +246,31 @@ impl Supervisor {
     pub fn with_readiness_timeout(mut self, timeout: Duration) -> Self {
         self.readiness_timeout = timeout;
         self
+    }
+
+    pub fn with_starter_model(mut self, path: Option<PathBuf>) -> Self {
+        self.starter_model = path;
+        self
+    }
+
+    pub fn set_starter_model(&mut self, path: Option<PathBuf>) {
+        self.starter_model = path;
+    }
+
+    pub fn starter_model(&self) -> Option<&Path> {
+        self.starter_model.as_deref()
+    }
+
+    /// 只有对话能力才拿入门权重。生图的 8GB/4GB 档也只有一个 `.gguf` 占位符，
+    /// 单看"唯一"不够 —— 那会把 527 MB 的对话模型塞进生图引擎的 `-m`。
+    fn launch_extra(&self, name: &str) -> BTreeMap<String, String> {
+        let mut extra = BTreeMap::new();
+        if name == "对话" {
+            if let Some(path) = &self.starter_model {
+                extra.insert("__model__".into(), path.to_string_lossy().into_owned());
+            }
+        }
+        extra
     }
 
     pub fn data_root(&self) -> &Path {
@@ -478,7 +517,7 @@ impl Supervisor {
         };
         let bind = cap.bind.as_deref().unwrap_or("127.0.0.1");
         let port = allocate_port(bind)?;
-        let extra = BTreeMap::new();
+        let extra = self.launch_extra(name);
         let plan = render(
             &cap,
             &cell,
@@ -989,6 +1028,73 @@ mod tests {
             );
         }
         assert_eq!(plan.inputs.len(), 4);
+    }
+
+    #[test]
+    fn a_starter_model_replaces_the_sole_weight_placeholder() {
+        let c = embedded();
+        let cap = c.capability("对话").unwrap();
+        let cell = cap.os.get("win-x64").unwrap();
+        let mut extra = BTreeMap::new();
+        extra.insert(
+            "__model__".into(),
+            "/home/u/models/pocket.gguf".to_string(),
+        );
+        let plan = render(
+            cap,
+            cell,
+            &LaunchContext {
+                data_root: Path::new("/data"),
+                tier: "8GB",
+                port: 1234,
+                token: Some("deadbeef"),
+                extra: &extra,
+            },
+        )
+        .unwrap();
+        assert!(plan.args.iter().any(|a| a == "/home/u/models/pocket.gguf"));
+        assert!(
+            plan.args.iter().all(|a| !a.contains("Qwen3-8B")),
+            "{:?}",
+            plan.args
+        );
+        assert_eq!(plan.inputs, vec![PathBuf::from("/home/u/models/pocket.gguf")]);
+    }
+
+    #[test]
+    fn the_starter_model_is_offered_to_chat_only() {
+        let supervisor = Supervisor::new(
+            embedded(),
+            "win-x64",
+            "8GB",
+            PathBuf::from("/data"),
+            "auto",
+        )
+        .unwrap()
+        .with_starter_model(Some(PathBuf::from("/home/u/models/pocket.gguf")));
+        assert!(supervisor.launch_extra("对话").contains_key("__model__"));
+        // 生图 8GB 档的 argv 里也只有一个 `.gguf`；它必须拿不到这只对话权重。
+        assert!(supervisor.launch_extra("生图").is_empty());
+        assert!(supervisor.launch_extra("字幕").is_empty());
+    }
+
+    #[test]
+    fn a_starter_model_does_not_touch_companion_weights() {
+        let c = embedded();
+        let cap = c.capability("生图").unwrap();
+        let cell = cap.os.get("win-x64").unwrap();
+        let mut context = ctx(Path::new("/data"));
+        context.tier = "16GB";
+        let mut extra = BTreeMap::new();
+        extra.insert("__model__".into(), "/home/u/models/pocket.gguf".to_string());
+        context.extra = &extra;
+        let plan = render(cap, cell, &context).unwrap();
+        assert_eq!(plan.inputs.len(), 4);
+        assert!(plan
+            .inputs
+            .iter()
+            .all(|p| p.parent() == Some(&models_dir(Path::new("/data")))));
+        assert!(!plan.args.iter().any(|a| a == "/home/u/models/pocket.gguf"));
     }
 
     #[test]

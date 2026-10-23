@@ -1,7 +1,10 @@
-name: 安装包（未签名，只装外壳）
+name: 安装包（未签名；外壳 + 随包运行组件）
 
-# 这条车道只做一件事：把 shell/ 编成三平台的安装包（Windows nsis / macOS dmg / Linux deb）。
-# 引擎与权重都不进包 —— 它们按 pins/payload-plan.json 首启下载，包体因此只有外壳。
+# 这条车道出三平台安装包（Windows nsis / macOS dmg / Linux deb）。
+# 引擎与权重不进安装包的压缩流里"再装一次"，而是先在 ubuntu 上按钉值打好一棵
+# 对象键布局的内置载荷（`bundled/`），由 Tauri 资源机制原样带进安装包。
+# 外壳首启时发现 `bundled/delivery-manifest.json`，逐文件校验后落进数据根，不联网。
+# 权重仍不在包里（527 MB 起），由首启的入门模型下载负责。
 # 签名的两个证书还没定（#30），所以这里出来的包未签名；首启会有系统警告。
 on:
   workflow_dispatch:
@@ -11,29 +14,99 @@ on:
       - "shell/**"
       # 外壳核心用 include_str! 把这张表嵌进二进制：表变了必须重出安装包。
       - "pins/shell-contract.json"
+      # 内置载荷的字节与清单由这些工具/钉表决定：任何一处变了都要重出包。
+      - "pins/payload-plan.json"
+      - "tools/pack_engine.py"
+      - "tools/payload_plan.py"
+      - "tools/engine_probe.py"
+      - "tools/stage_payload.py"
+      - "tools/payload_intake.py"
+      - "tools/bundle_payload.py"
       - ".github/workflows/installer.yml"
 
 permissions:
   contents: read
+
+env:
+  GITHUB_TOKEN: ${{ github.token }}
+  # windows runner 的 Python 默认 cp1252，工具会打印中文；改成 UTF-8 输出。
+  PYTHONUTF8: "1"
 
 concurrency:
   group: installer-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
+  # 先在 ubuntu 上按同一份钉值造出三档内置载荷。取包/解包与目标 OS 无关，
+  # 三档都走 package.yml 已经证明过的那条路径；不在 Windows/macOS 上重复取上游。
+  payload:
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        os_tag: [win-x64, linux-x64, macos-arm64]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4.4.0
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5.6.0
+        with:
+          python-version: "3.12"
+      - name: 判据自测（合成树，证明打包与复核都会红）
+        run: |
+          set -euo pipefail
+          python3 tools/pack_engine.py --selfcheck
+          python3 tools/bundle_payload.py --selftest
+      - name: 按钉值下载 → 解包 → 逐文件清单
+        run: python3 tools/pack_engine.py --plan pins/payload-plan.json --os "${{ matrix.os_tag }}" --out "dist/${{ matrix.os_tag }}"
+      - name: 摆进外壳认的 runtime 目录
+        run: |
+          set -euo pipefail
+          python3 tools/stage_payload.py --package "dist/${{ matrix.os_tag }}" --data "/tmp/root-${{ matrix.os_tag }}" --os "${{ matrix.os_tag }}"
+          python3 tools/stage_payload.py --check --package "dist/${{ matrix.os_tag }}" --data "/tmp/root-${{ matrix.os_tag }}" --os "${{ matrix.os_tag }}"
+      - name: 首启交付清单（逐对象键；不上传、不执行）
+        run: |
+          set -euo pipefail
+          python3 tools/payload_intake.py --data "/tmp/root-${{ matrix.os_tag }}" --os "${{ matrix.os_tag }}" \
+            --out "dist/${{ matrix.os_tag }}/delivery-manifest.json"
+          python3 tools/payload_intake.py --check --data "/tmp/root-${{ matrix.os_tag }}" --os "${{ matrix.os_tag }}" \
+            --out "dist/${{ matrix.os_tag }}/delivery-manifest.json"
+      - name: 打成安装包内置布局（对象键 + 根清单最后写）
+        run: |
+          set -euo pipefail
+          python3 tools/bundle_payload.py \
+            --manifest "dist/${{ matrix.os_tag }}/delivery-manifest.json" \
+            --stage "/tmp/root-${{ matrix.os_tag }}" \
+            --out "dist/bundled-${{ matrix.os_tag }}"
+          python3 tools/bundle_payload.py --check \
+            --manifest "dist/${{ matrix.os_tag }}/delivery-manifest.json" \
+            --out "dist/bundled-${{ matrix.os_tag }}"
+      - name: 上传这一档的内置载荷
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4.6.2
+        with:
+          name: installer-bundled-${{ matrix.os_tag }}
+          path: dist/bundled-${{ matrix.os_tag }}/
+          retention-days: 7
+
   bundle:
-    timeout-minutes: 45
+    needs: payload
+    timeout-minutes: 60
     strategy:
       fail-fast: false
       matrix:
         include:
           - os: ubuntu-latest
+            os_tag: linux-x64
+            python: python3
             bundles: deb
             glob: shell/src-tauri/target/release/bundle/deb/*.deb
           - os: windows-latest
+            os_tag: win-x64
+            python: python
             bundles: nsis
             glob: shell/src-tauri/target/release/bundle/nsis/*.exe
           - os: macos-latest
+            os_tag: macos-arm64
+            python: python3
             bundles: dmg
             glob: shell/src-tauri/target/release/bundle/dmg/*.dmg
     runs-on: ${{ matrix.os }}
@@ -42,6 +115,21 @@ jobs:
         shell: bash
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4.4.0
+      - name: 取回这一档的运行组件（安装包要带的就是这一棵）
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093  # v4.3.0
+        with:
+          name: installer-bundled-${{ matrix.os_tag }}
+          path: shell/src-tauri/bundled
+      - name: 编包前复核：清单与每个对象都能对上
+        run: |
+          set -euo pipefail
+          # 仓库里的占位文件只为"没有载荷时的普通编译"满足资源 glob；
+          # 安装包里不能带上它，否则内置载荷的 check 会把它当成清单外文件。
+          rm -f shell/src-tauri/bundled/placeholder.txt
+          test -f shell/src-tauri/bundled/delivery-manifest.json
+          ${{ matrix.python }} tools/bundle_payload.py --check \
+            --manifest shell/src-tauri/bundled/delivery-manifest.json \
+            --out shell/src-tauri/bundled
       - name: Linux 的 WebKitGTK 依赖
         if: matrix.os == 'ubuntu-latest'
         run: |
@@ -62,21 +150,57 @@ jobs:
           tauriScript: npx --yes @tauri-apps/cli@2.12.3
           args: --bundles ${{ matrix.bundles }}
           uploadWorkflowArtifacts: true
-      - name: 包必须真的落盘且非空（上传成功不代表编出了东西）
+      - name: 安装包里必须真有这棵运行组件（解开包后逐文件复核）
         env:
+          OS_TAG: ${{ matrix.os_tag }}
+          PYTHON: ${{ matrix.python }}
           GLOB: ${{ matrix.glob }}
         run: |
           set -euo pipefail
           shopt -s nullglob
           files=($GLOB)
-          if [ ${#files[@]} -eq 0 ]; then
-            echo "BAD: 没有找到 $GLOB"
+          if [ ${#files[@]} -ne 1 ]; then
+            echo "BAD: 期望 1 个安装包，实际 ${#files[@]} 个：${files[*]}"
             exit 1
           fi
-          for f in "${files[@]}"; do
-            if [ ! -s "$f" ]; then
-              echo "BAD: $f 是空文件"
+          PKG="${files[0]}"
+          if [ ! -s "$PKG" ]; then
+            echo "BAD: $PKG 是空文件"
+            exit 1
+          fi
+          ROOT="$RUNNER_TEMP/embedded-$OS_TAG"
+          MNT="$RUNNER_TEMP/mnt-$OS_TAG"
+          rm -rf "$ROOT" "$MNT"
+          mkdir -p "$ROOT"
+          case "$OS_TAG" in
+            linux-x64)
+              dpkg-deb -x "$PKG" "$ROOT"
+              ;;
+            win-x64)
+              7z x -y "$PKG" -o"$ROOT" >/dev/null
+              ;;
+            macos-arm64)
+              mkdir -p "$MNT"
+              hdiutil attach "$PKG" -nobrowse -readonly -mountpoint "$MNT" >/dev/null
+              trap 'hdiutil detach "$MNT" >/dev/null 2>&1 || true' EXIT
+              ROOT="$MNT"
+              ;;
+            *)
+              echo "BAD: 不认识的 OS_TAG=$OS_TAG"
               exit 1
-            fi
-            ls -l "$f"
-          done
+              ;;
+          esac
+          FOUND=$(find "$ROOT" -type f -path '*/bundled/delivery-manifest.json')
+          COUNT=$(printf '%s\n' "$FOUND" | grep -c . || true)
+          if [ "$COUNT" -ne 1 ]; then
+            echo "BAD: 安装包里 bundled/delivery-manifest.json 命中 $COUNT 个"
+            printf '%s\n' "$FOUND"
+            exit 1
+          fi
+          BUNDLED="$(dirname "$FOUND")"
+          cmp "$FOUND" shell/src-tauri/bundled/delivery-manifest.json
+          "$PYTHON" tools/bundle_payload.py --check \
+            --manifest shell/src-tauri/bundled/delivery-manifest.json \
+            --out "$BUNDLED"
+          ls -l "$PKG"
+          du -sh "$BUNDLED"

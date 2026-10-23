@@ -28,6 +28,12 @@
     <button class="tab" type="button" data-tab="image" data-i18n="tabImage"></button>
   </nav>
 
+  <section id="env" class="env" hidden>
+    <span id="env-backend" class="chip">…</span>
+    <span id="env-cpu" class="note"></span>
+    <span id="env-accel" class="env-accel"></span>
+  </section>
+
   <div id="enginebar" class="enginebar">
     <span id="engine-state" class="state"></span>
     <button id="payload-install" class="primary" type="button" data-i18n="installPayload" hidden></button>
@@ -37,6 +43,14 @@
 
   <main>
     <section id="panel-chat" class="panel active">
+      <aside id="starter" class="starter" hidden>
+        <div class="starter-copy">
+          <strong data-i18n="starterTitle"></strong>
+          <span id="starter-state" class="note"></span>
+          <span id="starter-meta" class="note"></span>
+        </div>
+        <button id="starter-install" class="primary" type="button" data-i18n="starterInstall"></button>
+      </aside>
       <div id="messages" class="messages" aria-live="polite"></div>
       <div class="composer">
         <textarea id="chat-input" rows="3" data-i18n-ph="chatPlaceholder"></textarea>
@@ -116,6 +130,31 @@
       </figure>
     </section>
   </main>
+
+  <details id="hub" class="hub">
+    <summary data-i18n="hubTitle"></summary>
+    <p class="note" data-i18n="hubHint"></p>
+    <div class="hub-grid">
+      <label class="check">
+        <input id="hub-enabled" type="checkbox">
+        <span data-i18n="hubEnable"></span>
+      </label>
+      <label class="field">
+        <span data-i18n="hubUser"></span>
+        <input id="hub-user" type="text" placeholder="join" autocomplete="off" spellcheck="false">
+      </label>
+      <label class="field">
+        <span data-i18n="hubKey"></span>
+        <input id="hub-key" type="text" autocomplete="off" spellcheck="false">
+      </label>
+    </div>
+    <div class="row">
+      <button id="hub-save" class="ghost" type="button" data-i18n="hubSave"></button>
+      <span id="hub-state" class="note"></span>
+      <span id="hub-node" class="note"></span>
+    </div>
+    <pre id="hub-command" class="out" hidden></pre>
+  </details>
 
   <footer>
     <span data-i18n="dataDir"></span>

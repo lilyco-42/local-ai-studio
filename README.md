@@ -15,10 +15,44 @@
 "只能靠 GitHub Actions 出包"这条硬约束本身的可行性（runner 缺什么、包该装什么）见
 [docs/packaging.md](docs/packaging.md)；
 选型/热切换/GGUF 估算这些**不自研**的部分见 [docs/toolbelt.md](docs/toolbelt.md)（llmfit、llama-swap、
-gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）。
+gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）；
+可选算力中心的边界见 [docs/adr/0002-personal-compute-hub.md](docs/adr/0002-personal-compute-hub.md)。
+
+## 小白路径：三步跑起第一只模型
+
+1. **装外壳 + 运行组件**（引擎是上游预编译产物，不自研、不在本机编译）。
+2. **点“下载入门模型”**：`pins/starter.json` 里钉住的是
+   `lainlives/Qwen3.5-0.8B-uncensored` 的 Q4_K_M（527,495,776 B，sha256 已钉）。
+   用户点名的 0.6B 在 Qwen3.5 里不存在（官方最小 0.8B），表里用 `requested/resolved` 两档
+   把这件事写明，不悄悄换名字。下载支持断点续传，过哈希才落成正式文件。
+3. **启动对话引擎**：外壳只把命令行里**唯一**的 `.gguf` 权重占位符换成这只入门权重；
+   生图的四个伴生权重、字幕的 `.bin` 都不动。硬件条会显示 CPU/GPU/NPU 探测结果与推荐后端
+   （“检测到”不等于“已装对应加速档”；默认交付的是 CPU 档）。
+
+入门档只在**对话**能力上生效：生图 8GB/4GB 档的 argv 里也只有一个 `.gguf`，
+所以“唯一占位符”这条规则单独不够，`Supervisor::launch_extra()` 还按能力名加了一道闸。
+可选中心 `lain42.top` 默认关闭；打开只保存开关并显示一条 SSH 命令，外壳不自动连接、
+不开入站端口、不碰积分与支付。真连、换积分、提现都在服务端与用户的终端里完成。
 
 ## 现在有什么
 
+- `tools/starter_pin.py` + `pins/starter.json`：随身入门档的 pin 与校验器。`--check` 只读仓库、
+  不联网；`--live` 用 HF API 复核 revision/体积/LFS sha256/许可；`--download` 在 CI 里真下
+  527 MB 并复算哈希。负向对照覆盖漂浮 revision、http、路径穿越、许可证、磁盘预算等 11 类改坏。
+  引擎版本必须能在 `pins/payload-plan.json` 的 llama 钉值里找到，不允许“工具自己同意自己”。
+  已在 `engine-live` 的 `starter-model` 车道真跑（2026-10-22，run 39773338208）：pin 与上游
+  revision / 体积 / 哈希 / 许可一致，503 MiB 权重复算 sha256 后落到 runner，常驻 llama-server
+  在 401 与 CORS 收窄下用 `enable_thinking:false` 产出了 token。
+- `shell/core/src/hardware.rs`：CPU/GPU/NPU 只读探测（`nvidia-smi`、`vulkaninfo`、`lspci`、
+  PowerShell CIM、`/proc`、`/sys`），判据全在纯函数 `classify()` 里，测试注入夹具而不是
+  依赖跑测试的那台机器；挑出 CUDA/ROCm/Vulkan/Metal/OpenVINO/QNN/RKNPU 中第一个可用后端，
+  没有就如实回落 CPU。检测到加速器 ≠ 已安装对应引擎档，UI 的 title 里写了这句话。
+- `shell/core/src/starter.rs`：把入门权重落到 `data_root/models/`，复用 `download.rs` 的
+  续传/换源/过哈希才落盘；`installed_path()` 只做长度检查，下载完成后再做一次完整 sha256 复核。
+  只替换对话命令行里唯一的 `.gguf` 占位符，且由 `Supervisor::launch_extra()` 限定在“对话”能力上。
+- `shell/core/src/hub.rs` + [ADR-0002](docs/adr/0002-personal-compute-hub.md)：可选中心
+  `lain42.top` 的开关、稳定 `node_id` 与展示用 SSH 命令。默认关闭、不联网、不执行 SSH、
+  不读私钥、不碰积分支付。
 - `tools/engine_probe.py`：吸收三家命名差异（`cuda-12.4` vs `cuda-12.4.0` vs 名字里带 `Ubuntu-24.04`，
   sd 的文件名只带 sha 不带 tag 里的 `975-`），按"引擎 + 平台 + 后端族 + 架构"选 target；
   同 target 冲突先比 release 构建号再比后端版本；**不看 `releases/latest`**（whisper.cpp 的 latest 是 0 产物）。
@@ -30,9 +64,9 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   `needs.X.outputs.Y` 也按 **job 自己的文本**查三件事：X 这个 job 存在、本 job 真 `needs` 它、
   X 真导出 Y —— 引用没导出的输出在 Actions 里拿到的是空字符串而不是报错，而"扫整份文件"那一版
   会让任何带 `needs:` 的 job 为别人的引用背锅（见 `docs/requirements.md` 验收第 5 条）。
-  车道分段与预跑的**计数**由 `tests/test_lane_replay_report.py` 钉住：六条 workflow 共 18 段 `<<'PY'`
+  车道分段与预跑的**计数**由 `tests/test_lane_replay_report.py` 钉住：六条 workflow 共 20 段 `<<'PY'`
   （`installer.yml` 与 `upstream-follow.yml` 没有 heredoc）、
-  其中 13 段含判据（认 `check(`/`SystemExit`/`assert`/`sys.exit(`）、本地预跑引用 8 个
+  其中 15 段含判据（认 `check(`/`SystemExit`/`assert`/`sys.exit(`）、本地预跑引用 8 个
   (job, 步骤名) 组合 —— 重数：`python -W error::ResourceWarning -m unittest tests.test_lane_replay_report -v`。
   这几个数以前只活在文档里，漂过三次，所以现在是断言不是散文。
   还会把车道 env 里每条 64 位十六进制的值（**按值形状认，不按键名**，否则 OCR 车道的
@@ -112,7 +146,7 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   `ggml-large-v1.bin` 的 SSL EOF —— 它本来就排在最后；可达 ≠ 吞吐，排序仍按实测速率）。
   `shell/core/src/download.rs` 是这条计划的消费者：系统 curl 传输（不引 TLS crate）、Range 续传、
   低速/断流换源、收满 sha256 才从 `blobs/<sha>.part` 落成 `blobs/<sha>` 并硬链接到文件名；
-  这一组单测已随 `shell.yml` 的 `core` 在 3 个操作系统上真跑过（2026-10-21，各 107 条全过，run 39682992984）。
+  这一组单测已随 `shell.yml` 的 `core` 在 3 个操作系统上真跑过（2026-10-22，各 133 条全过，run 39774726047）。
 - `tools/recommend_models.py` + `catalog/recommendations.json`：**给用户的**「我这台机器装哪个」表。
   `catalog/defaults.json` 那 6 条是车道最小样本（对话那颗 415 MB，只为跑通），不是推荐。
   四条规则都进产物、UI 要说得出为什么推荐它：半档 < `recommended_ram_gb` ≤ 档位（上游 llmfit 的数）、
@@ -230,9 +264,9 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   非空，`"{token}"` 原样传进去算不合格）与 `--cors-origins localhost`；同一段还必须有
   **无钥匙访问 `/props` 得 401** 的断言和**两个不同 Origin**（本机被反射 / 非本机拿不到 ACAO）
   的对照 —— 旗标传对了不等于门禁生效。
-  实测 4 项能力各一段、问题 0 条；15 种 workflow 文本变异全被报（含丢钥匙、占位符、变量未赋值、
+  实测四项能力都认出来（对话两段：无头 + 入门档）、问题 0 条；15 种 workflow 文本变异全被报（含丢钥匙、占位符、变量未赋值、
   丢 CORS、401 被改成 200、只剩一个来源），正向对照是"0 问题必须建立在
-  4 段都认出来之上"（重数：`python3 tools/lane_argv.py`，已挂在 `ci.yml` 静态门禁）。
+  5 段都认出来之上"（重数：`python3 tools/lane_argv.py`，已挂在 `ci.yml` 静态门禁）。
 - `tools/sideload_lookup.py` + `pins/sideload-index.json`：**用户从别处弄来的权重，按内容认领**。
   六张已钉表摊平成 `sha256 → 身份`（实测 354 串哈希 / 420 行身份 / 30 个同名不同哈希的文件名），
   结论四种：`known_by_hash`（认领，带能力与证据等级）、`name_matches_hash_differs`（名字钉过但字节
@@ -331,6 +365,9 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   （落后 0、已最新、rc=0）；2026-10-22T05:40Z 重钉到 b11804（落后 0、已最新），本轮由 GitHub Actions
   复核全绿：ci 39730079194（972 条单测 OK，skipped=1）/ shell 39730079402 / package 39730079234 /
   installer 39730079302 / engine-live 39730079204（无头推理 27.0 tok/s、三个 server 车道均成功）。
+  入门档分支上又复核了一遍：ci 39774726103（993 条单测 OK，skipped=1）/ shell 39774726047
+  （core 三档各 133 条、app 三档各 3 条）/ package 39772879110 / engine-live 39773338208
+  （23 条 job 全绿，`starter-model` 真下 503 MiB 并产出 token）。
   **首跑**是 2026-10-21T20:12Z 手动派发
   （run 39668207182）：25 个 release 的窗口、钉住 b11798 → 最新带产物 b11799（落后 1）、候选可升，
   结论 `有新版本（只报不跟）`、退出码 0，报告 JSON 照常上传。**`schedule` 已实跑**：
@@ -359,8 +396,8 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   `shell/src-tauri`（Tauri 2）只做装配：`AppState` + 10 条 IPC 命令调 core，耗时的调用
   （安装、四条能力）都丢进 `spawn_blocking`，`status`/`data_root`/`payload_source` 只读本地状态。`shell/ui` 只有 IPC、没有网络 API、中英两套文案；`icons/icon.ico` 是 Windows
   资源段要的那一颗。
-  **这些代码现在真编过、真跑过了**：2026-10-21 `shell.yml` 的 `core` 在 3 个操作系统上各 107 条
-  单测全过（run 39682992984），`app` 在 3 个操作系统上真的编出 Tauri 层并跑 3 条单测（Ubuntu 首编 1m30s，先装 WebKitGTK）；
+  **这些代码现在真编过、真跑过了**：2026-10-22 `shell.yml` 的 `core` 在 3 个操作系统上各 133 条
+  单测全过（run 39774726047），`app` 在 3 个操作系统上真的编出 Tauri 层并跑 3 条单测（Ubuntu 首编 1m16s，先装 WebKitGTK）；
   两个 crate 的首轮 `Cargo.lock` 已作为 artifact 产出（`shell-core-Cargo.lock`、`shell-app-Cargo.lock`），
   还没提交进仓库。Windows 第一次跑红在假服务器的 RST 竞态，修法是读到完整请求（头 + Content-Length
   正文）再回包 —— 只有真跑才会发现。**窗口里的 JS 与 IPC 也真驱动过了**：2026-10-21 起
@@ -375,13 +412,17 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   同一步还把能力名换成假的做已知坏对照，必须被拒；最后按 `pins/shell-contract.json` 在同一个数据根
   摆一份**合成**清单与 3 字节占位文件，要求只有对话那一行翻成 `installed=true`、状态条回到
   `对话 · 未启动`——`installed=true` 这一侧的正控。占位文件不是载荷，起引擎时仍会逐文件验哈希并拒掉。
+  本次（run 39774726047，job 119810691485）再把三条新界面逐字核了一遍：硬件条读到
+  `CPU 推理 · CPU` / `AMD EPYC 9V74 80-Core Processor · 4 核 · 15.6 GiB · linux/x86_64` / 1 个加速器 chip；
+  入门档卡片写着 `lainlives/Qwen3.5-0.8B-uncensored · apache-2.0 · 建议内存 ≥ 1024 MiB`；
+  中心服务器默认关闭，预显的 SSH 命令只作预览。
   **边界**：只有 Ubuntu 这一档，没有点“启动引擎”、
   没有联网 —— 证的是 IPC 桥与首屏渲染，不是四条能力的端到端链路；macOS/Windows 的 app job 跳过这两步。
 - `tools/action_pins.py` + `pins/actions.json`：**出包那只手自己也要钉住**。开工时三个
   workflow 里 4 个 `uses:` 全是浮动大版本 tag（`checkout@v4`、`setup-python@v5`、
   `upload-artifact@v4`、`download-artifact@v4`）—— 仓库对引擎/权重/工具带都定了
   "release + sha256"，唯独真正跑包的东西跟着别人随时会移动的 tag 走。
-  现在六条 workflow / 5 个 action / **56 处 uses** 全部是 40 位 commit SHA，尾注留着记它来自哪个
+  现在六条 workflow / 5 个 action / **66 处 uses** 全部是 40 位 commit SHA，尾注留着记它来自哪个
   tag（重数：`python3 tools/action_pins.py --check`；上一版表漏了 `shell.yml` 的 4 处，
   是这轮把它补进扫描表时才数出来的）：`checkout 11d5960a…`(v4.4.0)、`setup-python a26af69b…`(v5.6.0)、
   `upload-artifact ea165f8d…`(v4.6.2)、`download-artifact d3f86a10…`(v4.3.0)，都是 MIT、`node20`。
@@ -466,9 +507,11 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   （run 39730079234：linux-x64 94 个文件 / 156.4 MiB、win-x64 58 / 105.1、macos-arm64 33 / 158.5），
   再用 `python -m http.server` 把对象目录当远端、走一遍 HTTP 取数路径（同一 run 三档同数、
   均 0 跳过，`--help` 三次 rc=0 且输出含 `--port`）。IPC/UI 入口已接（读数据根的
-  `payload-source.json`），发布落点（R2 写）与生产基址仍未定。
+  `payload-source.json`），发布落点（R2 写）与生产基址仍未定；安装包自带的路径已接通：
+  `bundled/` 在安装包里，首启不联网也能装运行组件（run 39779235920，见下条）。
 - `.github/workflows/installer.yml` + `tools/make_icons.py`：**安装包本身**，三平台各一个未签名包，
-  只装壳、不带引擎与权重（引擎 server-only 后 105.1 MiB + 权重 415 MB 起，装不进安装器）。矩阵 Windows `nsis` /
+  带 server-only 运行组件（三档内置载荷 105.1 / 156.4 / 158.5 MiB，压缩后安装包
+  25.0 / 63.3 / 59.6 MiB），权重仍不进包（527 MB 起，首启下载）。矩阵 Windows `nsis` /
   macOS `dmg` / Linux `deb`，用钉住的 `tauri-apps/tauri-action`；CLI 显式传
   `npx --yes @tauri-apps/cli@2.12.3` —— 不传时 action 会自己 `npm install -g @tauri-apps/cli@v2`，
   浮在一个大版本上。`tauri.conf.json` 的 `bundle.active` 打开、targets 三档、图标五件；
@@ -476,10 +519,12 @@ gguf-parser-go、hf CLI，全部 MIT/Apache 且实测带活动度与产物表）
   与 ICNS（预乘 alpha 双线性缩放，避免透明边缘发黑）。`--check` 先比字节，不同就**解压后逐像素比**
   —— 压缩流随 zlib 实现而变（本机 python3 的 zlib-ng 1.3.1 与 Anaconda python 的 zlib 1.3.2
   对同一份像素给出 6,389 vs 6,393 B），逐字节比会在 CI 的另一种 zlib 上假红；
-  `tests/test_make_icons.py` 10 条（含"重新压缩但图没变"的阳性对照与改一个像素的阴性对照）。车道最后一步断言 glob 真找到包且非空
-  （`uploadWorkflowArtifacts` 成功不代表编出了东西）。**2026-10-21 三格全出了**（run 39633525944）：
-  Linux `deb` 3,237,370 B、Windows `nsis` 2,076,484 B、macOS `dmg` 3,152,248 B（`darwin-aarch64-dmg`，
-  16:28Z 才排到 runner、约 3 分钟编完）。包未签名，`tauriScript` 与 deb maintainer 仍只是静态核对。
+  `tests/test_make_icons.py` 10 条（含"重新压缩但图没变"的阳性对照与改一个像素的阴性对照）。车道最后一步
+  不是"产物非空"：把安装包解开（`dpkg-deb -x` / `7z x` / `hdiutil attach`），找到唯一的
+  `bundled/delivery-manifest.json`，与编包前那份逐字节 `cmp`，再用 `bundle_payload.py --check`
+  复核包内每个对象。**2026-10-22 三格全绿**（run 39779235920）：Linux `deb` 66,422,834 B、
+  Windows `nsis` 26,205,326 B、macOS `dmg` 62,451,834 B；包内运行组件 93 / 57 / 32 个文件
+  （157 / 106 / 159 MiB），权重不在其中。包未签名，`tauriScript` 与 deb maintainer 仍只是静态核对。
 - `.github/workflows/ci.yml`：静态门禁（含 yaml_gate）+ 单测（夹具是真实 API 捕获）+ 离线跑发现器
   与离线回放工具带钉表。
 - `.github/workflows/engine-live.yml`：打真实 API 发现产物 → 下载 linux 引擎（不编译）→ 下载 pin 住的

@@ -123,8 +123,11 @@ jobs:
           LIBGL_ALWAYS_SOFTWARE: "1"
           NO_AT_BRIDGE: "1"
         run: |
-          sudo apt-get install -y xvfb webkit2gtk-driver
-          apt-cache policy webkit2gtk-driver | head -5
+          sudo apt-get install -y xvfb
+          # ubuntu-latest 已迁到 26.04：驱动包从 webkit2gtk-driver 改名 webkitgtk-webdriver
+          if ! sudo apt-get install -y webkit2gtk-driver; then
+            sudo apt-get install -y webkitgtk-webdriver
+          fi
           command -v WebKitWebDriver
           WebKitWebDriver --version || true
           if ! command -v tauri-driver >/dev/null 2>&1; then
@@ -137,6 +140,28 @@ jobs:
             --native-driver "$(command -v WebKitWebDriver)" \
             --expect-not-installed \
             --install-payload 对话 \
+            --negative-control \
+            --timeout 180
+      - name: 真驱动窗口：内置载荷首装（离线，点一次按钮）
+        if: matrix.os == 'ubuntu-latest'
+        timeout-minutes: 10
+        env:
+          GDK_BACKEND: x11
+          WEBKIT_DISABLE_COMPOSITING_MODE: "1"
+          WEBKIT_DISABLE_DMABUF_RENDERER: "1"
+          WEBKIT_DISABLE_SANDBOX_THIS_IS_DANGEROUS: "1"
+          LIBGL_ALWAYS_SOFTWARE: "1"
+          NO_AT_BRIDGE: "1"
+        run: |
+          mkdir -p "$RUNNER_TEMP/home-bundled" "$RUNNER_TEMP/data-bundled"
+          xvfb-run -a -s "-screen 0 1024x768x24" env \
+            HOME="$RUNNER_TEMP/home-bundled" \
+            XDG_DATA_HOME="$RUNNER_TEMP/data-bundled" \
+            python3 "$GITHUB_WORKSPACE/tools/wd_ipc_probe.py" \
+            --app "$PWD/target/debug/local-ai-studio-shell" \
+            --native-driver "$(command -v WebKitWebDriver)" \
+            --expect-not-installed \
+            --install-bundled 对话 \
             --negative-control \
             --timeout 180
       - name: 把首轮解析出的 Cargo.lock 留档（Tauri 依赖图目前未钉）

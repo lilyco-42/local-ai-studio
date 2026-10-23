@@ -5,7 +5,7 @@
 读真实 workflow 文本 → 认出每项能力真起进程的那段 shell → 用表里的四条规矩量它。
 
 判据本身也要能红：所以每个变异都是**改 workflow 文本**（不是改工具），
-每种坏形状各一条，外加一条"真实 workflow 必须 0 问题且认出 4 段"的正向对照
+每种坏形状各一条，外加一条"真实 workflow 必须 0 问题且认出 5 段（对话两段）"的正向对照
 （否则"0 问题"可能只是"什么都没认出来"）。
 """
 from __future__ import annotations
@@ -106,15 +106,33 @@ class TestMutants(unittest.TestCase):
          "-H 'Origin: http://localhost:1420' \\"),
     ]
 
+    # 这些锚点现在在两条 chat 车道上都出现（无头 + 入门档）；负向对照要一起改，
+    # 才代表"每一段 chat 车道都坏了"，而不是"还有另一段合格所以不报"。
+    GLOBAL_ANCHORS = {
+        "llama 常驻那步找的是 CLI",
+        "llama 没带 --api-key",
+        "llama 把占位符原样传进去",
+        "llama 的钥匙变量没赋值",
+        "llama 丢了 --cors-origins",
+        "llama 不再验 401",
+        "CORS 只剩一个来源",
+    }
+
     def test_baseline_has_no_mutant_applied(self) -> None:
         s = wf_text()
         for _n, old, _new in self.MUTANTS:
-            self.assertEqual(s.count(old), 1, f"锚点不唯一或已漂：{_n}")
+            # 「常驻那步找的是 CLI」现在有两段 chat 车道（无头 + 入门档），
+            # 单改一段仍有一条合格的，所以这条按"全部替换"应用并核对 2 处。
+            want = 2 if _n in self.GLOBAL_ANCHORS else 1
+            self.assertEqual(s.count(old), want, f"锚点不唯一或已漂：{_n}")
 
     def test_every_mutant_is_caught(self) -> None:
         missed = []
         for name, old, new in self.MUTANTS:
-            got = problems(wf_text().replace(old, new, 1))
+            mutated = wf_text()
+            mutated = (mutated.replace(old, new) if name in self.GLOBAL_ANCHORS
+                       else mutated.replace(old, new, 1))
+            got = problems(mutated)
             if not got:
                 missed.append(name)
         self.assertEqual(missed, [], "这些坏形状没人报：对应判据是装饰")
@@ -133,7 +151,7 @@ class TestCli(unittest.TestCase):
         r = subprocess.run([sys.executable, CLI], capture_output=True, text=True)
         self.assertEqual(r.returncode, 0, r.stdout[-600:] + r.stderr[-300:])
         self.assertIn("问题 0 条", r.stdout)
-        self.assertIn("4 段", r.stdout)
+        self.assertIn("5 段", r.stdout)
 
 
 if __name__ == "__main__":

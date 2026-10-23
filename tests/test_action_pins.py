@@ -67,7 +67,7 @@ class TestParseUses(unittest.TestCase):
 
     def test_counts_match_the_measured_totals(self) -> None:
         doc = artifact()
-        self.assertEqual(doc["counts"], {"workflow_files": 6, "uses_total": 60, "distinct": 5})
+        self.assertEqual(doc["counts"], {"workflow_files": 6, "uses_total": 66, "distinct": 5})
 
 
 class TestShape(unittest.TestCase):

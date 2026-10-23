@@ -29,6 +29,8 @@ import urllib.request
 EXPECTED_CAPABILITIES = ("对话", "字幕", "文字识别", "生图")
 # 与 shell/core/src/payload_fetch.rs 的 SOURCE_NAME 一致。
 SOURCE_NAME = "payload-source.json"
+# 与 shell/core/src/bundled.rs 的 ENV_DIR 一致：真窗口指向一棵合成的包内载荷。
+BUNDLED_ENV = "LOCAL_AI_BUNDLED_PAYLOAD"
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 REQUIRED_STATUS_FIELDS = (
     "capability", "engine", "available", "installed", "running",
@@ -136,6 +138,101 @@ def check_data_root(value) -> None:
         raise ProbeError(f"data_root 应是非空字符串，实际 {value!r}")
     if not is_absolute_path(value):
         raise ProbeError(f"data_root 不是绝对路径：{value!r}")
+
+
+def check_hardware(doc) -> None:
+    """hardware_profile 的形状：OS/架构、CPU 核数、一个带 label 的后端与加速器列表。"""
+    if not isinstance(doc, dict):
+        raise ProbeError(f"hardware_profile 应回对象，实际是 {type(doc).__name__}")
+    for key in ("os", "arch"):
+        if not isinstance(doc.get(key), str) or not doc[key]:
+            raise ProbeError(f"hardware_profile.{key} 不是非空字符串：{doc.get(key)!r}")
+    cpu = doc.get("cpu")
+    if not isinstance(cpu, dict) or isinstance(cpu.get("cores"), bool) \
+            or not isinstance(cpu.get("cores"), int) or cpu["cores"] < 1:
+        raise ProbeError(f"hardware_profile.cpu 形状不对：{cpu!r}")
+    backend = doc.get("backend")
+    if not isinstance(backend, dict):
+        raise ProbeError(f"hardware_profile.backend 不是对象：{backend!r}")
+    if not isinstance(backend.get("label"), str) or not backend["label"]:
+        raise ProbeError(f"hardware_profile.backend 缺 label：{backend!r}")
+    if not isinstance(backend.get("accelerated"), bool):
+        raise ProbeError(f"hardware_profile.backend.accelerated 不是布尔值：{backend!r}")
+    if not isinstance(doc.get("accelerators"), list):
+        raise ProbeError(f"hardware_profile.accelerators 不是数组：{doc.get('accelerators')!r}")
+
+
+def starter_expect(pin_path: str | None = None) -> dict:
+    """从已提交的 pin 取 UI 必须显示的三个值 —— 不让探针自己抄一份模型身份。"""
+    path = pin_path or os.path.join(ROOT, "pins", "starter.json")
+    with open(path, encoding="utf-8") as fh:
+        doc = json.load(fh)
+    return {
+        "id": doc["model"]["id"],
+        "license": doc["model"]["license"],
+        "ram": doc["fit"]["ram_mib_min"],
+    }
+
+
+def check_starter_view(doc, expect: dict) -> None:
+    if not isinstance(doc, dict):
+        raise ProbeError(f"starter_status 应回对象，实际是 {type(doc).__name__}")
+    for key in ("installed",):
+        if not isinstance(doc.get(key), bool):
+            raise ProbeError(f"starter_status.{key} 不是布尔值：{doc.get(key)!r}")
+    for key in ("id", "file", "license"):
+        if not isinstance(doc.get(key), str) or not doc[key]:
+            raise ProbeError(f"starter_status.{key} 不是非空字符串：{doc.get(key)!r}")
+    if isinstance(doc.get("bytes"), bool) or not isinstance(doc.get("bytes"), int) or doc["bytes"] <= 0:
+        raise ProbeError(f"starter_status.bytes 不是正整数：{doc.get('bytes')!r}")
+    if doc.get("ram_mib_min") != expect["ram"]:
+        raise ProbeError(f"starter_status.ram_mib_min 是 {doc.get('ram_mib_min')!r}，pin 是 {expect['ram']}")
+    if doc.get("id") != expect["id"] or doc.get("license") != expect["license"]:
+        raise ProbeError(
+            f"starter_status 的身份/许可与 pin 不符：{doc.get('id')!r}/{doc.get('license')!r}"
+            f" ≠ {expect['id']!r}/{expect['license']!r}"
+        )
+
+
+def check_hub_default(view) -> None:
+    """默认关闭也预显命令，但命令里只能是 lain42.top，且 node_id 还没生成。"""
+    if not isinstance(view, dict):
+        raise ProbeError(f"hub_config 应回对象，实际是 {type(view).__name__}")
+    if view.get("enabled") is not False:
+        raise ProbeError(f"中心服务器默认应是关闭，实际 enabled={view.get('enabled')!r}")
+    if view.get("host") != "lain42.top":
+        raise ProbeError(f"中心服务器 host 是 {view.get('host')!r}，期望 'lain42.top'")
+    command = view.get("ssh_command")
+    if not isinstance(command, str) or not command.startswith("ssh -i "):
+        raise ProbeError(f"默认配置应预显一条 ssh 命令：{command!r}")
+    if "-o IdentitiesOnly=yes" not in command or "lain42.top" not in command:
+        raise ProbeError(f"预显的 ssh 命令少了 IdentitiesOnly 或中心主机：{command!r}")
+    if view.get("node_id") != "":
+        raise ProbeError(f"还没保存过就生成了 node_id：{view.get('node_id')!r}")
+
+
+def check_feature_strips(state, hardware: dict, expect: dict, fresh: bool) -> None:
+    """页面上必须真的画出硬件与入门档；fresh 时中心服务器必须是关的。"""
+    if state.get("env_hidden") is not False:
+        raise ProbeError("硬件条没显示（#env 仍 hidden）")
+    backend_text = str(state.get("env_backend") or "")
+    if hardware["backend"]["label"] not in backend_text:
+        raise ProbeError(f"硬件条没画后端 {hardware['backend']['label']!r}：{backend_text!r}")
+    cpu_text = str(state.get("env_cpu") or "")
+    os_arch = f"{hardware['os']}/{hardware['arch']}"
+    if os_arch not in cpu_text:
+        raise ProbeError(f"硬件条没画 {os_arch!r}：{cpu_text!r}")
+    chips = state.get("env_accel_chips")
+    if isinstance(chips, bool) or not isinstance(chips, int) or chips < 1:
+        raise ProbeError(f"加速器区连“无加速器”占位都没画：chips={chips!r}")
+    if state.get("starter_hidden") is not False:
+        raise ProbeError("入门档卡片没显示（#starter 仍 hidden）")
+    meta = str(state.get("starter_meta") or "")
+    missing = [name for name in ("id", "license", "ram") if str(expect[name]) not in meta]
+    if missing:
+        raise ProbeError(f"入门档卡片没写 {missing}：{meta!r}")
+    if fresh and state.get("hub_enabled") is not False:
+        raise ProbeError("全新数据根里中心服务器开关不该是开的")
 
 
 def check_installed_map(rows, want: dict) -> None:
@@ -260,6 +357,49 @@ def build_install_fixture(work: str, contract_path: str, capability: str = "对�
             "manifest_url_path": "/" + manifest_rel, "engine": engine, "asset": asset}
 
 
+def build_bundled_fixture(work: str, contract_path: str, capability: str = "对话",
+                          platform: str = "linux-x64") -> dict:
+    """把同一份合成交付清单打成安装包里的对象键布局。
+
+    只写 `work/bundled`，不写数据根、不起服务：安装时外壳应当完全离线。
+    """
+    import bundle_payload as bundle_tool
+
+    fixture = build_install_fixture(work, contract_path, capability=capability,
+                                    platform=platform)
+    manifest_rel = fixture["manifest_url_path"].lstrip("/")
+    manifest_path = os.path.join(fixture["server_root"], *manifest_rel.split("/"))
+    bundled_root = os.path.join(work, "bundled")
+    report = bundle_tool.bundle(manifest_path, fixture["stage_root"], bundled_root)
+    checked = bundle_tool.check(manifest_path, bundled_root)
+    if report["files"] != len(fixture["delivery"]["files"]) or checked["files"] != report["files"]:
+        raise ProbeError(f"内置载荷打出来的文件数不对：{report!r} / {checked!r}")
+    fixture.update({
+        "manifest_path": manifest_path,
+        "bundled_root": bundled_root,
+        "bundle_report": report,
+        "bundle_check": checked,
+    })
+    return fixture
+
+
+def check_payload_source(view, mode: str) -> None:
+    """UI 用来决定显不显示安装入口的那份来源描述。"""
+    if not isinstance(view, dict):
+        raise ProbeError(f"payload_source 应回对象（mode={mode}），实际是 {type(view).__name__}")
+    if view.get("mode") != mode:
+        raise ProbeError(f"payload_source.mode 是 {view.get('mode')!r}，期望 {mode!r}")
+    url = view.get("manifest_url")
+    bases = view.get("bases")
+    if not isinstance(url, str) or not isinstance(bases, list) \
+            or not all(isinstance(item, str) and item for item in bases):
+        raise ProbeError(f"payload_source 的地址形状不对：{view!r}")
+    if mode == "bundled" and (url or bases):
+        raise ProbeError(f"内置来源不该带远程地址：{view!r}")
+    if mode == "remote" and (not url or not bases):
+        raise ProbeError(f"远程来源缺清单地址或基址：{view!r}")
+
+
 def write_source(data_root: str, manifest_url: str, base: str) -> str:
     """把首装源配置写进数据根；同目录临时文件再替换，轮询不会读到半份 JSON。"""
     if not is_absolute_path(data_root):
@@ -368,7 +508,14 @@ return {
   engine_state: document.getElementById('engine-state').textContent,
   install_hidden: document.getElementById('payload-install').hidden,
   install_disabled: document.getElementById('payload-install').disabled,
-  data_root_text: document.getElementById('data-root').textContent
+  data_root_text: document.getElementById('data-root').textContent,
+  env_hidden: document.getElementById('env').hidden,
+  env_backend: document.getElementById('env-backend').textContent,
+  env_cpu: document.getElementById('env-cpu').textContent,
+  env_accel_chips: document.getElementById('env-accel').children.length,
+  starter_hidden: document.getElementById('starter').hidden,
+  starter_meta: document.getElementById('starter-meta').textContent,
+  hub_enabled: document.getElementById('hub-enabled').checked
 };
 """
 
@@ -453,18 +600,109 @@ def invoke(driver: Driver, sid: str, command: str):
     return result.get("value")
 
 
+def drive_install(driver: Driver, sid: str, root: str, capability: str, delivery: dict,
+                  timeout: float, remote: bool, hint: str) -> None:
+    """点一次安装按钮，再点一次验证幂等；两条来源路径共用这段判据。"""
+    ready_deadline = time.monotonic() + min(60.0, timeout)
+
+    def button_ready():
+        current = driver.execute(sid, UI_STATE_JS)
+        if not isinstance(current, dict):
+            return None
+        if current.get("install_hidden") is not False:
+            return None
+        if current.get("install_disabled") is not False:
+            return None
+        return current
+
+    button = poll_until(button_ready, ready_deadline, "刷新状态后出现可点的安装按钮")
+    if hint not in str(button.get("engine_state")):
+        raise ProbeError(f"状态条没写来源提示 {hint!r}：{button.get('engine_state')!r}")
+    say(f"button: hidden={button['install_hidden']} disabled={button['install_disabled']}"
+        f"（来源提示 {hint!r}）")
+    clicked = driver.execute(
+        sid, "document.getElementById('payload-install').click(); return true;")
+    if clicked is not True:
+        raise ProbeError(f"点安装按钮没有回 true：{clicked!r}")
+
+    want = {name: name == capability for name in EXPECTED_CAPABILITIES}
+    install_deadline = time.monotonic() + timeout
+
+    def installed_now():
+        current = invoke(driver, sid, "status")
+        check_status(current)
+        try:
+            check_installed_map(current, want)
+        except ProbeError as exc:
+            state = driver.execute(sid, UI_STATE_JS) or {}
+            raise ProbeError(
+                f"{exc}；状态条 {state.get('chip')!r}，"
+                f"说明 {state.get('engine_state')!r}"
+            ) from None
+        return current
+
+    rows = poll_until(installed_now, install_deadline,
+                      "点按钮后 status 把载荷报成 installed=true")
+    say("status(点按钮后): " + " / ".join(
+        f"{row['capability']}(installed={row['installed']})" for row in rows))
+
+    def ready_chip():
+        current = driver.execute(sid, UI_STATE_JS)
+        if not isinstance(current, dict):
+            return None
+        if current.get("chip") != f"{capability} · 未启动":
+            return None
+        return current
+
+    state = poll_until(ready_chip, install_deadline,
+                       "状态条从“运行组件未安装”翻成就绪")
+    check_ui(state, root)
+    checked = check_installed_tree(root, delivery)
+    objects = os.path.join(root, ".objects")
+    if remote and os.path.exists(objects):
+        raise ProbeError("装完后 .objects 还在 —— 断点缓存没有清")
+    if not remote and os.path.exists(objects):
+        raise ProbeError("内置载荷安装不该创建 .objects")
+    say(f"ui(点按钮后): chip={state['chip']!r}；盘上 {checked} 颗文件与清单逐字节相符，"
+        + ("远程缓存已清" if remote else "没有 .objects"))
+
+    report = invoke(driver, sid, "install_payload")
+    check_reinstall_report(report, len(delivery["files"]))
+    expected_mode = "remote" if remote else "bundled"
+    if report.get("mode") != expected_mode:
+        raise ProbeError(f"install_payload.mode 是 {report.get('mode')!r}，期望 {expected_mode!r}")
+    if os.path.exists(objects):
+        raise ProbeError("第二次安装后 .objects 还在")
+    say(f"reinstall: written={report['written']} skipped={report['skipped']}"
+        f" mode={report['mode']}（{len(delivery['files'])} 个对象 + 根清单）")
+
+
 def run(args) -> int:
     if not os.path.isfile(args.app):
         raise ProbeError(f"--app 指向的二进制不存在：{args.app}")
-    if args.install_payload and args.install_payload != "对话":
-        raise ValueError("--install-payload 只驱动对话页：安装按钮与状态条跟着当前页签走")
+    for option, value in (("--install-payload", args.install_payload),
+                          ("--install-bundled", args.install_bundled)):
+        if value and value != "对话":
+            raise ValueError(f"{option} 只驱动对话页：安装按钮与状态条跟着当前页签走")
     native = args.native_driver or shutil.which("WebKitWebDriver")
     if not native:
-        raise ProbeError("找不到 WebKitWebDriver（Ubuntu 上是 webkit2gtk-driver 包）")
+        raise ProbeError(
+            "找不到 WebKitWebDriver（Ubuntu 24.04 是 webkit2gtk-driver 包，26.04 起是 webkitgtk-webdriver）"
+        )
     base = f"http://127.0.0.1:{args.port}"
     driver = Driver(driver_argv(args.driver, args.port, args.native_port, native), base, args.log)
     sid = None
+    bundled_work = None
+    bundled_fixture = None
     try:
+        if args.install_bundled:
+            bundled_work = tempfile.mkdtemp(prefix="wd-bundled-fixture-")
+            bundled_fixture = build_bundled_fixture(
+                bundled_work, args.contract, capability=args.install_bundled,
+                platform=args.platform)
+            os.environ[BUNDLED_ENV] = bundled_fixture["bundled_root"]
+            say(f"bundled fixture: {bundled_fixture['bundle_report']['files']} 个对象 + 根清单，"
+                f"位于 {bundled_fixture['bundled_root']}（不起服务）")
         driver.start()
         say(f"driver: {args.driver}（proxy :{args.port} → {native} :{args.native_port}）")
         sid = driver.new_session(session_payload(args.app), timeout=args.timeout)
@@ -473,7 +711,8 @@ def run(args) -> int:
         poll_until(lambda: driver.execute(sid, READY_JS) is True, deadline, "页面里的 window.__TAURI__")
 
         rows = invoke(driver, sid, "status")
-        fresh = args.expect_not_installed or bool(args.plant_payload) or bool(args.install_payload)
+        fresh = (args.expect_not_installed or bool(args.plant_payload)
+                 or bool(args.install_payload) or bool(args.install_bundled))
         check_status(rows, installed=False if fresh else None)
         say("status: " + " / ".join(
             f"{row['capability']}(available={row['available']},installed={row['installed']},"
@@ -500,6 +739,31 @@ def run(args) -> int:
             chip_suffix="运行组件未安装" if fresh else None,
         )
         say(f"ui: title={state['title']!r} boot_hidden={state['boot_hidden']} chip={state['chip']!r}")
+
+        expect = starter_expect()
+        hw = invoke(driver, sid, "hardware_profile")
+        check_hardware(hw)
+        check_starter_view(invoke(driver, sid, "starter_status"), expect)
+        if args.expect_not_installed:
+            check_hub_default(invoke(driver, sid, "hub_config"))
+
+        def strips_ready():
+            current = driver.execute(sid, UI_STATE_JS)
+            if not isinstance(current, dict):
+                return None
+            if current.get("env_hidden") is not False or current.get("starter_hidden") is not False:
+                return None
+            if not current.get("env_backend") or not current.get("starter_meta"):
+                return None
+            return current
+
+        state = poll_until(strips_ready, deadline, "硬件条与入门档卡片渲染出来")
+        check_feature_strips(state, hw, expect, fresh=bool(args.expect_not_installed))
+        say(f"ui(硬件): {state['env_backend']!r} / {state['env_cpu']!r} / "
+            f"{state['env_accel_chips']} 个加速器 chip")
+        say(f"ui(入门档): {state['starter_meta']!r}")
+        if args.expect_not_installed:
+            say("ui(中心服务器): 默认关闭，SSH 命令只作预览")
 
         if args.plant_payload:
             fixture = plant_payload(root, args.contract, capability=args.plant_payload,
@@ -544,79 +808,23 @@ def run(args) -> int:
                 server, thread = serve_dir(fixture["server_root"])
                 fixture_base = base_url(server)
                 manifest_url = fixture_base + fixture["manifest_url_path"]
-                source = write_source(root, manifest_url, fixture_base)
+                write_source(root, manifest_url, fixture_base)
+                check_payload_source(invoke(driver, sid, "payload_source"), "remote")
                 delivery = fixture["delivery"]
                 say(f"fixture: {len(delivery['files'])} 个对象 + 根清单，经 {manifest_url}")
-
-                ready_deadline = time.monotonic() + min(60.0, args.timeout)
-
-                def button_ready():
-                    current = driver.execute(sid, UI_STATE_JS)
-                    if not isinstance(current, dict):
-                        return None
-                    if current.get("install_hidden") is not False:
-                        return None
-                    if current.get("install_disabled") is not False:
-                        return None
-                    return current
-
-                button = poll_until(button_ready, ready_deadline,
-                                    "刷新状态后出现可点的安装按钮")
-                say(f"button: hidden={button['install_hidden']} disabled={button['install_disabled']}"
-                    f"（{source}）")
-                clicked = driver.execute(
-                    sid, "document.getElementById('payload-install').click(); return true;")
-                if clicked is not True:
-                    raise ProbeError(f"点安装按钮没有回 true：{clicked!r}")
-
-                want = {name: name == args.install_payload for name in EXPECTED_CAPABILITIES}
-                install_deadline = time.monotonic() + args.timeout
-
-                def installed_now():
-                    current = invoke(driver, sid, "status")
-                    check_status(current)
-                    try:
-                        check_installed_map(current, want)
-                    except ProbeError as exc:
-                        state = driver.execute(sid, UI_STATE_JS) or {}
-                        raise ProbeError(
-                            f"{exc}；状态条 {state.get('chip')!r}，"
-                            f"说明 {state.get('engine_state')!r}"
-                        ) from None
-                    return current
-
-                rows = poll_until(installed_now, install_deadline,
-                                  "点按钮后 status 把载荷报成 installed=true")
-                say("status(点按钮后): " + " / ".join(
-                    f"{row['capability']}(installed={row['installed']})" for row in rows))
-
-                def ready_chip():
-                    current = driver.execute(sid, UI_STATE_JS)
-                    if not isinstance(current, dict):
-                        return None
-                    if current.get("chip") != f"{args.install_payload} · 未启动":
-                        return None
-                    return current
-
-                state = poll_until(ready_chip, install_deadline,
-                                   "状态条从“运行组件未安装”翻成就绪")
-                check_ui(state, root)
-                checked = check_installed_tree(root, delivery)
-                if os.path.exists(os.path.join(root, ".objects")):
-                    raise ProbeError("装完后 .objects 还在 —— 断点缓存没有清")
-                say(f"ui(点按钮后): chip={state['chip']!r}；盘上 {checked} 颗文件与清单逐字节相符，"
-                    ".objects 已清")
-
-                report = invoke(driver, sid, "install_payload")
-                check_reinstall_report(report, len(delivery["files"]))
-                if os.path.exists(os.path.join(root, ".objects")):
-                    raise ProbeError("第二次安装后 .objects 还在")
-                say(f"reinstall: written={report['written']} skipped={report['skipped']}"
-                    f"（{len(delivery['files'])} 个对象 + 根清单）")
+                drive_install(driver, sid, root, args.install_payload, delivery,
+                              args.timeout, remote=True, hint="远程源")
             finally:
                 if server is not None:
                     stop_server(server, thread)
                 shutil.rmtree(work, ignore_errors=True)
+
+        if args.install_bundled:
+            check_payload_source(invoke(driver, sid, "payload_source"), "bundled")
+            say(f"bundled: {bundled_fixture['bundled_root']}（同一份合成交付清单，不联网）")
+            drive_install(driver, sid, root, args.install_bundled,
+                          bundled_fixture["delivery"], args.timeout,
+                          remote=False, hint="安装包自带")
 
         if args.negative_control:
             spoofed = EXPECTED_CAPABILITIES[:-1] + ("不存在的能力",)
@@ -634,6 +842,9 @@ def run(args) -> int:
             except ProbeError:
                 pass
         driver.stop()
+        os.environ.pop(BUNDLED_ENV, None)
+        if bundled_work is not None:
+            shutil.rmtree(bundled_work, ignore_errors=True)
 
 
 def main(argv=None) -> int:
@@ -660,6 +871,10 @@ def main(argv=None) -> int:
     payload.add_argument("--install-payload", metavar="CAPABILITY", default=None,
                          help="起一个只读的本地对象桶，写 payload-source.json 后点 UI 的安装按钮，"
                               "要求真下载、校验、落盘，且第二次安装 0 写入")
+    payload.add_argument("--install-bundled", metavar="CAPABILITY", default=None,
+                         help="把合成载荷打成包内对象键布局，用 %s 指给外壳，"
+                              "点 UI 的安装按钮，要求离线落盘、逐文件校验、第二次安装 0 写入"
+                              % BUNDLED_ENV)
     parser.add_argument("--log", default=os.path.join(tempfile.gettempdir(), "wd-ipc-probe.log"))
     args = parser.parse_args(argv)
     try:

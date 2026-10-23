@@ -6,12 +6,16 @@ use serde_json::{json, Map, Value};
 use tauri::{AppHandle, Emitter, State};
 
 use local_ai_studio_core::base64;
+use local_ai_studio_core::bundled;
 use local_ai_studio_core::delivery::{install, Delivery};
 use local_ai_studio_core::download::{CurlFetcher, Policy};
+use local_ai_studio_core::hardware::Hardware;
 use local_ai_studio_core::http::MAX_BODY_BYTES;
+use local_ai_studio_core::hub::{self, HubView};
 use local_ai_studio_core::payload_fetch::{
     fetch_manifest, fetch_object, load_source, SOURCE_NAME,
 };
+use local_ai_studio_core::starter::{self, StarterPin};
 use local_ai_studio_core::{OcrRequest, Status};
 
 use crate::state::AppState;
@@ -239,6 +243,8 @@ pub async fn ocr(
 
 #[derive(Serialize)]
 pub struct PayloadSourceOut {
+    /// `remote` = 数据根里写了源配置；`bundled` = 安装包自带运行组件。
+    pub mode: String,
     pub manifest_url: String,
     pub bases: Vec<String>,
 }
@@ -248,6 +254,18 @@ pub struct InstallOut {
     pub platform: String,
     pub written: usize,
     pub skipped: usize,
+    pub mode: String,
+}
+
+/// 远程源是用户的显式配置，优先；没配才用包内资源。
+fn source_mode(has_remote: bool, has_bundled: bool) -> Option<&'static str> {
+    if has_remote {
+        Some("remote")
+    } else if has_bundled {
+        Some("bundled")
+    } else {
+        None
+    }
 }
 
 #[derive(Clone, Serialize)]
@@ -257,81 +275,200 @@ struct PayloadProgress {
     key: String,
 }
 
-/// 数据根里有没有源配置、配置了什么。没有就是 `null`，UI 据此决定显不显示安装入口。
+/// 载荷从哪来：数据根里的源配置优先，没配就看安装包带没带；都没有就是 `null`，
+/// UI 据此决定显不显示安装入口。
 #[tauri::command]
 pub fn payload_source(state: State<'_, AppState>) -> Result<Option<PayloadSourceOut>, String> {
     let path = state.data_root.join(SOURCE_NAME);
     let source = load_source(&path).map_err(|e| e.to_string())?;
-    Ok(source.map(|s| PayloadSourceOut {
-        manifest_url: s.manifest_url,
-        bases: s.bases,
-    }))
+    Ok(match source_mode(source.is_some(), state.bundled.is_some()) {
+        Some("remote") => source.map(|s| PayloadSourceOut {
+            mode: "remote".into(),
+            manifest_url: s.manifest_url,
+            bases: s.bases,
+        }),
+        Some(_) => Some(PayloadSourceOut {
+            mode: "bundled".into(),
+            manifest_url: String::new(),
+            bases: Vec::new(),
+        }),
+        None => None,
+    })
 }
 
-/// 首启安装：只凭 `<数据根>/payload-source.json` 取交付清单并落盘，根清单最后写。
-/// `.objects` 是断点续传的缓存；装完才删，失败时留着下一次接着取。
+/// 首启安装：有 `<数据根>/payload-source.json` 就按它下载；没有就用安装包自带的
+/// 对象键布局。两条路都走 `delivery::install`，逐文件验哈希、根清单最后写。
+/// `.objects` 只属于远程路径，是断点续传的缓存；装完才删，失败时留着下一次接着取。
 #[tauri::command]
 pub async fn install_payload(
     app: AppHandle,
     state: State<'_, AppState>,
 ) -> Result<InstallOut, String> {
     let data_root = state.data_root.clone();
+    let bundled_root = state.bundled.clone();
     tauri::async_runtime::spawn_blocking(move || {
         let platform = crate::state::platform_label()
             .ok_or_else(|| format!("合同里没有 {} 这一格", std::env::consts::OS))?;
         let source_path = data_root.join(SOURCE_NAME);
-        let source = load_source(&source_path)
-            .map_err(|e| e.to_string())?
-            .ok_or_else(|| {
-                format!(
-                    "还没有 {}：先写交付清单地址与下载基址",
-                    source_path.display()
-                )
-            })?;
-        let bases = source.checked_bases().map_err(|e| e.to_string())?;
-        let mut fetcher = CurlFetcher::new();
-        let objects = data_root.join(".objects");
-        let scratch = objects.join("delivery-manifest.json.part");
-        let body = fetch_manifest(&source.manifest_url, &scratch, &mut fetcher)
-            .map_err(|e| e.to_string())?;
-        let text = String::from_utf8(body).map_err(|e| format!("交付清单不是 UTF-8: {e}"))?;
-        let delivery = Delivery::parse(&text).map_err(|e| e.to_string())?;
-        delivery.check(platform).map_err(|e| e.to_string())?;
+        let source = load_source(&source_path).map_err(|e| e.to_string())?;
+        if let Some(source) = source {
+            let bases = source.checked_bases().map_err(|e| e.to_string())?;
+            let mut fetcher = CurlFetcher::new();
+            let objects = data_root.join(".objects");
+            let scratch = objects.join("delivery-manifest.json.part");
+            let body = fetch_manifest(&source.manifest_url, &scratch, &mut fetcher)
+                .map_err(|e| e.to_string())?;
+            let text = String::from_utf8(body).map_err(|e| format!("交付清单不是 UTF-8: {e}"))?;
+            let delivery = Delivery::parse(&text).map_err(|e| e.to_string())?;
+            delivery.check(platform).map_err(|e| e.to_string())?;
 
-        let total = delivery.files.len() + 1;
-        let mut seen = 0usize;
-        let report = install(&delivery, platform, &data_root, |key| {
-            let (bytes, sha) = delivery.expected(key)?;
-            let fetched = fetch_object(
-                &bases,
-                key,
-                bytes,
-                sha,
-                &objects,
-                &mut fetcher,
-                Policy::default(),
-            );
-            seen += 1;
-            let _ = app.emit(
-                "payload-progress",
-                PayloadProgress {
-                    seen,
-                    total,
-                    key: key.to_string(),
-                },
-            );
-            fetched
-        })
-        .map_err(|e| e.to_string())?;
-        let _ = fs::remove_dir_all(&objects);
-        Ok::<_, String>(InstallOut {
+            let total = delivery.files.len() + 1;
+            let mut seen = 0usize;
+            let report = install(&delivery, platform, &data_root, |key| {
+                let (bytes, sha) = delivery.expected(key)?;
+                let fetched = fetch_object(
+                    &bases,
+                    key,
+                    bytes,
+                    sha,
+                    &objects,
+                    &mut fetcher,
+                    Policy::default(),
+                );
+                seen += 1;
+                let _ = app.emit(
+                    "payload-progress",
+                    PayloadProgress {
+                        seen,
+                        total,
+                        key: key.to_string(),
+                    },
+                );
+                fetched
+            })
+            .map_err(|e| e.to_string())?;
+            let _ = fs::remove_dir_all(&objects);
+            return Ok(InstallOut {
+                platform: platform.to_string(),
+                written: report.written,
+                skipped: report.skipped,
+                mode: "remote".into(),
+            });
+        }
+        let root = bundled_root.ok_or_else(|| {
+            format!(
+                "没有载荷来源：数据根里没有 {}，安装包里也没有 bundled/{}",
+                source_path.display(),
+                local_ai_studio_core::delivery::TABLE_NAME
+            )
+        })?;
+        let report = bundled::install_from(&root, platform, &data_root)
+            .map_err(|e| e.to_string())?;
+        let total = report.written + report.skipped;
+        let _ = app.emit(
+            "payload-progress",
+            PayloadProgress {
+                seen: total,
+                total,
+                key: "bundled".to_string(),
+            },
+        );
+        Ok(InstallOut {
             platform: platform.to_string(),
             written: report.written,
             skipped: report.skipped,
+            mode: "bundled".into(),
         })
     })
     .await
     .map_err(|e| format!("安装任务失败: {e}"))?
+}
+
+#[derive(Serialize)]
+pub struct StarterOut {
+    pub installed: bool,
+    pub id: String,
+    pub file: String,
+    pub bytes: u64,
+    pub size_mib: u64,
+    pub license: String,
+    pub ram_mib_min: u64,
+    pub path: Option<String>,
+}
+
+fn starter_view(pin: &StarterPin, data_root: &std::path::Path) -> StarterOut {
+    let path = starter::installed_path(pin, data_root);
+    StarterOut {
+        installed: path.is_some(),
+        id: pin.model.id.clone(),
+        file: pin.model.file.clone(),
+        bytes: pin.model.bytes,
+        size_mib: pin.size_mib(),
+        license: pin.model.license.clone(),
+        ram_mib_min: pin.fit.ram_mib_min,
+        path: path.map(|p| p.display().to_string()),
+    }
+}
+
+#[tauri::command]
+pub fn hardware_profile(state: State<'_, AppState>) -> Hardware {
+    state.hardware.clone()
+}
+
+#[tauri::command]
+pub fn starter_status(state: State<'_, AppState>) -> StarterOut {
+    starter_view(&state.starter, &state.data_root)
+}
+
+/// 只下这只权重，不碰引擎载荷；装好之后把"对话"停一次，下一次启动就换用它。
+#[tauri::command]
+pub async fn starter_install(state: State<'_, AppState>) -> Result<StarterOut, String> {
+    let data_root = state.data_root.clone();
+    let supervisor = state.supervisor.clone();
+    let pin = state.starter.clone();
+    let task_pin = pin.clone();
+    let path = tauri::async_runtime::spawn_blocking(move || {
+        let mut fetcher = CurlFetcher::new();
+        let (path, _) = starter::install(&task_pin, &data_root, &mut fetcher, Policy::default())
+            .map_err(|e| e.to_string())?;
+        // 527 MB 的整文件复核也放在阻塞线程里，别堵住 async worker。
+        starter::verify(&path, task_pin.model.bytes, &task_pin.model.sha256)
+            .map_err(|e| e.to_string())?;
+        Ok::<_, String>(path)
+    })
+    .await
+    .map_err(|e| format!("入门模型下载任务失败: {e}"))??;
+    {
+        let mut guard = supervisor.lock().map_err(|_| lock_broken())?;
+        guard.stop("对话");
+        guard.set_starter_model(Some(path));
+    }
+    Ok(starter_view(&pin, &state.data_root))
+}
+
+#[tauri::command]
+pub fn hub_config(state: State<'_, AppState>) -> Result<HubView, String> {
+    hub::load(&state.data_root)
+        .map(|config| config.view())
+        .map_err(|e| e.to_string())
+}
+
+/// 只写开关与展示用的命令；不连接、不登录、不碰积分。
+#[tauri::command]
+pub fn hub_save(
+    state: State<'_, AppState>,
+    enabled: bool,
+    ssh_user: String,
+    ssh_key: String,
+) -> Result<HubView, String> {
+    // 配置文件坏了也要能靠一次显式保存恢复，而不是把用户锁在报错页。
+    let mut config = hub::load(&state.data_root).unwrap_or_default();
+    config.enabled = enabled;
+    config.ssh_user = ssh_user.trim().to_string();
+    config.ssh_key = ssh_key.trim().to_string();
+    hub::save(&state.data_root, config)
+        .map(|saved| saved.view())
+        .map_err(|e| e.to_string())
 }
 
 #[cfg(test)]
@@ -349,5 +486,13 @@ mod tests {
     #[test]
     fn a_stamp_is_monotonic_enough_to_be_nonzero() {
         assert!(stamp() > 0);
+    }
+
+    #[test]
+    fn an_explicit_remote_source_wins_over_the_bundled_one() {
+        assert_eq!(source_mode(true, true), Some("remote"));
+        assert_eq!(source_mode(true, false), Some("remote"));
+        assert_eq!(source_mode(false, true), Some("bundled"));
+        assert_eq!(source_mode(false, false), None);
     }
 }
